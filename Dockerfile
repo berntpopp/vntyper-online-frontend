@@ -13,5 +13,3 @@ COPY generate_config.sh /generate_config.sh
 RUN chmod +x /generate_config.sh
 
 EXPOSE 80
-
-CMD ["/bin/sh", "/generate_config.sh"]
