@@ -3,6 +3,3 @@ README.md
 LICENSE
 .gitattributes
 .gitignore
-
-# Prevent config.js from being copied into the Docker image
-ressources/js/config.js
