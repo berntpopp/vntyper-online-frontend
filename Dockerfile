@@ -22,4 +22,4 @@ RUN chmod +x /generate_config.sh
 EXPOSE 80
 
 # Set the entrypoint to the shell script
-ENTRYPOINT ["/generate_config.sh"]
+ENTRYPOINT ["/generate_config.sh", "-l", "-c" ]
