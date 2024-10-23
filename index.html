@@ -70,7 +70,21 @@
           formData.append("bam_file", pair.bam);
           formData.append("bai_file", pair.bai);
         });
-        formData.append("region", region);
+
+        // compute reference_assembly based on region
+        // if the value is "chr1:155158000-155163000" set to hg19
+        // if the value is "chr1:155184000-155194000" set to hg38
+        // append the reference_assembly to the formData
+        if (region === "chr1:155158000-155163000") {
+          formData.append("reference_assembly", "hg19");
+        } else if (region === "chr1:155184000-155194000") {
+          formData.append("reference_assembly", "hg38");
+        }
+
+        // add additional parameters
+        formData.append("fast_mode", "true");
+        formData.append("keep_intermediates", "true");
+        formData.append("archive_results", "true");
 
         // Disable button and indicate submission
         const submitBtn = document.getElementById("submitBtn");
