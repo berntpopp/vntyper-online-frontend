@@ -1,0 +1,8 @@
+# Exclude README, LICENSE, and other non-essential files
+README.md
+LICENSE
+.gitattributes
+.gitignore
+
+# Prevent config.js from being copied into the Docker image
+ressources/js/config.js

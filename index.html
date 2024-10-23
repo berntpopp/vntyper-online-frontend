@@ -5,91 +5,17 @@
   <title>vntyper-online</title>
   <!-- Include Aioli from BioWasm CDN -->
   <script src="https://biowasm.com/cdn/v3/aioli.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-      background-color: #f9f9f9;
-    }
-    .container {
-      max-width: 900px; /* Increased width for better layout */
-      margin: auto;
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .file-input {
-      margin-bottom: 20px;
-    }
-    .file-input label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-    .file-input input[type="file"] {
-      width: 100%;
-      padding: 10px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .region-select {
-      margin-bottom: 20px;
-    }
-    .region-select label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-    .region-select select {
-      width: 100%;
-      padding: 10px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      padding: 12px 24px;
-      font-size: 16px;
-      cursor: pointer;
-      background-color: #28a745;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-    }
-    button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-    #output {
-      margin-top: 30px;
-      white-space: pre-wrap;
-      background-color: #f4f4f4;
-      padding: 20px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    .error {
-      color: red;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    .success {
-      color: green;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    a.download-link {
-      display: block;
-      margin-top: 10px;
-      color: #007bff;
-      text-decoration: none;
-    }
-    a.download-link:hover {
-      text-decoration: underline;
-    }
-  </style>
+  <!-- Link to External CSS -->
+  <link rel="stylesheet" href="ressources/css/style.css">
+  <!-- Link to Config JS -->
+  <script src="ressources/js/config.default.js" defer></script>
+  <script src="ressources/js/config.js" defer></script>
+  <!-- Link to Input Wrangling JS -->
+  <script src="ressources/js/inputWrangling.js" defer></script>
+  <!-- Link to API Interactions JS -->
+  <script src="ressources/js/apiInteractions.js" defer></script>
+  <!-- Link to BAM Processing JS -->
+  <script src="ressources/js/bamProcessing.js" defer></script>
 </head>
 <body>
   <div class="container">
@@ -112,6 +38,10 @@
       </select>
     </div>
 
+    <!-- API-Based Job Submission -->
+    <button id="submitBtn">Submit Job</button>
+
+    <!-- Old BAM Processing Button -->
     <button id="extractBtn">Extract Region</button>
 
     <div id="output"></div>
@@ -119,175 +49,93 @@
   </div>
 
   <script type="module">
-    async function initializeAioli() {
+    // Initialize API-Based Job Submission
+    document.getElementById("submitBtn").addEventListener("click", async () => {
       try {
-        console.log("Initializing Aioli with Samtools...");
-        const CLI = await new Aioli(["samtools/1.10"]);
-        console.log("Aioli initialized.");
-        console.log("CLI object:", CLI);
-        console.log("CLI.fs:", CLI.fs);
+        // Get selected files and validate
+        const fileInputs = document.getElementById("bamFiles");
+        const selectedFiles = Array.from(fileInputs.files);
+        const { matchedPairs } = validateFiles(selectedFiles);
+        const region = document.getElementById("region").value;
 
-        if (!CLI.fs) {
-          throw new Error("Failed to initialize the virtual filesystem (CLI.fs is undefined).");
+        if (!region) {
+          document.getElementById("error").textContent = "Please select a region.";
+          console.warn("Region selection error: No region selected.");
+          return;
         }
 
-        return CLI;
-      } catch (err) {
-        console.error("Error initializing Aioli:", err);
-        document.getElementById("error").textContent = "Failed to initialize the processing environment.";
-        throw err;
-      }
-    }
-
-    async function extractRegion(CLI) {
-      // Clear previous outputs
-      document.getElementById("output").innerHTML = "";
-      document.getElementById("error").textContent = "";
-
-      const fileInputs = document.getElementById("bamFiles");
-      const selectedFiles = Array.from(fileInputs.files);
-      const region = document.getElementById("region").value;
-
-      console.log("Extract Region Function Triggered");
-      console.log("Selected Files:", selectedFiles);
-      console.log("Selected Region:", region);
-
-      // Input Validation
-      if (selectedFiles.length === 0) {
-        document.getElementById("error").textContent = "Please select at least one BAM file and its corresponding BAI file.";
-        console.warn("File selection error: No files selected.");
-        return;
-      }
-
-      if (!region) {
-        document.getElementById("error").textContent = "Please select a region.";
-        console.warn("Region selection error: No region selected.");
-        return;
-      }
-
-      // Organize files into BAM and BAI
-      const bamFiles = selectedFiles.filter(file => file.name.endsWith(".bam"));
-      const baiFiles = selectedFiles.filter(file => file.name.endsWith(".bai"));
-
-      console.log("BAM Files:", bamFiles);
-      console.log("BAI Files:", baiFiles);
-
-      if (bamFiles.length === 0) {
-        document.getElementById("error").textContent = "No BAM files selected.";
-        console.warn("File selection error: No BAM files selected.");
-        return;
-      }
-
-      // Match BAM files with their corresponding BAI files
-      const matchedPairs = bamFiles.map(bam => {
-        const baseName = bam.name.replace(/\.bam$/, '');
-        const correspondingBai = baiFiles.find(bai => bai.name === `${baseName}.bai` || bai.name === `${baseName}.bam.bai`);
-        return { bam, bai: correspondingBai };
-      });
-
-      // Check for unmatched BAM files
-      const unmatched = matchedPairs.filter(pair => !pair.bai);
-      if (unmatched.length > 0) {
-        const unmatchedNames = unmatched.map(pair => pair.bam.name).join(', ');
-        document.getElementById("error").textContent = `Corresponding BAI file not found for: ${unmatchedNames}. Please ensure each BAM file has a matching BAI file (e.g., test.bam.bai or test.bai).`;
-        console.warn("BAI file missing for some BAM files:", unmatched);
-        return;
-      }
-
-      // Update UI to indicate processing
-      const extractBtn = document.getElementById("extractBtn");
-      extractBtn.disabled = true;
-      extractBtn.textContent = "Processing...";
-
-      try {
-        // Mount all BAM and BAI files
-        console.log("Mounting BAM and BAI files...");
-        const filesToMount = [];
+        // Prepare FormData
+        const formData = new FormData();
         matchedPairs.forEach(pair => {
-          filesToMount.push(pair.bam);
-          filesToMount.push(pair.bai);
+          formData.append("bam_file", pair.bam);
+          formData.append("bai_file", pair.bai);
         });
-        const paths = await CLI.mount(filesToMount);
-        console.log("Mounted Paths:", paths);
+        formData.append("region", region);
 
-        // Process each BAM and BAI pair
-        for (const pair of matchedPairs) {
-          const bamPath = paths.find(p => p.endsWith(pair.bam.name));
-          const baiPath = paths.find(p => p.endsWith(pair.bai.name));
+        // Disable button and indicate submission
+        const submitBtn = document.getElementById("submitBtn");
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
 
-          console.log(`Processing BAM: ${bamPath}, BAI: ${baiPath}`);
+        // Submit job to API
+        const data = await submitJobToAPI(formData);
+        console.log("Job Submission Response:", data);
 
-          // Extract region using samtools view
-          const outputPath = `/subset_${pair.bam.name}`;
-          const command = "samtools";
-          const args = ["view", "-b", bamPath, region, "-o", outputPath];
-          console.log("Executing Command:", command, args);
+        // Update output
+        document.getElementById("output").innerHTML = `Job submitted successfully!<br>Job ID: <strong>${data.job_id}</strong>`;
 
-          const result = await CLI.exec(command, args);
-          console.log("Samtools View Output:", result);
-
-          // Check if subset BAM was created and has content
-          const subsetStats = await CLI.fs.stat(outputPath);
-          console.log(`${outputPath} Stats:`, subsetStats);
-
-          if (!subsetStats || subsetStats.size === 0) {
-            throw new Error(`Subset BAM file ${outputPath} was not created or is empty. No reads found in the specified region.`);
+        // Poll job status
+        pollJobStatusAPI(
+          data.job_id,
+          (status) => {
+            document.getElementById("output").innerHTML = `Job ID: <strong>${data.job_id}</strong><br>Status: <strong>${status}</strong>`;
+          },
+          () => {
+            // On Complete
+            const downloadLink = document.createElement("a");
+            downloadLink.href = `${CONFIG.API_URL}/download/${data.job_id}`;
+            downloadLink.textContent = "Download Result BAM File";
+            downloadLink.classList.add("download-link");
+            document.getElementById("output").appendChild(document.createElement("br"));
+            document.getElementById("output").appendChild(downloadLink);
+          },
+          (errorMessage) => {
+            // On Error
+            document.getElementById("error").textContent = errorMessage;
           }
-
-          // Read the subset BAM file as Uint8Array
-          const subsetBam = await CLI.fs.readFile(outputPath);
-          console.log(`${outputPath} length:`, subsetBam.length);
-
-          // Create Blob from Uint8Array
-          const subsetBlob = new Blob([subsetBam], { type: 'application/octet-stream' });
-          console.log(`${outputPath} Blob size:`, subsetBlob.size);
-
-          if (subsetBlob.size === 0) {
-            throw new Error(`Failed to create Blob from subset BAM file ${outputPath}.`);
-          }
-
-          // Create an Object URL from the Blob
-          const downloadUrl = URL.createObjectURL(subsetBlob);
-          console.log("Download URL:", downloadUrl);
-
-          // Create and append the download link
-          const downloadLink = document.createElement("a");
-          downloadLink.href = downloadUrl;
-          downloadLink.download = `subset_${pair.bam.name}`;
-          downloadLink.textContent = `Download subset_${pair.bam.name}`;
-          downloadLink.classList.add("download-link");
-
-          document.getElementById("output").appendChild(downloadLink);
-
-          console.log("Download link created successfully.");
-        }
-
-        // Optional: Revoke the Object URLs after some time to free memory
-        setTimeout(() => {
-          document.querySelectorAll('#output a').forEach(link => {
-            URL.revokeObjectURL(link.href);
-            console.log(`Object URL revoked for ${link.download}`);
-          });
-        }, 60000); // Revoke after 60 seconds
+        );
 
       } catch (err) {
-        console.error("Error during extraction:", err);
+        console.error("Error during job submission:", err);
         document.getElementById("error").textContent = `Error: ${err.message}`;
       } finally {
         // Reset the button
-        extractBtn.disabled = false;
-        extractBtn.textContent = "Extract Region";
+        const submitBtn = document.getElementById("submitBtn");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Job";
       }
-    }
+    });
 
-    async function main() {
+    // Initialize BAM Processing
+    async function initializeBamProcessing() {
       const CLI = await initializeAioli();
       if (!CLI) return;
 
-      document.getElementById("extractBtn").addEventListener("click", () => extractRegion(CLI));
+      document.getElementById("extractBtn").addEventListener("click", () => {
+        const fileInputs = document.getElementById("bamFiles");
+        const selectedFiles = Array.from(fileInputs.files);
+
+        try {
+          const { matchedPairs } = validateFiles(selectedFiles);
+          extractRegion(CLI, matchedPairs);
+        } catch (err) {
+          document.getElementById("error").textContent = `Error: ${err.message}`;
+        }
+      });
     }
 
-    main();
+    // Run BAM Processing Initialization
+    initializeBamProcessing();
   </script>
 </body>
 </html>

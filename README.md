@@ -1,4 +1,4 @@
-# vntyper-online-frontend
+# vntyper online frontend
 
 ## Table of Contents
 
