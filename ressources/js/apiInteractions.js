@@ -1,55 +1,40 @@
 // frontend/ressources/js/apiInteractions.js
 
-/**
- * Submits a job to the backend API.
- * @param {FormData} formData - FormData containing BAM and BAI files and region.
- * @returns {Object} - Response data containing job_id.
- */
+// Function to submit a job to the API
 async function submitJobToAPI(formData) {
     const response = await fetch(`${CONFIG.API_URL}/run-job/`, {
         method: 'POST',
         body: formData
     });
-
     if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail || 'Failed to submit job.');
     }
-
-    const data = await response.json();
-    return data;
+    return response.json();
 }
 
-/**
- * Polls the backend API for job status.
- * @param {string} jobId - The ID of the submitted job.
- * @param {function} onUpdate - Callback to handle status updates.
- * @param {function} onComplete - Callback when job is completed.
- * @param {function} onError - Callback when an error occurs.
- */
-async function pollJobStatusAPI(jobId, onUpdate, onComplete, onError) {
+// Function to poll job status
+async function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError) {
     const interval = setInterval(async () => {
         try {
-            const response = await fetch(`${CONFIG.API_URL}/job-status/${jobId}`);
+            const response = await fetch(`${CONFIG.API_URL}/job-status/${jobId}/`);
             if (!response.ok) {
                 throw new Error('Failed to fetch job status.');
             }
-
-            const statusData = await response.json();
-            onUpdate(statusData.status);
-
-            if (statusData.status === 'Completed') {
+            const data = await response.json();
+            onStatusUpdate(data.status);
+            if (data.status === 'completed') {
                 clearInterval(interval);
                 onComplete();
-            } else if (statusData.status === 'Failed') {
+            } else if (data.status === 'failed') {
                 clearInterval(interval);
-                onError("Job processing failed. Please check the backend logs for more details.");
+                onError(data.error || 'Job failed.');
             }
-
-        } catch (err) {
-            console.error("Error while polling job status:", err);
-            onError(`Error: ${err.message}`);
+        } catch (error) {
             clearInterval(interval);
+            onError(error.message);
         }
     }, 5000); // Poll every 5 seconds
 }
+
+export { submitJobToAPI, pollJobStatusAPI };
