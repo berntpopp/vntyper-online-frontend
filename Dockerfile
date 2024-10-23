@@ -13,7 +13,7 @@ RUN rm -rf /usr/share/nginx/html/*
 COPY . /usr/share/nginx/html/
 
 # Copy the shell script
-COPY generate_config.sh /generate_config.sh
+RUN cp generate_config.sh /generate_config.sh
 
 # Make the shell script executable
 RUN chmod +x /generate_config.sh
