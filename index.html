@@ -10,11 +10,11 @@
   <!-- Link to Config JS -->
   <script src="ressources/js/config.js" defer></script>
   <!-- Link to Input Wrangling JS -->
-  <script src="ressources/js/inputWrangling.js" defer></script>
+  <script type="module" src="ressources/js/inputWrangling.js" defer></script>
   <!-- Link to API Interactions JS -->
   <script type="module" src="ressources/js/apiInteractions.js" defer></script>
   <!-- Link to BAM Processing JS -->
-  <script src="ressources/js/bamProcessing.js" defer></script>
+  <script type="module" src="ressources/js/bamProcessing.js" defer></script>
 </head>
 <body>
   <div class="container">
@@ -46,135 +46,5 @@
     <div id="output"></div>
     <div id="error" class="error"></div>
   </div>
-
-  <script type="module">
-    import { submitJobToAPI, pollJobStatusAPI } from './ressources/js/apiInteractions.js';
-
-    // Function to validate selected files and match BAM with BAI
-    function validateFiles(files) {
-      const bamFiles = {};
-      const baiFiles = {};
-
-      files.forEach(file => {
-        if (file.name.endsWith('.bam')) {
-          bamFiles[file.name.slice(0, -4)] = file;
-        } else if (file.name.endsWith('.bai')) {
-          baiFiles[file.name.slice(0, -4)] = file;
-        }
-      });
-
-      const matchedPairs = [];
-
-      for (const bamKey in bamFiles) {
-        if (baiFiles[bamKey]) {
-          matchedPairs.push({ bam: bamFiles[bamKey], bai: baiFiles[bamKey] });
-        } else {
-          console.warn(`No matching BAI file for BAM file: ${bamFiles[bamKey].name}`);
-        }
-      }
-
-      return { matchedPairs };
-    }
-
-    // Initialize API-Based Job Submission
-    document.getElementById("submitBtn").addEventListener("click", async () => {
-      try {
-        // Get selected files and validate
-        const fileInputs = document.getElementById("bamFiles");
-        const selectedFiles = Array.from(fileInputs.files);
-        const { matchedPairs } = validateFiles(selectedFiles);
-        const region = document.getElementById("region").value;
-
-        if (!region) {
-          document.getElementById("error").textContent = "Please select a region.";
-          console.warn("Region selection error: No region selected.");
-          return;
-        }
-
-        // Prepare FormData
-        const formData = new FormData();
-        matchedPairs.forEach(pair => {
-          formData.append("bam_file", pair.bam);
-          formData.append("bai_file", pair.bai);
-        });
-
-        // Compute reference_assembly based on region
-        if (region === "chr1:155158000-155163000") {
-          formData.append("reference_assembly", "hg19");
-        } else if (region === "chr1:155184000-155194000") {
-          formData.append("reference_assembly", "hg38");
-        }
-
-        // Add additional parameters
-        formData.append("fast_mode", "true");
-        formData.append("keep_intermediates", "true");
-        formData.append("archive_results", "true");
-
-        // Disable button and indicate submission
-        const submitBtn = document.getElementById("submitBtn");
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Submitting...";
-
-        // Submit job to API
-        const data = await submitJobToAPI(formData);
-        console.log("Job Submission Response:", data);
-
-        // Update output
-        const outputDiv = document.getElementById("output");
-        outputDiv.innerHTML = `Job submitted successfully!<br>Job ID: <strong>${data.job_id}</strong>`;
-
-        // Poll job status
-        pollJobStatusAPI(
-          data.job_id,
-          (status) => {
-            outputDiv.innerHTML = `Job ID: <strong>${data.job_id}</strong><br>Status: <strong>${status}</strong>`;
-          },
-          () => {
-            // On Complete
-            const downloadLink = document.createElement("a");
-            downloadLink.href = `/api/download/${data.job_id}/`;
-            downloadLink.textContent = "Download Result BAM File";
-            downloadLink.classList.add("download-link");
-            outputDiv.appendChild(document.createElement("br"));
-            outputDiv.appendChild(downloadLink);
-          },
-          (errorMessage) => {
-            // On Error
-            document.getElementById("error").textContent = errorMessage;
-          }
-        );
-
-      } catch (err) {
-        console.error("Error during job submission:", err);
-        document.getElementById("error").textContent = `Error: ${err.message}`;
-      } finally {
-        // Reset the button
-        const submitBtn = document.getElementById("submitBtn");
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Submit Job";
-      }
-    });
-
-    // Initialize BAM Processing
-    async function initializeBamProcessing() {
-      const CLI = await initializeAioli();
-      if (!CLI) return;
-
-      document.getElementById("extractBtn").addEventListener("click", () => {
-        const fileInputs = document.getElementById("bamFiles");
-        const selectedFiles = Array.from(fileInputs.files);
-
-        try {
-          const { matchedPairs } = validateFiles(selectedFiles);
-          extractRegion(CLI, matchedPairs);
-        } catch (err) {
-          document.getElementById("error").textContent = `Error: ${err.message}`;
-        }
-      });
-    }
-
-    // Run BAM Processing Initialization
-    initializeBamProcessing();
-  </script>
 </body>
 </html>

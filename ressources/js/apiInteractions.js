@@ -1,20 +1,51 @@
 // frontend/ressources/js/apiInteractions.js
 
-// Function to submit a job to the API
+/**
+ * Submits a job to the backend API.
+ * @param {FormData} formData - The form data containing job parameters and files.
+ * @returns {Promise<Object>} - The JSON response from the API.
+ * @throws {Error} - If the submission fails.
+ */
 async function submitJobToAPI(formData) {
-    const response = await fetch(`${window.CONFIG.API_URL}/run-job/`, {
-        method: 'POST',
-        body: formData
-    });
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to submit job.');
+    try {
+        const response = await fetch(`${window.CONFIG.API_URL}/run-job/`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            let errorMessage = 'Failed to submit job.';
+            try {
+                const errorData = await response.json();
+                if (errorData.detail) {
+                    // detail might be a string or a list of errors
+                    if (Array.isArray(errorData.detail)) {
+                        errorMessage = errorData.detail.map(err => err.msg).join(', ');
+                    } else if (typeof errorData.detail === 'string') {
+                        errorMessage = errorData.detail;
+                    }
+                }
+            } catch (e) {
+                console.error('Error parsing error response:', e);
+            }
+            throw new Error(errorMessage);
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error('Error in submitJobToAPI:', error);
+        throw error;
     }
-    return response.json();
 }
 
-// Function to poll job status
-async function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError) {
+/**
+ * Polls the job status from the backend API at regular intervals.
+ * @param {string} jobId - The unique identifier of the job.
+ * @param {Function} onStatusUpdate - Callback function to handle status updates.
+ * @param {Function} onComplete - Callback function when the job is completed.
+ * @param {Function} onError - Callback function when an error occurs.
+ */
+function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError) {
     const interval = setInterval(async () => {
         try {
             const response = await fetch(`${window.CONFIG.API_URL}/job-status/${jobId}/`);
@@ -37,4 +68,5 @@ async function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError) {
     }, 5000); // Poll every 5 seconds
 }
 
+// Export the functions for use in other modules
 export { submitJobToAPI, pollJobStatusAPI };
