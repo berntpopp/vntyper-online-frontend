@@ -6,7 +6,7 @@
  * @returns {Promise<Object>} - The JSON response from the API.
  * @throws {Error} - If the submission fails.
  */
-async function submitJobToAPI(formData) {
+export async function submitJobToAPI(formData) {
     try {
         const response = await fetch(`${window.CONFIG.API_URL}/run-job/`, {
             method: 'POST',
@@ -45,7 +45,7 @@ async function submitJobToAPI(formData) {
  * @param {Function} onComplete - Callback function when the job is completed.
  * @param {Function} onError - Callback function when an error occurs.
  */
-function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError) {
+export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError) {
     const interval = setInterval(async () => {
         try {
             const response = await fetch(`${window.CONFIG.API_URL}/job-status/${jobId}/`);
@@ -67,6 +67,3 @@ function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError) {
         }
     }, 5000); // Poll every 5 seconds
 }
-
-// Export the functions for use in other modules
-export { submitJobToAPI, pollJobStatusAPI };

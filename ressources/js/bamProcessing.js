@@ -1,12 +1,10 @@
 // frontend/ressources/js/bamProcessing.js
 
-import { validateFiles } from './inputWrangling.js';
-
 /**
  * Initializes Aioli with Samtools.
- * @returns {Aioli} - The initialized Aioli CLI object.
+ * @returns {Promise<Aioli>} - The initialized Aioli CLI object.
  */
-async function initializeAioli() {
+export async function initializeAioli() {
     try {
         console.log("Initializing Aioli with Samtools...");
         const CLI = await new Aioli(["samtools/1.10"]);
@@ -31,7 +29,7 @@ async function initializeAioli() {
  * @param {Aioli} CLI - The initialized Aioli CLI object.
  * @param {Object[]} matchedPairs - Array of matched BAM and BAI file pairs.
  */
-async function extractRegion(CLI, matchedPairs) {
+export async function extractRegion(CLI, matchedPairs) {
     // Clear previous outputs
     document.getElementById("output").innerHTML = "";
     document.getElementById("error").textContent = "";
@@ -133,25 +131,3 @@ async function extractRegion(CLI, matchedPairs) {
         extractBtn.textContent = "Extract Region";
     }
 }
-
-// Initialize BAM Processing once the module is loaded
-async function initializeBamProcessing() {
-    const CLI = await initializeAioli();
-    if (!CLI) return;
-
-    document.getElementById("extractBtn").addEventListener("click", async () => {
-        const fileInputs = document.getElementById("bamFiles");
-        const selectedFiles = fileInputs.files;
-
-        try {
-            const { matchedPairs } = validateFiles(selectedFiles);
-            await extractRegion(CLI, matchedPairs);
-        } catch (err) {
-            console.error("Error in extractRegion:", err);
-            document.getElementById("error").textContent = `Error: ${err.message}`;
-        }
-    });
-}
-
-// Run BAM Processing Initialization
-initializeBamProcessing();

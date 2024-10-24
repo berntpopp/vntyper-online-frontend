@@ -2,14 +2,13 @@
 
 /**
  * Validates the selected BAM and BAI files.
- * @param {FileList} fileList - The list of selected files from the input.
+ * @param {File[]} selectedFiles - Array of selected File objects.
  * @returns {Object} - Contains matchedPairs.
  * @throws {Error} - If validation fails.
  */
-function validateFiles(fileList) {
-    const files = Array.from(fileList);
-    const bamFiles = files.filter(file => file.name.endsWith(".bam"));
-    const baiFiles = files.filter(file => file.name.endsWith(".bai"));
+export function validateFiles(selectedFiles) {
+    const bamFiles = selectedFiles.filter(file => file.name.endsWith(".bam"));
+    const baiFiles = selectedFiles.filter(file => file.name.endsWith(".bai"));
 
     if (bamFiles.length === 0) {
         throw new Error("No BAM files selected.");
@@ -17,15 +16,8 @@ function validateFiles(fileList) {
 
     // Match BAM files with their corresponding BAI files
     const matchedPairs = bamFiles.map(bam => {
-        const baseName = bam.name.slice(0, -4); // Remove '.bam'
-
-        // Possible BAI file names
-        const baiName1 = `${baseName}.bai`; // e.g., 'sample.bai'
-        const baiName2 = `${bam.name}.bai`; // e.g., 'sample.bam.bai'
-
-        // Find BAI file with either name
-        const correspondingBai = baiFiles.find(bai => bai.name === baiName1 || bai.name === baiName2);
-
+        const baseName = bam.name.replace(/\.bam$/, '');
+        const correspondingBai = baiFiles.find(bai => bai.name === `${baseName}.bai` || bai.name === `${baseName}.bam.bai`);
         return { bam, bai: correspondingBai };
     });
 
@@ -38,6 +30,3 @@ function validateFiles(fileList) {
 
     return { matchedPairs };
 }
-
-// Export the function for use in other modules
-export { validateFiles };
