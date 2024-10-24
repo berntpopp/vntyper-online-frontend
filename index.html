@@ -12,7 +12,7 @@
   <!-- Link to Input Wrangling JS -->
   <script src="ressources/js/inputWrangling.js" defer></script>
   <!-- Link to API Interactions JS -->
-  <script src="ressources/js/apiInteractions.js" defer></script>
+  <script type="module" src="ressources/js/apiInteractions.js" defer></script>
   <!-- Link to BAM Processing JS -->
   <script src="ressources/js/bamProcessing.js" defer></script>
 </head>
@@ -48,6 +48,34 @@
   </div>
 
   <script type="module">
+    import { submitJobToAPI, pollJobStatusAPI } from './ressources/js/apiInteractions.js';
+
+    // Function to validate selected files and match BAM with BAI
+    function validateFiles(files) {
+      const bamFiles = {};
+      const baiFiles = {};
+
+      files.forEach(file => {
+        if (file.name.endsWith('.bam')) {
+          bamFiles[file.name.slice(0, -4)] = file;
+        } else if (file.name.endsWith('.bai')) {
+          baiFiles[file.name.slice(0, -4)] = file;
+        }
+      });
+
+      const matchedPairs = [];
+
+      for (const bamKey in bamFiles) {
+        if (baiFiles[bamKey]) {
+          matchedPairs.push({ bam: bamFiles[bamKey], bai: baiFiles[bamKey] });
+        } else {
+          console.warn(`No matching BAI file for BAM file: ${bamFiles[bamKey].name}`);
+        }
+      }
+
+      return { matchedPairs };
+    }
+
     // Initialize API-Based Job Submission
     document.getElementById("submitBtn").addEventListener("click", async () => {
       try {
@@ -70,17 +98,14 @@
           formData.append("bai_file", pair.bai);
         });
 
-        // compute reference_assembly based on region
-        // if the value is "chr1:155158000-155163000" set to hg19
-        // if the value is "chr1:155184000-155194000" set to hg38
-        // append the reference_assembly to the formData
+        // Compute reference_assembly based on region
         if (region === "chr1:155158000-155163000") {
           formData.append("reference_assembly", "hg19");
         } else if (region === "chr1:155184000-155194000") {
           formData.append("reference_assembly", "hg38");
         }
 
-        // add additional parameters
+        // Add additional parameters
         formData.append("fast_mode", "true");
         formData.append("keep_intermediates", "true");
         formData.append("archive_results", "true");
@@ -95,22 +120,23 @@
         console.log("Job Submission Response:", data);
 
         // Update output
-        document.getElementById("output").innerHTML = `Job submitted successfully!<br>Job ID: <strong>${data.job_id}</strong>`;
+        const outputDiv = document.getElementById("output");
+        outputDiv.innerHTML = `Job submitted successfully!<br>Job ID: <strong>${data.job_id}</strong>`;
 
         // Poll job status
         pollJobStatusAPI(
           data.job_id,
           (status) => {
-            document.getElementById("output").innerHTML = `Job ID: <strong>${data.job_id}</strong><br>Status: <strong>${status}</strong>`;
+            outputDiv.innerHTML = `Job ID: <strong>${data.job_id}</strong><br>Status: <strong>${status}</strong>`;
           },
           () => {
             // On Complete
             const downloadLink = document.createElement("a");
-            downloadLink.href = `${CONFIG.API_URL}/download/${data.job_id}`;
+            downloadLink.href = `/api/download/${data.job_id}/`;
             downloadLink.textContent = "Download Result BAM File";
             downloadLink.classList.add("download-link");
-            document.getElementById("output").appendChild(document.createElement("br"));
-            document.getElementById("output").appendChild(downloadLink);
+            outputDiv.appendChild(document.createElement("br"));
+            outputDiv.appendChild(downloadLink);
           },
           (errorMessage) => {
             // On Error
