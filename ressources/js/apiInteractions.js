@@ -2,7 +2,7 @@
 
 // Function to submit a job to the API
 async function submitJobToAPI(formData) {
-    const response = await fetch(`${CONFIG.API_URL}/run-job/`, {
+    const response = await fetch(`${window.CONFIG.API_URL}/run-job/`, {
         method: 'POST',
         body: formData
     });
@@ -17,7 +17,7 @@ async function submitJobToAPI(formData) {
 async function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError) {
     const interval = setInterval(async () => {
         try {
-            const response = await fetch(`${CONFIG.API_URL}/job-status/${jobId}/`);
+            const response = await fetch(`${window.CONFIG.API_URL}/job-status/${jobId}/`);
             if (!response.ok) {
                 throw new Error('Failed to fetch job status.');
             }
