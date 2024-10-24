@@ -13,7 +13,8 @@ async function initializeApp() {
     const extractBtn = document.getElementById("extractBtn");
     const spinner = document.getElementById("spinner");
     const countdownDiv = document.getElementById("countdown");
-    const outputDiv = document.getElementById("output");
+    const jobInfoDiv = document.getElementById("jobInfo");
+    const jobStatusDiv = document.getElementById("jobStatus");
     const errorDiv = document.getElementById("error");
 
     let countdownInterval = null;
@@ -23,7 +24,8 @@ async function initializeApp() {
     submitBtn.addEventListener("click", async () => {
         try {
             // Clear previous outputs and errors
-            outputDiv.innerHTML = "";
+            jobInfoDiv.innerHTML = "";
+            jobStatusDiv.innerHTML = "";
             errorDiv.textContent = "";
 
             // Get selected files and validate
@@ -61,10 +63,12 @@ async function initializeApp() {
             // Disable button and indicate submission
             submitBtn.disabled = true;
             submitBtn.textContent = "Submitting...";
+            console.log("Submit button disabled and text changed to 'Submitting...'");
 
             // Show spinner and initialize countdown
             spinner.style.display = "block";
             countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+            console.log("Spinner displayed and countdown started");
 
             // Initialize countdown timer
             countdownInterval = setInterval(() => {
@@ -81,26 +85,18 @@ async function initializeApp() {
             const data = await submitJobToAPI(formData);
             console.log("Job Submission Response:", data);
 
-            // Update output with initial status
-            outputDiv.innerHTML = `Job submitted successfully!<br>Job ID: <strong>${data.job_id}</strong><br>Status: <strong>Pending...</strong>`;
+            // Update job info and initial status
+            jobInfoDiv.innerHTML = `Job submitted successfully!<br>Job ID: <strong>${data.job_id}</strong>`;
+            jobStatusDiv.innerHTML = `Status: <strong>Submitted</strong>`;
+            console.log("Initial status 'Submitted' displayed");
 
             // Poll job status
             pollJobStatusAPI(
                 data.job_id,
                 (status) => {
-                    // Update status in the output div
-                    const jobIdElement = outputDiv.querySelector("strong");
-                    if (jobIdElement) {
-                        // Find the next sibling text node after Job ID
-                        const siblings = Array.from(outputDiv.childNodes);
-                        const statusNode = siblings.find(node => node.nodeType === Node.TEXT_NODE && node.textContent.includes("Status:"));
-                        if (statusNode) {
-                            statusNode.textContent = `\nStatus: ${status}`;
-                        } else {
-                            // If not found, append the status
-                            outputDiv.innerHTML += `<br>Status: <strong>${status}</strong>`;
-                        }
-                    }
+                    // Update status in the jobStatusDiv
+                    jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+                    console.log(`Status updated to: ${status}`);
                 },
                 () => {
                     // On Complete
@@ -110,27 +106,32 @@ async function initializeApp() {
                     downloadLink.classList.add("download-link");
                     downloadLink.target = "_blank"; // Open in a new tab
 
-                    outputDiv.appendChild(document.createElement("br"));
-                    outputDiv.appendChild(downloadLink);
+                    jobStatusDiv.appendChild(document.createElement("br"));
+                    jobStatusDiv.appendChild(downloadLink);
+                    console.log("Download link appended to jobStatusDiv");
 
                     // Hide spinner and countdown
                     spinner.style.display = "none";
                     countdownDiv.textContent = "";
                     clearInterval(countdownInterval);
+                    console.log("Spinner and countdown hidden");
                 },
                 (errorMessage) => {
                     // On Error
                     displayError(errorMessage);
+                    console.error(`Job failed with error: ${errorMessage}`);
 
                     // Hide spinner and countdown
                     spinner.style.display = "none";
                     countdownDiv.textContent = "";
                     clearInterval(countdownInterval);
+                    console.log("Spinner and countdown hidden due to error");
                 },
                 () => {
                     // onPoll Callback to reset countdown
                     timeLeft = 20;
                     countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+                    console.log("Countdown reset to 20 seconds");
                 }
             );
 
@@ -142,10 +143,12 @@ async function initializeApp() {
             spinner.style.display = "none";
             countdownDiv.textContent = "";
             clearInterval(countdownInterval);
+            console.log("Spinner and countdown hidden due to exception");
         } finally {
             // Reset the button
             submitBtn.disabled = false;
             submitBtn.textContent = "Submit Job";
+            console.log("Submit button re-enabled and text reset to 'Submit Job'");
         }
     });
 
@@ -161,6 +164,7 @@ async function initializeApp() {
                 await extractRegion(CLI, matchedPairs);
             } catch (err) {
                 displayError(`Error: ${err.message}`);
+                console.error("Error during region extraction:", err);
             }
         });
     } catch (err) {
@@ -175,6 +179,16 @@ async function initializeApp() {
 function displayError(message) {
     const errorDiv = document.getElementById("error");
     errorDiv.textContent = message;
+}
+
+/**
+ * Capitalizes the first letter of a string.
+ * @param {string} string - The string to capitalize.
+ * @returns {string} - The capitalized string.
+ */
+function capitalizeFirstLetter(string) {
+    if (!string) return "";
+    return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 // Initialize the application once the DOM is fully loaded
