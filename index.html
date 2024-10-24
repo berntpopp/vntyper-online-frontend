@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>vntyper-online</title>  
+  
   <!-- Favicon Links -->
   <link rel="icon" type="image/png" href="ressources/assets/favicon/favicon-48x48.png" sizes="48x48" />
   <link rel="icon" type="image/svg+xml" href="ressources/assets/favicon/favicon.svg" />
@@ -12,22 +13,32 @@
 
   <!-- Include Aioli from BioWasm CDN -->
   <script src="https://biowasm.com/cdn/v3/aioli.js" defer></script>
+  
   <!-- Link to External CSS -->
   <link rel="stylesheet" href="ressources/css/style.css">
+  
   <!-- Link to Config JS -->
   <script src="ressources/js/config.js" defer></script>
+  
   <!-- Link to Input Wrangling JS -->
   <script type="module" src="ressources/js/inputWrangling.js" defer></script>
+  
   <!-- Link to API Interactions JS -->
   <script type="module" src="ressources/js/apiInteractions.js" defer></script>
+  
   <!-- Link to BAM Processing JS -->
   <script type="module" src="ressources/js/bamProcessing.js" defer></script>
+  
   <!-- Link to Main JS -->
   <script type="module" src="ressources/js/main.js" defer></script>
 </head>
 <body>
   <div class="container">
-    <h2>vntyper-online</h2>
+    <!-- Header Section with Logo and Title -->
+    <div class="header">
+      <img src="ressources/assets/logo/vntyperonline_logo_80px.png" alt="vntyper-online Logo" class="logo">
+      <h2>vntyper-online</h2>
+    </div>
 
     <!-- File Input Container -->
     <div class="file-input">
@@ -54,7 +65,6 @@
 
     <!-- Output and Error Containers -->
     <div id="output">
-
       <!-- Job Information and Status -->
       <div id="jobInfo"></div>
       <div id="jobStatus"></div>
@@ -62,7 +72,6 @@
       <!-- Spinner and Countdown -->
       <div id="spinner" class="spinner" style="display: none;" aria-label="Loading" role="status"></div>
       <div id="countdown" class="countdown"></div>
-
     </div>
     <div id="error" class="error"></div>
   </div>
