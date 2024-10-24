@@ -57,8 +57,7 @@ button:disabled {
   cursor: not-allowed;
 }
 #output {
-  margin-top: 30px;
-  white-space: pre-wrap;
+  margin-top: 20px;
   background-color: #f4f4f4;
   padding: 20px;
   border: 1px solid #ddd;
