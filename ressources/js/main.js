@@ -8,15 +8,24 @@ import { initializeAioli, extractRegion } from './bamProcessing.js';
  * Initializes the application by setting up event listeners.
  */
 async function initializeApp() {
-    // Submit Job Button Event Listener
+    // Get references to DOM elements
     const submitBtn = document.getElementById("submitBtn");
+    const extractBtn = document.getElementById("extractBtn");
     const spinner = document.getElementById("spinner");
     const countdownDiv = document.getElementById("countdown");
-    let countdownInterval = null;
-    let timeLeft = 20; // Initial countdown time in seconds
+    const outputDiv = document.getElementById("output");
+    const errorDiv = document.getElementById("error");
 
+    let countdownInterval = null;
+    let timeLeft = 20; // Countdown time in seconds
+
+    // Submit Job Button Event Listener
     submitBtn.addEventListener("click", async () => {
         try {
+            // Clear previous outputs and errors
+            outputDiv.innerHTML = "";
+            errorDiv.textContent = "";
+
             // Get selected files and validate
             const fileInputs = document.getElementById("bamFiles");
             const selectedFiles = Array.from(fileInputs.files);
@@ -56,6 +65,8 @@ async function initializeApp() {
             // Show spinner and initialize countdown
             spinner.style.display = "block";
             countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+
+            // Initialize countdown timer
             countdownInterval = setInterval(() => {
                 timeLeft--;
                 if (timeLeft > 0) {
@@ -70,15 +81,26 @@ async function initializeApp() {
             const data = await submitJobToAPI(formData);
             console.log("Job Submission Response:", data);
 
-            // Update output
-            const outputDiv = document.getElementById("output");
-            outputDiv.innerHTML = `Job submitted successfully!<br>Job ID: <strong>${data.job_id}</strong>`;
+            // Update output with initial status
+            outputDiv.innerHTML = `Job submitted successfully!<br>Job ID: <strong>${data.job_id}</strong><br>Status: <strong>Pending...</strong>`;
 
             // Poll job status
             pollJobStatusAPI(
                 data.job_id,
                 (status) => {
-                    outputDiv.innerHTML = `Job ID: <strong>${data.job_id}</strong><br>Status: <strong>${status}</strong>`;
+                    // Update status in the output div
+                    const jobIdElement = outputDiv.querySelector("strong");
+                    if (jobIdElement) {
+                        // Find the next sibling text node after Job ID
+                        const siblings = Array.from(outputDiv.childNodes);
+                        const statusNode = siblings.find(node => node.nodeType === Node.TEXT_NODE && node.textContent.includes("Status:"));
+                        if (statusNode) {
+                            statusNode.textContent = `\nStatus: ${status}`;
+                        } else {
+                            // If not found, append the status
+                            outputDiv.innerHTML += `<br>Status: <strong>${status}</strong>`;
+                        }
+                    }
                 },
                 () => {
                     // On Complete
@@ -86,6 +108,8 @@ async function initializeApp() {
                     downloadLink.href = `${window.CONFIG.API_URL}/download/${data.job_id}/`;
                     downloadLink.textContent = "Download vntyper results"; // Updated link text
                     downloadLink.classList.add("download-link");
+                    downloadLink.target = "_blank"; // Open in a new tab
+
                     outputDiv.appendChild(document.createElement("br"));
                     outputDiv.appendChild(downloadLink);
 
@@ -113,6 +137,11 @@ async function initializeApp() {
         } catch (err) {
             console.error("Error during job submission:", err);
             displayError(`Error: ${err.message}`);
+
+            // Hide spinner and countdown in case of error
+            spinner.style.display = "none";
+            countdownDiv.textContent = "";
+            clearInterval(countdownInterval);
         } finally {
             // Reset the button
             submitBtn.disabled = false;
@@ -123,7 +152,6 @@ async function initializeApp() {
     // Initialize BAM Processing and set up Extract Button Event Listener
     try {
         const CLI = await initializeAioli();
-        const extractBtn = document.getElementById("extractBtn");
         extractBtn.addEventListener("click", async () => {
             const fileInputs = document.getElementById("bamFiles");
             const selectedFiles = Array.from(fileInputs.files);
