@@ -74,8 +74,7 @@ button:disabled {
   cursor: not-allowed;
 }
 #output {
-  margin-top: 30px;
-  white-space: pre-wrap;
+  margin-top: 2px;
   background-color: #f4f4f4;
   padding: 20px;
   border: 1px solid #ddd;
@@ -86,10 +85,10 @@ button:disabled {
   border: 8px solid #f3f3f3; /* Light grey */
   border-top: 8px solid #3498db; /* Blue */
   border-radius: 50%;
-  width: 60px;
-  height: 60px;
+  width: 20px;
+  height: 20px;
   animation: spin 2s linear infinite;
-  margin: 20px auto;
+  margin: 10px auto;
   display: none; /* Initially hidden */
 }
 @keyframes spin {
