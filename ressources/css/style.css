@@ -83,4 +83,48 @@ body {
   a.download-link:hover {
     text-decoration: underline;
   }
-  
+  /* Spinner Styles */
+.spinner {
+  border: 8px solid #f3f3f3; /* Light grey */
+  border-top: 8px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 2s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Countdown Styles */
+.countdown {
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  margin-top: 10px;
+}
+
+/* Download Link Styles (Optional Enhancement) */
+.download-link {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 15px;
+  background-color: #3498db;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.download-link:hover {
+  background-color: #2980b9;
+}
+
+/* Error Message Styles */
+.error {
+  color: red;
+  margin-top: 10px;
+  text-align: center;
+}

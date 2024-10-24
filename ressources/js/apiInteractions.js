@@ -44,10 +44,15 @@ export async function submitJobToAPI(formData) {
  * @param {Function} onStatusUpdate - Callback function to handle status updates.
  * @param {Function} onComplete - Callback function when the job is completed.
  * @param {Function} onError - Callback function when an error occurs.
+ * @param {Function} [onPoll] - Optional callback function when a poll is made.
  */
-export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError) {
+export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onPoll) {
     const interval = setInterval(async () => {
         try {
+            if (onPoll && typeof onPoll === 'function') {
+                onPoll();
+            }
+
             const response = await fetch(`${window.CONFIG.API_URL}/job-status/${jobId}/`);
             if (!response.ok) {
                 throw new Error('Failed to fetch job status.');
@@ -65,5 +70,5 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError) {
             clearInterval(interval);
             onError(error.message);
         }
-    }, 5000); // Poll every 5 seconds
+    }, 20000); // Poll every 20 seconds
 }

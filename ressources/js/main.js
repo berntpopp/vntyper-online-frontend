@@ -10,6 +10,11 @@ import { initializeAioli, extractRegion } from './bamProcessing.js';
 async function initializeApp() {
     // Submit Job Button Event Listener
     const submitBtn = document.getElementById("submitBtn");
+    const spinner = document.getElementById("spinner");
+    const countdownDiv = document.getElementById("countdown");
+    let countdownInterval = null;
+    let timeLeft = 20; // Initial countdown time in seconds
+
     submitBtn.addEventListener("click", async () => {
         try {
             // Get selected files and validate
@@ -48,6 +53,19 @@ async function initializeApp() {
             submitBtn.disabled = true;
             submitBtn.textContent = "Submitting...";
 
+            // Show spinner and initialize countdown
+            spinner.style.display = "block";
+            countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+                } else {
+                    timeLeft = 20;
+                    countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+                }
+            }, 1000);
+
             // Submit job to API
             const data = await submitJobToAPI(formData);
             console.log("Job Submission Response:", data);
@@ -66,14 +84,29 @@ async function initializeApp() {
                     // On Complete
                     const downloadLink = document.createElement("a");
                     downloadLink.href = `${window.CONFIG.API_URL}/download/${data.job_id}/`;
-                    downloadLink.textContent = "Download Result BAM File";
+                    downloadLink.textContent = "Download vntyper results"; // Updated link text
                     downloadLink.classList.add("download-link");
                     outputDiv.appendChild(document.createElement("br"));
                     outputDiv.appendChild(downloadLink);
+
+                    // Hide spinner and countdown
+                    spinner.style.display = "none";
+                    countdownDiv.textContent = "";
+                    clearInterval(countdownInterval);
                 },
                 (errorMessage) => {
                     // On Error
                     displayError(errorMessage);
+
+                    // Hide spinner and countdown
+                    spinner.style.display = "none";
+                    countdownDiv.textContent = "";
+                    clearInterval(countdownInterval);
+                },
+                () => {
+                    // onPoll Callback to reset countdown
+                    timeLeft = 20;
+                    countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
                 }
             );
 
