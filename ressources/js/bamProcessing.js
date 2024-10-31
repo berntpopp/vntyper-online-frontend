@@ -30,8 +30,8 @@ export async function initializeAioli() {
  * @param {Object[]} matchedPairs - Array of matched BAM and BAI file pairs.
  */
 export async function extractRegion(CLI, matchedPairs) {
-    // Clear previous outputs
-    document.getElementById("output").innerHTML = "";
+    // Clear previous region outputs instead of the entire output
+    document.getElementById("regionOutput").innerHTML = "";
     document.getElementById("error").textContent = "";
 
     const region = document.getElementById("region").value;
@@ -109,14 +109,14 @@ export async function extractRegion(CLI, matchedPairs) {
             downloadLink.textContent = `Download subset_${pair.bam.name}`;
             downloadLink.classList.add("download-link");
 
-            document.getElementById("output").appendChild(downloadLink);
+            document.getElementById("regionOutput").appendChild(downloadLink);
 
             console.log("Download link created successfully.");
         }
 
         // Optional: Revoke the Object URLs after some time to free memory
         setTimeout(() => {
-            document.querySelectorAll('#output a').forEach(link => {
+            document.querySelectorAll('#regionOutput a').forEach(link => {
                 URL.revokeObjectURL(link.href);
                 console.log(`Object URL revoked for ${link.download}`);
             });
