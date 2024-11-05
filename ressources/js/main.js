@@ -20,13 +20,82 @@ async function initializeApp() {
     let countdownInterval = null;
     let timeLeft = 20; // Countdown time in seconds
 
+    /**
+     * Displays an error message to the user.
+     * @param {string} message - The error message to display.
+     */
+    function displayError(message) {
+        errorDiv.textContent = message;
+    }
+
+    /**
+     * Capitalizes the first letter of a string.
+     * @param {string} string - The string to capitalize.
+     * @returns {string} - The capitalized string.
+     */
+    function capitalizeFirstLetter(string) {
+        if (!string) return "";
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    /**
+     * Shows the spinner by toggling CSS classes.
+     */
+    function showSpinner() {
+        spinner.classList.remove('hidden');
+        spinner.classList.add('visible');
+    }
+
+    /**
+     * Hides the spinner by toggling CSS classes.
+     */
+    function hideSpinner() {
+        spinner.classList.remove('visible');
+        spinner.classList.add('hidden');
+    }
+
+    /**
+     * Updates the countdown timer display.
+     */
+    function startCountdown() {
+        countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+        countdownInterval = setInterval(() => {
+            timeLeft--;
+            if (timeLeft > 0) {
+                countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+            } else {
+                timeLeft = 20;
+                countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+            }
+        }, 1000);
+    }
+
+    /**
+     * Resets the countdown timer.
+     */
+    function resetCountdown() {
+        timeLeft = 20;
+        countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+    }
+
+    /**
+     * Clears the countdown interval.
+     */
+    function clearCountdown() {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+            countdownDiv.textContent = "";
+        }
+    }
+
     // Submit Job Button Event Listener
     submitBtn.addEventListener("click", async () => {
         try {
             // Clear previous outputs and errors
             jobInfoDiv.innerHTML = "";
             jobStatusDiv.innerHTML = "";
-            errorDiv.textContent = "";
+            displayError("");
 
             // Get selected files and validate
             const fileInputs = document.getElementById("bamFiles");
@@ -66,20 +135,9 @@ async function initializeApp() {
             console.log("Submit button disabled and text changed to 'Submitting...'");
 
             // Show spinner and initialize countdown
-            spinner.style.display = "block";
-            countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+            showSpinner();
+            startCountdown();
             console.log("Spinner displayed and countdown started");
-
-            // Initialize countdown timer
-            countdownInterval = setInterval(() => {
-                timeLeft--;
-                if (timeLeft > 0) {
-                    countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
-                } else {
-                    timeLeft = 20;
-                    countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
-                }
-            }, 1000);
 
             // Submit job to API
             const data = await submitJobToAPI(formData);
@@ -102,7 +160,7 @@ async function initializeApp() {
                     // On Complete
                     const downloadLink = document.createElement("a");
                     downloadLink.href = `${window.CONFIG.API_URL}/download/${data.job_id}/`;
-                    downloadLink.textContent = "Download vntyper results"; // Updated link text
+                    downloadLink.textContent = "Download vntyper results";
                     downloadLink.classList.add("download-link");
                     downloadLink.target = "_blank"; // Open in a new tab
 
@@ -111,9 +169,8 @@ async function initializeApp() {
                     console.log("Download link appended to jobStatusDiv");
 
                     // Hide spinner and countdown
-                    spinner.style.display = "none";
-                    countdownDiv.textContent = "";
-                    clearInterval(countdownInterval);
+                    hideSpinner();
+                    clearCountdown();
                     console.log("Spinner and countdown hidden");
                 },
                 (errorMessage) => {
@@ -122,15 +179,13 @@ async function initializeApp() {
                     console.error(`Job failed with error: ${errorMessage}`);
 
                     // Hide spinner and countdown
-                    spinner.style.display = "none";
-                    countdownDiv.textContent = "";
-                    clearInterval(countdownInterval);
+                    hideSpinner();
+                    clearCountdown();
                     console.log("Spinner and countdown hidden due to error");
                 },
                 () => {
                     // onPoll Callback to reset countdown
-                    timeLeft = 20;
-                    countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+                    resetCountdown();
                     console.log("Countdown reset to 20 seconds");
                 }
             );
@@ -140,9 +195,8 @@ async function initializeApp() {
             displayError(`Error: ${err.message}`);
 
             // Hide spinner and countdown in case of error
-            spinner.style.display = "none";
-            countdownDiv.textContent = "";
-            clearInterval(countdownInterval);
+            hideSpinner();
+            clearCountdown();
             console.log("Spinner and countdown hidden due to exception");
         } finally {
             // Reset the button
@@ -170,25 +224,6 @@ async function initializeApp() {
     } catch (err) {
         console.error("Failed to initialize BAM processing:", err);
     }
-}
-
-/**
- * Displays an error message to the user.
- * @param {string} message - The error message to display.
- */
-function displayError(message) {
-    const errorDiv = document.getElementById("error");
-    errorDiv.textContent = message;
-}
-
-/**
- * Capitalizes the first letter of a string.
- * @param {string} string - The string to capitalize.
- * @returns {string} - The capitalized string.
- */
-function capitalizeFirstLetter(string) {
-    if (!string) return "";
-    return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 // Initialize the application once the DOM is fully loaded

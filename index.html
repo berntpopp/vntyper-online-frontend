@@ -11,8 +11,10 @@
   <link rel="apple-touch-icon" sizes="180x180" href="ressources/assets/favicon/apple-touch-icon.png" />
   <link rel="manifest" href="ressources/assets/favicon/site.webmanifest" />
 
-  <!-- Include Aioli from BioWasm CDN -->
-  <script src="https://biowasm.com/cdn/v3/aioli.js" defer></script>
+  <!-- Include Aioli from BioWasm CDN with Subresource Integrity (SRI) -->
+  <script src="https://biowasm.com/cdn/v3/aioli.js"
+          integrity="sha384-1Ergza974F0w12B/lIP0OD/cMzMizVolHbzSX1Jlmour//ypy41MIN8qYeHl45Jz"
+          crossorigin="anonymous" defer></script>
   
   <!-- Link to External CSS -->
   <link rel="stylesheet" href="ressources/css/style.css">
@@ -71,7 +73,7 @@
         <div id="jobStatus"></div>
 
         <!-- Spinner and Countdown -->
-        <div id="spinner" class="spinner" style="display: none;" aria-label="Loading" role="status"></div>
+        <div id="spinner" class="spinner hidden" aria-label="Loading" role="status"></div>
         <div id="countdown" class="countdown"></div>
       </div>
       
