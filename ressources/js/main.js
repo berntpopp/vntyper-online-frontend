@@ -5,6 +5,182 @@ import { submitJobToAPI, pollJobStatusAPI } from './apiInteractions.js';
 import { initializeAioli, extractRegion } from './bamProcessing.js';
 
 /**
+ * Gets the value of a cookie by name.
+ * @param {string} name - Cookie name.
+ * @returns {string|null} - Cookie value or null if not found.
+ */
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+/**
+ * Sets a cookie with given name, value, and days until expiration.
+ * @param {string} name - Cookie name.
+ * @param {string} value - Cookie value.
+ * @param {number} days - Number of days until the cookie expires.
+ */
+function setCookie(name, value, days) {
+    let expires = "";
+    let secure = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    if (window.location.protocol === 'https:') {
+        secure = "; Secure";
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax" + secure;
+}
+
+/**
+ * Checks if the disclaimer has been acknowledged and displays the modal or indicator accordingly.
+ */
+function checkAndShowDisclaimer() {
+    const disclaimerAcknowledged = getCookie('disclaimerAcknowledged');
+    if (!disclaimerAcknowledged) {
+        openDisclaimerModal();
+    } else {
+        showDisclaimerIndicator();
+    }
+}
+
+/**
+ * Displays the disclaimer modal and traps focus within it.
+ */
+function openDisclaimerModal() {
+    const disclaimerModal = document.getElementById("disclaimerModal");
+    const agreeBtn = document.getElementById("agreeBtn");
+    disclaimerModal.style.display = "block";
+    document.body.classList.add('modal-open');
+    // Set focus to the "I Agree" button for accessibility
+    agreeBtn.focus();
+    // Trap focus within the modal
+    trapFocus(disclaimerModal);
+}
+
+/**
+ * Closes the disclaimer modal.
+ */
+function closeDisclaimerModal() {
+    const disclaimerModal = document.getElementById("disclaimerModal");
+    disclaimerModal.style.display = "none";
+    document.body.classList.remove('modal-open');
+    // Remove focus trap
+    removeTrapFocus();
+}
+
+/**
+ * Handles the agreement to the disclaimer.
+ */
+function handleAgree() {
+    setCookie('disclaimerAcknowledged', 'true', 365); // Cookie expires in 1 year
+    closeDisclaimerModal();
+    showDisclaimerIndicator();
+}
+
+/**
+ * Displays the disclaimer indicator in the footer.
+ */
+function showDisclaimerIndicator() {
+    const disclaimerIndicator = document.getElementById("disclaimerIndicator");
+    const disclaimerStatusIcon = document.getElementById("disclaimerStatusIcon");
+    const disclaimerStatusText = document.getElementById("disclaimerStatusText");
+    
+    disclaimerIndicator.style.display = "flex"; // Show the indicator
+    disclaimerIndicator.setAttribute('aria-pressed', 'true');
+    // Update the icon and text
+    disclaimerStatusIcon.textContent = "✔️"; // Checkmark
+    disclaimerStatusText.textContent = "Disclaimer";
+}
+
+/**
+ * Hides the disclaimer indicator in the footer.
+ */
+function hideDisclaimerIndicator() {
+    const disclaimerIndicator = document.getElementById("disclaimerIndicator");
+    disclaimerIndicator.style.display = "none"; // Hide the indicator
+    disclaimerIndicator.setAttribute('aria-pressed', 'false');
+}
+
+/**
+ * Updates the disclaimer indicator based on acknowledgment status.
+ */
+function updateDisclaimerIndicator() {
+    const disclaimerAcknowledged = getCookie('disclaimerAcknowledged');
+    if (disclaimerAcknowledged) {
+        showDisclaimerIndicator();
+    } else {
+        hideDisclaimerIndicator();
+    }
+}
+
+/**
+ * Reopens the disclaimer modal when the indicator is clicked.
+ */
+function handleDisclaimerIndicatorClick() {
+    openDisclaimerModal();
+}
+
+/**
+ * Initializes the disclaimer indicator based on acknowledgment.
+ */
+function initializeDisclaimerIndicator() {
+    updateDisclaimerIndicator();
+}
+
+/**
+ * Trap focus within a given element for accessibility.
+ * @param {HTMLElement} element - The element to trap focus within.
+ */
+function trapFocus(element) {
+    const focusableElements = element.querySelectorAll('a[href], button:not([disabled]), textarea, input, select');
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+
+    function handleFocus(event) {
+        if (event.key === 'Tab') {
+            if (event.shiftKey) { // Shift + Tab
+                if (document.activeElement === firstFocusable) {
+                    event.preventDefault();
+                    lastFocusable.focus();
+                }
+            } else { // Tab
+                if (document.activeElement === lastFocusable) {
+                    event.preventDefault();
+                    firstFocusable.focus();
+                }
+            }
+        } else if (event.key === 'Escape') {
+            // Prevent closing the modal with Escape
+            event.preventDefault();
+        }
+    }
+
+    element.addEventListener('keydown', handleFocus);
+    // Save the handler so it can be removed later
+    element.focusHandler = handleFocus;
+}
+
+/**
+ * Removes the focus trap from the modal.
+ */
+function removeTrapFocus() {
+    const disclaimerModal = document.getElementById("disclaimerModal");
+    if (disclaimerModal.focusHandler) {
+        disclaimerModal.removeEventListener('keydown', disclaimerModal.focusHandler);
+        delete disclaimerModal.focusHandler;
+    }
+}
+
+/**
  * Initializes the application by setting up event listeners and dynamic content.
  */
 async function initializeApp() {
@@ -19,15 +195,6 @@ async function initializeApp() {
     const institutionLogosDiv = document.getElementById("institutionLogos");
     const footerLinksDiv = document.getElementById("footerLinks");
     const currentYearSpan = document.getElementById("currentYear");
-
-    // Modal Elements
-    const disclaimerModal = document.getElementById("disclaimerModal");
-    const agreeBtn = document.getElementById("agreeBtn");
-
-    // Disclaimer Indicator Elements
-    const disclaimerIndicator = document.getElementById("disclaimerIndicator");
-    const disclaimerStatusIcon = document.getElementById("disclaimerStatusIcon");
-    const disclaimerStatusText = document.getElementById("disclaimerStatusText");
 
     let countdownInterval = null;
     let timeLeft = 20; // Countdown time in seconds
@@ -64,114 +231,6 @@ async function initializeApp() {
     function hideSpinner() {
         spinner.classList.remove('visible');
         spinner.classList.add('hidden');
-    }
-
-    /**
-     * Shows the disclaimer modal and traps focus within it.
-     */
-    function openDisclaimerModal() {
-        disclaimerModal.style.display = "block";
-        document.body.classList.add('modal-open');
-        // Set focus to the "I Agree" button for accessibility
-        agreeBtn.focus();
-        // Trap focus within the modal
-        trapFocus(disclaimerModal);
-    }
-
-    /**
-     * Closes the disclaimer modal.
-     */
-    function closeDisclaimerModal() {
-        disclaimerModal.style.display = "none";
-        document.body.classList.remove('modal-open');
-        // Remove focus trap
-        removeTrapFocus();
-    }
-
-    /**
-     * Sets a cookie with given name, value and days until expiration.
-     * @param {string} name - Cookie name.
-     * @param {string} value - Cookie value.
-     * @param {number} days - Number of days until the cookie expires.
-     */
-    function setCookie(name, value, days) {
-        let expires = "";
-        let secure = "";
-        if (days) {
-            const date = new Date();
-            date.setTime(date.getTime() + (days*24*60*60*1000));
-            expires = "; expires=" + date.toUTCString();
-        }
-        if (window.location.protocol === 'https:') {
-            secure = "; Secure";
-        }
-        document.cookie = name + "=" + (value || "")  + expires + "; path=/; SameSite=Lax" + secure;
-    }
-
-    /**
-     * Gets the value of a cookie by name.
-     * @param {string} name - Cookie name.
-     * @returns {string|null} - Cookie value or null if not found.
-     */
-    function getCookie(name) {
-        const nameEQ = name + "=";
-        const ca = document.cookie.split(';');
-        for(let i=0;i < ca.length;i++) {
-            let c = ca[i];
-            while (c.charAt(0)==' ') c = c.substring(1,c.length);
-            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-        }
-        return null;
-    }
-
-    /**
-     * Handles the agreement to the disclaimer.
-     */
-    function handleAgree() {
-        setCookie('disclaimerAcknowledged', 'true', 365); // Cookie expires in 1 year
-        closeDisclaimerModal();
-        showDisclaimerIndicator();
-    }
-
-    /**
-     * Trap focus within a given element for accessibility.
-     * @param {HTMLElement} element - The element to trap focus within.
-     */
-    function trapFocus(element) {
-        const focusableElements = element.querySelectorAll('a[href], button:not([disabled]), textarea, input, select');
-        const firstFocusable = focusableElements[0];
-        const lastFocusable = focusableElements[focusableElements.length - 1];
-
-        function handleFocus(event) {
-            if (event.key === 'Tab') {
-                if (event.shiftKey) { // Shift + Tab
-                    if (document.activeElement === firstFocusable) {
-                        event.preventDefault();
-                        lastFocusable.focus();
-                    }
-                } else { // Tab
-                    if (document.activeElement === lastFocusable) {
-                        event.preventDefault();
-                        firstFocusable.focus();
-                    }
-                }
-            } else if (event.key === 'Escape') {
-                // Prevent closing the modal with Escape
-                event.preventDefault();
-            }
-        }
-
-        element.addEventListener('keydown', handleFocus);
-        // Save the handler so it can be removed later
-        element.focusHandler = handleFocus;
-    }
-
-    /**
-     * Removes the focus trap from the modal.
-     */
-    function removeTrapFocus() {
-        disclaimerModal.removeEventListener('keydown', disclaimerModal.focusHandler);
-        delete disclaimerModal.focusHandler;
     }
 
     /**
@@ -245,68 +304,11 @@ async function initializeApp() {
         currentYearSpan.textContent = currentYear;
     }
 
-    /**
-     * Displays the disclaimer indicator in the footer.
-     */
-    function showDisclaimerIndicator() {
-        disclaimerIndicator.style.display = "flex"; // Show the indicator
-        disclaimerIndicator.setAttribute('aria-pressed', 'true');
-        // Update the icon and text if needed
-        disclaimerStatusIcon.textContent = "✔️"; // Checkmark
-        disclaimerStatusText.textContent = "Disclaimer";
-    }
-
-    /**
-     * Hides the disclaimer indicator in the footer.
-     */
-    function hideDisclaimerIndicator() {
-        disclaimerIndicator.style.display = "none"; // Hide the indicator
-        disclaimerIndicator.setAttribute('aria-pressed', 'false');
-    }
-
-    /**
-     * Updates the disclaimer indicator based on acknowledgment status.
-     */
-    function updateDisclaimerIndicator() {
-        const disclaimerAcknowledged = getCookie('disclaimerAcknowledged');
-        if (disclaimerAcknowledged) {
-            showDisclaimerIndicator();
-        } else {
-            hideDisclaimerIndicator();
-        }
-    }
-
-    /**
-     * Reopens the disclaimer modal when the indicator is clicked.
-     */
-    function handleDisclaimerIndicatorClick() {
-        openDisclaimerModal();
-    }
-
-    /**
-     * Displays the disclaimer indicator if acknowledged.
-     */
-    function showDisclaimerIndicatorIfAcknowledged() {
-        const disclaimerAcknowledged = getCookie('disclaimerAcknowledged');
-        if (disclaimerAcknowledged) {
-            showDisclaimerIndicator();
-        } else {
-            hideDisclaimerIndicator();
-        }
-    }
-
-    /**
-     * Initializes the disclaimer indicator based on acknowledgment.
-     */
-    function initializeDisclaimerIndicator() {
-        updateDisclaimerIndicator();
-    }
-
     // Event Listener for "I Agree" Button in Modal
-    agreeBtn.addEventListener("click", handleAgree);
+    // (Already defined globally)
 
     // Event Listener for Disclaimer Indicator Button
-    disclaimerIndicator.addEventListener("click", handleDisclaimerIndicatorClick);
+    // (Already defined globally)
 
     // Submit Job Button Event Listener
     submitBtn.addEventListener("click", async () => {
@@ -351,7 +353,7 @@ async function initializeApp() {
             // Disable button and indicate submission
             submitBtn.disabled = true;
             submitBtn.textContent = "Submitting...";
-            console.log("Submit button disabled and text changed to 'Submitting...'");
+            console.log("Submit button disabled and text changed to 'Submitting...");
 
             // Show spinner and initialize countdown
             showSpinner();
@@ -457,50 +459,11 @@ async function initializeApp() {
     checkAndShowDisclaimer();
 }
 
-/**
- * Initializes the disclaimer indicator based on acknowledgment.
- */
-function initializeDisclaimerIndicator() {
-    updateDisclaimerIndicator();
-}
+// Event Listener for Disclaimer Indicator Button
+document.getElementById("disclaimerIndicator").addEventListener("click", handleDisclaimerIndicatorClick);
 
-/**
- * Displays the disclaimer indicator in the footer.
- */
-function showDisclaimerIndicator() {
-    disclaimerIndicator.style.display = "flex"; // Show the indicator
-    disclaimerIndicator.setAttribute('aria-pressed', 'true');
-    // Update the icon and text if needed
-    disclaimerStatusIcon.textContent = "✔️"; // Checkmark
-    disclaimerStatusText.textContent = "Disclaimer";
-}
-
-/**
- * Hides the disclaimer indicator in the footer.
- */
-function hideDisclaimerIndicator() {
-    disclaimerIndicator.style.display = "none"; // Hide the indicator
-    disclaimerIndicator.setAttribute('aria-pressed', 'false');
-}
-
-/**
- * Updates the disclaimer indicator based on acknowledgment status.
- */
-function updateDisclaimerIndicator() {
-    const disclaimerAcknowledged = getCookie('disclaimerAcknowledged');
-    if (disclaimerAcknowledged) {
-        showDisclaimerIndicator();
-    } else {
-        hideDisclaimerIndicator();
-    }
-}
-
-/**
- * Reopens the disclaimer modal when the indicator is clicked.
- */
-function handleDisclaimerIndicatorClick() {
-    openDisclaimerModal();
-}
+// Event Listener for "I Agree" Button in Modal
+document.getElementById("agreeBtn").addEventListener("click", handleAgree);
 
 // Initialize the application once the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", initializeApp);
