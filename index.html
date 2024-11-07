@@ -50,7 +50,7 @@
       "description": "vntyper-online offers comprehensive genetic variant analysis and visualization tools to support researchers and clinicians in genomics studies.",
       "publisher": {
         "@type": "Person",
-        "name": "Bernt Popp",,
+        "name": "Bernt Popp",
         "url": "https://berntpopp.com",
         "logo": {
           "@type": "ImageObject",
@@ -63,7 +63,7 @@
           "name": "Bernt Popp",
           "url": "https://berntpopp.com",
           "sameAs": [
-            "https://github.com/berntpopp",
+            "https://github.com/berntpopp"
           ]
         },
         {
@@ -137,10 +137,34 @@
       <div class="footer-links" id="footerLinks">
         <!-- Links can be injected here if needed -->
       </div>
+      
+      <!-- Disclaimer Indicator -->
+      <button id="disclaimerIndicator" class="disclaimer-indicator" aria-label="View Disclaimer Status">
+        <span id="disclaimerStatusIcon" class="status-icon" aria-hidden="true">✔️</span>
+        <span id="disclaimerStatusText" class="status-text">Disclaimer</span>
+      </button>
     </div>
     <div class="footer-bottom">
       <p>&copy; <span id="currentYear"></span> vntyper-online. All rights reserved.</p>
     </div>
   </footer>
+
+  <!-- Disclaimer Modal -->
+  <div id="disclaimerModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle" aria-describedby="disclaimerDescription">
+    <div class="modal-overlay"></div> <!-- Moved above modal-content -->
+    <div class="modal-content">
+      <h2 id="disclaimerTitle">Disclaimer</h2>
+      <p id="disclaimerDescription">
+        <strong>Important Information</strong><br>
+        vntyper-online is intended for educational and research purposes only. It is not a substitute for professional medical advice and should not be used for clinical decision-making.
+      </p>
+      <p>
+        <strong>Usage Guidelines</strong><br>
+        The results provided by this tool should not be used as a basis for diagnosis or treatment without consulting a healthcare professional.
+      </p>
+      <button id="agreeBtn" class="agree-button">I Agree</button>
+    </div>
+  </div>
+
 </body>
 </html>
