@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <title>vntyper-online</title>  
   
+  <!-- Viewport Meta Tag -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Meta Description -->
+  <meta name="description" content="vntyper-online offers comprehensive genetic variant analysis and visualization tools to support researchers and clinicians in genomics studies.">
+  
   <!-- Favicon Links -->
   <link rel="icon" type="image/png" href="ressources/assets/favicon/favicon-48x48.png" sizes="48x48" />
   <link rel="icon" type="image/svg+xml" href="ressources/assets/favicon/favicon.svg" />
@@ -33,6 +39,42 @@
   
   <!-- Link to Main JS -->
   <script type="module" src="ressources/js/main.js" defer></script>
+  
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "WebSite",
+      "name": "vntyper-online",
+      "url": "https://vntyper.org/",
+      "description": "vntyper-online offers comprehensive genetic variant analysis and visualization tools to support researchers and clinicians in genomics studies.",
+      "publisher": {
+        "@type": "Person",
+        "name": "Bernt Popp",,
+        "url": "https://berntpopp.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://vntyper.org/ressources/assets/logo/vntyperonline_logo_80px.png"
+        }
+      },
+      "creator": [
+        {
+          "@type": "Person",
+          "name": "Bernt Popp",
+          "url": "https://berntpopp.com",
+          "sameAs": [
+            "https://github.com/berntpopp",
+          ]
+        },
+        {
+          "@type": "Person",
+          "name": "Hassan Saei",
+          "url": "https://github.com/hassansaei",
+        }
+      ]
+    }
+  </script>
+
 </head>
 <body>
   <div class="container">
