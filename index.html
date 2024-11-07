@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
   <!-- Meta Description -->
-  <meta name="description" content="vntyper-online offers comprehensive genetic variant analysis and visualization tools to support researchers and clinicians in genomics studies.">
+  <meta name="description" content="vntyper-online offers online MUC1 VNTR genotyping using the vntyper algorithm.">
   
   <!-- Favicon Links -->
   <link rel="icon" type="image/png" href="ressources/assets/favicon/favicon-48x48.png" sizes="48x48" />
@@ -17,13 +17,24 @@
   <link rel="apple-touch-icon" sizes="180x180" href="ressources/assets/favicon/apple-touch-icon.png" />
   <link rel="manifest" href="ressources/assets/favicon/site.webmanifest" />
 
+  <!-- Intro.js CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0/introjs.min.css" integrity="sha512-631ugrjzlQYCOP9P8BOLEMFspr5ooQwY3rgt8SMUa+QqtVMbY/tniEUOcABHDGjK50VExB4CNc61g5oopGqCEw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Link to New CSS Files -->
+  <link rel="stylesheet" href="ressources/css/base.css">
+  <link rel="stylesheet" href="ressources/css/navbar.css">
+  <link rel="stylesheet" href="ressources/css/faq.css">
+  <link rel="stylesheet" href="ressources/css/citations.css">
+  <link rel="stylesheet" href="ressources/css/footer.css">
+  <link rel="stylesheet" href="ressources/css/modal.css">
+
+  <!-- Intro.js JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0/intro.min.js" integrity="sha512-+hhhH0eKqYCmXsO28OJE1HHWkgNYwlpceBwmeeDEt5jpCL8jOuqAVunXlZ/WZ4qIluJdwlcv4f5BUIQ/l1w9iw==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+
   <!-- Include Aioli from BioWasm CDN with Subresource Integrity (SRI) -->
   <script src="https://biowasm.com/cdn/v3/aioli.js"
           integrity="sha384-1Ergza974F0w12B/lIP0OD/cMzMizVolHbzSX1Jlmour//ypy41MIN8qYeHl45Jz"
           crossorigin="anonymous" defer></script>
-  
-  <!-- Link to External CSS -->
-  <link rel="stylesheet" href="ressources/css/style.css">
   
   <!-- Link to Config JS -->
   <script src="ressources/js/config.js" defer></script>
@@ -39,6 +50,9 @@
   
   <!-- Link to Main JS -->
   <script type="module" src="ressources/js/main.js" defer></script>
+  
+  <!-- Link to Modal JS -->
+  <script type="module" src="ressources/js/modal.js" defer></script>
   
   <!-- Schema.org JSON-LD -->
   <script type="application/ld+json">
@@ -77,22 +91,33 @@
 
 </head>
 <body>
-  <div class="container">
-    <!-- Header Section with Logo and Title -->
-    <div class="header">
-      <img src="ressources/assets/logo/vntyperonline_logo_80px.png" alt="vntyper-online Logo" class="logo">
-      <h2>vntyper-online</h2>
-    </div>
+
+  <div class="container" id="home">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="navbar-container">
+        <div class="header">
+          <img src="ressources/assets/logo/vntyperonline_logo_80px.png" alt="vntyper-online Logo" class="logo">
+          <h2>vntyper-online</h2>
+        </div>
+
+        <!-- Navigation Links -->
+        <ul class="navbar-menu">
+          <li><a href="#" class="navbar-link" data-modal="faqModal">FAQ</a></li>
+          <li><a href="#" id="startTutorialBtn" class="navbar-link">Tutorial</a></li>
+        </ul>
+      </div>
+    </nav>
 
     <!-- File Input Container -->
-    <div class="file-input">
+    <div class="file-input" data-intro="Upload your BAM and BAI files here. Each BAM file should have a corresponding BAI file." data-step="1">
       <label for="bamFiles">Select BAM and BAI Files:</label>
       <input id="bamFiles" type="file" accept=".bam,.bai" multiple />
       <small>Select corresponding BAM and BAI files. Each BAM file should have a matching BAI file (e.g., test.bam and test.bam.bai or test.bai).</small>
     </div>
 
     <!-- Region Select Dropdown -->
-    <div class="region-select">
+    <div class="region-select" data-intro="Select the genomic region you wish to analyze. This should be based on the reference used for your alignment." data-step="2">
       <label for="region">Select Region:</label>
       <select id="region">
         <option value="" disabled selected>Select a region</option>
@@ -102,13 +127,13 @@
     </div>
 
     <!-- API-Based Job Submission -->
-    <button id="submitBtn">Submit Job</button>
+    <button id="submitBtn" data-intro="Click here to submit your job for analysis. The MUC1 read data will be extracted on your device and only this subset will be uploaded for analysis." data-step="3">Submit Job</button>
 
     <!-- Old BAM Processing Button -->
-    <button id="extractBtn">Extract Region</button>
+    <button id="extractBtn" data-intro="Use this button to extract regions from your BAM files in your browser and save the subset BAM file." data-step="4">Extract Region</button>
 
     <!-- Output and Error Containers -->
-    <div id="output">
+    <div id="output" data-intro="Here you will see the status and results of your job." data-step="5">
       <!-- Job Information and Status -->
       <div id="jobOutput">
         <div id="jobInfo"></div>
@@ -124,7 +149,19 @@
     </div>
     <div id="error" class="error"></div>
   </div>
-  
+
+  <!-- Citations Section -->
+  <section id="citations" class="citations-section">
+    <div class="citations-container">
+      <div class="citation-item">
+        <p>
+          Saei H, et al. VNtyper enables accurate alignment-free genotyping of MUC1 coding VNTR using short-read sequencing data in autosomal dominant tubulointerstitial kidney disease. <strong>iScience</strong>. 2023 Jun 17;26(7):107171. doi: <a href="https://doi.org/10.1016/j.isci.2023.107171" target="_blank">10.1016/j.isci.2023.107171</a>. PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/37456840/" target="_blank">37456840</a>; PMCID: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10338300/" target="_blank">PMC10338300</a>.
+        </p>
+      </div>
+      <!-- Add more citation items as needed -->
+    </div>
+  </section>
+
   <!-- Footer Section -->
   <footer class="footer">
     <div class="footer-content">
@@ -135,11 +172,12 @@
       
       <!-- Dynamic Footer Links (Optional) -->
       <div class="footer-links" id="footerLinks">
-        <!-- Links can be injected here if needed -->
+        <a href="#" class="navbar-link" data-modal="faqModal">FAQ</a>
+        <a href="#citations">Citations</a>
       </div>
       
       <!-- Disclaimer Indicator -->
-      <button id="disclaimerIndicator" class="disclaimer-indicator" aria-label="View Disclaimer Status">
+      <button id="disclaimerIndicator" class="disclaimer-indicator" aria-label="View Disclaimer Status" data-intro="Click here to view the disclaimer again." data-step="6">
         <span id="disclaimerStatusIcon" class="status-icon" aria-hidden="true">✔️</span>
         <span id="disclaimerStatusText" class="status-text">Disclaimer</span>
       </button>
@@ -151,8 +189,9 @@
 
   <!-- Disclaimer Modal -->
   <div id="disclaimerModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle" aria-describedby="disclaimerDescription">
-    <div class="modal-overlay"></div> <!-- Moved above modal-content -->
+    <div class="modal-overlay"></div> <!-- Overlay background -->
     <div class="modal-content">
+      <button class="modal-close" aria-label="Close Disclaimer Modal">&times;</button>
       <h2 id="disclaimerTitle">Disclaimer</h2>
       <p id="disclaimerDescription">
         <strong>Important Information</strong><br>
@@ -163,6 +202,34 @@
         The results provided by this tool should not be used as a basis for diagnosis or treatment without consulting a healthcare professional.
       </p>
       <button id="agreeBtn" class="agree-button">I Agree</button>
+    </div>
+  </div>
+
+  <!-- FAQ Modal -->
+  <div id="faqModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="faqTitle" aria-describedby="faqDescription" aria-hidden="true">
+    <div class="modal-overlay"></div> <!-- Overlay background -->
+    <div class="modal-content">
+      <button class="modal-close" aria-label="Close FAQ Modal">&times;</button>
+      <h2 id="faqTitle">Frequently Asked Questions</h2>
+      <div id="faqDescription" class="faq-container">
+        <div class="faq-item">
+          <h3>What is vntyper-online?</h3>
+          <p>vntyper-online is a comprehensive genetic variant analysis and visualization tool designed to support researchers and clinicians in genomics studies.</p>
+        </div>
+        <div class="faq-item">
+          <h3>How do I upload my data?</h3>
+          <p>You can upload your BAM and BAI files using the file input section on the Home page. Ensure that each BAM file has a corresponding BAI file.</p>
+        </div>
+        <div class="faq-item">
+          <h3>What regions can I analyze?</h3>
+          <p>Select from the predefined genomic regions available in the region selection dropdown. Currently, MUC1 Locus (hg19 and hg38) are supported.</p>
+        </div>
+        <div class="faq-item">
+          <h3>How can I track the status of my job?</h3>
+          <p>After submitting a job, the status will be displayed in the output section. You can also download the results once the job is complete.</p>
+        </div>
+        <!-- Add more FAQ items as needed -->
+      </div>
     </div>
   </div>
 

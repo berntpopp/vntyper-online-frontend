@@ -5,6 +5,10 @@ import { submitJobToAPI, pollJobStatusAPI } from './apiInteractions.js';
 import { initializeAioli, extractRegion } from './bamProcessing.js';
 import { initializeModal, checkAndShowDisclaimer } from './modal.js';
 import { initializeFooter } from './footer.js';
+import { initializeFAQ } from './faq.js';
+import { initializeUserGuide } from './userGuide.js';
+import { initializeCitations } from './citations.js';
+import { initializeTutorial } from './tutorial.js';
 
 /**
  * Initializes the application by setting up event listeners and dynamic content.
@@ -13,6 +17,12 @@ async function initializeApp() {
     // Initialize modal and footer functionalities
     initializeModal();
     initializeFooter();
+
+    // Initialize other sections
+    initializeFAQ();
+    initializeUserGuide();
+    initializeCitations();
+    initializeTutorial();
 
     // Check and show disclaimer modal or indicator based on acknowledgment
     checkAndShowDisclaimer();
@@ -180,7 +190,7 @@ async function initializeApp() {
             // Disable button and indicate submission
             submitBtn.disabled = true;
             submitBtn.textContent = "Submitting...";
-            console.log("Submit button disabled and text changed to 'Submitting...");
+            console.log("Submit button disabled and text changed to 'Submitting...'");
 
             // Show spinner and initialize countdown
             showSpinner();

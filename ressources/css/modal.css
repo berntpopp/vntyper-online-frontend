@@ -1,0 +1,84 @@
+/* frontend/ressources/css/modal.css */
+
+/* General Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1001; /* Above other content */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5); /* Semi-transparent background */
+}
+
+/* Modal Content */
+.modal-content {
+    position: relative;
+    background-color: #ffffff;
+    margin: 5% auto; /* 5% from top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation-name: modalopen;
+    animation-duration: 0.4s;
+}
+
+/* Close Button */
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    font-weight: bold;
+    cursor: pointer;
+    color: #aaaaaa;
+    transition: color 0.3s ease;
+}
+
+.modal-close:hover,
+.modal-close:focus {
+    color: #000000;
+    outline: none;
+}
+
+/* Fade-in Animation */
+@keyframes modalopen {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+/* FAQ Specific Styles */
+.faq-container {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.faq-item {
+    margin-bottom: 20px;
+}
+
+.faq-item h3 {
+    margin-bottom: 10px;
+    color: #343a40;
+}
+
+.faq-item p {
+    color: #6c757d;
+    line-height: 1.6;
+}
