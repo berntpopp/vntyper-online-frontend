@@ -5,7 +5,7 @@ import { submitJobToAPI, pollJobStatusAPI } from './apiInteractions.js';
 import { initializeAioli, extractRegion } from './bamProcessing.js';
 
 /**
- * Initializes the application by setting up event listeners.
+ * Initializes the application by setting up event listeners and dynamic content.
  */
 async function initializeApp() {
     // Get references to DOM elements
@@ -16,6 +16,9 @@ async function initializeApp() {
     const jobInfoDiv = document.getElementById("jobInfo");
     const jobStatusDiv = document.getElementById("jobStatus");
     const errorDiv = document.getElementById("error");
+    const institutionLogosDiv = document.getElementById("institutionLogos");
+    const footerLinksDiv = document.getElementById("footerLinks");
+    const currentYearSpan = document.getElementById("currentYear");
 
     let countdownInterval = null;
     let timeLeft = 20; // Countdown time in seconds
@@ -87,6 +90,42 @@ async function initializeApp() {
             countdownInterval = null;
             countdownDiv.textContent = "";
         }
+    }
+
+    /**
+     * Dynamically generates the footer institution logos and links.
+     */
+    function generateFooter() {
+        const institutions = window.CONFIG.institutions || [];
+
+        // Clear existing content to avoid duplication
+        institutionLogosDiv.innerHTML = '';
+        footerLinksDiv.innerHTML = '';
+
+        // Generate Institution Logos
+        institutions.forEach(inst => {
+            const link = document.createElement('a');
+            link.href = inst.url;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+
+            const img = document.createElement('img');
+            img.src = `ressources/assets/logos/${inst.logo}`;
+            img.alt = `${inst.name} Logo`;
+            img.classList.add('institution-logo');
+            img.loading = "lazy";
+
+            link.appendChild(img);
+            institutionLogosDiv.appendChild(link);
+        });
+    }
+
+    /**
+     * Sets the current year in the footer.
+     */
+    function setCurrentYear() {
+        const currentYear = new Date().getFullYear();
+        currentYearSpan.textContent = currentYear;
     }
 
     // Submit Job Button Event Listener
@@ -224,6 +263,12 @@ async function initializeApp() {
     } catch (err) {
         console.error("Failed to initialize BAM processing:", err);
     }
+
+    // Generate the footer content dynamically
+    generateFooter();
+
+    // Set the current year dynamically
+    setCurrentYear();
 }
 
 // Initialize the application once the DOM is fully loaded
