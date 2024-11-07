@@ -163,3 +163,83 @@ button:disabled {
   height: 40px;
   border-width: 12px;
 }
+
+/* Footer Styles */
+.footer {
+  background-color: #f8f9fa; /* Light background to distinguish footer */
+  padding: 20px 0;
+  border-top: 1px solid #e7e7e7;
+  font-size: 14px;
+  color: #333;
+  margin-top: 40px; /* Space above the footer */
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 900px; /* Match container's max-width */
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.institution-logos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* Center horizontally */
+  align-items: center;    /* Center vertically */
+  gap: 20px;              /* Space between logos */
+  margin-bottom: 15px;
+}
+
+.institution-logo {
+  height: 60px;      /* Fixed height */
+  height: auto;     /* Maintain aspect ratio */
+  transition: transform 0.3s;
+  max-width: 100%;  /* Prevent images from stretching beyond 60px */
+}
+
+.institution-logo:hover {
+  transform: scale(1.1); /* Slightly enlarge on hover */
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.footer-links a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.footer-links a:hover,
+.footer-links a:focus {
+  text-decoration: underline;
+}
+
+.footer-bottom {
+  text-align: center;
+  font-size: 12px;
+  color: #666;
+}
+
+/* Responsive Design */
+@media (min-width: 600px) {
+  .footer-content {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .institution-logos {
+    margin-bottom: 0;
+  }
+
+  .footer-links {
+    margin-bottom: 0;
+  }
+}
