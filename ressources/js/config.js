@@ -26,7 +26,7 @@ window.CONFIG = {
         {
             name: "ADTKD-Net",
             logo: "ADTKD-Net_60px.webp",
-            url: "https://nephrologie-intensivmedizin.charite.de/en/fuer_patienten/cerkid/"
+            url: "https://www.gesundheitsforschung-bmbf.de/de/adtkd-net-netzwerk-fur-autosomal-dominante-tubulointerstitielle-nierenerkrankung-17889.php"
         }
         // Add more institutions here as needed
     ]
