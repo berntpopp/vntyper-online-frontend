@@ -243,3 +243,135 @@ button:disabled {
     margin-bottom: 0;
   }
 }
+
+/* Modal Styles */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  z-index: 1000; /* High z-index to overlay above all other content */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto; /* Enable scroll if needed */
+  outline: 0;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  z-index: 999; /* Below the modal content */
+}
+
+.modal-content {
+  position: fixed; /* Changed from relative to fixed */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center the modal */
+  background-color: #fff;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 90%;
+  max-width: 500px; /* Maximum width */
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  z-index: 1001; /* Above the overlay */
+}
+
+.modal-content h2 {
+  margin-top: 0;
+}
+
+.agree-button {
+  padding: 10px 20px;
+  background-color: #1e7e34; /* Dark green for visibility */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+}
+
+.agree-button:hover,
+.agree-button:focus {
+  background-color: #155d27; /* Darker shade on hover/focus */
+  outline: none;
+}
+
+/* Ensure the rest of the page is not scrollable when modal is open */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Accessibility: Focus outline for buttons */
+button:focus {
+  outline: 2px solid #000;
+}
+
+/* Disclaimer Indicator Styles */
+.disclaimer-indicator {
+  display: none; /* Hidden by default; shown via JavaScript if acknowledged */
+  flex: 0 0 auto;
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  color: #007bff; /* Bootstrap primary color for visibility */
+  cursor: pointer;
+  font-size: 14px;
+  padding: 8px 12px;
+  margin-left: 20px; /* Spacing from other footer content */
+  transition: color 0.3s ease;
+  position: relative; /* For tooltip positioning */
+}
+
+.disclaimer-indicator:hover,
+.disclaimer-indicator:focus {
+  color: #0056b3; /* Darker shade on hover/focus */
+  outline: none;
+}
+
+.disclaimer-indicator .status-icon {
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+.disclaimer-indicator .status-text {
+  display: none; /* Hide text on smaller screens */
+}
+
+@media (min-width: 600px) {
+  .disclaimer-indicator .status-text {
+    display: inline; /* Show text on larger screens */
+  }
+}
+
+/* Optional: Tooltip for the Disclaimer Indicator */
+.disclaimer-indicator::after {
+  content: "Reopen Disclaimer";
+  visibility: hidden;
+  opacity: 0;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+  padding: 4px 8px;
+  position: absolute;
+  z-index: 1002;
+  bottom: 150%;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: opacity 0.3s;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.disclaimer-indicator:hover::after,
+.disclaimer-indicator:focus::after {
+  visibility: visible;
+  opacity: 1;
+}

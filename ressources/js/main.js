@@ -3,11 +3,20 @@
 import { validateFiles } from './inputWrangling.js';
 import { submitJobToAPI, pollJobStatusAPI } from './apiInteractions.js';
 import { initializeAioli, extractRegion } from './bamProcessing.js';
+import { initializeModal, checkAndShowDisclaimer } from './modal.js';
+import { initializeFooter } from './footer.js';
 
 /**
  * Initializes the application by setting up event listeners and dynamic content.
  */
 async function initializeApp() {
+    // Initialize modal and footer functionalities
+    initializeModal();
+    initializeFooter();
+
+    // Check and show disclaimer modal or indicator based on acknowledgment
+    checkAndShowDisclaimer();
+
     // Get references to DOM elements
     const submitBtn = document.getElementById("submitBtn");
     const extractBtn = document.getElementById("extractBtn");
@@ -58,7 +67,7 @@ async function initializeApp() {
     }
 
     /**
-     * Updates the countdown timer display.
+     * Shows the spinner and initializes countdown.
      */
     function startCountdown() {
         countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
@@ -171,7 +180,7 @@ async function initializeApp() {
             // Disable button and indicate submission
             submitBtn.disabled = true;
             submitBtn.textContent = "Submitting...";
-            console.log("Submit button disabled and text changed to 'Submitting...'");
+            console.log("Submit button disabled and text changed to 'Submitting...");
 
             // Show spinner and initialize countdown
             showSpinner();
