@@ -9,6 +9,11 @@ window.CONFIG = {
             url: "https://www.institutimagine.org/en"
         },
         {
+            name: "Univerité Paris Cité",
+            logo: "UPC_60px.webp",
+            url: "https://u-paris.fr/"
+        },
+        {
             name: "Berlin Institute of Health at Charité (BIH)",
             logo: "BIH_60px.webp",
             url: "https://www.bihealth.org/en/"

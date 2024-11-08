@@ -105,6 +105,14 @@
         <ul class="navbar-menu">
           <li><a href="#" class="navbar-link" data-modal="faqModal">FAQ</a></li>
           <li><a href="#" id="startTutorialBtn" class="navbar-link">Tutorial</a></li>
+      
+          <!-- Disclaimer Indicator -->
+          <li id="disclaimerIndicator" aria-label="View Disclaimer Status" data-intro="Click here to view the disclaimer again." data-step="6">
+            <a href="#" id="disclaimerLink" class="navbar-link">
+              <span id="disclaimerStatusIcon" class="status-icon" aria-hidden="true">✔️</span>
+              <span id="disclaimerStatusText" class="status-text">Disclaimer</span>
+            </a>
+          </li>
         </ul>
       </div>
     </nav>
@@ -175,12 +183,7 @@
         <a href="#" class="navbar-link" data-modal="faqModal">FAQ</a>
         <a href="#citations">Citations</a>
       </div>
-      
-      <!-- Disclaimer Indicator -->
-      <button id="disclaimerIndicator" class="disclaimer-indicator" aria-label="View Disclaimer Status" data-intro="Click here to view the disclaimer again." data-step="6">
-        <span id="disclaimerStatusIcon" class="status-icon" aria-hidden="true">✔️</span>
-        <span id="disclaimerStatusText" class="status-text">Disclaimer</span>
-      </button>
+
     </div>
     <div class="footer-bottom">
       <p>&copy; <span id="currentYear"></span> vntyper-online. All rights reserved.</p>
