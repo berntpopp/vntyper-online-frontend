@@ -2,7 +2,7 @@
 
 import { validateFiles } from './inputWrangling.js';
 import { submitJobToAPI, pollJobStatusAPI } from './apiInteractions.js';
-import { initializeAioli, extractRegion } from './bamProcessing.js';
+import { initializeAioli, extractRegionAndIndex } from './bamProcessing.js';
 import { initializeModal, checkAndShowDisclaimer } from './modal.js';
 import { initializeFooter } from './footer.js';
 import { initializeFAQ } from './faq.js';
@@ -167,11 +167,33 @@ async function initializeApp() {
                 return;
             }
 
-            // Prepare FormData
+            if (matchedPairs.length === 0) {
+                displayError("No valid BAM and BAI file pairs found.");
+                console.warn("File validation error: No matched pairs.");
+                return;
+            }
+
+            // Show spinner and initialize countdown
+            showSpinner();
+            startCountdown();
+            console.log("Spinner displayed and countdown started");
+
+            // Initialize Aioli and extract subset BAM and BAI
+            const CLI = await initializeAioli();
+            const subsetBamAndBaiBlobs = await extractRegionAndIndex(CLI, matchedPairs);
+            console.log("Subsetted BAM and BAI Blobs:", subsetBamAndBaiBlobs);
+
+            // Prepare FormData with subsetted BAM and BAI files
             const formData = new FormData();
-            matchedPairs.forEach(pair => {
-                formData.append("bam_file", pair.bam);
-                formData.append("bai_file", pair.bai);
+
+            subsetBamAndBaiBlobs.forEach((subset, index) => {
+                const { subsetBamBlob, subsetBaiBlob, subsetName } = subset;
+                const originalPair = matchedPairs[index];
+                const subsetBamFileName = subsetName; // e.g., subset_test.bam
+                const subsetBaiFileName = `${subsetName}.bai`; // e.g., subset_test.bam.bai
+
+                formData.append("bam_file", subsetBamBlob, subsetBamFileName);
+                formData.append("bai_file", subsetBaiBlob, subsetBaiFileName);
             });
 
             // Compute reference_assembly based on region
@@ -191,11 +213,6 @@ async function initializeApp() {
             submitBtn.disabled = true;
             submitBtn.textContent = "Submitting...";
             console.log("Submit button disabled and text changed to 'Submitting...'");
-
-            // Show spinner and initialize countdown
-            showSpinner();
-            startCountdown();
-            console.log("Spinner displayed and countdown started");
 
             // Submit job to API
             const data = await submitJobToAPI(formData);
@@ -273,10 +290,56 @@ async function initializeApp() {
 
             try {
                 const { matchedPairs } = validateFiles(selectedFiles);
-                await extractRegion(CLI, matchedPairs);
+                if (matchedPairs.length === 0) {
+                    displayError("No valid BAM and BAI file pairs found for extraction.");
+                    console.warn("File validation error: No matched pairs for extraction.");
+                    return;
+                }
+                const subsetBamAndBaiBlobs = await extractRegionAndIndex(CLI, matchedPairs);
+                
+                // Provide download links for the subsetted BAM and BAI files
+                subsetBamAndBaiBlobs.forEach(subset => {
+                    const { subsetBamBlob, subsetBaiBlob, subsetName } = subset;
+                    const subsetBaiName = `${subsetName}.bai`;
+
+                    const downloadBamUrl = URL.createObjectURL(subsetBamBlob);
+                    const downloadBaiUrl = URL.createObjectURL(subsetBaiBlob);
+                    
+                    // Download Link for BAM
+                    const downloadBamLink = document.createElement("a");
+                    downloadBamLink.href = downloadBamUrl;
+                    downloadBamLink.download = subsetName;
+                    downloadBamLink.textContent = `Download ${subsetName}`;
+                    downloadBamLink.classList.add("download-link");
+
+                    // Download Link for BAI
+                    const downloadBaiLink = document.createElement("a");
+                    downloadBaiLink.href = downloadBaiUrl;
+                    downloadBaiLink.download = subsetBaiName;
+                    downloadBaiLink.textContent = `Download ${subsetBaiName}`;
+                    downloadBaiLink.classList.add("download-link");
+
+                    // Append links to the regionOutput div
+                    const linkContainer = document.createElement("div");
+                    linkContainer.appendChild(downloadBamLink);
+                    linkContainer.appendChild(document.createElement("br"));
+                    linkContainer.appendChild(downloadBaiLink);
+                    linkContainer.appendChild(document.createElement("hr"));
+
+                    document.getElementById("regionOutput").appendChild(linkContainer);
+                });
+
+                // Optional: Revoke the Object URLs after some time to free memory
+                setTimeout(() => {
+                    document.querySelectorAll('#regionOutput a').forEach(link => {
+                        URL.revokeObjectURL(link.href);
+                        console.log(`Object URL revoked for ${link.download}`);
+                    });
+                }, 60000); // Revoke after 60 seconds
+
             } catch (err) {
                 displayError(`Error: ${err.message}`);
-                console.error("Error during region extraction:", err);
+                console.error("Error during region extraction and indexing:", err);
             }
         });
     } catch (err) {
