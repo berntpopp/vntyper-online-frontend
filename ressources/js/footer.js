@@ -11,7 +11,6 @@ export function showDisclaimerIndicator() {
     const disclaimerStatusText = document.getElementById("disclaimerStatusText");
     
     disclaimerIndicator.style.display = "flex"; // Show the indicator
-    disclaimerIndicator.setAttribute('aria-pressed', 'true');
     // Update the icon and text
     disclaimerStatusIcon.textContent = "✔️"; // Checkmark
     disclaimerStatusText.textContent = "Disclaimer";
@@ -23,7 +22,6 @@ export function showDisclaimerIndicator() {
 export function hideDisclaimerIndicator() {
     const disclaimerIndicator = document.getElementById("disclaimerIndicator");
     disclaimerIndicator.style.display = "none"; // Hide the indicator
-    disclaimerIndicator.setAttribute('aria-pressed', 'false');
 }
 
 /**
