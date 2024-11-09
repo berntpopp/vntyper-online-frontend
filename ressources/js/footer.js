@@ -3,7 +3,7 @@
 import { getCookie } from './cookie.js';
 
 /**
- * Displays the disclaimer indicator in the footer.
+ * Displays the disclaimer indicator.
  */
 export function showDisclaimerIndicator() {
     const disclaimerIndicator = document.getElementById("disclaimerIndicator");
@@ -18,7 +18,7 @@ export function showDisclaimerIndicator() {
 }
 
 /**
- * Hides the disclaimer indicator in the footer.
+ * Hides the disclaimer indicator.
  */
 export function hideDisclaimerIndicator() {
     const disclaimerIndicator = document.getElementById("disclaimerIndicator");

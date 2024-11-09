@@ -117,6 +117,10 @@ async function initializeApp() {
     function generateFooter() {
         const institutions = window.CONFIG.institutions || [];
 
+        // Get the container elements
+        const institutionLogosDiv = document.getElementById('institutionLogos');
+        const footerLinksDiv = document.getElementById('footerLinks');
+
         // Clear existing content to avoid duplication
         institutionLogosDiv.innerHTML = '';
         footerLinksDiv.innerHTML = '';
@@ -129,10 +133,18 @@ async function initializeApp() {
             link.rel = "noopener noreferrer";
 
             const img = document.createElement('img');
-            img.src = `ressources/assets/logos/${inst.logo}`;
+            img.src = inst.base64; // Use Base64 string from config
             img.alt = `${inst.name} Logo`;
             img.classList.add('institution-logo');
-            img.loading = "lazy";
+            img.width = inst.width; // Set explicit width
+            img.height = inst.height; // Set explicit height
+            img.alt = inst.alt; // Alt text for accessibility
+            img.loading = "lazy"; // Lazy load non-critical images
+
+            // Handle load event for smooth transition
+            img.addEventListener('load', () => {
+                img.classList.add('logo-loaded');
+            });
 
             link.appendChild(img);
             institutionLogosDiv.appendChild(link);
