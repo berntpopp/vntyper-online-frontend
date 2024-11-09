@@ -177,4 +177,19 @@ body {
     height: 40px;
     border-width: 12px;
   }
+
+  #submitBtn,
+  #extractBtn {
+      background-color: #005f73; /* Dark teal */
+      color: #ffffff;            /* White text */
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+  }
   
+  #submitBtn:hover,
+  #extractBtn:hover {
+      background-color: #0a9396; /* Slightly lighter teal on hover */
+  }
