@@ -193,3 +193,26 @@ body {
   #extractBtn:hover {
       background-color: #0a9396; /* Slightly lighter teal on hover */
   }
+  
+  /* Error Alert Styles */
+  .error {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c2c7;
+    padding: 0.5rem 1rem; /* Reduced padding */
+    border-radius: 0.25rem;
+    max-width: 400px; /* Reduced max-width */
+    margin: 0.75rem auto; /* Reduced margin */
+    display: none; /* Hidden by default */
+  }
+  
+  /* Show error when not hidden */
+  .error:not(.hidden) {
+    display: block;
+  }
+  
+  /* Hidden File Input */
+  .drag-drop-input {
+    display: none;
+  }
+  
