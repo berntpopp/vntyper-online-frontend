@@ -2,29 +2,29 @@
 
 /* Drag & Drop Container */
 .drag-drop-container {
-    margin-bottom: 1rem; /* Reduced from 1.5rem */
+    margin-bottom: 1rem;
   }
   
   /* Drag & Drop Label */
   .drag-drop-label {
     display: block;
-    margin-bottom: 0.25rem; /* Reduced from 0.5rem */
+    margin-bottom: 0.25rem;
     font-weight: bold;
-    font-size: 1.2rem;
+    font-size: 1.0rem;
   }
   
   /* Drag & Drop Area */
   .drag-drop-area {
     border: 2px dashed #6c757d;
-    border-radius: 0.4rem; /* Slightly reduced radius */
-    padding: 1.0rem; /* Reduced from 2rem */
+    border-radius: 0.4rem;
+    padding: 1.0rem;
     text-align: center;
     color: #6c757d;
     transition: background-color 0.3s, border-color 0.3s, color 0.3s;
     cursor: pointer;
     position: relative;
-    height: 80px; /* Fixed height for consistency */
-    overflow: hidden; /* Hide overflow to maintain compactness */
+    height: 60px; /* Fixed height for consistency */
+    overflow: hidden;
   }
   
   .drag-drop-area:hover,
@@ -32,7 +32,7 @@
     border-color: #0d6efd;
     background-color: #e7f1ff;
     color: #0d6efd;
-    outline: none; /* Remove default focus outline */
+    outline: none;
   }
   
   .drag-drop-area.dragover {
@@ -43,13 +43,13 @@
   
   .drag-drop-area p {
     margin: 0;
-    font-size: 0.95rem; /* Slightly smaller font */
+    font-size: 0.95rem;
   }
   
   /* File List Styles */
   .file-list {
-    margin-top: 0.75rem; /* Reduced from 1rem */
-    max-height: 100px; /* Reduced from 150px */
+    margin-top: 0.75rem;
+    max-height: 100px;
     overflow-y: auto;
     text-align: left;
   }
@@ -61,7 +61,7 @@
   }
   
   .file-list li {
-    padding: 0.15rem 0; /* Reduced from 0.25rem */
+    padding: 0.15rem 0;
     border-bottom: 1px solid #e0e0e0;
     display: flex;
     justify-content: space-between;
