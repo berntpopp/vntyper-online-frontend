@@ -30,6 +30,9 @@
   <link rel="stylesheet" href="ressources/css/citations.css">
   <link rel="stylesheet" href="ressources/css/footer.css">
   <link rel="stylesheet" href="ressources/css/modal.css">
+  
+  <!-- Link to Drag & Drop CSS -->
+  <link rel="stylesheet" href="ressources/css/drag-drop.css">
 
   <!-- Intro.js JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0/intro.min.js" integrity="sha512-+hhhH0eKqYCmXsO28OJE1HHWkgNYwlpceBwmeeDEt5jpCL8jOuqAVunXlZ/WZ4qIluJdwlcv4f5BUIQ/l1w9iw==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
@@ -120,17 +123,36 @@
       </div>
     </nav>
 
-    <!-- File Input Container -->
-    <div class="file-input" data-intro="Upload your BAM and BAI files here. Each BAM file should have a corresponding BAI file." data-step="1">
-      <label for="bamFiles">Select BAM and BAI Files:</label>
-      <input id="bamFiles" type="file" accept=".bam,.bai" multiple />
-      <small>Select corresponding BAM and BAI files. Each BAM file should have a matching BAI file (e.g., test.bam and test.bam.bai or test.bai).</small>
+    <!-- Drag & Drop File Input Container -->
+    <div class="drag-drop-container" data-intro="Upload your BAM and BAI files here. Each BAM file should have a corresponding BAI file." data-step="1">
+      <label class="drag-drop-label" for="bamFiles">Upload sequencing files:</label>
+      
+      <div
+        id="dropArea"
+        class="drag-drop-area"
+        tabindex="0"
+        role="button"
+        aria-label="File Upload Area"
+      >
+        <p>Drag & drop corresponding BAM and BAI files.</p>
+        <input
+          type="file"
+          id="bamFiles"
+          accept=".bam,.bai"
+          multiple
+          class="drag-drop-input"
+        />
+        <!-- Container to display selected files -->
+        <div id="fileList" class="file-list">
+          <p>No files selected.</p>
+        </div>
+      </div>
     </div>
 
     <!-- Region Select Dropdown -->
     <div class="region-select" data-intro="Select the genomic region you wish to analyze. This should be based on the reference used for your alignment." data-step="2">
       <label for="region">Select Region:</label>
-      <select id="region">
+      <select id="region" class="form-select">
         <option value="" disabled selected>Select a region</option>
         <option value="chr1:155158000-155163000">MUC1 Locus (hg19): chr1:155158000-155163000</option>
         <option value="chr1:155184000-155194000" selected>MUC1 Locus (hg38): chr1:155184000-155194000</option>
@@ -138,10 +160,10 @@
     </div>
 
     <!-- API-Based Job Submission -->
-    <button id="submitBtn" data-intro="Click here to submit your job for analysis. The MUC1 read data will be extracted on your device and only this subset will be uploaded for analysis." data-step="3">Submit Job</button>
+    <button id="submitBtn" class="submit-button" data-intro="Click here to submit your job for analysis. The MUC1 read data will be extracted on your device and only this subset will be uploaded for analysis." data-step="3">Submit Job</button>
 
     <!-- Old BAM Processing Button -->
-    <button id="extractBtn" data-intro="Use this button to extract regions from your BAM files in your browser and save the subset BAM file." data-step="4">Extract Region</button>
+    <button id="extractBtn" class="extract-button" data-intro="Use this button to extract regions from your BAM files in your browser and save the subset BAM file." data-step="4">Extract Region</button>
 
     <!-- Output and Error Containers -->
     <div id="output" data-intro="Here you will see the status and results of your job." data-step="5">
@@ -156,9 +178,9 @@
       </div>
       
       <!-- Region Extraction Output -->
-      <div id="regionOutput"></div>
+      <div id="regionOutput" class="region-output"></div>
     </div>
-    <div id="error" class="error"></div>
+    <div id="error" class="error d-none hidden"></div>
   </div>
 
   <!-- Citations Section -->
@@ -224,13 +246,13 @@
         </div>
         <div class="faq-item">
           <h3>How do I upload my data?</h3>
-          <p>You can upload your BAM and BAI files using the file input section on the Home page. Ensure that each BAM file has a corresponding BAI file.</p>
+          <p>You can upload your BAM and BAI files using the file input section on the Home page. Ensure that each BAM file has a corresponding BAI file (e.g., test.bam and test.bam.bai or test.bai).</p>
         </div>
         <div class="faq-item">
           <h3>Is my data secure?</h3>
-          <p>The website https://vntyper.org/ uses SSL/HTTPS protocols with strong encryption and gets a high score for it's security implementation (<a href="https://developer.mozilla.org/en-US/observatory/analyze?host=vntyper.org" target="_blank">Mozilla Observatory A+ rating</a>).
-            Additionally, only a small fraction of the BAM file is uploaded, preserving privacy ad even this read data is immediately deleted after computation.
-            Results are kept for 7 days and then deleted from teh server
+          <p>The website https://vntyper.org/ uses SSL/HTTPS protocols with strong encryption and gets a high score for its security implementation (<a href="https://developer.mozilla.org/en-US/observatory/analyze?host=vntyper.org" target="_blank">Mozilla Observatory A+ rating</a>).
+            Additionally, only a small fraction of the BAM file is uploaded, preserving privacy and even this read data is immediately deleted after computation.
+            Results are kept for 7 days and then deleted from the server.
           </p>
         </div>
         <div class="faq-item">
