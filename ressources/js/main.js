@@ -275,7 +275,13 @@ async function initializeApp() {
 
             // Initialize Aioli and extract subset BAM and BAI
             const CLI = await initializeAioli();
-            const subsetBamAndBaiBlobs = await extractRegionAndIndex(CLI, selectedFiles);
+            const { matchedPairs, invalidFiles } = validateFiles(selectedFiles, false); // Pass false to avoid logging warnings
+            if (matchedPairs.length === 0) {
+                displayError("No valid BAM and BAI file pairs found for extraction.");
+                console.warn("File validation error: No matched pairs for extraction.");
+                return;
+            }
+            const subsetBamAndBaiBlobs = await extractRegionAndIndex(CLI, matchedPairs);
             console.log("Subsetted BAM and BAI Blobs:", subsetBamAndBaiBlobs);
 
             // Prepare FormData with subsetted BAM and BAI files
