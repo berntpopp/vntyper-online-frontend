@@ -7,7 +7,7 @@
 export async function initializeAioli() {
     try {
         console.log("Initializing Aioli with Samtools...");
-        const CLI = await new Aioli(["samtools/1.10"]);
+        const CLI = await new Aioli(["samtools/1.17"]);
         console.log("Aioli initialized.");
         console.log("CLI object:", CLI);
         console.log("CLI.fs:", CLI.fs);
@@ -76,7 +76,7 @@ export async function extractRegionAndIndex(CLI, matchedPairs) {
             const subsetBamName = `subset_${pair.bam.name}`;
             const subsetBamPath = subsetBamName;
             const viewCommand = "samtools";
-            const viewArgs = ["view", "-b", bamPath, region, "-o", subsetBamPath];
+            const viewArgs = ["view", "-P", "-b", bamPath, region, "-o", subsetBamPath];
             console.log("Executing Samtools View Command:", viewCommand, viewArgs);
 
             const viewResult = await CLI.exec(viewCommand, viewArgs);
