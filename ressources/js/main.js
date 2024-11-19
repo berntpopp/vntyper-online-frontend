@@ -1,7 +1,7 @@
 // frontend/ressources/js/main.js
 
 import { validateFiles } from './inputWrangling.js';
-import { submitJobToAPI, pollJobStatusAPI } from './apiInteractions.js';
+import { submitJobToAPI, pollJobStatusAPI, getJobQueueStatus } from './apiInteractions.js';
 import { initializeAioli, extractRegionAndIndex } from './bamProcessing.js';
 import { initializeModal, checkAndShowDisclaimer } from './modal.js';
 import { initializeFooter } from './footer.js';
@@ -35,12 +35,12 @@ async function initializeApp() {
     const jobInfoDiv = document.getElementById("jobInfo");
     const jobStatusDiv = document.getElementById("jobStatus");
     const errorDiv = document.getElementById("error");
-    const institutionLogosDiv = document.getElementById("institutionLogos");
-    const footerLinksDiv = document.getElementById("footerLinks");
-    const currentYearSpan = document.getElementById("currentYear");
     const dropArea = document.getElementById("dropArea");
     const bamFilesInput = document.getElementById("bamFiles");
     const fileList = document.getElementById("fileList");
+    const totalJobsInQueueSpan = document.getElementById('totalJobsInQueue'); // Server load count
+    const serverLoadIndicator = document.getElementById('serverLoadIndicator'); // Server load indicator li
+    const jobQueuePositionDiv = document.getElementById("jobQueuePosition");
 
     // Variable to store selected files
     let selectedFiles = [];
@@ -246,6 +246,37 @@ async function initializeApp() {
     });
 
     /**
+     * Updates the server load indicator by fetching the total number of jobs in the queue.
+     */
+    async function updateServerLoad() {
+        try {
+            const data = await getJobQueueStatus();
+            const totalJobsInQueue = data.total_jobs_in_queue || 0;
+            totalJobsInQueueSpan.textContent = totalJobsInQueue;
+
+            // Update color based on the number of jobs
+            if (totalJobsInQueue <= 2) {
+                serverLoadIndicator.classList.remove('load-orange', 'load-red');
+                serverLoadIndicator.classList.add('load-green');
+            } else if (totalJobsInQueue <= 10) {
+                serverLoadIndicator.classList.remove('load-green', 'load-red');
+                serverLoadIndicator.classList.add('load-orange');
+            } else {
+                serverLoadIndicator.classList.remove('load-green', 'load-orange');
+                serverLoadIndicator.classList.add('load-red');
+            }
+        } catch (error) {
+            console.error('Error updating server load:', error);
+        }
+    }
+
+    // Call updateServerLoad periodically
+    setInterval(updateServerLoad, 60000); // Update every 60 seconds
+
+    // Call it once at startup
+    updateServerLoad();
+
+    /**
      * Handle Job Submission via Submit Button
      */
     submitBtn.addEventListener("click", async () => {
@@ -258,6 +289,7 @@ async function initializeApp() {
             // Clear previous outputs and errors
             jobInfoDiv.innerHTML = "";
             jobStatusDiv.innerHTML = "";
+            jobQueuePositionDiv.innerHTML = "";
             clearError();
 
             const region = document.getElementById("region").value;
@@ -347,6 +379,12 @@ async function initializeApp() {
                     hideSpinner();
                     clearCountdown();
                     console.log("Spinner and countdown hidden");
+
+                    // Clear job queue position
+                    jobQueuePositionDiv.innerHTML = '';
+
+                    // Update server load indicator after job completion
+                    updateServerLoad();
                 },
                 (errorMessage) => {
                     // On Error
@@ -357,11 +395,42 @@ async function initializeApp() {
                     hideSpinner();
                     clearCountdown();
                     console.log("Spinner and countdown hidden due to error");
+
+                    // Clear job queue position
+                    jobQueuePositionDiv.innerHTML = '';
+
+                    // Update server load indicator after job failure
+                    updateServerLoad();
                 },
                 () => {
                     // onPoll Callback to reset countdown
                     resetCountdown();
                     console.log("Countdown reset to 20 seconds");
+                },
+                (queueData) => {
+                    // onQueueUpdate callback
+                    const { position_in_queue, total_jobs_in_queue, status } = queueData;
+                    if (position_in_queue) {
+                        jobQueuePositionDiv.innerHTML = `Position in Queue: <strong>${position_in_queue}</strong> out of <strong>${total_jobs_in_queue}</strong>`;
+                    } else if (status) {
+                        jobQueuePositionDiv.innerHTML = `${status}`;
+                    } else {
+                        jobQueuePositionDiv.innerHTML = '';
+                    }
+                    // Update server load indicator
+                    totalJobsInQueueSpan.textContent = total_jobs_in_queue;
+
+                    // Update color based on the number of jobs
+                    if (total_jobs_in_queue <= 2) {
+                        serverLoadIndicator.classList.remove('load-orange', 'load-red');
+                        serverLoadIndicator.classList.add('load-green');
+                    } else if (total_jobs_in_queue <= 10) {
+                        serverLoadIndicator.classList.remove('load-green', 'load-red');
+                        serverLoadIndicator.classList.add('load-orange');
+                    } else {
+                        serverLoadIndicator.classList.remove('load-green', 'load-orange');
+                        serverLoadIndicator.classList.add('load-red');
+                    }
                 }
             );
 
@@ -377,6 +446,12 @@ async function initializeApp() {
             hideSpinner();
             clearCountdown();
             console.log("Spinner and countdown hidden due to exception");
+
+            // Clear job queue position
+            jobQueuePositionDiv.innerHTML = '';
+
+            // Update server load indicator after error
+            updateServerLoad();
         } finally {
             // Reset the button
             submitBtn.disabled = false;
@@ -498,7 +573,10 @@ async function initializeApp() {
      */
     function setCurrentYear() {
         const currentYear = new Date().getFullYear();
-        currentYearSpan.textContent = currentYear;
+        const currentYearSpan = document.getElementById("currentYear");
+        if (currentYearSpan) {
+            currentYearSpan.textContent = currentYear;
+        }
     }
 
     // Generate the footer content dynamically

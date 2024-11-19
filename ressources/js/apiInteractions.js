@@ -45,8 +45,9 @@ export async function submitJobToAPI(formData) {
  * @param {Function} onComplete - Callback function when the job is completed.
  * @param {Function} onError - Callback function when an error occurs.
  * @param {Function} [onPoll] - Optional callback function when a poll is made.
+ * @param {Function} [onQueueUpdate] - Optional callback function to handle queue updates.
  */
-export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onPoll) {
+export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onPoll, onQueueUpdate) {
     const interval = setInterval(async () => {
         try {
             if (onPoll && typeof onPoll === 'function') {
@@ -59,16 +60,47 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
             }
             const data = await response.json();
             onStatusUpdate(data.status);
+
             if (data.status === 'completed') {
                 clearInterval(interval);
                 onComplete();
             } else if (data.status === 'failed') {
                 clearInterval(interval);
                 onError(data.error || 'Job failed.');
+            } else {
+                // Fetch job queue position
+                if (onQueueUpdate && typeof onQueueUpdate === 'function') {
+                    const queueData = await getJobQueueStatus(jobId);
+                    onQueueUpdate(queueData);
+                }
             }
         } catch (error) {
             clearInterval(interval);
             onError(error.message);
         }
     }, 20000); // Poll every 20 seconds
+}
+
+/**
+ * Fetches the job queue status from the backend API.
+ * @param {string} [jobId] - Optional job ID to get position in the queue.
+ * @returns {Promise<Object>} - The JSON response from the API.
+ * @throws {Error} - If the request fails.
+ */
+export async function getJobQueueStatus(jobId) {
+    try {
+        let url = `${window.CONFIG.API_URL}/job-queue/`;
+        if (jobId) {
+            url += `?job_id=${jobId}`;
+        }
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Failed to fetch job queue status.');
+        }
+        return response.json();
+    } catch (error) {
+        console.error('Error in getJobQueueStatus:', error);
+        throw error;
+    }
 }

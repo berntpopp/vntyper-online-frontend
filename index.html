@@ -112,6 +112,14 @@
           <li><a href="#" class="navbar-link" data-modal="faqModal">FAQ</a></li>
           <li><a href="#" id="startTutorialBtn" class="navbar-link">Tutorial</a></li>
       
+          <!-- Server Load Indicator -->
+          <li id="serverLoadIndicator" class="server-load-indicator">
+            <a href="#" class="navbar-link" aria-label="Current Server Load">
+              <span id="serverLoadText">Server Load: </span>
+              <span id="totalJobsInQueue" class="load-count">0</span>
+            </a>
+          </li>
+
           <!-- Disclaimer Indicator -->
           <li id="disclaimerIndicator" data-intro="Click here to view the disclaimer again." data-step="6">
             <a href="#" id="disclaimerLink" class="navbar-link" aria-label="View Disclaimer Status">
@@ -153,7 +161,7 @@
     <div class="region-select" data-intro="Select the genomic region you wish to analyze. This should be based on the reference used for your alignment." data-step="2">
       <label for="region">Select Region:</label>
       <select id="region" class="form-select">
-        <option value="" disabled selected>Select a region</option>
+        <option value="" disabled>Select a region</option>
         <option value="chr1:155158000-155163000">MUC1 Locus (hg19): chr1:155158000-155163000</option>
         <option value="chr1:155184000-155194000" selected>MUC1 Locus (hg38): chr1:155184000-155194000</option>
       </select>
@@ -171,7 +179,7 @@
       <div id="jobOutput">
         <div id="jobInfo"></div>
         <div id="jobStatus"></div>
-
+        <div id="jobQueuePosition"></div> <!-- Added for job queue position -->
         <!-- Spinner and Countdown -->
         <div id="spinner" class="spinner hidden" aria-label="Loading" role="status"></div>
         <div id="countdown" class="countdown"></div>
@@ -208,7 +216,6 @@
         <a href="#" class="navbar-link" data-modal="faqModal">FAQ</a>
         <a href="#citations">Citations</a>
       </div>
-
     </div>
     <div class="footer-bottom">
       <p>&copy; <span id="currentYear"></span> vntyper-online. All rights reserved.</p>
