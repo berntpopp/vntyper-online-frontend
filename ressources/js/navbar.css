@@ -7,8 +7,8 @@
     padding: 0.5em;
 }
 
-.server-load-indicator.load-green .navbar-link {
-    color: green;
+.server-load-indicator.load-blue .navbar-link {
+    color: blue;
 }
 
 .server-load-indicator.load-orange .navbar-link {

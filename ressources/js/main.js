@@ -48,6 +48,9 @@ async function initializeApp() {
     let countdownInterval = null;
     let timeLeft = 20; // Countdown time in seconds
 
+    // Variable to store the interval ID for updating server load
+    let serverLoadInterval = null;
+
     /**
      * Displays an error message to the user.
      * @param {string} message - The error message to display.
@@ -257,23 +260,46 @@ async function initializeApp() {
             // Update color based on the number of jobs
             if (totalJobsInQueue <= 2) {
                 serverLoadIndicator.classList.remove('load-orange', 'load-red');
-                serverLoadIndicator.classList.add('load-green');
-            } else if (totalJobsInQueue <= 10) {
-                serverLoadIndicator.classList.remove('load-green', 'load-red');
+                serverLoadIndicator.classList.add('load-blue');
+            } else if (totalJobsInQueue > 2 && totalJobsInQueue <= 10) {
+                serverLoadIndicator.classList.remove('load-blue', 'load-red');
                 serverLoadIndicator.classList.add('load-orange');
-            } else {
-                serverLoadIndicator.classList.remove('load-green', 'load-orange');
+            } else if (totalJobsInQueue > 10) {
+                serverLoadIndicator.classList.remove('load-blue', 'load-orange');
                 serverLoadIndicator.classList.add('load-red');
             }
+
+            // Adjust the update interval based on the server load
+            adjustServerLoadUpdateInterval(totalJobsInQueue);
+
         } catch (error) {
             console.error('Error updating server load:', error);
         }
     }
 
-    // Call updateServerLoad periodically
-    setInterval(updateServerLoad, 60000); // Update every 60 seconds
+    /**
+     * Adjusts the server load update interval based on the number of jobs in the queue.
+     * @param {number} totalJobsInQueue - The total number of jobs in the queue.
+     */
+    function adjustServerLoadUpdateInterval(totalJobsInQueue) {
+        // Clear existing interval
+        if (serverLoadInterval) {
+            clearInterval(serverLoadInterval);
+            serverLoadInterval = null;
+        }
 
-    // Call it once at startup
+        // Set update interval based on totalJobsInQueue
+        let intervalTime = 60000; // Default to 60 seconds
+
+        if (totalJobsInQueue > 0) {
+            intervalTime = 10000; // Update every 10 seconds if server load is > 0
+        }
+
+        // Set new interval
+        serverLoadInterval = setInterval(updateServerLoad, intervalTime);
+    }
+
+    // Initial call to update the server load
     updateServerLoad();
 
     /**
@@ -423,14 +449,17 @@ async function initializeApp() {
                     // Update color based on the number of jobs
                     if (total_jobs_in_queue <= 2) {
                         serverLoadIndicator.classList.remove('load-orange', 'load-red');
-                        serverLoadIndicator.classList.add('load-green');
-                    } else if (total_jobs_in_queue <= 10) {
-                        serverLoadIndicator.classList.remove('load-green', 'load-red');
+                        serverLoadIndicator.classList.add('load-blue');
+                    } else if (total_jobs_in_queue > 2 && total_jobs_in_queue <= 10) {
+                        serverLoadIndicator.classList.remove('load-blue', 'load-red');
                         serverLoadIndicator.classList.add('load-orange');
-                    } else {
-                        serverLoadIndicator.classList.remove('load-green', 'load-orange');
+                    } else if (total_jobs_in_queue > 10) {
+                        serverLoadIndicator.classList.remove('load-blue', 'load-orange');
                         serverLoadIndicator.classList.add('load-red');
                     }
+
+                    // Adjust the update interval based on the server load
+                    adjustServerLoadUpdateInterval(total_jobs_in_queue);
                 }
             );
 
