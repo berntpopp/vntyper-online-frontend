@@ -71,6 +71,9 @@
   <!-- Link to Modal JS -->
   <script type="module" src="ressources/js/modal.js" defer></script>
   
+  <!-- Link to Populate Regions JS -->
+  <script type="module" src="ressources/js/populateRegions.js" defer></script>
+  
   <!-- Schema.org JSON-LD -->
   <script type="application/ld+json">
     {
@@ -170,9 +173,9 @@
 
     <!-- Region Select Dropdown -->
     <div class="region-select" data-intro="Select the reference assembly used for your alignment. The region will be selected accordingly." data-step="2">
-      <label for="region">Select Reference Assembly:</label>
+      <label for="region">Select reference:</label>
       <select id="region" class="form-select">
-        <option value="guess" selected>Guess Reference Assembly</option>
+        <option value="guess" selected>Guess assembly</option>
         <!-- Options will be populated dynamically -->
       </select>
     </div>
@@ -287,23 +290,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Include script to dynamically populate the region select dropdown -->
-  <script type="module">
-    import { regions } from './ressources/js/regionsConfig.js';
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const regionSelect = document.getElementById('region');
-
-      // Populate the region select dropdown
-      for (const [key, value] of Object.entries(regions)) {
-        const option = document.createElement('option');
-        option.value = key; // Use the assembly key as the value
-        option.textContent = `${value.assembly} (${value.description}: ${value.region})`;
-        regionSelect.appendChild(option);
-      }
-    });
-  </script>
 
 </body>
 </html>
