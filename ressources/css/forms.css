@@ -1,0 +1,31 @@
+/* frontend/ressources/css/forms.css */
+
+/* --- Form Styles --- */
+
+/* Region Select Styles */
+.region-select {
+    margin-bottom: 20px;
+}
+
+.region-select label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.region-select select {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 1rem;
+}
+
+/* Optional: Add focus styles for better accessibility */
+.region-select select:focus {
+    border-color: #80bdff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0,123,255,0.5);
+}

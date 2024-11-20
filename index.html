@@ -23,13 +23,18 @@
   <!-- Intro.js CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0/introjs.min.css" integrity="sha512-631ugrjzlQYCOP9P8BOLEMFspr5ooQwY3rgt8SMUa+QqtVMbY/tniEUOcABHDGjK50VExB4CNc61g5oopGqCEw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-  <!-- Link to New CSS Files -->
+  <!-- Link to CSS Files -->
   <link rel="stylesheet" href="ressources/css/base.css">
   <link rel="stylesheet" href="ressources/css/navbar.css">
+  <link rel="stylesheet" href="ressources/css/drag-drop.css">
+  <link rel="stylesheet" href="ressources/css/forms.css">
+  <link rel="stylesheet" href="ressources/css/buttons.css">
+  <link rel="stylesheet" href="ressources/css/ui-components.css">
+  <link rel="stylesheet" href="ressources/css/output.css">
+  <link rel="stylesheet" href="ressources/css/modal.css">
   <link rel="stylesheet" href="ressources/css/faq.css">
   <link rel="stylesheet" href="ressources/css/citations.css">
   <link rel="stylesheet" href="ressources/css/footer.css">
-  <link rel="stylesheet" href="ressources/css/modal.css">
   
   <!-- Link to Drag & Drop CSS -->
   <link rel="stylesheet" href="ressources/css/drag-drop.css">
@@ -48,11 +53,17 @@
   <!-- Link to Input Wrangling JS -->
   <script type="module" src="ressources/js/inputWrangling.js" defer></script>
   
-  <!-- Link to API Interactions JS -->
-  <script type="module" src="ressources/js/apiInteractions.js" defer></script>
+  <!-- Link to Regions Config JS -->
+  <script type="module" src="ressources/js/regionsConfig.js" defer></script>
+  
+  <!-- Link to Assembly Configs JS -->
+  <script type="module" src="ressources/js/assemblyConfigs.js" defer></script>
   
   <!-- Link to BAM Processing JS -->
   <script type="module" src="ressources/js/bamProcessing.js" defer></script>
+  
+  <!-- Link to API Interactions JS -->
+  <script type="module" src="ressources/js/apiInteractions.js" defer></script>
   
   <!-- Link to Main JS -->
   <script type="module" src="ressources/js/main.js" defer></script>
@@ -158,28 +169,30 @@
     </div>
 
     <!-- Region Select Dropdown -->
-    <div class="region-select" data-intro="Select the genomic region you wish to analyze. This should be based on the reference used for your alignment." data-step="2">
-      <label for="region">Select Region:</label>
+    <div class="region-select" data-intro="Select the reference assembly used for your alignment. The region will be selected accordingly." data-step="2">
+      <label for="region">Select Reference Assembly:</label>
       <select id="region" class="form-select">
-        <option value="" disabled>Select a region</option>
-        <option value="chr1:155158000-155163000">MUC1 Locus (hg19): chr1:155158000-155163000</option>
-        <option value="chr1:155184000-155194000" selected>MUC1 Locus (hg38): chr1:155184000-155194000</option>
+        <option value="guess" selected>Guess Reference Assembly</option>
+        <!-- Options will be populated dynamically -->
       </select>
     </div>
 
     <!-- API-Based Job Submission -->
     <button id="submitBtn" class="submit-button" data-intro="Click here to submit your job for analysis. The MUC1 read data will be extracted on your device and only this subset will be uploaded for analysis." data-step="3">Submit Job</button>
 
-    <!-- Old BAM Processing Button -->
+    <!-- Region Extraction Button -->
     <button id="extractBtn" class="extract-button" data-intro="Use this button to extract regions from your BAM files in your browser and save the subset BAM file." data-step="4">Extract Region</button>
 
     <!-- Output and Error Containers -->
     <div id="output" data-intro="Here you will see the status and results of your job." data-step="5">
+      <!-- Message Display -->
+      <div id="message" class="message hidden"></div>
+
       <!-- Job Information and Status -->
       <div id="jobOutput">
         <div id="jobInfo"></div>
         <div id="jobStatus"></div>
-        <div id="jobQueuePosition"></div> <!-- Added for job queue position -->
+        <div id="jobQueuePosition"></div>
         <!-- Spinner and Countdown -->
         <div id="spinner" class="spinner hidden" aria-label="Loading" role="status"></div>
         <div id="countdown" class="countdown"></div>
@@ -264,7 +277,7 @@
         </div>
         <div class="faq-item">
           <h3>What regions can I analyze?</h3>
-          <p>Select from the predefined genomic regions available in the region selection dropdown. Currently, MUC1 Locus (hg19 and hg38) are supported.</p>
+          <p>Select the reference assembly used for your alignment. The region corresponding to MUC1 Locus will be automatically selected.</p>
         </div>
         <div class="faq-item">
           <h3>How can I track the status of my job?</h3>
@@ -274,6 +287,23 @@
       </div>
     </div>
   </div>
+
+  <!-- Include script to dynamically populate the region select dropdown -->
+  <script type="module">
+    import { regions } from './ressources/js/regionsConfig.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const regionSelect = document.getElementById('region');
+
+      // Populate the region select dropdown
+      for (const [key, value] of Object.entries(regions)) {
+        const option = document.createElement('option');
+        option.value = key; // Use the assembly key as the value
+        option.textContent = `${value.assembly} (${value.description}: ${value.region})`;
+        regionSelect.appendChild(option);
+      }
+    });
+  </script>
 
 </body>
 </html>

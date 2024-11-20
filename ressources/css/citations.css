@@ -1,11 +1,12 @@
 /* frontend/ressources/css/citations.css */
 
 /* --- Citations Section Styles --- */
+
 .citations-section {
     padding: 10px 10px;
-    background-color: #f8f9fa; /* Light background */
+    background-color: #f8f9fa;
     max-width: 800px;
-    margin: 10px auto; /* Added margin for spacing */
+    margin: 10px auto;
     border-radius: 8px;
 }
 

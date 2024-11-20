@@ -1,170 +1,95 @@
 /* frontend/ressources/css/drag-drop.css */
 
+/* --- Drag & Drop Styles --- */
+
 /* Drag & Drop Container */
 .drag-drop-container {
-    margin-bottom: 1rem;
-  }
-  
-  /* Drag & Drop Label */
-  .drag-drop-label {
-    display: block;
-    margin-bottom: 0.25rem;
-    font-weight: bold;
-    font-size: 1.0rem;
-  }
-  
-  /* Drag & Drop Area */
-  .drag-drop-area {
-    border: 2px dashed #6c757d;
-    border-radius: 0.4rem;
-    padding: 1.0rem;
-    text-align: center;
-    color: #6c757d;
-    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
-    cursor: pointer;
-    position: relative;
-    height: 60px; /* Fixed height for consistency */
-    overflow: hidden;
-  }
-  
-  .drag-drop-area:hover,
-  .drag-drop-area:focus {
-    border-color: #0d6efd;
-    background-color: #e7f1ff;
-    color: #0d6efd;
-    outline: none;
-  }
-  
-  .drag-drop-area.dragover {
-    border-color: #0d6efd;
-    background-color: #e7f1ff;
-    color: #0d6efd;
-  }
-  
-  .drag-drop-area p {
-    margin: 0;
-    font-size: 0.95rem;
-  }
-  
-  /* File List Styles */
-  .file-list {
-    margin-top: 0.75rem;
-    max-height: 100px;
-    overflow-y: auto;
-    text-align: left;
-  }
-  
-  .file-list ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .file-list li {
-    padding: 0.15rem 0;
-    border-bottom: 1px solid #e0e0e0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.85rem; /* Slightly smaller font */
-  }
-  
-  .file-list li:last-child {
-    border-bottom: none;
-  }
-  
-  .file-list .file-name {
-    word-break: break-all;
-  }
-  
-  .file-list .remove-file {
-    background: none;
-    border: none;
-    color: #dc3545;
-    cursor: pointer;
-    font-size: 1rem;
-    line-height: 1;
-    padding: 0;
-    margin-left: 0.5rem;
-  }
-  
-  .file-list .remove-file:hover {
-    color: #a71d2a;
-  }
-  
-  /* Spinner Styles */
-  .spinner {
-    border: 3px solid rgba(0, 0, 0, 0.1); /* Reduced border width */
-    width: 24px; /* Reduced from 36px */
-    height: 24px; /* Reduced from 36px */
-    border-radius: 50%;
-    border-left-color: #0d6efd;
-    animation: spin 1s linear infinite;
-    display: none; /* Hidden by default */
-    margin: 0.75rem auto; /* Reduced margin */
-  }
-  
-  .spinner.visible {
-    display: block;
-  }
-  
-  .spinner.hidden {
-    display: none;
-  }
-  
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  
-  /* Countdown Styles */
-  .countdown {
-    text-align: center;
-    margin-top: 0.3rem; /* Reduced from 0.5rem */
-    font-weight: bold;
-    font-size: 0.85rem; /* Slightly smaller font */
-  }
-  
-  /* Submit and Extract Buttons */
-  .submit-button,
-  .extract-button {
-    display: inline-block;
-    margin: 0.4rem 0.4rem; /* Reduced from 0.5rem */
-    padding: 0.4rem 0.8rem; /* Reduced padding */
-    background-color: #0d6efd;
-    color: #fff;
-    border: none;
-    border-radius: 0.2rem; /* Slightly reduced radius */
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 0.9rem; /* Slightly smaller font */
-  }
-  
-  .submit-button:hover,
-  .extract-button:hover {
-    background-color: #0b5ed7;
-  }
-  
-  .submit-button:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
-  }
-  
-  /* Download Button Styles */
-  .download-button {
-    display: inline-block;
-    margin-top: 0.4rem; /* Reduced from 0.5rem */
-    padding: 0.4rem 0.8rem; /* Reduced padding */
-    background-color: #28a745;
-    color: #fff;
-    border: none;
-    border-radius: 0.2rem; /* Slightly reduced radius */
-    text-decoration: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 0.9rem; /* Slightly smaller font */
-  }
-  
-  .download-button:hover {
-    background-color: #218838;
-  }
-  
+  margin-bottom: 1rem;
+}
+
+/* Drag & Drop Label */
+.drag-drop-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: bold;
+  font-size: 1.0rem;
+}
+
+/* Drag & Drop Area */
+.drag-drop-area {
+  border: 2px dashed #6c757d;
+  border-radius: 0.4rem;
+  padding: 1.0rem;
+  text-align: center;
+  color: #6c757d;
+  transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+  cursor: pointer;
+  position: relative;
+  height: 60px;
+  overflow: hidden;
+}
+
+.drag-drop-area:hover,
+.drag-drop-area:focus,
+.drag-drop-area.dragover {
+  border-color: #0d6efd;
+  background-color: #e7f1ff;
+  color: #0d6efd;
+  outline: none;
+}
+
+.drag-drop-area p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* File List Styles */
+.file-list {
+  margin-top: 0.75rem;
+  max-height: 100px;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.file-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.file-list li {
+  padding: 0.15rem 0;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.file-list li:last-child {
+  border-bottom: none;
+}
+
+.file-list .file-name {
+  word-break: break-all;
+}
+
+.file-list .remove-file {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  margin-left: 0.5rem;
+}
+
+.file-list .remove-file:hover {
+  color: #a71d2a;
+}
+
+/* Hidden File Input */
+.drag-drop-input {
+  display: none;
+}

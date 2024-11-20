@@ -1,11 +1,12 @@
 /* frontend/ressources/css/faq.css */
 
 /* --- FAQ Section Styles --- */
+
 .faq-section {
     padding: 10px 10px;
-    background-color: #f8f9fa; /* Light background */
+    background-color: #f8f9fa;
     max-width: 800px;
-    margin: 10px auto; /* Added margin for spacing */
+    margin: 10px auto;
     border-radius: 8px;
 }
 
@@ -56,19 +57,14 @@
 .faq-item p {
     color: #6c757d;
     line-height: 1.6;
-    display: none; /* Hidden by default */
+    display: none;
 }
 
 .faq-item p.visible {
     display: block;
 }
 
-/* --- Enhanced FAQ Accessibility and Responsiveness --- */
-
-/* Ensure questions are focusable for keyboard navigation */
-.faq-item h3 {
-    outline: none;
-}
+/* Enhanced Accessibility */
 
 .faq-item h3:focus {
     box-shadow: 0 0 0 3px #007bff;
