@@ -1,7 +1,7 @@
 // ressources/js/version.js
 
 // Frontend Version
-const frontendVersion = '0.9.0'; // Update this as needed
+const frontendVersion = '0.10.0'; // Update this as needed
 
 // API Endpoint for Versions
 const versionEndpoint = '/api/version'; // Adjust the path if necessary

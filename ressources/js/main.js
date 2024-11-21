@@ -1,7 +1,7 @@
 // frontend/ressources/js/main.js
 
 import { validateFiles } from './inputWrangling.js';
-import { submitJobToAPI, pollJobStatusAPI } from './apiInteractions.js';
+import { submitJobToAPI, pollJobStatusAPI, getJobStatus } from './apiInteractions.js';
 import { initializeAioli, extractRegionAndIndex } from './bamProcessing.js';
 import { initializeModal, checkAndShowDisclaimer } from './modal.js';
 import { initializeFooter } from './footer.js';
@@ -106,7 +106,8 @@ async function initializeApp() {
     }
 
     /**
-     * Displays the shareable link to the user.
+     * Displays the shareable link to the user within the jobOutput section.
+     * Includes a copy link icon next to it.
      * @param {string} jobId - The job identifier.
      */
     function displayShareableLink(jobId) {
@@ -123,29 +124,72 @@ async function initializeApp() {
         shareLink.readOnly = true;
         shareLink.classList.add('share-link-input');
 
-        // Add copy button
-        const copyButton = document.createElement('button');
-        copyButton.textContent = 'Copy';
-        copyButton.classList.add('copy-button');
-        copyButton.addEventListener('click', () => {
+        // Add copy icon/button
+        const copyIcon = document.createElement('button');
+        copyIcon.classList.add('copy-button');
+        copyIcon.setAttribute('aria-label', 'Copy link');
+        copyIcon.innerHTML = '📋'; // Using clipboard emoji as copy icon
+        copyIcon.addEventListener('click', () => {
             shareLink.select();
             document.execCommand('copy');
-            copyButton.textContent = 'Copied!';
+            copyIcon.textContent = '✅'; // Change icon to indicate success
             setTimeout(() => {
-                copyButton.textContent = 'Copy';
+                copyIcon.textContent = '📋'; // Revert icon back
             }, 2000);
         });
 
         shareContainer.appendChild(shareLink);
-        shareContainer.appendChild(copyButton);
+        shareContainer.appendChild(copyIcon);
 
         // Append to jobInfoDiv
         jobInfoDiv.appendChild(shareContainer);
     }
 
     /**
+     * Fetches the current job status and updates the UI immediately.
+     * Utilizes the getJobStatus function from apiInteractions.js.
+     * @param {string} jobId - The job identifier.
+     */
+    async function fetchAndUpdateJobStatus(jobId) {
+        try {
+            const data = await getJobStatus(jobId);
+
+            // Update job status in the UI
+            jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(data.status)}</strong>`;
+            console.log(`Status fetched: ${data.status}`);
+
+            if (data.status === 'completed') {
+                // On Complete
+                displayDownloadLink(jobId);
+                hideSpinner();
+                clearCountdown();
+                jobQueuePositionDiv.innerHTML = '';
+                serverLoad.updateServerLoad();
+            } else if (data.status === 'failed') {
+                // On Error
+                const errorMessage = data.error || 'Job failed.';
+                displayError(errorMessage);
+                console.error(`Job failed with error: ${errorMessage}`);
+                hideSpinner();
+                clearCountdown();
+                jobQueuePositionDiv.innerHTML = '';
+                serverLoad.updateServerLoad();
+            } else {
+                // Job is still processing
+                console.log(`Job is in status: ${data.status}`);
+            }
+        } catch (error) {
+            console.error('Error fetching job status:', error);
+            displayError(`Error fetching job status: ${error.message}`);
+            hideSpinner();
+            clearCountdown();
+        }
+    }
+
+    /**
      * Fetches and displays job details based on the job ID.
      * Utilizes pollJobStatusAPI to retrieve job status and details.
+     * Performs an immediate poll and then continues polling at intervals.
      * @param {string} jobId - The job identifier.
      */
     async function loadJobFromURL(jobId) {
@@ -161,7 +205,13 @@ async function initializeApp() {
             // Display initial job information
             jobInfoDiv.innerHTML = `Loading job details for Job ID: <strong>${jobId}</strong>`;
 
-            // Poll job status
+            // Generate and display the shareable link
+            displayShareableLink(jobId);
+
+            // Immediately fetch and update job status
+            await fetchAndUpdateJobStatus(jobId);
+
+            // Start polling job status every 20 seconds
             pollJobStatusAPI(
                 jobId,
                 (status) => {
@@ -171,39 +221,22 @@ async function initializeApp() {
                 },
                 () => {
                     // On Complete
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = `${window.CONFIG.API_URL}/download/${jobId}/`;
-                    downloadLink.textContent = 'Download vntyper results';
-                    downloadLink.classList.add('download-link', 'download-button');
-                    downloadLink.target = '_blank'; // Open in a new tab
-
-                    jobStatusDiv.appendChild(document.createElement('br'));
-                    jobStatusDiv.appendChild(downloadLink);
-                    console.log('Download link appended to jobStatusDiv');
-
-                    // Hide spinner and countdown
+                    displayDownloadLink(jobId);
                     hideSpinner();
                     clearCountdown();
                     console.log('Spinner and countdown hidden');
-
-                    // Clear job queue position
                     jobQueuePositionDiv.innerHTML = '';
-
-                    // Update server load indicator after job completion
                     serverLoad.updateServerLoad();
                 },
                 (errorMessage) => {
                     // On Error
                     displayError(errorMessage);
                     console.error(`Job failed with error: ${errorMessage}`);
-
-                    // Hide spinner and countdown
                     hideSpinner();
                     clearCountdown();
                     console.log('Spinner and countdown hidden due to error');
-
-                    // Clear job queue position
                     jobQueuePositionDiv.innerHTML = '';
+                    serverLoad.updateServerLoad();
                 },
                 () => {
                     // onPoll Callback to reset countdown
@@ -347,7 +380,10 @@ async function initializeApp() {
             // Generate and display shareable link
             displayShareableLink(data.job_id);
 
-            // Poll job status
+            // Immediately fetch and update job status
+            await fetchAndUpdateJobStatus(data.job_id);
+
+            // Start polling job status every 20 seconds
             pollJobStatusAPI(
                 data.job_id,
                 (status) => {
@@ -359,41 +395,21 @@ async function initializeApp() {
                 },
                 () => {
                     // On Complete
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = `${window.CONFIG.API_URL}/download/${data.job_id}/`;
-                    downloadLink.textContent = 'Download vntyper results';
-                    downloadLink.classList.add('download-link', 'download-button');
-                    downloadLink.target = '_blank'; // Open in a new tab
-
-                    jobStatusDiv.appendChild(document.createElement('br'));
-                    jobStatusDiv.appendChild(downloadLink);
-                    console.log('Download link appended to jobStatusDiv');
-
-                    // Hide spinner and countdown
+                    displayDownloadLink(data.job_id);
                     hideSpinner();
                     clearCountdown();
                     console.log('Spinner and countdown hidden');
-
-                    // Clear job queue position
                     jobQueuePositionDiv.innerHTML = '';
-
-                    // Update server load indicator after job completion
                     serverLoad.updateServerLoad();
                 },
                 (errorMessage) => {
                     // On Error
                     displayError(errorMessage);
                     console.error(`Job failed with error: ${errorMessage}`);
-
-                    // Hide spinner and countdown
                     hideSpinner();
                     clearCountdown();
                     console.log('Spinner and countdown hidden due to error');
-
-                    // Clear job queue position
                     jobQueuePositionDiv.innerHTML = '';
-
-                    // Update server load indicator after job failure
                     serverLoad.updateServerLoad();
                 },
                 () => {
@@ -554,6 +570,22 @@ async function initializeApp() {
 
     // Check URL for job_id on initial load
     checkURLForJob();
+}
+
+/**
+ * Displays the download link once the job is completed.
+ * @param {string} jobId - The job identifier.
+ */
+function displayDownloadLink(jobId) {
+    const downloadLink = document.createElement('a');
+    downloadLink.href = `${window.CONFIG.API_URL}/download/${jobId}/`;
+    downloadLink.textContent = 'Download vntyper results';
+    downloadLink.classList.add('download-link', 'download-button');
+    downloadLink.target = '_blank'; // Open in a new tab
+
+    jobStatusDiv.appendChild(document.createElement('br'));
+    jobStatusDiv.appendChild(downloadLink);
+    console.log('Download link appended to jobStatusDiv');
 }
 
 // Initialize the application once the DOM is fully loaded

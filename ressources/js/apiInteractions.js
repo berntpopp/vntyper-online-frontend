@@ -39,7 +39,28 @@ export async function submitJobToAPI(formData) {
 }
 
 /**
+ * Fetches the current status of a job from the backend API.
+ * @param {string} jobId - The unique identifier of the job.
+ * @returns {Promise<Object>} - The JSON response containing job status and details.
+ * @throws {Error} - If the request fails.
+ */
+export async function getJobStatus(jobId) {
+    try {
+        const response = await fetch(`${window.CONFIG.API_URL}/job-status/${jobId}/`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch job status.');
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error in getJobStatus:', error);
+        throw error;
+    }
+}
+
+/**
  * Polls the job status from the backend API at regular intervals.
+ * Utilizes the getJobStatus function to fetch the current status.
  * @param {string} jobId - The unique identifier of the job.
  * @param {Function} onStatusUpdate - Callback function to handle status updates.
  * @param {Function} onComplete - Callback function when the job is completed.
@@ -54,18 +75,16 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
                 onPoll();
             }
 
-            const response = await fetch(`${window.CONFIG.API_URL}/job-status/${jobId}/`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch job status.');
-            }
-            const data = await response.json();
+            // Use the getJobStatus function to fetch current status
+            const data = await getJobStatus(jobId);
+
+            // Update status using the provided callback
             onStatusUpdate(data.status);
 
-            // Optionally, display additional job details if available
+            // Optionally, handle additional job details if available
             if (data.details) {
-                // You can handle additional details here
                 console.log('Job Details:', data.details);
-                // For example, update the UI with additional details
+                // For example, update the UI with additional details here
             }
 
             if (data.status === 'completed') {
@@ -75,7 +94,7 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
                 clearInterval(interval);
                 onError(data.error || 'Job failed.');
             } else {
-                // Fetch job queue position
+                // Fetch job queue position if applicable
                 if (onQueueUpdate && typeof onQueueUpdate === 'function') {
                     const queueData = await getJobQueueStatus(jobId);
                     onQueueUpdate(queueData);

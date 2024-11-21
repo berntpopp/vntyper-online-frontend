@@ -52,6 +52,7 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 16px; /* Adjusted for better visibility */
 }
 
 .copy-button:hover {
