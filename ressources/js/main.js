@@ -278,6 +278,22 @@ async function initializeApp() {
     }
 
     /**
+     * Displays the download link once the job is completed.
+     * @param {string} jobId - The job identifier.
+     */
+    function displayDownloadLink(jobId) {
+        const downloadLink = document.createElement('a');
+        downloadLink.href = `${window.CONFIG.API_URL}/download/${jobId}/`;
+        downloadLink.textContent = 'Download vntyper results';
+        downloadLink.classList.add('download-link', 'download-button');
+        downloadLink.target = '_blank'; // Open in a new tab
+    
+        jobStatusDiv.appendChild(document.createElement('br'));
+        jobStatusDiv.appendChild(downloadLink);
+        console.log('Download link appended to jobStatusDiv');
+    }
+
+    /**
      * Handle Job Submission via Submit Button
      */
     submitBtn.addEventListener('click', async () => {
@@ -557,35 +573,8 @@ async function initializeApp() {
         }
     });
 
-    /**
-     * Checks URL parameters for job_id and loads the job if present.
-     */
-    function checkURLForJob() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const jobId = urlParams.get('job_id');
-        if (jobId) {
-            loadJobFromURL(jobId);
-        }
-    }
-
     // Check URL for job_id on initial load
     checkURLForJob();
-}
-
-/**
- * Displays the download link once the job is completed.
- * @param {string} jobId - The job identifier.
- */
-function displayDownloadLink(jobId) {
-    const downloadLink = document.createElement('a');
-    downloadLink.href = `${window.CONFIG.API_URL}/download/${jobId}/`;
-    downloadLink.textContent = 'Download vntyper results';
-    downloadLink.classList.add('download-link', 'download-button');
-    downloadLink.target = '_blank'; // Open in a new tab
-
-    jobStatusDiv.appendChild(document.createElement('br'));
-    jobStatusDiv.appendChild(downloadLink);
-    console.log('Download link appended to jobStatusDiv');
 }
 
 // Initialize the application once the DOM is fully loaded
