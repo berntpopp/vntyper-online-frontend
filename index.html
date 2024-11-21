@@ -73,7 +73,10 @@
   
   <!-- Link to Populate Regions JS -->
   <script type="module" src="ressources/js/populateRegions.js" defer></script>
-  
+
+  <!-- Version and Current Year Script -->
+  <script src="ressources/js/version.js" defer></script>
+
   <!-- Schema.org JSON-LD -->
   <script type="application/ld+json">
     {
@@ -125,7 +128,7 @@
         <ul class="navbar-menu">
           <li><a href="#" class="navbar-link" data-modal="faqModal">FAQ</a></li>
           <li><a href="#" id="startTutorialBtn" class="navbar-link">Tutorial</a></li>
-          <li><a href="/api/docs" class="navbar-link" aria-label="OpenAPI Documentation">API</a></li> <!-- New Link Added -->
+          <li><a href="/api/docs" class="navbar-link" target="_blank" aria-label="OpenAPI Documentation">API</a></li>
           
           <!-- Server Load Indicator -->
           <li id="serverLoadIndicator" class="server-load-indicator">
@@ -210,10 +213,12 @@
 
   <!-- Citations Section -->
   <section id="citations" class="citations-section">
+    <!-- Please Cite Note -->
+    <p><strong>Please cite:</strong></p>
     <div class="citations-container">
       <div class="citation-item">
         <p>
-          Saei H, et al. VNtyper enables accurate alignment-free genotyping of MUC1 coding VNTR using short-read sequencing data in autosomal dominant tubulointerstitial kidney disease. <strong>iScience</strong>. 2023 Jun 17;26(7):107171. doi: <a href="https://doi.org/10.1016/j.isci.2023.107171" target="_blank">10.1016/j.isci.2023.107171</a>. PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/37456840/" target="_blank">37456840</a>; PMCID: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10338300/" target="_blank">PMC10338300</a>.
+          Saei H, et al. VNtyper enables accurate alignment-free genotyping of MUC1 coding VNTR using short-read sequencing data in autosomal dominant tubulointerstitielle nierenerkrankung. <strong>iScience</strong>. 2023 Jun 17;26(7):107171. doi: <a href="https://doi.org/10.1016/j.isci.2023.107171" target="_blank">10.1016/j.isci.2023.107171</a>. PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/37456840/" target="_blank">37456840</a>; PMCID: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10338300/" target="_blank">PMC10338300</a>.
         </p>
       </div>
       <!-- Add more citation items as needed -->
@@ -228,14 +233,19 @@
         <!-- Logos will be injected here by JavaScript -->
       </div>
       
-      <!-- Dynamic Footer Links (Optional) -->
+      <!-- Dynamic Footer Links -->
       <div class="footer-links" id="footerLinks">
-        <a href="#" class="navbar-link" data-modal="faqModal">FAQ</a>
-        <a href="#citations">Citations</a>
       </div>
     </div>
     <div class="footer-bottom">
       <p>&copy; <span id="currentYear"></span> vntyper-online. All rights reserved.</p>
+      <p>Frontend version: <span id="appVersion"></span></p>
+      <!-- Added Imprint and Contact Links Below Version Info -->
+      <p>
+        <a href="impressum_en.html" target="_blank" aria-label="Imprint">Imprint</a> | 
+        <a href="contact.html" target="_blank" aria-label="Contact">Contact</a> | 
+        <a href="https://github.com/berntpopp/vntyper-online-backend" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">GitHub</a>
+      </p>
     </div>
   </footer>
 

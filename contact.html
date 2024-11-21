@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Contact - vntyper-online</title>
+  <!-- Include CSS and any other head content -->
+  <link rel="stylesheet" href="ressources/css/base.css">
+  <link rel="stylesheet" href="ressources/css/footer.css">
+</head>
+<body>
+
+  <div class="container">
+
+    <h1>Contact Us</h1>
+
+    <p>If you have any questions or need support, please reach out to us at:</p>
+
+    <p>Email: <span id="emailLink"></span></p>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <!-- ... footer content ... -->
+    <div class="footer-bottom">
+      <p>&copy; <span id="currentYear"></span> vntyper-online. All rights reserved.</p>
+      <p>Frontend version: <span id="appVersion"></span></p>
+    </div>
+  </footer>
+
+  <!-- Include version.js and email obfuscation script -->
+  <script src="ressources/js/version.js"></script>
+  <script>
+    // Email obfuscation to prevent spam
+    const emailUser = 'support';
+    const emailDomain = 'vntyper.org';
+    const emailLink = document.getElementById('emailLink');
+    emailLink.innerHTML = '<a href="mailto:' + emailUser + '@' + emailDomain + '">' + emailUser + '@' + emailDomain + '</a>';
+  </script>
+</body>
+</html>
