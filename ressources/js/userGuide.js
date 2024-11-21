@@ -6,5 +6,4 @@
  */
 export function initializeUserGuide() {
     // Placeholder for future interactivity enhancements
-    console.log("User Guide initialized.");
 }
