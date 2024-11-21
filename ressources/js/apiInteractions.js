@@ -61,6 +61,13 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
             const data = await response.json();
             onStatusUpdate(data.status);
 
+            // Optionally, display additional job details if available
+            if (data.details) {
+                // You can handle additional details here
+                console.log('Job Details:', data.details);
+                // For example, update the UI with additional details
+            }
+
             if (data.status === 'completed') {
                 clearInterval(interval);
                 onComplete();

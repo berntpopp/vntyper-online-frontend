@@ -95,6 +95,156 @@ async function initializeApp() {
     }
 
     /**
+     * Generates a shareable URL containing the job ID.
+     * @param {string} jobId - The job identifier.
+     * @returns {string} - The shareable URL.
+     */
+    function generateShareableLink(jobId) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('job_id', jobId);
+        return url.toString();
+    }
+
+    /**
+     * Displays the shareable link to the user.
+     * @param {string} jobId - The job identifier.
+     */
+    function displayShareableLink(jobId) {
+        const shareContainer = document.createElement('div');
+        shareContainer.classList.add('share-container', 'mt-2');
+
+        const shareLabel = document.createElement('span');
+        shareLabel.textContent = 'Shareable Link: ';
+        shareContainer.appendChild(shareLabel);
+
+        const shareLink = document.createElement('input');
+        shareLink.type = 'text';
+        shareLink.value = generateShareableLink(jobId);
+        shareLink.readOnly = true;
+        shareLink.classList.add('share-link-input');
+
+        // Add copy button
+        const copyButton = document.createElement('button');
+        copyButton.textContent = 'Copy';
+        copyButton.classList.add('copy-button');
+        copyButton.addEventListener('click', () => {
+            shareLink.select();
+            document.execCommand('copy');
+            copyButton.textContent = 'Copied!';
+            setTimeout(() => {
+                copyButton.textContent = 'Copy';
+            }, 2000);
+        });
+
+        shareContainer.appendChild(shareLink);
+        shareContainer.appendChild(copyButton);
+
+        // Append to jobInfoDiv
+        jobInfoDiv.appendChild(shareContainer);
+    }
+
+    /**
+     * Fetches and displays job details based on the job ID.
+     * Utilizes pollJobStatusAPI to retrieve job status and details.
+     * @param {string} jobId - The job identifier.
+     */
+    async function loadJobFromURL(jobId) {
+        try {
+            showSpinner();
+            clearError();
+            clearMessage();
+            jobInfoDiv.innerHTML = '';
+            jobStatusDiv.innerHTML = '';
+            jobQueuePositionDiv.innerHTML = '';
+            regionOutputDiv.innerHTML = '';
+
+            // Display initial job information
+            jobInfoDiv.innerHTML = `Loading job details for Job ID: <strong>${jobId}</strong>`;
+
+            // Poll job status
+            pollJobStatusAPI(
+                jobId,
+                (status) => {
+                    // Update status in the jobStatusDiv
+                    jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+                    console.log(`Status updated to: ${status}`);
+                },
+                () => {
+                    // On Complete
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = `${window.CONFIG.API_URL}/download/${jobId}/`;
+                    downloadLink.textContent = 'Download vntyper results';
+                    downloadLink.classList.add('download-link', 'download-button');
+                    downloadLink.target = '_blank'; // Open in a new tab
+
+                    jobStatusDiv.appendChild(document.createElement('br'));
+                    jobStatusDiv.appendChild(downloadLink);
+                    console.log('Download link appended to jobStatusDiv');
+
+                    // Hide spinner and countdown
+                    hideSpinner();
+                    clearCountdown();
+                    console.log('Spinner and countdown hidden');
+
+                    // Clear job queue position
+                    jobQueuePositionDiv.innerHTML = '';
+
+                    // Update server load indicator after job completion
+                    serverLoad.updateServerLoad();
+                },
+                (errorMessage) => {
+                    // On Error
+                    displayError(errorMessage);
+                    console.error(`Job failed with error: ${errorMessage}`);
+
+                    // Hide spinner and countdown
+                    hideSpinner();
+                    clearCountdown();
+                    console.log('Spinner and countdown hidden due to error');
+
+                    // Clear job queue position
+                    jobQueuePositionDiv.innerHTML = '';
+                },
+                () => {
+                    // onPoll Callback to reset countdown
+                    resetCountdown();
+                    console.log('Countdown reset to 20 seconds');
+                },
+                (queueData) => {
+                    // onQueueUpdate callback
+                    const { position_in_queue, total_jobs_in_queue, status } = queueData;
+                    if (position_in_queue) {
+                        jobQueuePositionDiv.innerHTML = `Position in Queue: <strong>${position_in_queue}</strong> out of <strong>${total_jobs_in_queue}</strong>`;
+                    } else if (status) {
+                        jobQueuePositionDiv.innerHTML = `${status}`;
+                    } else {
+                        jobQueuePositionDiv.innerHTML = '';
+                    }
+                    // Update server load indicator
+                    serverLoad.updateServerLoad();
+                }
+            );
+
+            hideSpinner();
+        } catch (error) {
+            console.error('Error loading job from URL:', error);
+            displayError(`Error loading job: ${error.message}`);
+            hideSpinner();
+        }
+    }
+
+    /**
+     * Checks URL parameters for job_id and loads the job if present.
+     */
+    function checkURLForJob() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const jobId = urlParams.get('job_id');
+        if (jobId) {
+            loadJobFromURL(jobId);
+        }
+    }
+
+    /**
      * Handle Job Submission via Submit Button
      */
     submitBtn.addEventListener('click', async () => {
@@ -123,6 +273,8 @@ async function initializeApp() {
             if (matchedPairs.length === 0) {
                 displayError('No valid BAM and BAI file pairs found for extraction.');
                 console.warn('File validation error: No matched pairs for extraction.');
+                hideSpinner();
+                clearCountdown();
                 return;
             }
 
@@ -191,6 +343,9 @@ async function initializeApp() {
             jobInfoDiv.innerHTML = `Job submitted successfully!<br>Job ID: <strong>${data.job_id}</strong>`;
             jobStatusDiv.innerHTML = 'Status: <strong>Submitted</strong>';
             console.log('Initial status "Submitted" displayed');
+
+            // Generate and display shareable link
+            displayShareableLink(data.job_id);
 
             // Poll job status
             pollJobStatusAPI(
@@ -385,6 +540,20 @@ async function initializeApp() {
             console.error('Error during region extraction and indexing:', err);
         }
     });
+
+    /**
+     * Checks URL parameters for job_id and loads the job if present.
+     */
+    function checkURLForJob() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const jobId = urlParams.get('job_id');
+        if (jobId) {
+            loadJobFromURL(jobId);
+        }
+    }
+
+    // Check URL for job_id on initial load
+    checkURLForJob();
 }
 
 // Initialize the application once the DOM is fully loaded
