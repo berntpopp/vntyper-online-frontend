@@ -48,7 +48,20 @@ export async function getJobStatus(jobId) {
     try {
         const response = await fetch(`${window.CONFIG.API_URL}/job-status/${jobId}/`);
         if (!response.ok) {
-            throw new Error('Failed to fetch job status.');
+            let errorMessage = 'Failed to fetch job status.';
+            try {
+                const errorData = await response.json();
+                if (errorData.detail) {
+                    if (Array.isArray(errorData.detail)) {
+                        errorMessage = errorData.detail.map(err => err.msg).join(', ');
+                    } else if (typeof errorData.detail === 'string') {
+                        errorMessage = errorData.detail;
+                    }
+                }
+            } catch (e) {
+                console.error('Error parsing job status error response:', e);
+            }
+            throw new Error(errorMessage);
         }
         const data = await response.json();
         return data;
@@ -94,10 +107,18 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
                 clearInterval(interval);
                 onError(data.error || 'Job failed.');
             } else {
+                // Job is still processing
+                console.log(`Job is in status: ${data.status}`);
+
                 // Fetch job queue position if applicable
                 if (onQueueUpdate && typeof onQueueUpdate === 'function') {
-                    const queueData = await getJobQueueStatus(jobId);
-                    onQueueUpdate(queueData);
+                    try {
+                        const queueData = await getJobQueueStatus(jobId);
+                        onQueueUpdate(queueData);
+                    } catch (queueError) {
+                        console.error('Error fetching job queue status:', queueError);
+                        // Optionally, you can decide how to handle queue fetch errors
+                    }
                 }
             }
         } catch (error) {
@@ -117,14 +138,28 @@ export async function getJobQueueStatus(jobId) {
     try {
         let url = `${window.CONFIG.API_URL}/job-queue/`;
         if (jobId) {
-            url += `?job_id=${jobId}`;
+            url += `?job_id=${encodeURIComponent(jobId)}`;
         }
 
         const response = await fetch(url);
         if (!response.ok) {
-            throw new Error('Failed to fetch job queue status.');
+            let errorMessage = 'Failed to fetch job queue status.';
+            try {
+                const errorData = await response.json();
+                if (errorData.detail) {
+                    if (Array.isArray(errorData.detail)) {
+                        errorMessage = errorData.detail.map(err => err.msg).join(', ');
+                    } else if (typeof errorData.detail === 'string') {
+                        errorMessage = errorData.detail;
+                    }
+                }
+            } catch (e) {
+                console.error('Error parsing job queue status error response:', e);
+            }
+            throw new Error(errorMessage);
         }
-        return response.json();
+        const data = await response.json();
+        return data;
     } catch (error) {
         console.error('Error in getJobQueueStatus:', error);
         throw error;
@@ -133,20 +168,24 @@ export async function getJobQueueStatus(jobId) {
 
 /**
  * Creates a cohort by sending a POST request to the backend API.
- * @param {string} alias - The cohort alias provided by the user.
- * @param {string} email - The user's email for notifications.
- * @returns {Promise<string>} - The created cohort ID.
+ * @param {string} [alias] - The cohort alias provided by the user.
+ * @param {string} [passphrase] - The passphrase for the cohort (optional).
+ * @returns {Promise<Object>} - The created cohort object containing cohort_id and alias.
  * @throws {Error} - If the cohort creation fails.
  */
-export async function createCohort(alias, email) {
+export async function createCohort(alias, passphrase) {
     try {
-        const formData = new FormData();
-        if (alias) formData.append('alias', alias);
-        if (email) formData.append('email', email);
+        // Construct the payload as a URL-encoded string
+        const params = new URLSearchParams();
+        if (alias) params.append('alias', alias);
+        if (passphrase) params.append('passphrase', passphrase);
 
         const response = await fetch(`${window.CONFIG.API_URL}/create-cohort/`, {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded' // Set the content type to URL-encoded
+            },
+            body: params.toString() // Convert the parameters to a URL-encoded string
         });
 
         if (!response.ok) {
@@ -154,7 +193,6 @@ export async function createCohort(alias, email) {
             try {
                 const errorData = await response.json();
                 if (errorData.detail) {
-                    // detail might be a string or a list of errors
                     if (Array.isArray(errorData.detail)) {
                         errorMessage = errorData.detail.map(err => err.msg).join(', ');
                     } else if (typeof errorData.detail === 'string') {
@@ -169,7 +207,7 @@ export async function createCohort(alias, email) {
 
         const data = await response.json();
         console.log(`Cohort created with ID: ${data.cohort_id}`);
-        return data.cohort_id;
+        return data; // Returns an object containing cohort_id and alias
     } catch (error) {
         console.error('Error in createCohort:', error);
         throw error;

@@ -1,7 +1,7 @@
 // frontend/ressources/js/main.js
 
 import { validateFiles } from './inputWrangling.js';
-import { submitJobToAPI, pollJobStatusAPI, getJobStatus, createCohort } from './apiInteractions.js'; // **Imported createCohort**
+import { submitJobToAPI, pollJobStatusAPI, getJobStatus, createCohort } from './apiInteractions.js';
 import { initializeAioli, extractRegionAndIndex } from './bamProcessing.js';
 import { initializeModal, checkAndShowDisclaimer } from './modal.js';
 import { initializeFooter } from './footer.js';
@@ -16,11 +16,11 @@ import {
     hideSpinner,
     startCountdown,
     resetCountdown,
-    clearCountdown
+    clearCountdown,
+    initializeUIUtils
 } from './uiUtils.js';
 import { initializeFileSelection } from './fileSelection.js';
 import { initializeServerLoad } from './serverLoad.js';
-import { initializeUIUtils } from './uiUtils.js'; // **Added Import**
 
 /**
  * Initializes the application by setting up event listeners and dynamic content.
@@ -37,7 +37,7 @@ async function initializeApp() {
     initializeTutorial();
 
     // Initialize UI Utilities (includes toggle functionality)
-    initializeUIUtils(); // **Added Initialization**
+    initializeUIUtils();
 
     // Check and show disclaimer modal or indicator based on acknowledgment
     checkAndShowDisclaimer();
@@ -50,13 +50,12 @@ async function initializeApp() {
     const jobQueuePositionDiv = document.getElementById('jobQueuePosition');
     const regionSelect = document.getElementById('region');
     const regionOutputDiv = document.getElementById('regionOutput');
-    const emailInput = document.getElementById('email'); // **Added**
-    const cohortAliasInput = document.getElementById('cohortAlias'); // **Added**
-
-    // Variable to store selected files
-    let selectedFiles = [];
+    const emailInput = document.getElementById('email');
+    const cohortAliasInput = document.getElementById('cohortAlias');
+    const passphraseInput = document.getElementById('passphrase'); // **Added**
 
     // Initialize file selection
+    let selectedFiles = [];
     const fileSelection = initializeFileSelection(selectedFiles);
     const { displaySelectedFiles } = fileSelection;
 
@@ -352,16 +351,30 @@ async function initializeApp() {
                 return;
             }
 
-            // Capture email and cohort alias inputs
+            // Capture email, cohort alias, and passphrase inputs
             const email = emailInput.value.trim() || null;
             const cohortAlias = cohortAliasInput.value.trim() || null;
+            const passphrase = passphraseInput.value.trim() || null; // **Captured Passphrase**
 
             let cohortId = null;
 
             // Determine if batch submission is needed
             if (matchedPairs.length > 1) {
                 // **Batch Submission: Create a Cohort**
-                cohortId = await createCohort(cohortAlias, email);
+                if (!cohortAlias) {
+                    displayError('Cohort Alias is required for batch submissions.');
+                    hideSpinner();
+                    clearCountdown();
+                    return;
+                }
+                if (!passphrase) { // **Ensure passphrase is provided**
+                    displayError('Passphrase is required for cohort creation.');
+                    hideSpinner();
+                    clearCountdown();
+                    return;
+                }
+                const cohortData = await createCohort(cohortAlias, passphrase); // **Pass alias and passphrase**
+                cohortId = cohortData.cohort_id; // **Retrieve cohort_id from response**
             }
 
             // Iterate through each matched pair and submit jobs sequentially
@@ -587,10 +600,10 @@ async function initializeApp() {
                     linkContainer.appendChild(downloadBamLink);
                     linkContainer.appendChild(downloadBaiLink);
 
-                    // Append the Flex container to the regionOutput div
+                    // Append the container to the regionOutput div
                     regionOutputDiv.appendChild(linkContainer);
 
-                    // Create and append the horizontal divider after the Flex container
+                    // Create and append the horizontal divider after the container
                     const divider = document.createElement('hr');
                     divider.classList.add('separator'); // Applies the styles from buttons.css
                     regionOutputDiv.appendChild(divider);
