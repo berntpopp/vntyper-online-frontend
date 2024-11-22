@@ -74,6 +74,9 @@
   <!-- Link to Populate Regions JS -->
   <script type="module" src="ressources/js/populateRegions.js" defer></script>
 
+  <!-- Link to UI Utils JS -->
+  <script type="module" src="ressources/js/uiUtils.js" defer></script>
+
   <!-- Version and Current Year Script -->
   <script src="ressources/js/version.js" defer></script>
 
@@ -184,11 +187,35 @@
       </select>
     </div>
 
-    <!-- API-Based Job Submission -->
-    <button id="submitBtn" class="submit-button" data-intro="Click here to submit your job for analysis. The MUC1 read data will be extracted on your device and only this subset will be uploaded for analysis." data-step="3">Submit Job</button>
+    <!-- Button Group: Submit, Extract, Show Options -->
+    <div class="button-group" data-intro="Submit your job, extract regions, or provide additional optional inputs." data-step="3">
+      <button id="submitBtn" class="submit-button button" data-intro="Click here to submit your job for analysis. The MUC1 read data will be extracted on your device and only this subset will be uploaded for analysis." data-step="3">Submit Job</button>
+      <button id="extractBtn" class="extract-button button" data-intro="Use this button to extract regions from your BAM files in your browser and save the subset BAM file." data-step="4">Extract Region</button>
+      <button id="toggleOptionalInputs" class="toggle-button button" aria-expanded="false" aria-controls="additionalInputs">Show Options</button>
+    </div>
 
-    <!-- Region Extraction Button -->
-    <button id="extractBtn" class="extract-button" data-intro="Use this button to extract regions from your BAM files in your browser and save the subset BAM file." data-step="4">Extract Region</button>
+    <!-- Optional Inputs: Hidden by Default -->
+    <div id="additionalInputs" class="additional-inputs hidden">
+      <label for="email">Email (optional):</label>
+      <input 
+        type="email" 
+        id="email" 
+        name="email" 
+        class="form-input" 
+        placeholder="your.email@example.com" 
+        aria-label="Email for notifications"
+      >
+
+      <label for="cohortAlias">Cohort Alias (optional):</label>
+      <input 
+        type="text" 
+        id="cohortAlias" 
+        name="cohortAlias" 
+        class="form-input" 
+        placeholder="My Cohort" 
+        aria-label="Cohort Alias"
+      >
+    </div>
 
     <!-- Output and Error Containers -->
     <div id="output" data-intro="Here you will see the status and results of your job." data-step="5">
@@ -213,12 +240,10 @@
 
   <!-- Citations Section -->
   <section id="citations" class="citations-section">
-    <!-- Please Cite Note -->
-    <p><strong>Please cite:</strong></p>
     <div class="citations-container">
       <div class="citation-item">
         <p>
-          Saei H, et al. VNtyper enables accurate alignment-free genotyping of MUC1 coding VNTR using short-read sequencing data in autosomal dominant tubulointerstitielle nierenerkrankung. <strong>iScience</strong>. 2023 Jun 17;26(7):107171. doi: <a href="https://doi.org/10.1016/j.isci.2023.107171" target="_blank">10.1016/j.isci.2023.107171</a>. PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/37456840/" target="_blank">37456840</a>; PMCID: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10338300/" target="_blank">PMC10338300</a>.
+          <strong>Please cite:</strong> Saei H, et al. VNtyper enables accurate alignment-free genotyping of MUC1 coding VNTR using short-read sequencing data in autosomal dominant tubulointerstitielle nierenerkrankung. <strong>iScience</strong>. 2023 Jun 17;26(7):107171. doi: <a href="https://doi.org/10.1016/j.isci.2023.107171" target="_blank">10.1016/j.isci.2023.107171</a>. PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/37456840/" target="_blank">37456840</a>; PMCID: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10338300/" target="_blank">PMC10338300</a>.
         </p>
       </div>
       <!-- Add more citation items as needed -->

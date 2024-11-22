@@ -130,3 +130,48 @@ export async function getJobQueueStatus(jobId) {
         throw error;
     }
 }
+
+/**
+ * Creates a cohort by sending a POST request to the backend API.
+ * @param {string} alias - The cohort alias provided by the user.
+ * @param {string} email - The user's email for notifications.
+ * @returns {Promise<string>} - The created cohort ID.
+ * @throws {Error} - If the cohort creation fails.
+ */
+export async function createCohort(alias, email) {
+    try {
+        const formData = new FormData();
+        if (alias) formData.append('alias', alias);
+        if (email) formData.append('email', email);
+
+        const response = await fetch(`${window.CONFIG.API_URL}/create-cohort/`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            let errorMessage = 'Failed to create cohort.';
+            try {
+                const errorData = await response.json();
+                if (errorData.detail) {
+                    // detail might be a string or a list of errors
+                    if (Array.isArray(errorData.detail)) {
+                        errorMessage = errorData.detail.map(err => err.msg).join(', ');
+                    } else if (typeof errorData.detail === 'string') {
+                        errorMessage = errorData.detail;
+                    }
+                }
+            } catch (e) {
+                console.error('Error parsing cohort creation error response:', e);
+            }
+            throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+        console.log(`Cohort created with ID: ${data.cohort_id}`);
+        return data.cohort_id;
+    } catch (error) {
+        console.error('Error in createCohort:', error);
+        throw error;
+    }
+}

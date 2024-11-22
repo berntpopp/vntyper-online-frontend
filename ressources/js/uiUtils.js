@@ -43,3 +43,48 @@ export function clearCountdown() {
         countdownDiv.textContent = '';
     }
 }
+
+/* --- Toggle Optional Inputs Functionality --- */
+
+/**
+ * Initializes the toggle functionality for optional inputs (Email and Cohort Alias).
+ * This function adds an event listener to the toggle button to show/hide the optional inputs.
+ */
+export function initializeToggleOptionalInputs() {
+    const toggleButton = document.getElementById('toggleOptionalInputs');
+    const additionalInputs = document.getElementById('additionalInputs');
+
+    if (!toggleButton || !additionalInputs) {
+        console.warn('Toggle button or additional inputs container not found.');
+        return;
+    }
+
+    toggleButton.addEventListener('click', () => {
+        const isHidden = additionalInputs.classList.contains('hidden');
+        
+        if (isHidden) {
+            // Show optional inputs
+            additionalInputs.classList.remove('hidden');
+            additionalInputs.classList.add('visible');
+            toggleButton.textContent = 'Hide options';
+            toggleButton.setAttribute('aria-expanded', 'true');
+        } else {
+            // Hide optional inputs
+            additionalInputs.classList.remove('visible');
+            additionalInputs.classList.add('hidden');
+            toggleButton.textContent = 'Show options';
+            toggleButton.setAttribute('aria-expanded', 'false');
+        }
+    });
+}
+
+/* --- Initialize All UI Utilities --- */
+
+/**
+ * Initializes all UI utilities by calling their respective initialization functions.
+ * This function should be called once the DOM is fully loaded.
+ */
+export function initializeUIUtils() {
+    initializeToggleOptionalInputs();
+    // Add other UI utilities initialization here if needed in the future
+}

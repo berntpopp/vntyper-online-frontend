@@ -158,27 +158,71 @@ function detectAssembly(bamContigs, assemblyHints) {
 }
 
 /**
- * Extracts the specified region from BAM files using Samtools and indexes the subset BAM.
- * Also detects the reference genome assembly.
+ * Extracts the specified region from a BAM file using Samtools.
  * @param {Aioli} CLI - The initialized Aioli CLI object.
- * @param {Object[]} matchedPairs - Array of matched BAM and BAI file pairs.
+ * @param {string} bamPath - The path to the BAM file in the virtual filesystem.
+ * @param {string} region - The genomic region to extract.
+ * @param {string} subsetBamName - The desired name for the subset BAM file.
+ * @returns {Promise<string>} - The path to the subset BAM file.
+ */
+async function extractRegion(CLI, bamPath, region, subsetBamName) {
+    const subsetBamPath = subsetBamName;
+    const viewCommand = "samtools";
+    const viewArgs = ["view", "-P", "-b", bamPath, region, "-o", subsetBamPath];
+    console.log("Executing Samtools View Command:", viewCommand, viewArgs);
+
+    const viewResult = await CLI.exec(viewCommand, viewArgs);
+    console.log("Samtools View Output:", viewResult);
+
+    // Verify subset BAM creation
+    const subsetBamStats = await CLI.fs.stat(subsetBamPath);
+    console.log(`${subsetBamPath} Stats:`, subsetBamStats);
+
+    if (!subsetBamStats || subsetBamStats.size === 0) {
+        throw new Error(`Subset BAM file ${subsetBamPath} was not created or is empty. No reads found in the specified region.`);
+    }
+
+    return subsetBamPath;
+}
+
+/**
+ * Indexes a BAM file using Samtools.
+ * @param {Aioli} CLI - The initialized Aioli CLI object.
+ * @param {string} subsetBamPath - The path to the subset BAM file.
+ * @returns {Promise<void>}
+ */
+async function indexBam(CLI, subsetBamPath) {
+    console.log(`Indexing subset BAM: ${subsetBamPath}`);
+    const indexCommand = "samtools";
+    const indexArgs = ["index", subsetBamPath];
+    const indexResult = await CLI.exec(indexCommand, indexArgs);
+    console.log("Samtools Index Output:", indexResult);
+
+    // Verify BAI creation
+    const subsetBaiPath = `${subsetBamPath}.bai`;
+    const subsetBaiStats = await CLI.fs.stat(subsetBaiPath);
+    console.log(`${subsetBaiPath} Stats:`, subsetBaiStats);
+
+    if (!subsetBaiStats || subsetBaiStats.size === 0) {
+        throw new Error(`Index BAI file ${subsetBaiPath} was not created or is empty.`);
+    }
+}
+
+/**
+ * Processes a single BAM and BAI pair: extracts the specified region, indexes the subset BAM, and detects the assembly.
+ * @param {Aioli} CLI - The initialized Aioli CLI object.
+ * @param {Object} pair - A single matched BAM and BAI file pair.
  * @returns {Promise<Object>} - An object containing subset BAM/BAI Blobs and detected assembly.
  */
-export async function extractRegionAndIndex(CLI, matchedPairs) {
-    // Clear previous region outputs and errors
-    document.getElementById("regionOutput").innerHTML = "";
-    document.getElementById("error").textContent = "";
-
+export async function extractRegionAndIndex(CLI, pair) {
     const regionSelect = document.getElementById("region");
-    let regionValue = regionSelect.value;
+    const regionValue = regionSelect.value;
 
     console.log("Extract Region and Index Function Triggered");
     console.log("Selected Region:", regionValue);
 
     // Input Validation
     if (!regionValue) {
-        document.getElementById("error").textContent = "Please select a region.";
-        console.warn("Region selection error: No region selected.");
         throw new Error("No region selected.");
     }
 
@@ -189,125 +233,81 @@ export async function extractRegionAndIndex(CLI, matchedPairs) {
 
     let detectedAssembly = null;
     let region = null;
+    const subsetBamAndBaiBlobs = [];
 
     try {
-        // Mount all BAM and BAI files
+        // Mount BAM and BAI files
         console.log("Mounting BAM and BAI files...");
-        const filesToMount = [];
-        matchedPairs.forEach(pair => {
-            filesToMount.push(pair.bam);
-            filesToMount.push(pair.bai);
-        });
-        const paths = await CLI.mount(filesToMount);
+        const paths = await CLI.mount([pair.bam, pair.bai]);
         console.log("Mounted Paths:", paths);
 
-        const subsetBamAndBaiBlobs = [];
+        const bamPath = paths.find(p => p.endsWith(pair.bam.name));
+        const baiPath = paths.find(p => p.endsWith(pair.bai.name));
 
-        // Process each BAM and BAI pair
-        for (const pair of matchedPairs) {
-            const bamPath = paths.find(p => p.endsWith(pair.bam.name));
-            const baiPath = paths.find(p => p.endsWith(pair.bai.name));
+        console.log(`Processing BAM: ${bamPath}, BAI: ${baiPath}`);
 
-            console.log(`Processing BAM: ${bamPath}, BAI: ${baiPath}`);
+        // Extract and Parse BAM Header
+        const header = await extractBamHeader(CLI, bamPath);
+        const { contigs: bamContigs, assemblyHints } = parseHeader(header);
 
-            // **Extract and Parse BAM Header**
-            const header = await extractBamHeader(CLI, bamPath);
-            const { contigs: bamContigs, assemblyHints } = parseHeader(header);
+        // Detect Assembly
+        if (!detectedAssembly) {
+            detectedAssembly = detectAssembly(bamContigs, assemblyHints);
+            console.log("Detected Assembly:", detectedAssembly);
+        }
 
-            // **Detect Assembly (only once)**
-            if (!detectedAssembly) {
-                detectedAssembly = detectAssembly(bamContigs, assemblyHints);
-                console.log("Detected Assembly:", detectedAssembly);
-            }
-
-            // **Determine region**
-            if (regionValue === 'guess') {
-                // If region is 'guess', set region based on detected assembly
-                if (detectedAssembly === 'hg19') {
-                    region = 'chr1:155158000-155163000';
-                } else if (detectedAssembly === 'hg38') {
-                    region = 'chr1:155184000-155194000';
-                } else {
-                    throw new Error('Could not determine region based on detected assembly.');
-                }
-            } else if (regionValue === 'hg19') {
+        // Determine Region
+        if (regionValue === 'guess') {
+            // Set region based on detected assembly
+            if (detectedAssembly === 'hg19') {
                 region = 'chr1:155158000-155163000';
-            } else if (regionValue === 'hg38') {
+            } else if (detectedAssembly === 'hg38') {
                 region = 'chr1:155184000-155194000';
             } else {
-                // Assume the regionValue is a custom region string provided by the user
-                region = regionValue;
+                throw new Error('Could not determine region based on detected assembly.');
             }
-
-            console.log("Region to extract:", region);
-
-            // Extract region using samtools view
-            const subsetBamName = `subset_${pair.bam.name}`;
-            const subsetBamPath = subsetBamName;
-            const viewCommand = "samtools";
-            const viewArgs = ["view", "-P", "-b", bamPath, region, "-o", subsetBamPath];
-            console.log("Executing Samtools View Command:", viewCommand, viewArgs);
-
-            const viewResult = await CLI.exec(viewCommand, viewArgs);
-            console.log("Samtools View Output:", viewResult);
-
-            // Check if subset BAM was created and has content
-            const subsetBamStats = await CLI.fs.stat(subsetBamPath);
-            console.log(`${subsetBamPath} Stats:`, subsetBamStats);
-
-            if (!subsetBamStats || subsetBamStats.size === 0) {
-                throw new Error(`Subset BAM file ${subsetBamPath} was not created or is empty. No reads found in the specified region.`);
-            }
-
-            // Index the subset BAM using samtools index
-            console.log(`Indexing subset BAM: ${subsetBamPath}`);
-            const indexCommand = "samtools";
-            const indexArgs = ["index", subsetBamPath];
-            const indexResult = await CLI.exec(indexCommand, indexArgs);
-            console.log("Samtools Index Output:", indexResult);
-
-            // Check if BAI was created
-            const subsetBaiPath = `${subsetBamPath}.bai`;
-            const subsetBaiStats = await CLI.fs.stat(subsetBaiPath);
-            console.log(`${subsetBaiPath} Stats:`, subsetBaiStats);
-
-            if (!subsetBaiStats || subsetBaiStats.size === 0) {
-                throw new Error(`Index BAI file ${subsetBaiPath} was not created or is empty.`);
-            }
-
-            // Read the subset BAM file as Uint8Array
-            const subsetBam = await CLI.fs.readFile(subsetBamPath);
-            console.log(`${subsetBamPath} length:`, subsetBam.length);
-
-            // Create Blob from Uint8Array
-            const subsetBamBlob = new Blob([subsetBam], { type: 'application/octet-stream' });
-            console.log(`${subsetBamPath} Blob size:`, subsetBamBlob.size);
-
-            if (subsetBamBlob.size === 0) {
-                throw new Error(`Failed to create Blob from subset BAM file ${subsetBamPath}.`);
-            }
-
-            // Read the subset BAI file as Uint8Array
-            const subsetBai = await CLI.fs.readFile(subsetBaiPath);
-            console.log(`${subsetBaiPath} length:`, subsetBai.length);
-
-            // Create Blob from Uint8Array
-            const subsetBaiBlob = new Blob([subsetBai], { type: 'application/octet-stream' });
-            console.log(`${subsetBaiPath} Blob size:`, subsetBaiBlob.size);
-
-            if (subsetBaiBlob.size === 0) {
-                throw new Error(`Failed to create Blob from subset BAI file ${subsetBaiPath}.`);
-            }
-
-            // Collect the Blob and its name to return
-            subsetBamAndBaiBlobs.push({
-                subsetBamBlob,
-                subsetBaiBlob,
-                subsetName: subsetBamPath
-            });
-
-            console.log(`Subset BAM and BAI for ${pair.bam.name} created successfully.`);
+        } else if (regionValue === 'hg19') {
+            region = 'chr1:155158000-155163000';
+        } else if (regionValue === 'hg38') {
+            region = 'chr1:155184000-155194000';
+        } else {
+            // Assume the regionValue is a custom region string provided by the user
+            region = regionValue;
         }
+
+        console.log("Region to extract:", region);
+
+        // Extract Region
+        const subsetBamName = `subset_${pair.bam.name}`;
+        const subsetBamPath = subsetBamName;
+        await extractRegion(CLI, bamPath, region, subsetBamName);
+
+        // Index Subset BAM
+        await indexBam(CLI, subsetBamPath);
+
+        // Create Blob for subset BAM
+        const subsetBam = await CLI.fs.readFile(subsetBamPath);
+        const subsetBamBlob = new Blob([subsetBam], { type: 'application/octet-stream' });
+        if (subsetBamBlob.size === 0) {
+            throw new Error(`Failed to create Blob from subset BAM file ${subsetBamPath}.`);
+        }
+
+        // Create Blob for subset BAI
+        const subsetBaiPath = `${subsetBamPath}.bai`;
+        const subsetBai = await CLI.fs.readFile(subsetBaiPath);
+        const subsetBaiBlob = new Blob([subsetBai], { type: 'application/octet-stream' });
+        if (subsetBaiBlob.size === 0) {
+            throw new Error(`Failed to create Blob from subset BAI file ${subsetBaiPath}.`);
+        }
+
+        // Collect the Blob and its name to return
+        subsetBamAndBaiBlobs.push({
+            subsetBamBlob,
+            subsetBaiBlob,
+            subsetName: subsetBamPath
+        });
+
+        console.log(`Subset BAM and BAI for ${pair.bam.name} created successfully.`);
 
         return {
             subsetBamAndBaiBlobs,

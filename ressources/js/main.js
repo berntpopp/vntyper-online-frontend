@@ -1,7 +1,7 @@
 // frontend/ressources/js/main.js
 
 import { validateFiles } from './inputWrangling.js';
-import { submitJobToAPI, pollJobStatusAPI, getJobStatus } from './apiInteractions.js';
+import { submitJobToAPI, pollJobStatusAPI, getJobStatus, createCohort } from './apiInteractions.js'; // **Imported createCohort**
 import { initializeAioli, extractRegionAndIndex } from './bamProcessing.js';
 import { initializeModal, checkAndShowDisclaimer } from './modal.js';
 import { initializeFooter } from './footer.js';
@@ -20,6 +20,7 @@ import {
 } from './uiUtils.js';
 import { initializeFileSelection } from './fileSelection.js';
 import { initializeServerLoad } from './serverLoad.js';
+import { initializeUIUtils } from './uiUtils.js'; // **Added Import**
 
 /**
  * Initializes the application by setting up event listeners and dynamic content.
@@ -35,6 +36,9 @@ async function initializeApp() {
     initializeCitations();
     initializeTutorial();
 
+    // Initialize UI Utilities (includes toggle functionality)
+    initializeUIUtils(); // **Added Initialization**
+
     // Check and show disclaimer modal or indicator based on acknowledgment
     checkAndShowDisclaimer();
 
@@ -46,6 +50,8 @@ async function initializeApp() {
     const jobQueuePositionDiv = document.getElementById('jobQueuePosition');
     const regionSelect = document.getElementById('region');
     const regionOutputDiv = document.getElementById('regionOutput');
+    const emailInput = document.getElementById('email'); // **Added**
+    const cohortAliasInput = document.getElementById('cohortAlias'); // **Added**
 
     // Variable to store selected files
     let selectedFiles = [];
@@ -106,7 +112,7 @@ async function initializeApp() {
     }
 
     /**
-     * Displays the shareable link to the user within the jobOutput section.
+     * Displays the shareable link to the user within the jobInfoDiv.
      * Includes a copy link icon next to it.
      * @param {string} jobId - The job identifier.
      */
@@ -155,7 +161,10 @@ async function initializeApp() {
             const data = await getJobStatus(jobId);
 
             // Update job status in the UI
-            jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(data.status)}</strong>`;
+            const statusElement = document.getElementById(`status-${jobId}`);
+            if (statusElement) {
+                statusElement.innerHTML = `Status: <strong>${capitalizeFirstLetter(data.status)}</strong>`;
+            }
             console.log(`Status fetched: ${data.status}`);
 
             if (data.status === 'completed') {
@@ -203,10 +212,18 @@ async function initializeApp() {
             regionOutputDiv.innerHTML = '';
 
             // Display initial job information
-            jobInfoDiv.innerHTML = `Loading job details for Job ID: <strong>${jobId}</strong>`;
+            const jobInfo = document.createElement('div');
+            jobInfo.innerHTML = `Loading job details for Job ID: <strong>${jobId}</strong>`;
+            jobInfoDiv.appendChild(jobInfo);
 
             // Generate and display the shareable link
             displayShareableLink(jobId);
+
+            // Create a status element for this job
+            const statusElement = document.createElement('div');
+            statusElement.id = `status-${jobId}`;
+            statusElement.innerHTML = `Status: <strong>Loading...</strong>`;
+            jobStatusDiv.appendChild(statusElement);
 
             // Immediately fetch and update job status
             await fetchAndUpdateJobStatus(jobId);
@@ -216,7 +233,9 @@ async function initializeApp() {
                 jobId,
                 (status) => {
                     // Update status in the jobStatusDiv
-                    jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+                    if (statusElement) {
+                        statusElement.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+                    }
                     console.log(`Status updated to: ${status}`);
                 },
                 () => {
@@ -231,7 +250,7 @@ async function initializeApp() {
                 (errorMessage) => {
                     // On Error
                     displayError(errorMessage);
-                    console.error(`Job failed with error: ${errorMessage}`);
+                    console.error(`Job ${jobId} failed with error: ${errorMessage}`);
                     hideSpinner();
                     clearCountdown();
                     console.log('Spinner and countdown hidden due to error');
@@ -316,137 +335,148 @@ async function initializeApp() {
             startCountdown();
             console.log('Spinner displayed and countdown started');
 
-            // Initialize Aioli and extract subset BAM and BAI
+            // Initialize Aioli and validate selected files
             const CLI = await initializeAioli();
-            const { matchedPairs } = validateFiles(selectedFiles, false);
+            const { matchedPairs, invalidFiles } = validateFiles(selectedFiles, false);
+
+            if (invalidFiles.length > 0) {
+                displayError(`Some files were invalid and not added: ${invalidFiles.map(f => f.name).join(', ')}`);
+                console.warn('Invalid files detected.');
+            }
+
             if (matchedPairs.length === 0) {
-                displayError('No valid BAM and BAI file pairs found for extraction.');
-                console.warn('File validation error: No matched pairs for extraction.');
+                displayError('No valid BAM and BAI file pairs found for submission.');
+                console.warn('No valid file pairs.');
                 hideSpinner();
                 clearCountdown();
                 return;
             }
 
-            // Extract region and detect assembly
-            const {
-                subsetBamAndBaiBlobs,
-                detectedAssembly,
-                region
-            } = await extractRegionAndIndex(CLI, matchedPairs);
-            console.log('Subsetted BAM and BAI Blobs:', subsetBamAndBaiBlobs);
-            console.log('Detected Assembly:', detectedAssembly);
-            console.log('Region used:', region);
+            // Capture email and cohort alias inputs
+            const email = emailInput.value.trim() || null;
+            const cohortAlias = cohortAliasInput.value.trim() || null;
 
-            // Update the region select dropdown based on detected assembly
-            if (detectedAssembly) {
-                regionSelect.value = detectedAssembly;
+            let cohortId = null;
 
-                // Display message about the detected assembly
-                displayMessage(
-                    `Detected reference assembly: ${detectedAssembly.toUpperCase()}. Please confirm or select manually.`,
-                    'info'
-                );
-            } else {
-                // Prompt the user to select manually
-                displayMessage(
-                    'Could not automatically detect the reference assembly. Please select it manually.',
-                    'error'
-                );
-                regionSelect.value = ''; // Reset selection
-                hideSpinner();
-                clearCountdown();
-                return;
+            // Determine if batch submission is needed
+            if (matchedPairs.length > 1) {
+                // **Batch Submission: Create a Cohort**
+                cohortId = await createCohort(cohortAlias, email);
             }
 
-            // Prepare FormData with subsetted BAM and BAI files
-            const formData = new FormData();
+            // Iterate through each matched pair and submit jobs sequentially
+            const jobIds = [];
 
-            subsetBamAndBaiBlobs.forEach((subset, index) => {
-                const { subsetBamBlob, subsetBaiBlob, subsetName } = subset;
-                const subsetBamFileName = subsetName; // e.g., subset_test.bam
-                const subsetBaiFileName = `${subsetName}.bai`; // e.g., subset_test.bam.bai
+            for (const pair of matchedPairs) {
+                const { bam, bai } = pair;
 
-                formData.append('bam_file', subsetBamBlob, subsetBamFileName);
-                formData.append('bai_file', subsetBaiBlob, subsetBaiFileName);
-            });
+                // Extract region and detect assembly
+                const { subsetBamAndBaiBlobs, detectedAssembly, region } = await extractRegionAndIndex(CLI, pair);
+                console.log('Subset BAM and BAI Blobs:', subsetBamAndBaiBlobs);
+                console.log('Detected Assembly:', detectedAssembly);
+                console.log('Region used:', region);
 
-            // Use the detected assembly and region
-            formData.append('reference_assembly', detectedAssembly);
-            formData.append('region', region);
+                // Prepare FormData with subsetted BAM and BAI files
+                const formData = new FormData();
 
-            // Add additional parameters
-            formData.append('fast_mode', 'true');
-            formData.append('keep_intermediates', 'true');
-            formData.append('archive_results', 'true');
+                subsetBamAndBaiBlobs.forEach((subset) => {
+                    const { subsetBamBlob, subsetBaiBlob, subsetName } = subset;
+                    const subsetBamFileName = subsetName; // e.g., subset_test.bam
+                    const subsetBaiFileName = `${subsetName}.bai`; // e.g., subset_test.bam.bai
 
-            // Disable button and indicate submission
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
-            console.log('Submit button disabled and text changed to "Submitting..."');
+                    formData.append('bam_file', subsetBamBlob, subsetBamFileName);
+                    formData.append('bai_file', subsetBaiBlob, subsetBaiFileName);
+                });
 
-            // Submit job to API
-            const data = await submitJobToAPI(formData);
-            console.log('Job Submission Response:', data);
+                // Use the detected assembly and region
+                formData.append('reference_assembly', detectedAssembly);
+                formData.append('region', region);
 
-            // Update job info and initial status
-            jobInfoDiv.innerHTML = `Job submitted successfully!<br>Job ID: <strong>${data.job_id}</strong>`;
-            jobStatusDiv.innerHTML = 'Status: <strong>Submitted</strong>';
-            console.log('Initial status "Submitted" displayed');
+                // Add additional parameters
+                formData.append('fast_mode', 'true');
+                formData.append('keep_intermediates', 'true');
+                formData.append('archive_results', 'true');
 
-            // Generate and display shareable link
-            displayShareableLink(data.job_id);
-
-            // Immediately fetch and update job status
-            await fetchAndUpdateJobStatus(data.job_id);
-
-            // Start polling job status every 20 seconds
-            pollJobStatusAPI(
-                data.job_id,
-                (status) => {
-                    // Update status in the jobStatusDiv
-                    jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(
-                        status
-                    )}</strong>`;
-                    console.log(`Status updated to: ${status}`);
-                },
-                () => {
-                    // On Complete
-                    displayDownloadLink(data.job_id);
-                    hideSpinner();
-                    clearCountdown();
-                    console.log('Spinner and countdown hidden');
-                    jobQueuePositionDiv.innerHTML = '';
-                    serverLoad.updateServerLoad();
-                },
-                (errorMessage) => {
-                    // On Error
-                    displayError(errorMessage);
-                    console.error(`Job failed with error: ${errorMessage}`);
-                    hideSpinner();
-                    clearCountdown();
-                    console.log('Spinner and countdown hidden due to error');
-                    jobQueuePositionDiv.innerHTML = '';
-                    serverLoad.updateServerLoad();
-                },
-                () => {
-                    // onPoll Callback to reset countdown
-                    resetCountdown();
-                    console.log('Countdown reset to 20 seconds');
-                },
-                (queueData) => {
-                    // onQueueUpdate callback
-                    const { position_in_queue, total_jobs_in_queue, status } = queueData;
-                    if (position_in_queue) {
-                        jobQueuePositionDiv.innerHTML = `Position in Queue: <strong>${position_in_queue}</strong> out of <strong>${total_jobs_in_queue}</strong>`;
-                    } else if (status) {
-                        jobQueuePositionDiv.innerHTML = `${status}`;
-                    } else {
-                        jobQueuePositionDiv.innerHTML = '';
-                    }
-                    // Update server load indicator
-                    serverLoad.updateServerLoad();
+                // Add email and cohort information if available
+                if (email) {
+                    formData.append('email', email);
                 }
-            );
+                if (cohortId) {
+                    formData.append('cohort_id', cohortId);
+                }
+
+                // Submit job to API
+                const data = await submitJobToAPI(formData);
+                console.log('Job Submission Response:', data);
+
+                jobIds.push(data.job_id);
+
+                // Display job information
+                const jobInfo = document.createElement('div');
+                jobInfo.innerHTML = `Job submitted successfully!<br>Job ID: <strong>${data.job_id}</strong>`;
+                jobInfoDiv.appendChild(jobInfo);
+
+                // Generate and display shareable link
+                displayShareableLink(data.job_id);
+
+                // Create a status element for this job
+                const statusElement = document.createElement('div');
+                statusElement.id = `status-${data.job_id}`;
+                statusElement.innerHTML = `Status: <strong>Submitted</strong>`;
+                jobStatusDiv.appendChild(statusElement);
+
+                // Immediately fetch and update job status
+                await fetchAndUpdateJobStatus(data.job_id);
+
+                // Start polling job status every 20 seconds
+                pollJobStatusAPI(
+                    data.job_id,
+                    (status) => {
+                        // Update status in the jobStatusDiv
+                        if (statusElement) {
+                            statusElement.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+                        }
+                        console.log(`Status updated to: ${status}`);
+                    },
+                    () => {
+                        // On Complete
+                        displayDownloadLink(data.job_id);
+                        hideSpinner();
+                        clearCountdown();
+                        console.log('Spinner and countdown hidden');
+                        jobQueuePositionDiv.innerHTML = '';
+                        serverLoad.updateServerLoad();
+                    },
+                    (errorMessage) => {
+                        // On Error
+                        displayError(errorMessage);
+                        console.error(`Job failed with error: ${errorMessage}`);
+                        hideSpinner();
+                        clearCountdown();
+                        console.log('Spinner and countdown hidden due to error');
+                        jobQueuePositionDiv.innerHTML = '';
+                        serverLoad.updateServerLoad();
+                    },
+                    () => {
+                        // onPoll Callback to reset countdown
+                        resetCountdown();
+                        console.log('Countdown reset to 20 seconds');
+                    },
+                    (queueData) => {
+                        // onQueueUpdate callback
+                        const { position_in_queue, total_jobs_in_queue, status } = queueData;
+                        if (position_in_queue) {
+                            jobQueuePositionDiv.innerHTML = `Position in Queue: <strong>${position_in_queue}</strong> out of <strong>${total_jobs_in_queue}</strong>`;
+                        } else if (status) {
+                            jobQueuePositionDiv.innerHTML = `${status}`;
+                        } else {
+                            jobQueuePositionDiv.innerHTML = '';
+                        }
+                        // Update server load indicator
+                        serverLoad.updateServerLoad();
+                    }
+                );
+            }
 
             // Optionally, clear selected files after submission
             selectedFiles = [];
@@ -490,74 +520,82 @@ async function initializeApp() {
             clearMessage();
 
             const CLI = await initializeAioli();
-            const { matchedPairs } = validateFiles(selectedFiles, false);
+            const { matchedPairs, invalidFiles } = validateFiles(selectedFiles, false);
+
+            if (invalidFiles.length > 0) {
+                displayError(`Some files were invalid and not added: ${invalidFiles.map(f => f.name).join(', ')}`);
+                console.warn('Invalid files detected.');
+            }
+
             if (matchedPairs.length === 0) {
                 displayError('No valid BAM and BAI file pairs found for extraction.');
-                console.warn('File validation error: No matched pairs for extraction.');
+                console.warn('No valid file pairs.');
                 return;
             }
 
-            // Extract region and detect assembly
-            const {
-                subsetBamAndBaiBlobs,
-                detectedAssembly,
-                region
-            } = await extractRegionAndIndex(CLI, matchedPairs);
-            console.log('Subsetted BAM and BAI Blobs:', subsetBamAndBaiBlobs);
-            console.log('Detected Assembly:', detectedAssembly);
-            console.log('Region used:', region);
+            // Extract region and detect assembly for each pair
+            for (const pair of matchedPairs) {
+                const { subsetBamAndBaiBlobs, detectedAssembly, region } = await extractRegionAndIndex(CLI, pair);
+                console.log('Subset BAM and BAI Blobs:', subsetBamAndBaiBlobs);
+                console.log('Detected Assembly:', detectedAssembly);
+                console.log('Region used:', region);
 
-            // Update the region select dropdown based on detected assembly
-            if (detectedAssembly) {
-                regionSelect.value = detectedAssembly;
+                // Update the region select dropdown based on detected assembly
+                if (detectedAssembly) {
+                    regionSelect.value = detectedAssembly;
 
-                // Display message about the detected assembly
-                displayMessage(
-                    `Detected reference assembly: ${detectedAssembly.toUpperCase()}. Please confirm or select manually.`,
-                    'info'
-                );
-            } else {
-                // Prompt the user to select manually
-                displayMessage(
-                    'Could not automatically detect the reference assembly. Please select it manually.',
-                    'error'
-                );
-                regionSelect.value = ''; // Reset selection
-                return;
+                    // Display message about the detected assembly
+                    displayMessage(
+                        `Detected reference assembly: ${detectedAssembly.toUpperCase()}. Please confirm or select manually.`,
+                        'info'
+                    );
+                } else {
+                    // Prompt the user to select manually
+                    displayMessage(
+                        'Could not automatically detect the reference assembly. Please select it manually.',
+                        'error'
+                    );
+                    regionSelect.value = ''; // Reset selection
+                    return;
+                }
+
+                // Provide download links for the subsetted BAM and BAI files
+                subsetBamAndBaiBlobs.forEach((subset) => {
+                    const { subsetBamBlob, subsetBaiBlob, subsetName } = subset;
+                    const subsetBaiName = `${subsetName}.bai`;
+
+                    const downloadBamUrl = URL.createObjectURL(subsetBamBlob);
+                    const downloadBaiUrl = URL.createObjectURL(subsetBaiBlob);
+
+                    // Download Link for BAM
+                    const downloadBamLink = document.createElement('a');
+                    downloadBamLink.href = downloadBamUrl;
+                    downloadBamLink.download = subsetName;
+                    downloadBamLink.textContent = `Download ${subsetName}`;
+                    downloadBamLink.classList.add('download-link', 'download-button');
+
+                    // Download Link for BAI
+                    const downloadBaiLink = document.createElement('a');
+                    downloadBaiLink.href = downloadBaiUrl;
+                    downloadBaiLink.download = subsetBaiName;
+                    downloadBaiLink.textContent = `Download ${subsetBaiName}`;
+                    downloadBaiLink.classList.add('download-link', 'download-button');
+
+                    // Create a container for the download links
+                    const linkContainer = document.createElement('div');
+                    linkContainer.classList.add('download-container', 'mb-2'); // Ensure 'mb-2' is defined in your CSS or remove if unnecessary
+                    linkContainer.appendChild(downloadBamLink);
+                    linkContainer.appendChild(downloadBaiLink);
+
+                    // Append the Flex container to the regionOutput div
+                    regionOutputDiv.appendChild(linkContainer);
+
+                    // Create and append the horizontal divider after the Flex container
+                    const divider = document.createElement('hr');
+                    divider.classList.add('separator'); // Applies the styles from buttons.css
+                    regionOutputDiv.appendChild(divider);
+                });
             }
-
-            // Provide download links for the subsetted BAM and BAI files
-            subsetBamAndBaiBlobs.forEach((subset) => {
-                const { subsetBamBlob, subsetBaiBlob, subsetName } = subset;
-                const subsetBaiName = `${subsetName}.bai`;
-
-                const downloadBamUrl = URL.createObjectURL(subsetBamBlob);
-                const downloadBaiUrl = URL.createObjectURL(subsetBaiBlob);
-
-                // Download Link for BAM
-                const downloadBamLink = document.createElement('a');
-                downloadBamLink.href = downloadBamUrl;
-                downloadBamLink.download = subsetName;
-                downloadBamLink.textContent = `Download ${subsetName}`;
-                downloadBamLink.classList.add('download-link', 'download-button');
-
-                // Download Link for BAI
-                const downloadBaiLink = document.createElement('a');
-                downloadBaiLink.href = downloadBaiUrl;
-                downloadBaiLink.download = subsetBaiName;
-                downloadBaiLink.textContent = `Download ${subsetBaiName}`;
-                downloadBaiLink.classList.add('download-link', 'download-button');
-
-                // Append links to the regionOutput div
-                const linkContainer = document.createElement('div');
-                linkContainer.classList.add('download-container', 'mb-2');
-                linkContainer.appendChild(downloadBamLink);
-                linkContainer.appendChild(document.createElement('br'));
-                linkContainer.appendChild(downloadBaiLink);
-                linkContainer.appendChild(document.createElement('hr'));
-
-                regionOutputDiv.appendChild(linkContainer);
-            });
 
             // Optionally: Revoke the Object URLs after some time to free memory
             setTimeout(() => {
