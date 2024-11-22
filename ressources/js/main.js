@@ -62,6 +62,12 @@ async function initializeApp() {
     // Initialize server load monitoring
     const serverLoad = initializeServerLoad();
 
+    const cohortsContainer = document.createElement('div');
+    cohortsContainer.id = 'cohortsContainer';
+    jobInfoDiv.appendChild(cohortsContainer);
+
+    const displayedCohorts = new Set();
+
     /**
      * Capitalizes the first letter of a string.
      * @param {string} string - The string to capitalize.
@@ -159,11 +165,38 @@ async function initializeApp() {
         try {
             const data = await getJobStatus(jobId);
 
-            // Update job status in the UI
-            const statusElement = document.getElementById(`status-${jobId}`);
-            if (statusElement) {
-                statusElement.innerHTML = `Status: <strong>${capitalizeFirstLetter(data.status)}</strong>`;
+            if (data.cohort_id && !displayedCohorts.has(data.cohort_id)) {
+                // Create a new cohort section
+                const cohortSection = document.createElement('div');
+                cohortSection.id = `cohort-${data.cohort_id}`;
+                cohortSection.classList.add('cohort-section');
+
+                const cohortInfo = document.createElement('div');
+                cohortInfo.classList.add('cohort-info');
+                cohortInfo.innerHTML = `Cohort ID: <strong>${data.cohort_id}</strong>`;
+
+                cohortSection.appendChild(cohortInfo);
+                cohortsContainer.appendChild(cohortSection);
+
+                // Add to displayed cohorts
+                displayedCohorts.add(data.cohort_id);
             }
+
+            // **New:** Determine where to append job info
+            let targetContainer;
+            if (data.cohort_id) {
+                targetContainer = document.getElementById(`cohort-${data.cohort_id}`);
+            } else {
+                targetContainer = jobInfoDiv;
+            }
+
+            // Create job information element
+            const jobInfo = document.createElement('div');
+            jobInfo.innerHTML = `Job ID: <strong>${jobId}</strong> - Status: <strong>${capitalizeFirstLetter(data.status)}</strong>`;
+            jobInfo.classList.add('job-info');
+
+            targetContainer.appendChild(jobInfo);
+
             console.log(`Status fetched: ${data.status}`);
 
             if (data.status === 'completed') {
@@ -222,6 +255,7 @@ async function initializeApp() {
             const statusElement = document.createElement('div');
             statusElement.id = `status-${jobId}`;
             statusElement.innerHTML = `Status: <strong>Loading...</strong>`;
+            statusElement.classList.add('job-status');
             jobStatusDiv.appendChild(statusElement);
 
             // Immediately fetch and update job status
@@ -357,6 +391,7 @@ async function initializeApp() {
             const passphrase = passphraseInput.value.trim() || null; // **Captured Passphrase**
 
             let cohortId = null;
+            let cohortSection = null; // **New:** Reference to the current cohort section
 
             // Determine if batch submission is needed and cohort creation is desired
             if (matchedPairs.length > 1) {
@@ -368,6 +403,17 @@ async function initializeApp() {
                         const cohortData = await createCohort(cohortAlias, passphrase); // Pass alias and passphrase
                         cohortId = cohortData.cohort_id; // Retrieve cohort_id from response
                         console.log(`Cohort created with ID: ${cohortId}`);
+
+                        cohortSection = document.createElement('div');
+                        cohortSection.id = `cohort-${cohortId}`;
+                        cohortSection.classList.add('cohort-section');
+
+                        const cohortInfo = document.createElement('div');
+                        cohortInfo.classList.add('cohort-info');
+                        cohortInfo.innerHTML = `Cohort ID: <strong>${cohortId}</strong>`;
+
+                        cohortSection.appendChild(cohortInfo);
+                        cohortsContainer.appendChild(cohortSection);
                     } catch (cohortError) {
                         // Handle cohort creation error
                         displayError(`Cohort Creation Failed: ${cohortError.message}`);
@@ -429,10 +475,16 @@ async function initializeApp() {
 
                     jobIds.push(data.job_id);
 
-                    // Display job information
+                    // **Create job information element**
                     const jobInfo = document.createElement('div');
                     jobInfo.innerHTML = `Job submitted successfully!<br>Job ID: <strong>${data.job_id}</strong>`;
-                    jobInfoDiv.appendChild(jobInfo);
+                    jobInfo.classList.add('job-info');
+
+                    if (cohortSection) {
+                        cohortSection.appendChild(jobInfo);
+                    } else {
+                        jobInfoDiv.appendChild(jobInfo);
+                    }
 
                     // Generate and display shareable link
                     displayShareableLink(data.job_id);
@@ -441,7 +493,14 @@ async function initializeApp() {
                     const statusElement = document.createElement('div');
                     statusElement.id = `status-${data.job_id}`;
                     statusElement.innerHTML = `Status: <strong>Submitted</strong>`;
-                    jobStatusDiv.appendChild(statusElement);
+                    statusElement.classList.add('job-status');
+
+                    if (cohortId) {
+                        // Assuming all jobs share the same cohort section
+                        jobStatusDiv.appendChild(statusElement);
+                    } else {
+                        jobStatusDiv.appendChild(statusElement);
+                    }
 
                     // Immediately fetch and update job status
                     await fetchAndUpdateJobStatus(data.job_id);
@@ -504,7 +563,6 @@ async function initializeApp() {
                 }
             }
 
-            // Optionally, clear selected files after submission
             selectedFiles = [];
             displaySelectedFiles();
 
