@@ -305,7 +305,7 @@ async function initializeApp() {
         downloadLink.textContent = 'Download vntyper results';
         downloadLink.classList.add('download-link', 'download-button');
         downloadLink.target = '_blank'; // Open in a new tab
-    
+
         jobStatusDiv.appendChild(document.createElement('br'));
         jobStatusDiv.appendChild(downloadLink);
         console.log('Download link appended to jobStatusDiv');
@@ -493,7 +493,7 @@ async function initializeApp() {
                             // Update server load indicator
                             serverLoad.updateServerLoad();
                         }
-                    });
+                    );
                 } catch (jobError) {
                     // Handle individual job submission error
                     displayError(`Job Submission Failed: ${jobError.message}`);
