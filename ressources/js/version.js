@@ -4,7 +4,7 @@
 const frontendVersion = '0.10.1'; // Update this as needed
 
 // API Endpoint for Versions
-const versionEndpoint = '/api/version'; // Adjust the path if necessary
+const versionEndpoint = `${window.CONFIG.API_URL}/version/`;
 
 // Function to Fetch and Display Versions
 async function displayVersions() {
