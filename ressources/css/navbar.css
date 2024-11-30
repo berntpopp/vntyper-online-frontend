@@ -1,5 +1,3 @@
-/* frontend/ressources/css/navbar.css */
-
 /* --- Navigation Bar Styles --- */
 
 .navbar {
@@ -82,4 +80,41 @@
 
 .server-load-indicator.load-red a {
     color: #dc3545;
+}
+
+/* Hamburger Menu Styles */
+
+.navbar-toggle {
+    display: none; /* Hidden by default */
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #333;
+}
+
+/* Responsive Styles */
+
+@media (max-width: 768px) {
+
+    /* Hide navbar menu by default */
+    .navbar-menu {
+        position: relative;
+        top: 0;
+        left: 0;
+        right: 0;
+        background-color: #fff;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px 10px;
+    }
+
+    .navbar-menu li {
+        margin: 10px 0;
+    }
+
+    /* Show navbar menu when active */
+    .navbar-menu.active {
+        display: flex;
+    }
 }
