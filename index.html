@@ -36,9 +36,6 @@
   <link rel="stylesheet" href="ressources/css/citations.css">
   <link rel="stylesheet" href="ressources/css/footer.css">
   
-  <!-- Link to Drag & Drop CSS -->
-  <link rel="stylesheet" href="ressources/css/drag-drop.css">
-
   <!-- Intro.js JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0/intro.min.js" integrity="sha512-+hhhH0eKqYCmXsO28OJE1HHWkgNYwlpceBwmeeDEt5jpCL8jOuqAVunXlZ/WZ4qIluJdwlcv4f5BUIQ/l1w9iw==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 
@@ -50,31 +47,15 @@
   <!-- Link to Config JS -->
   <script src="ressources/js/config.js" defer></script>
   
-  <!-- Link to Input Wrangling JS -->
+  <!-- Link to JavaScript Modules -->
   <script type="module" src="ressources/js/inputWrangling.js" defer></script>
-  
-  <!-- Link to Regions Config JS -->
   <script type="module" src="ressources/js/regionsConfig.js" defer></script>
-  
-  <!-- Link to Assembly Configs JS -->
   <script type="module" src="ressources/js/assemblyConfigs.js" defer></script>
-  
-  <!-- Link to BAM Processing JS -->
   <script type="module" src="ressources/js/bamProcessing.js" defer></script>
-  
-  <!-- Link to API Interactions JS -->
   <script type="module" src="ressources/js/apiInteractions.js" defer></script>
-  
-  <!-- Link to Main JS -->
   <script type="module" src="ressources/js/main.js" defer></script>
-  
-  <!-- Link to Modal JS -->
   <script type="module" src="ressources/js/modal.js" defer></script>
-  
-  <!-- Link to Populate Regions JS -->
   <script type="module" src="ressources/js/populateRegions.js" defer></script>
-
-  <!-- Link to UI Utils JS -->
   <script type="module" src="ressources/js/uiUtils.js" defer></script>
 
   <!-- Version and Current Year Script -->
@@ -142,7 +123,7 @@
           </li>
 
           <!-- Disclaimer Indicator -->
-          <li id="disclaimerIndicator" data-intro="Click here to view the disclaimer again." data-step="6">
+          <li id="disclaimerIndicator"">
             <a href="#" id="disclaimerLink" class="navbar-link" aria-label="View Disclaimer Status">
               <span id="disclaimerStatusIcon" class="status-icon" aria-hidden="true">✔️</span>
               <span id="disclaimerStatusText" class="status-text">Disclaimer</span>
@@ -179,7 +160,7 @@
     </div>
 
     <!-- Region Select Dropdown -->
-    <div class="region-select" data-intro="Select the reference assembly used for your alignment. The region will be selected accordingly." data-step="2">
+    <div class="region-select" data-intro="Select the reference assembly used for your alignment. The region will be selected accordingly. If no region is selected the default behavior is to guess the assembly from the fields provided." data-step="2">
       <label for="region">Select reference:</label>
       <select id="region" class="form-select">
         <option value="guess" selected>Guess assembly</option>
@@ -189,9 +170,9 @@
 
     <!-- Button Group: Submit, Extract, Show Options -->
     <div class="button-group" data-intro="Submit your job, extract regions, or provide additional optional inputs." data-step="3">
-      <button id="submitBtn" class="submit-button button" data-intro="Click here to submit your job for analysis. The MUC1 read data will be extracted on your device and only this subset will be uploaded for analysis." data-step="3">Submit Job</button>
-      <button id="extractBtn" class="extract-button button" data-intro="Use this button to extract regions from your BAM files in your browser and save the subset BAM file." data-step="4">Extract Region</button>
-      <button id="toggleOptionalInputs" class="toggle-button button" aria-expanded="false" aria-controls="additionalInputs">Show Options</button>
+      <button id="submitBtn" class="submit-button button" data-intro="Click here to submit your job for analysis. The MUC1 read data will be extracted locally on your devices browser and only this subset will be uploaded to the server for analysis." data-step="3">Submit Job</button>
+      <button id="extractBtn" class="extract-button button" data-intro="Optional: Use this button to extract MUC1 regions from your BAM files in your browser and save the subset BAM file." data-step="4">Extract Region</button>
+      <button id="toggleOptionalInputs" class="toggle-button button" aria-expanded="false" aria-controls="additionalInputs" data-intro="Show additional options for job submission." data-step="5">Show Options</button>
     </div>
 
     <!-- Optional Inputs: Hidden by Default -->
@@ -228,7 +209,12 @@
     </div>
 
     <!-- Output and Error Containers -->
-    <div id="output" data-intro="Here you will see the status and results of your job." data-step="5">
+    <div id="output" data-intro="Here you will see the status and results of your job." data-step="6">
+      <!-- Placeholder Message -->
+      <div id="placeholderMessage" class="placeholder-message">
+        Your results will appear here after job submission.
+      </div>
+
       <!-- Message Display -->
       <div id="message" class="message hidden"></div>
 
@@ -272,7 +258,6 @@
       <div class="footer-links" id="footerLinks">
         <a href="#" class="navbar-link" data-modal="faqModal">FAQ</a>
         <a href="#citations">Citations</a>
-        <!-- Updated GitHub Link -->
         <a href="https://github.com/berntpopp/vntyper-online-backend" class="navbar-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">GitHub</a>
       </div>
     </div>

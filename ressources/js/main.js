@@ -79,11 +79,32 @@ async function initializeApp() {
     }
 
     /**
+     * Shows the placeholder message in the output area.
+     */
+    function showPlaceholderMessage() {
+        const placeholderMessage = document.getElementById('placeholderMessage');
+        if (placeholderMessage) {
+            placeholderMessage.classList.remove('hidden');
+        }
+    }
+
+    /**
+     * Hides the placeholder message in the output area.
+     */
+    function hidePlaceholderMessage() {
+        const placeholderMessage = document.getElementById('placeholderMessage');
+        if (placeholderMessage) {
+            placeholderMessage.classList.add('hidden');
+        }
+    }
+
+    /**
      * Displays a message to the user in the output area.
      * @param {string} message - The message to display.
      * @param {string} type - The type of message ('info', 'error', 'success').
      */
     function displayMessage(message, type = 'info') {
+        hidePlaceholderMessage(); // Hide placeholder when displaying a message
         const messageDiv = document.getElementById('message');
         if (messageDiv) {
             messageDiv.innerHTML = message;
@@ -103,6 +124,7 @@ async function initializeApp() {
             messageDiv.className = ''; // Reset classes
             messageDiv.classList.add('message', 'hidden');
         }
+        showPlaceholderMessage(); // Show placeholder when message is cleared
     }
 
     /**
@@ -122,6 +144,8 @@ async function initializeApp() {
      * @param {string} jobId - The job identifier.
      */
     function displayShareableLink(jobId) {
+        hidePlaceholderMessage(); // Hide placeholder when displaying shareable link
+
         const shareContainer = document.createElement('div');
         shareContainer.classList.add('share-container', 'mt-2');
 
@@ -182,7 +206,7 @@ async function initializeApp() {
                 displayedCohorts.add(data.cohort_id);
             }
 
-            // **New:** Determine where to append job info
+            // Determine where to append job info
             let targetContainer;
             if (data.cohort_id) {
                 targetContainer = document.getElementById(`cohort-${data.cohort_id}`);
@@ -334,6 +358,8 @@ async function initializeApp() {
      * @param {string} jobId - The job identifier.
      */
     function displayDownloadLink(jobId) {
+        hidePlaceholderMessage(); // Hide placeholder when results are available
+
         const downloadLink = document.createElement('a');
         downloadLink.href = `${window.CONFIG.API_URL}/download/${jobId}/`;
         downloadLink.textContent = 'Download vntyper results';
@@ -362,6 +388,7 @@ async function initializeApp() {
             regionOutputDiv.innerHTML = '';
             clearError();
             clearMessage();
+            hidePlaceholderMessage(); // Hide placeholder when submitting a job
 
             // Show spinner and initialize countdown
             showSpinner();
@@ -391,7 +418,7 @@ async function initializeApp() {
             const passphrase = passphraseInput.value.trim() || null; // **Captured Passphrase**
 
             let cohortId = null;
-            let cohortSection = null; // **New:** Reference to the current cohort section
+            let cohortSection = null; // **Reference to the current cohort section**
 
             // Determine if batch submission is needed and cohort creation is desired
             if (matchedPairs.length > 1) {
@@ -602,6 +629,7 @@ async function initializeApp() {
             regionOutputDiv.innerHTML = '';
             clearError();
             clearMessage();
+            hidePlaceholderMessage(); // Hide placeholder when extracting region
 
             const CLI = await initializeAioli();
             const { matchedPairs, invalidFiles } = validateFiles(selectedFiles, false);
