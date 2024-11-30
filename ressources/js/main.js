@@ -4,7 +4,8 @@ import { validateFiles } from './inputWrangling.js';
 import { submitJobToAPI, pollJobStatusAPI, getJobStatus, createCohort } from './apiInteractions.js';
 import { initializeAioli, extractRegionAndIndex } from './bamProcessing.js';
 import { initializeModal, checkAndShowDisclaimer } from './modal.js';
-import { initializeFooter } from './footer.js';
+import { initializeFooter } from './footer.js'; // Import from the new footer.js
+import { initializeDisclaimer } from './disclaimer.js'; // Import from disclaimer.js
 import { initializeFAQ } from './faq.js';
 import { initializeUserGuide } from './userGuide.js';
 import { initializeCitations } from './citations.js';
@@ -29,7 +30,8 @@ import { logMessage, initializeLogging } from './log.js'; // Import logging func
 async function initializeApp() {
     // Initialize modal and footer functionalities
     initializeModal();
-    initializeFooter();
+    initializeFooter(); // Initialize the actual footer
+    initializeDisclaimer(); // Initialize the disclaimer functionality
 
     // Initialize other sections
     initializeFAQ();
@@ -572,7 +574,6 @@ async function initializeApp() {
                             logMessage(`Job ID ${data.job_id} failed with error: ${errorMessage}`, 'error');
                             hideSpinner();
                             clearCountdown();
-                            logMessage(`Spinner and countdown hidden due to error for Job ID ${data.job_id}.`, 'info');
                             jobQueuePositionDiv.innerHTML = '';
                             serverLoad.updateServerLoad();
                         },

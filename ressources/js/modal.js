@@ -1,7 +1,7 @@
 // frontend/ressources/js/modal.js
 
 import { getCookie, setCookie } from './cookie.js';
-import { showDisclaimerIndicator } from './footer.js'; // If needed
+import { showDisclaimerIndicator } from './disclaimer.js'; // If needed
 
 /**
  * Opens the disclaimer modal and traps focus within it.
