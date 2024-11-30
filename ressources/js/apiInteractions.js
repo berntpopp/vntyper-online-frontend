@@ -1,5 +1,7 @@
 // frontend/ressources/js/apiInteractions.js
 
+import { logMessage } from './log.js'; // Import the logMessage function
+
 /**
  * Submits a job to the backend API.
  * @param {FormData} formData - The form data containing job parameters and files.
@@ -8,6 +10,8 @@
  */
 export async function submitJobToAPI(formData) {
     try {
+        logMessage('Submitting job to the API...', 'info');
+
         const response = await fetch(`${window.CONFIG.API_URL}/run-job/`, {
             method: 'POST',
             body: formData
@@ -26,14 +30,17 @@ export async function submitJobToAPI(formData) {
                     }
                 }
             } catch (e) {
-                console.error('Error parsing error response:', e);
+                logMessage('Error parsing error response in submitJobToAPI.', 'error');
             }
+            logMessage(`Job submission failed: ${errorMessage}`, 'error');
             throw new Error(errorMessage);
         }
 
-        return response.json();
+        const data = await response.json();
+        logMessage(`Job submitted successfully! Job ID: ${data.job_id}`, 'success');
+        return data;
     } catch (error) {
-        console.error('Error in submitJobToAPI:', error);
+        logMessage(`Error in submitJobToAPI: ${error.message}`, 'error');
         throw error;
     }
 }
@@ -46,6 +53,8 @@ export async function submitJobToAPI(formData) {
  */
 export async function getJobStatus(jobId) {
     try {
+        logMessage(`Fetching status for Job ID: ${jobId}`, 'info');
+
         const response = await fetch(`${window.CONFIG.API_URL}/job-status/${jobId}/`);
         if (!response.ok) {
             let errorMessage = 'Failed to fetch job status.';
@@ -59,14 +68,16 @@ export async function getJobStatus(jobId) {
                     }
                 }
             } catch (e) {
-                console.error('Error parsing job status error response:', e);
+                logMessage('Error parsing job status error response.', 'error');
             }
+            logMessage(`Failed to fetch status for Job ID ${jobId}: ${errorMessage}`, 'error');
             throw new Error(errorMessage);
         }
         const data = await response.json();
+        logMessage(`Status fetched for Job ID ${jobId}: ${data.status}`, 'info');
         return data;
     } catch (error) {
-        console.error('Error in getJobStatus:', error);
+        logMessage(`Error in getJobStatus for Job ID ${jobId}: ${error.message}`, 'error');
         throw error;
     }
 }
@@ -82,10 +93,13 @@ export async function getJobStatus(jobId) {
  * @param {Function} [onQueueUpdate] - Optional callback function to handle queue updates.
  */
 export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onPoll, onQueueUpdate) {
+    logMessage(`Starting to poll status for Job ID: ${jobId}`, 'info');
+
     const interval = setInterval(async () => {
         try {
             if (onPoll && typeof onPoll === 'function') {
                 onPoll();
+                logMessage(`Polling initiated for Job ID: ${jobId}`, 'info');
             }
 
             // Use the getJobStatus function to fetch current status
@@ -93,36 +107,42 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
 
             // Update status using the provided callback
             onStatusUpdate(data.status);
+            logMessage(`Job ID ${jobId} status updated to: ${data.status}`, 'info');
 
             // Optionally, handle additional job details if available
             if (data.details) {
-                console.log('Job Details:', data.details);
+                logMessage(`Job ID ${jobId} details: ${JSON.stringify(data.details)}`, 'info');
                 // For example, update the UI with additional details here
             }
 
             if (data.status === 'completed') {
                 clearInterval(interval);
+                logMessage(`Job ID ${jobId} has been completed.`, 'success');
                 onComplete();
             } else if (data.status === 'failed') {
                 clearInterval(interval);
-                onError(data.error || 'Job failed.');
+                const errorMsg = data.error || 'Job failed.';
+                logMessage(`Job ID ${jobId} failed with error: ${errorMsg}`, 'error');
+                onError(errorMsg);
             } else {
                 // Job is still processing
-                console.log(`Job is in status: ${data.status}`);
+                logMessage(`Job ID ${jobId} is in status: ${data.status}`, 'info');
 
                 // Fetch job queue position if applicable
                 if (onQueueUpdate && typeof onQueueUpdate === 'function') {
                     try {
                         const queueData = await getJobQueueStatus(jobId);
                         onQueueUpdate(queueData);
+                        logMessage(`Queue data updated for Job ID ${jobId}: ${JSON.stringify(queueData)}`, 'info');
                     } catch (queueError) {
-                        console.error('Error fetching job queue status:', queueError);
+                        logMessage(`Error fetching job queue status for Job ID ${jobId}: ${queueError.message}`, 'error');
                         // Optionally, you can decide how to handle queue fetch errors
                     }
                 }
             }
         } catch (error) {
             clearInterval(interval);
+            logMessage(`Error polling status for Job ID ${jobId}: ${error.message}`, 'error');
             onError(error.message);
         }
     }, 20000); // Poll every 20 seconds
@@ -136,6 +156,8 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
  */
 export async function getJobQueueStatus(jobId) {
     try {
+        logMessage(`Fetching queue status${jobId ? ` for Job ID: ${jobId}` : ''}`, 'info');
+
         let url = `${window.CONFIG.API_URL}/job-queue/`;
         if (jobId) {
             url += `?job_id=${encodeURIComponent(jobId)}`;
@@ -154,14 +176,16 @@ export async function getJobQueueStatus(jobId) {
                     }
                 }
             } catch (e) {
-                console.error('Error parsing job queue status error response:', e);
+                logMessage('Error parsing job queue status error response.', 'error');
             }
+            logMessage(`Failed to fetch queue status${jobId ? ` for Job ID ${jobId}` : ''}: ${errorMessage}`, 'error');
             throw new Error(errorMessage);
         }
         const data = await response.json();
+        logMessage(`Queue status fetched${jobId ? ` for Job ID ${jobId}` : ''}: ${JSON.stringify(data)}`, 'info');
         return data;
     } catch (error) {
-        console.error('Error in getJobQueueStatus:', error);
+        logMessage(`Error in getJobQueueStatus${jobId ? ` for Job ID ${jobId}` : ''}: ${error.message}`, 'error');
         throw error;
     }
 }
@@ -175,6 +199,8 @@ export async function getJobQueueStatus(jobId) {
  */
 export async function createCohort(alias, passphrase) {
     try {
+        logMessage(`Creating cohort with alias: ${alias}`, 'info');
+
         // Construct the payload as a URL-encoded string
         const params = new URLSearchParams();
         if (alias) params.append('alias', alias);
@@ -200,16 +226,17 @@ export async function createCohort(alias, passphrase) {
                     }
                 }
             } catch (e) {
-                console.error('Error parsing cohort creation error response:', e);
+                logMessage('Error parsing cohort creation error response.', 'error');
             }
+            logMessage(`Cohort creation failed: ${errorMessage}`, 'error');
             throw new Error(errorMessage);
         }
 
         const data = await response.json();
-        console.log(`Cohort created with ID: ${data.cohort_id}`);
+        logMessage(`Cohort created successfully! Cohort ID: ${data.cohort_id}`, 'success');
         return data; // Returns an object containing cohort_id and alias
     } catch (error) {
-        console.error('Error in createCohort:', error);
+        logMessage(`Error in createCohort: ${error.message}`, 'error');
         throw error;
     }
 }

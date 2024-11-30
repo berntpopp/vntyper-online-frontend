@@ -1,16 +1,18 @@
 // frontend/ressources/js/bamProcessing.js
 
+import { logMessage } from './log.js'; // Import the logMessage function
+
 /**
  * Initializes Aioli with Samtools.
  * @returns {Promise<Aioli>} - The initialized Aioli CLI object.
  */
 export async function initializeAioli() {
     try {
-        console.log("Initializing Aioli with Samtools...");
+        logMessage("Initializing Aioli with Samtools...", 'info');
         const CLI = await new Aioli(["samtools/1.17"]);
-        console.log("Aioli initialized.");
-        console.log("CLI object:", CLI);
-        console.log("CLI.fs:", CLI.fs);
+        logMessage("Aioli initialized successfully.", 'success');
+        logMessage("CLI object:", 'info');
+        logMessage(`CLI.fs is ${CLI.fs ? 'initialized' : 'undefined'}.`, 'info');
 
         if (!CLI.fs) {
             throw new Error("Failed to initialize the virtual filesystem (CLI.fs is undefined).");
@@ -18,8 +20,12 @@ export async function initializeAioli() {
 
         return CLI;
     } catch (err) {
-        console.error("Error initializing Aioli:", err);
-        document.getElementById("error").textContent = "Failed to initialize the processing environment.";
+        logMessage(`Error initializing Aioli: ${err.message}`, 'error');
+        const errorDiv = document.getElementById("error");
+        if (errorDiv) {
+            errorDiv.textContent = "Failed to initialize the processing environment.";
+            errorDiv.classList.remove('hidden');
+        }
         throw err;
     }
 }
@@ -32,13 +38,18 @@ export async function initializeAioli() {
  */
 async function extractBamHeader(CLI, bamPath) {
     const viewArgs = ["view", "-H", bamPath];
-    console.log("Executing Samtools View Command to extract header:", viewArgs);
+    logMessage(`Executing Samtools View Command to extract header: ${viewArgs.join(' ')}`, 'info');
 
-    const result = await CLI.exec("samtools", viewArgs);
-    const header = result;
-    console.log(`Extracted BAM Header for ${bamPath}:\n`, header);
+    try {
+        const result = await CLI.exec("samtools", viewArgs);
+        const header = result;
+        logMessage(`Extracted BAM Header for ${bamPath}:\n${header}`, 'info');
 
-    return header;
+        return header;
+    } catch (err) {
+        logMessage(`Error extracting BAM header for ${bamPath}: ${err.message}`, 'error');
+        throw err;
+    }
 }
 
 /**
@@ -84,8 +95,10 @@ function parseHeader(header) {
         }
     });
 
-    console.log("Parsed Contigs:", contigs);
-    console.log("Assembly Hints from @PG lines:", assemblyHints);
+    logMessage("Parsed Contigs:", 'info');
+    logMessage(JSON.stringify(contigs, null, 2), 'info');
+    logMessage("Assembly Hints from @PG lines:", 'info');
+    logMessage(JSON.stringify(assemblyHints, null, 2), 'info');
 
     return { contigs, assemblyHints };
 }
@@ -109,12 +122,13 @@ function extractAssemblyFromHints(assemblyHints) {
     for (const [assembly, identifiers] of Object.entries(assemblyIdentifiers)) {
         for (const id of identifiers) {
             if (hintsString.includes(id.toLowerCase())) {
-                console.log(`Assembly detected from @PG lines: ${assembly}`);
+                logMessage(`Assembly detected from @PG lines: ${assembly}`, 'info');
                 return assembly;
             }
         }
     }
 
+    logMessage('No assembly detected from @PG lines.', 'info');
     return null; // Return null if no assembly is found
 }
 
@@ -146,12 +160,18 @@ function detectAssembly(bamContigs, assemblyHints) {
         }, 0);
 
         const matchPercentage = matchCount / assembly.contigs.length;
-        console.log(`Assembly ${assembly.name} match: ${Math.round(matchPercentage * 100)}%`);
+        logMessage(`Assembly ${assembly.name} match: ${Math.round(matchPercentage * 100)}%`, 'info');
 
         if (matchPercentage >= threshold) {
             detectedAssembly = assembly.name;
             break;
         }
+    }
+
+    if (detectedAssembly) {
+        logMessage(`Detected Assembly: ${detectedAssembly}`, 'success');
+    } else {
+        logMessage('Could not confidently detect the assembly based on contig comparison.', 'warning');
     }
 
     return detectedAssembly;
@@ -169,20 +189,25 @@ async function extractRegion(CLI, bamPath, region, subsetBamName) {
     const subsetBamPath = subsetBamName;
     const viewCommand = "samtools";
     const viewArgs = ["view", "-P", "-b", bamPath, region, "-o", subsetBamPath];
-    console.log("Executing Samtools View Command:", viewCommand, viewArgs);
+    logMessage(`Executing Samtools View Command: ${viewCommand} ${viewArgs.join(' ')}`, 'info');
 
-    const viewResult = await CLI.exec(viewCommand, viewArgs);
-    console.log("Samtools View Output:", viewResult);
+    try {
+        const viewResult = await CLI.exec(viewCommand, viewArgs);
+        logMessage(`Samtools View Output for ${subsetBamPath}: ${viewResult}`, 'info');
 
-    // Verify subset BAM creation
-    const subsetBamStats = await CLI.fs.stat(subsetBamPath);
-    console.log(`${subsetBamPath} Stats:`, subsetBamStats);
+        // Verify subset BAM creation
+        const subsetBamStats = await CLI.fs.stat(subsetBamPath);
+        logMessage(`${subsetBamPath} Stats: ${JSON.stringify(subsetBamStats)}`, 'info');
 
-    if (!subsetBamStats || subsetBamStats.size === 0) {
-        throw new Error(`Subset BAM file ${subsetBamPath} was not created or is empty. No reads found in the specified region.`);
+        if (!subsetBamStats || subsetBamStats.size === 0) {
+            throw new Error(`Subset BAM file ${subsetBamPath} was not created or is empty. No reads found in the specified region.`);
+        }
+
+        return subsetBamPath;
+    } catch (err) {
+        logMessage(`Error extracting region from BAM file ${bamPath}: ${err.message}`, 'error');
+        throw err;
     }
-
-    return subsetBamPath;
 }
 
 /**
@@ -192,19 +217,26 @@ async function extractRegion(CLI, bamPath, region, subsetBamName) {
  * @returns {Promise<void>}
  */
 async function indexBam(CLI, subsetBamPath) {
-    console.log(`Indexing subset BAM: ${subsetBamPath}`);
+    logMessage(`Indexing subset BAM: ${subsetBamPath}`, 'info');
     const indexCommand = "samtools";
     const indexArgs = ["index", subsetBamPath];
-    const indexResult = await CLI.exec(indexCommand, indexArgs);
-    console.log("Samtools Index Output:", indexResult);
+    try {
+        const indexResult = await CLI.exec(indexCommand, indexArgs);
+        logMessage(`Samtools Index Output for ${subsetBamPath}: ${indexResult}`, 'info');
 
-    // Verify BAI creation
-    const subsetBaiPath = `${subsetBamPath}.bai`;
-    const subsetBaiStats = await CLI.fs.stat(subsetBaiPath);
-    console.log(`${subsetBaiPath} Stats:`, subsetBaiStats);
+        // Verify BAI creation
+        const subsetBaiPath = `${subsetBamPath}.bai`;
+        const subsetBaiStats = await CLI.fs.stat(subsetBaiPath);
+        logMessage(`${subsetBaiPath} Stats: ${JSON.stringify(subsetBaiStats)}`, 'info');
 
-    if (!subsetBaiStats || subsetBaiStats.size === 0) {
-        throw new Error(`Index BAI file ${subsetBaiPath} was not created or is empty.`);
+        if (!subsetBaiStats || subsetBaiStats.size === 0) {
+            throw new Error(`Index BAI file ${subsetBaiPath} was not created or is empty.`);
+        }
+
+        logMessage(`Successfully indexed BAM file: ${subsetBamPath}`, 'success');
+    } catch (err) {
+        logMessage(`Error indexing BAM file ${subsetBamPath}: ${err.message}`, 'error');
+        throw err;
     }
 }
 
@@ -218,11 +250,12 @@ export async function extractRegionAndIndex(CLI, pair) {
     const regionSelect = document.getElementById("region");
     const regionValue = regionSelect.value;
 
-    console.log("Extract Region and Index Function Triggered");
-    console.log("Selected Region:", regionValue);
+    logMessage("Extract Region and Index Function Triggered", 'info');
+    logMessage(`Selected Region: ${regionValue}`, 'info');
 
     // Input Validation
     if (!regionValue) {
+        logMessage("No region selected.", 'error');
         throw new Error("No region selected.");
     }
 
@@ -230,6 +263,7 @@ export async function extractRegionAndIndex(CLI, pair) {
     const extractBtn = document.getElementById("extractBtn");
     extractBtn.disabled = true;
     extractBtn.textContent = "Processing...";
+    logMessage("Extract button disabled and text updated to 'Processing...'", 'info');
 
     let detectedAssembly = null;
     let region = null;
@@ -237,14 +271,14 @@ export async function extractRegionAndIndex(CLI, pair) {
 
     try {
         // Mount BAM and BAI files
-        console.log("Mounting BAM and BAI files...");
+        logMessage("Mounting BAM and BAI files...", 'info');
         const paths = await CLI.mount([pair.bam, pair.bai]);
-        console.log("Mounted Paths:", paths);
+        logMessage(`Mounted Paths: ${paths.join(', ')}`, 'info');
 
         const bamPath = paths.find(p => p.endsWith(pair.bam.name));
         const baiPath = paths.find(p => p.endsWith(pair.bai.name));
 
-        console.log(`Processing BAM: ${bamPath}, BAI: ${baiPath}`);
+        logMessage(`Processing BAM: ${bamPath}, BAI: ${baiPath}`, 'info');
 
         // Extract and Parse BAM Header
         const header = await extractBamHeader(CLI, bamPath);
@@ -253,7 +287,7 @@ export async function extractRegionAndIndex(CLI, pair) {
         // Detect Assembly
         if (!detectedAssembly) {
             detectedAssembly = detectAssembly(bamContigs, assemblyHints);
-            console.log("Detected Assembly:", detectedAssembly);
+            logMessage(`Detected Assembly: ${detectedAssembly}`, 'info');
         }
 
         // Determine Region
@@ -275,7 +309,7 @@ export async function extractRegionAndIndex(CLI, pair) {
             region = regionValue;
         }
 
-        console.log("Region to extract:", region);
+        logMessage(`Region to extract: ${region}`, 'info');
 
         // Extract Region
         const subsetBamName = `subset_${pair.bam.name}`;
@@ -289,16 +323,20 @@ export async function extractRegionAndIndex(CLI, pair) {
         const subsetBam = await CLI.fs.readFile(subsetBamPath);
         const subsetBamBlob = new Blob([subsetBam], { type: 'application/octet-stream' });
         if (subsetBamBlob.size === 0) {
+            logMessage(`Failed to create Blob from subset BAM file ${subsetBamPath}.`, 'error');
             throw new Error(`Failed to create Blob from subset BAM file ${subsetBamPath}.`);
         }
+        logMessage(`Created Blob for subset BAM: ${subsetBamPath}`, 'info');
 
         // Create Blob for subset BAI
         const subsetBaiPath = `${subsetBamPath}.bai`;
         const subsetBai = await CLI.fs.readFile(subsetBaiPath);
         const subsetBaiBlob = new Blob([subsetBai], { type: 'application/octet-stream' });
         if (subsetBaiBlob.size === 0) {
+            logMessage(`Failed to create Blob from subset BAI file ${subsetBaiPath}.`, 'error');
             throw new Error(`Failed to create Blob from subset BAI file ${subsetBaiPath}.`);
         }
+        logMessage(`Created Blob for subset BAI: ${subsetBaiPath}`, 'info');
 
         // Collect the Blob and its name to return
         subsetBamAndBaiBlobs.push({
@@ -307,7 +345,7 @@ export async function extractRegionAndIndex(CLI, pair) {
             subsetName: subsetBamPath
         });
 
-        console.log(`Subset BAM and BAI for ${pair.bam.name} created successfully.`);
+        logMessage(`Subset BAM and BAI for ${pair.bam.name} created successfully.`, 'success');
 
         return {
             subsetBamAndBaiBlobs,
@@ -316,12 +354,17 @@ export async function extractRegionAndIndex(CLI, pair) {
         };
 
     } catch (err) {
-        console.error("Error during extraction and indexing:", err);
-        document.getElementById("error").textContent = `Error: ${err.message}`;
+        logMessage(`Error during extraction and indexing: ${err.message}`, 'error');
+        const errorDiv = document.getElementById("error");
+        if (errorDiv) {
+            errorDiv.textContent = `Error: ${err.message}`;
+            errorDiv.classList.remove('hidden');
+        }
         throw err;
     } finally {
         // Reset the button
         extractBtn.disabled = false;
         extractBtn.textContent = "Extract Region";
+        logMessage("Extract button re-enabled and text reset to 'Extract Region'.", 'info');
     }
 }

@@ -1,5 +1,7 @@
 // frontend/ressources/js/inputWrangling.js
 
+import { logMessage } from './log.js'; // Import the logMessage function
+
 /**
  * Validates the selected BAM and BAI files.
  * @param {File[]} selectedFiles - Array of selected File objects.
@@ -7,6 +9,8 @@
  * @returns {Object} - Contains matchedPairs and invalidFiles arrays.
  */
 export function validateFiles(selectedFiles, logWarnings = true) {
+    logMessage('Starting file validation process...', 'info');
+
     // Convert all file names to lowercase for case-insensitive matching
     const lowerCaseFiles = selectedFiles.map(file => ({
         originalFile: file,
@@ -16,6 +20,8 @@ export function validateFiles(selectedFiles, logWarnings = true) {
     // Filter BAM and BAI files
     const bamFiles = lowerCaseFiles.filter(file => file.lowerCaseName.endsWith(".bam"));
     const baiFiles = lowerCaseFiles.filter(file => file.lowerCaseName.endsWith(".bai"));
+
+    logMessage(`Found ${bamFiles.length} BAM file(s) and ${baiFiles.length} BAI file(s).`, 'info');
 
     // Initialize arrays to hold matched pairs and invalid files
     const matchedPairs = [];
@@ -28,6 +34,8 @@ export function validateFiles(selectedFiles, logWarnings = true) {
         baiMap.set(baseName, bai);
     });
 
+    logMessage(`Mapped ${baiMap.size} BAI file(s) for matching.`, 'info');
+
     // Iterate through BAM files to find corresponding BAI files
     bamFiles.forEach(bam => {
         const baseName = getBaseName(bam.lowerCaseName, 'bam');
@@ -35,10 +43,11 @@ export function validateFiles(selectedFiles, logWarnings = true) {
         if (bai) {
             matchedPairs.push({ bam: bam.originalFile, bai: bai.originalFile });
             baiMap.delete(baseName); // Remove from map once matched
+            logMessage(`Matched BAM file "${bam.originalFile.name}" with BAI file "${bai.originalFile.name}".`, 'success');
         } else {
             invalidFiles.push(bam.originalFile);
             if (logWarnings) {
-                console.warn(`Corresponding BAI file not found for BAM file: ${bam.originalFile.name}`);
+                logMessage(`Corresponding BAI file not found for BAM file: ${bam.originalFile.name}`, 'warning');
             }
         }
     });
@@ -47,9 +56,11 @@ export function validateFiles(selectedFiles, logWarnings = true) {
     baiMap.forEach((bai, baseName) => {
         invalidFiles.push(bai.originalFile);
         if (logWarnings) {
-            console.warn(`Corresponding BAM file not found for BAI file: ${bai.originalFile.name}`);
+            logMessage(`Corresponding BAM file not found for BAI file: ${bai.originalFile.name}`, 'warning');
         }
     });
+
+    logMessage(`File validation completed. ${matchedPairs.length} matched pair(s) and ${invalidFiles.length} invalid file(s) found.`, 'info');
 
     return { matchedPairs, invalidFiles };
 }

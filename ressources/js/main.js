@@ -21,6 +21,7 @@ import {
 } from './uiUtils.js';
 import { initializeFileSelection } from './fileSelection.js';
 import { initializeServerLoad } from './serverLoad.js';
+import { logMessage, initializeLogging } from './log.js'; // Import logging functions
 
 /**
  * Initializes the application by setting up event listeners and dynamic content.
@@ -38,6 +39,10 @@ async function initializeApp() {
 
     // Initialize UI Utilities (includes toggle functionality)
     initializeUIUtils();
+
+    // Initialize Logging System
+    initializeLogging();
+    logMessage('Application initialized.', 'info');
 
     // Check and show disclaimer modal or indicator based on acknowledgment
     checkAndShowDisclaimer();
@@ -172,6 +177,7 @@ async function initializeApp() {
             setTimeout(() => {
                 copyIcon.textContent = '📋'; // Revert icon back
             }, 2000);
+            logMessage(`Shareable link for Job ID ${jobId} copied to clipboard.`, 'info');
         });
 
         shareContainer.appendChild(shareLink);
@@ -179,6 +185,7 @@ async function initializeApp() {
 
         // Append to jobInfoDiv
         jobInfoDiv.appendChild(shareContainer);
+        logMessage(`Shareable link generated for Job ID ${jobId}.`, 'info');
     }
 
     /**
@@ -205,6 +212,7 @@ async function initializeApp() {
 
                 // Add to displayed cohorts
                 displayedCohorts.add(data.cohort_id);
+                logMessage(`Cohort ${data.cohort_id} displayed in UI.`, 'info');
             }
 
             // Determine where to append job info
@@ -222,7 +230,7 @@ async function initializeApp() {
 
             targetContainer.appendChild(jobInfo);
 
-            console.log(`Status fetched: ${data.status}`);
+            logMessage(`Status fetched for Job ID ${jobId}: ${data.status}`, 'info');
 
             if (data.status === 'completed') {
                 // On Complete
@@ -231,22 +239,22 @@ async function initializeApp() {
                 clearCountdown();
                 jobQueuePositionDiv.innerHTML = '';
                 serverLoad.updateServerLoad();
+                logMessage(`Job ID ${jobId} completed successfully.`, 'success');
             } else if (data.status === 'failed') {
                 // On Error
                 const errorMessage = data.error || 'Job failed.';
                 displayError(errorMessage);
-                console.error(`Job failed with error: ${errorMessage}`);
+                logMessage(`Job ID ${jobId} failed with error: ${errorMessage}`, 'error');
                 hideSpinner();
                 clearCountdown();
                 jobQueuePositionDiv.innerHTML = '';
                 serverLoad.updateServerLoad();
             } else {
                 // Job is still processing
-                console.log(`Job is in status: ${data.status}`);
+                logMessage(`Job ID ${jobId} is currently ${data.status}.`, 'info');
             }
         } catch (error) {
-            console.error('Error fetching job status:', error);
-            displayError(`Error fetching job status: ${error.message}`);
+            logMessage(`Error fetching job status for Job ID ${jobId}: ${error.message}`, 'error');
             hideSpinner();
             clearCountdown();
         }
@@ -272,6 +280,7 @@ async function initializeApp() {
             const jobInfo = document.createElement('div');
             jobInfo.innerHTML = `Loading job details for Job ID: <strong>${jobId}</strong>`;
             jobInfoDiv.appendChild(jobInfo);
+            logMessage(`Loading details for Job ID ${jobId}.`, 'info');
 
             // Generate and display the shareable link
             displayShareableLink(jobId);
@@ -294,39 +303,40 @@ async function initializeApp() {
                     if (statusElement) {
                         statusElement.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
                     }
-                    console.log(`Status updated to: ${status}`);
+                    logMessage(`Status updated to ${status} for Job ID ${jobId}.`, 'info');
                 },
                 () => {
                     // On Complete
                     displayDownloadLink(jobId);
                     hideSpinner();
                     clearCountdown();
-                    console.log('Spinner and countdown hidden');
+                    logMessage(`Job ID ${jobId} has been completed.`, 'success');
                     jobQueuePositionDiv.innerHTML = '';
                     serverLoad.updateServerLoad();
                 },
                 (errorMessage) => {
                     // On Error
                     displayError(errorMessage);
-                    console.error(`Job ${jobId} failed with error: ${errorMessage}`);
+                    logMessage(`Job ID ${jobId} encountered an error: ${errorMessage}`, 'error');
                     hideSpinner();
                     clearCountdown();
-                    console.log('Spinner and countdown hidden due to error');
                     jobQueuePositionDiv.innerHTML = '';
                     serverLoad.updateServerLoad();
                 },
                 () => {
                     // onPoll Callback to reset countdown
                     resetCountdown();
-                    console.log('Countdown reset to 20 seconds');
+                    logMessage(`Countdown reset for polling Job ID ${jobId}.`, 'info');
                 },
                 (queueData) => {
                     // onQueueUpdate callback
                     const { position_in_queue, total_jobs_in_queue, status } = queueData;
                     if (position_in_queue) {
                         jobQueuePositionDiv.innerHTML = `Position in Queue: <strong>${position_in_queue}</strong> out of <strong>${total_jobs_in_queue}</strong>`;
+                        logMessage(`Job ID ${jobId} is position ${position_in_queue} out of ${total_jobs_in_queue} in the queue.`, 'info');
                     } else if (status) {
                         jobQueuePositionDiv.innerHTML = `${status}`;
+                        logMessage(`Job ID ${jobId} queue status: ${status}.`, 'info');
                     } else {
                         jobQueuePositionDiv.innerHTML = '';
                     }
@@ -337,8 +347,7 @@ async function initializeApp() {
 
             hideSpinner();
         } catch (error) {
-            console.error('Error loading job from URL:', error);
-            displayError(`Error loading job: ${error.message}`);
+            logMessage(`Error loading Job ID ${jobId}: ${error.message}`, 'error');
             hideSpinner();
         }
     }
@@ -370,7 +379,7 @@ async function initializeApp() {
 
         jobStatusDiv.appendChild(document.createElement('br'));
         jobStatusDiv.appendChild(downloadLink);
-        console.log('Download link appended to jobStatusDiv');
+        logMessage(`Download link generated for Job ID ${jobId}.`, 'info');
     }
 
     /**
@@ -379,6 +388,7 @@ async function initializeApp() {
     submitBtn.addEventListener('click', async () => {
         if (selectedFiles.length === 0) {
             displayError('No files selected. Please upload BAM and BAI files.');
+            logMessage('Attempted to submit job without selecting files.', 'warning');
             return;
         }
 
@@ -395,7 +405,7 @@ async function initializeApp() {
             // Show spinner and initialize countdown
             showSpinner();
             startCountdown();
-            console.log('Spinner displayed and countdown started');
+            logMessage('Job submission started.', 'info');
 
             // Initialize Aioli and validate selected files
             const CLI = await initializeAioli();
@@ -403,12 +413,12 @@ async function initializeApp() {
 
             if (invalidFiles.length > 0) {
                 displayError(`Some files were invalid and not added: ${invalidFiles.map(f => f.name).join(', ')}`);
-                console.warn('Invalid files detected.');
+                logMessage('Invalid files detected during submission.', 'warning');
             }
 
             if (matchedPairs.length === 0) {
                 displayError('No valid BAM and BAI file pairs found for submission.');
-                console.warn('No valid file pairs.');
+                logMessage('No valid file pairs found for submission.', 'warning');
                 hideSpinner();
                 clearCountdown();
                 return;
@@ -431,7 +441,7 @@ async function initializeApp() {
                     try {
                         const cohortData = await createCohort(cohortAlias, passphrase); // Pass alias and passphrase
                         cohortId = cohortData.cohort_id; // Retrieve cohort_id from response
-                        console.log(`Cohort created with ID: ${cohortId}`);
+                        logMessage(`Cohort created with ID: ${cohortId}`, 'info');
 
                         cohortSection = document.createElement('div');
                         cohortSection.id = `cohort-${cohortId}`;
@@ -443,16 +453,17 @@ async function initializeApp() {
 
                         cohortSection.appendChild(cohortInfo);
                         cohortsContainer.appendChild(cohortSection);
+                        logMessage(`Cohort section created for Cohort ID: ${cohortId}`, 'info');
                     } catch (cohortError) {
                         // Handle cohort creation error
                         displayError(`Cohort Creation Failed: ${cohortError.message}`);
-                        console.error('Cohort creation failed:', cohortError);
+                        logMessage(`Cohort creation failed: ${cohortError.message}`, 'error');
                         hideSpinner();
                         clearCountdown();
                         return;
                     }
                 } else {
-                    console.log('Cohort Alias not provided. Proceeding without cohort creation.');
+                    logMessage('Cohort Alias not provided. Proceeding without cohort creation.', 'info');
                 }
             }
 
@@ -464,9 +475,9 @@ async function initializeApp() {
 
                 // Extract region and detect assembly
                 const { subsetBamAndBaiBlobs, detectedAssembly, region } = await extractRegionAndIndex(CLI, pair);
-                console.log('Subset BAM and BAI Blobs:', subsetBamAndBaiBlobs);
-                console.log('Detected Assembly:', detectedAssembly);
-                console.log('Region used:', region);
+                logMessage('Subset BAM and BAI Blobs created.', 'info');
+                logMessage(`Detected Assembly: ${detectedAssembly}`, 'info');
+                logMessage(`Region used: ${region}`, 'info');
 
                 // Prepare FormData with subsetted BAM and BAI files
                 const formData = new FormData();
@@ -492,15 +503,17 @@ async function initializeApp() {
                 // Add email and cohort information if available
                 if (email) {
                     formData.append('email', email);
+                    logMessage(`Email ${email} added to job submission.`, 'info');
                 }
                 if (cohortId) {
                     formData.append('cohort_id', cohortId);
+                    logMessage(`Cohort ID ${cohortId} added to job submission.`, 'info');
                 }
 
                 // Submit job to API
                 try {
                     const data = await submitJobToAPI(formData);
-                    console.log('Job Submission Response:', data);
+                    logMessage(`Job submitted successfully! Job ID: ${data.job_id}`, 'success');
 
                     jobIds.push(data.job_id);
 
@@ -542,39 +555,41 @@ async function initializeApp() {
                             if (statusElement) {
                                 statusElement.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
                             }
-                            console.log(`Status updated to: ${status}`);
+                            logMessage(`Status updated to: ${status} for Job ID ${data.job_id}.`, 'info');
                         },
                         () => {
                             // On Complete
                             displayDownloadLink(data.job_id);
                             hideSpinner();
                             clearCountdown();
-                            console.log('Spinner and countdown hidden');
+                            logMessage(`Spinner and countdown hidden for Job ID ${data.job_id}.`, 'info');
                             jobQueuePositionDiv.innerHTML = '';
                             serverLoad.updateServerLoad();
                         },
                         (errorMessage) => {
                             // On Error
                             displayError(errorMessage);
-                            console.error(`Job failed with error: ${errorMessage}`);
+                            logMessage(`Job ID ${data.job_id} failed with error: ${errorMessage}`, 'error');
                             hideSpinner();
                             clearCountdown();
-                            console.log('Spinner and countdown hidden due to error');
+                            logMessage(`Spinner and countdown hidden due to error for Job ID ${data.job_id}.`, 'info');
                             jobQueuePositionDiv.innerHTML = '';
                             serverLoad.updateServerLoad();
                         },
                         () => {
                             // onPoll Callback to reset countdown
                             resetCountdown();
-                            console.log('Countdown reset to 20 seconds');
+                            logMessage('Countdown reset to 20 seconds.', 'info');
                         },
                         (queueData) => {
                             // onQueueUpdate callback
                             const { position_in_queue, total_jobs_in_queue, status } = queueData;
                             if (position_in_queue) {
                                 jobQueuePositionDiv.innerHTML = `Position in Queue: <strong>${position_in_queue}</strong> out of <strong>${total_jobs_in_queue}</strong>`;
+                                logMessage(`Job ID ${data.job_id} is position ${position_in_queue} out of ${total_jobs_in_queue} in the queue.`, 'info');
                             } else if (status) {
                                 jobQueuePositionDiv.innerHTML = `${status}`;
+                                logMessage(`Job ID ${data.job_id} queue status: ${status}.`, 'info');
                             } else {
                                 jobQueuePositionDiv.innerHTML = '';
                             }
@@ -585,7 +600,7 @@ async function initializeApp() {
                 } catch (jobError) {
                     // Handle individual job submission error
                     displayError(`Job Submission Failed: ${jobError.message}`);
-                    console.error('Job submission failed:', jobError);
+                    logMessage(`Job submission failed: ${jobError.message}`, 'error');
                     hideSpinner();
                     clearCountdown();
                     return;
@@ -594,26 +609,20 @@ async function initializeApp() {
 
             selectedFiles = [];
             displaySelectedFiles();
+            logMessage('All selected files have been submitted.', 'info');
 
         } catch (err) {
-            console.error('Error during job submission:', err);
-            displayError(`Error: ${err.message}`);
-
-            // Hide spinner and countdown in case of error
+            logMessage(`Error during job submission: ${err.message}`, 'error');
             hideSpinner();
             clearCountdown();
-            console.log('Spinner and countdown hidden due to exception');
-
-            // Clear job queue position
+            logMessage('Spinner and countdown hidden due to exception.', 'info');
             jobQueuePositionDiv.innerHTML = '';
-
-            // Update server load indicator after error
             serverLoad.updateServerLoad();
         } finally {
             // Reset the button
             submitBtn.disabled = false;
             submitBtn.textContent = 'Submit Job';
-            console.log('Submit button re-enabled and text reset to "Submit Job"');
+            logMessage('Submit button re-enabled and text reset to "Submit Job".', 'info');
         }
     });
 
@@ -623,6 +632,7 @@ async function initializeApp() {
     extractBtn.addEventListener('click', async () => {
         if (selectedFiles.length === 0) {
             displayError('No files selected. Please upload BAM and BAI files.');
+            logMessage('Attempted to extract region without selecting files.', 'warning');
             return;
         }
 
@@ -638,21 +648,21 @@ async function initializeApp() {
 
             if (invalidFiles.length > 0) {
                 displayError(`Some files were invalid and not added: ${invalidFiles.map(f => f.name).join(', ')}`);
-                console.warn('Invalid files detected.');
+                logMessage('Invalid files detected during region extraction.', 'warning');
             }
 
             if (matchedPairs.length === 0) {
                 displayError('No valid BAM and BAI file pairs found for extraction.');
-                console.warn('No valid file pairs.');
+                logMessage('No valid file pairs found for region extraction.', 'warning');
                 return;
             }
 
             // Extract region and detect assembly for each pair
             for (const pair of matchedPairs) {
                 const { subsetBamAndBaiBlobs, detectedAssembly, region } = await extractRegionAndIndex(CLI, pair);
-                console.log('Subset BAM and BAI Blobs:', subsetBamAndBaiBlobs);
-                console.log('Detected Assembly:', detectedAssembly);
-                console.log('Region used:', region);
+                logMessage('Subset BAM and BAI Blobs created during extraction.', 'info');
+                logMessage(`Detected Assembly: ${detectedAssembly}`, 'info');
+                logMessage(`Region used: ${region}`, 'info');
 
                 // Update the region select dropdown based on detected assembly
                 if (detectedAssembly) {
@@ -663,12 +673,14 @@ async function initializeApp() {
                         `Detected reference assembly: ${detectedAssembly.toUpperCase()}. Please confirm or select manually.`,
                         'info'
                     );
+                    logMessage(`Reference assembly detected as ${detectedAssembly}.`, 'info');
                 } else {
                     // Prompt the user to select manually
                     displayMessage(
                         'Could not automatically detect the reference assembly. Please select it manually.',
                         'error'
                     );
+                    logMessage('Automatic assembly detection failed. Prompting user to select manually.', 'warning');
                     regionSelect.value = ''; // Reset selection
                     return;
                 }
@@ -710,6 +722,8 @@ async function initializeApp() {
                     const divider = document.createElement('hr');
                     divider.classList.add('separator'); // Applies the styles from buttons.css
                     regionOutputDiv.appendChild(divider);
+
+                    logMessage(`Download links provided for ${subsetName} and ${subsetBaiName}.`, 'info');
                 });
             }
 
@@ -717,13 +731,14 @@ async function initializeApp() {
             setTimeout(() => {
                 document.querySelectorAll('#regionOutput a').forEach((link) => {
                     URL.revokeObjectURL(link.href);
-                    console.log(`Object URL revoked for ${link.download}`);
+                    logMessage(`Object URL revoked for ${link.download}.`, 'info');
                 });
             }, 60000); // Revoke after 60 seconds
 
+            logMessage('Region extraction completed.', 'info');
         } catch (err) {
             displayError(`Error: ${err.message}`);
-            console.error('Error during region extraction and indexing:', err);
+            logMessage(`Error during region extraction: ${err.message}`, 'error');
         }
     });
 
@@ -735,6 +750,7 @@ async function initializeApp() {
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
             bamFilesInput.click();
+            logMessage('File upload dialog triggered via keyboard.', 'info');
         }
     });
 

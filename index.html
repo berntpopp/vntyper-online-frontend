@@ -35,6 +35,7 @@
   <link rel="stylesheet" href="ressources/css/faq.css">
   <link rel="stylesheet" href="ressources/css/citations.css">
   <link rel="stylesheet" href="ressources/css/footer.css">
+  <link rel="stylesheet" href="ressources/css/log.css">
   
   <!-- Intro.js JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0/intro.min.js" integrity="sha512-+hhhH0eKqYCmXsO28OJE1HHWkgNYwlpceBwmeeDEt5jpCL8jOuqAVunXlZ/WZ4qIluJdwlcv4f5BUIQ/l1w9iw==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
@@ -57,10 +58,10 @@
   <script type="module" src="ressources/js/modal.js" defer></script>
   <script type="module" src="ressources/js/populateRegions.js" defer></script>
   <script type="module" src="ressources/js/uiUtils.js" defer></script>
-
+  
   <!-- Version and Current Year Script -->
-  <script src="ressources/js/version.js" defer></script>
-
+  <script type="module" src="ressources/js/version.js" defer></script>
+  
   <!-- Schema.org JSON-LD -->
   <script type="application/ld+json">
     {
@@ -376,6 +377,25 @@
       </div>
     </div>
   </div>
+
+  <!-- Logging Panel -->
+  <div id="logContainer" class="hidden" aria-label="Application Logs">
+    <div class="log-header">
+        <h2>Logs</h2>
+        <div>
+            <button class="clear-log-btn" aria-label="Clear Logs">🗑️</button>
+            <button class="close-log-btn" aria-label="Close Logs">✖️</button>
+        </div>
+    </div>
+    <div class="log-content" id="logContent" role="log" aria-live="polite" aria-atomic="false">
+        <!-- Log entries will be appended here -->
+    </div>
+  </div>
+
+  <!-- Toggle Logs Button -->
+  <button id="toggleLogBtn" aria-controls="logContainer" aria-expanded="false" aria-label="Toggle Logs Panel">
+    📜 Logs
+  </button>
 
 </body>
 </html>
