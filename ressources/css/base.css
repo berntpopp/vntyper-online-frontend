@@ -191,6 +191,7 @@ select:focus,
   /* Adjust font sizes for readability */
   body {
       margin: 20px;
+      font-size: 16px; /* Increased base font size */
   }
 
   .header h2 {
@@ -203,6 +204,9 @@ select:focus,
 
   .navbar-link {
       font-size: 1.1em;
+      padding: 8px 0;
+      width: 100%;
+      display: block;
   }
 
   /* Adjust logo size */
@@ -221,9 +225,11 @@ select:focus,
   /* Adjust input fields */
   .form-input, .form-select {
       width: 100%;
-      padding: 8px;
+      padding: 10px;
       font-size: 1em;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
   }
 
   /* Adjust spinner size */
@@ -235,5 +241,20 @@ select:focus,
   /* Adjust modal content */
   .modal-content {
       padding: 20px;
+  }
+
+  /* Adjust citations section font size */
+  .citations-section {
+      padding: 10px;
+  }
+
+  .citation-item p {
+      font-size: 0.95em;
+  }
+
+  /* Adjust footer links */
+  .footer-links a {
+      display: block;
+      margin: 5px 0;
   }
 }

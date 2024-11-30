@@ -13,6 +13,7 @@
     justify-content: space-between;
     padding: 0;
     width: 100%;
+    position: relative; /* Ensure positioning context for absolute elements */
 }
 
 .header {
@@ -25,15 +26,57 @@
     width: 80px;
     height: 80px;
     margin-right: 20px;
+    animation: logoPulse 3s ease-in-out infinite; /* Applies the pulse animation */
+    transform-origin: center;
 }
 
 .header h2 {
     font-size: 32px;
     margin: 0;
     color: #333;
+    opacity: 0; /* Start invisible */
+    animation: appNameFadeInSlideIn 1.5s ease-out forwards; /* Applies fade-in and slide-in */
+    animation-delay: 0.5s; /* Delays animation for sequential effect */
 }
 
-/* Navigation Menu Styles */
+/* --- Keyframe Animations --- */
+
+/* Logo Pulse Animation */
+@keyframes logoPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* App Name Fade-In and Slide-In Animation */
+@keyframes appNameFadeInSlideIn {
+    0% { opacity: 0; transform: translateX(-20px); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Optional: Vendor Prefixes for Better Compatibility */
+@-webkit-keyframes logoPulse {
+    0% { -webkit-transform: scale(1); }
+    50% { -webkit-transform: scale(1.05); }
+    100% { -webkit-transform: scale(1); }
+}
+
+@-webkit-keyframes appNameFadeInSlideIn {
+    0% { opacity: 0; -webkit-transform: translateX(-20px); }
+    100% { opacity: 1; -webkit-transform: translateX(0); }
+}
+
+.logo {
+    -webkit-animation: logoPulse 3s ease-in-out infinite;
+    animation: logoPulse 3s ease-in-out infinite;
+}
+
+.header h2 {
+    -webkit-animation: appNameFadeInSlideIn 1.5s ease-out forwards;
+    animation: appNameFadeInSlideIn 1.5s ease-out forwards;
+}
+
+/* --- Navigation Menu Styles --- */
 
 .navbar-menu {
     list-style: none;
@@ -96,17 +139,23 @@
 /* Responsive Styles */
 
 @media (max-width: 768px) {
+    /* Show hamburger button */
+    .navbar-toggle {
+        display: block;
+    }
 
     /* Hide navbar menu by default */
     .navbar-menu {
-        position: relative;
-        top: 0;
+        position: absolute;
+        top: 100%;
         left: 0;
         right: 0;
         background-color: #fff;
         flex-direction: column;
         align-items: flex-start;
-        padding: 10px 10px;
+        padding: 10px 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        display: none; /* Hidden initially */
     }
 
     .navbar-menu li {
@@ -117,4 +166,18 @@
     .navbar-menu.active {
         display: flex;
     }
+}
+
+/* --- Keyframe Animations Continuation --- */
+
+/* Ensuring the animations are defined before being used */
+@keyframes logoPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes appNameFadeInSlideIn {
+    0% { opacity: 0; transform: translateX(-20px); }
+    100% { opacity: 1; transform: translateX(0); }
 }
