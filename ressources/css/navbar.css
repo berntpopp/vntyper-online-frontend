@@ -146,16 +146,14 @@
 
     /* Hide navbar menu by default */
     .navbar-menu {
-        position: absolute;
-        top: 100%;
+        position: relative;
+        top: 0;
         left: 0;
         right: 0;
         background-color: #fff;
         flex-direction: column;
         align-items: flex-start;
-        padding: 10px 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        display: none; /* Hidden initially */
+        padding: 10px 10px;
     }
 
     .navbar-menu li {
