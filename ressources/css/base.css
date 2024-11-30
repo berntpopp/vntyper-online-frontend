@@ -86,3 +86,101 @@ body {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* --- Tooltip Styles --- */
+
+[data-tooltip] {
+  position: relative;
+  cursor: pointer; /* Indicate interactivity */
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%; /* Position above the element */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 6px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s;
+  z-index: 10;
+}
+
+[data-tooltip]::before {
+  content: '';
+  position: absolute;
+  bottom: 115%; /* Slightly above the tooltip */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s;
+  z-index: 10;
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:focus::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+[data-tooltip]:hover::before,
+[data-tooltip]:focus::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Ensure the tooltip appears above other elements */
+.modal, .dropdown-menu {
+  z-index: 1000;
+}
+
+/* --- Focus Styles for Accessibility --- */
+
+/* Ensure that all focusable elements have a visible outline */
+button:focus, 
+input:focus, 
+select:focus, 
+[tabindex]:focus {
+  outline: 2px solid #0a9396; /* Customize color as needed */
+  outline-offset: 2px;
+}
+
+/* Remove default outline and add custom focus styles for tooltip-enabled elements */
+[data-tooltip]:focus {
+  outline: none; /* Remove default outline */
+}
+
+/* Enhanced Styles for Tooltip-Enabled Elements */
+[data-tooltip]:focus::after,
+[data-tooltip]:focus::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* --- Responsive Adjustments --- */
+
+@media (max-width: 600px) {
+  .button-group {
+      flex-direction: column;     /* Stacks buttons vertically on small screens */
+      align-items: stretch;
+  }
+
+  .button {
+      width: 100%;                /* Buttons take full width on small screens */
+      text-align: center;         /* Centers text within buttons */
+  }
+
+  .additional-inputs-container {
+      margin-top: 15px;
+  }
+}

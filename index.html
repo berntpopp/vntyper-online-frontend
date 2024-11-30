@@ -110,21 +110,21 @@
 
         <!-- Navigation Links -->
         <ul class="navbar-menu">
-          <li><a href="#" class="navbar-link" data-modal="faqModal">FAQ</a></li>
-          <li><a href="#" id="startTutorialBtn" class="navbar-link">Tutorial</a></li>
-          <li><a href="/api/docs" class="navbar-link" target="_blank" aria-label="OpenAPI Documentation">API</a></li>
+          <li><a href="#" class="navbar-link" data-modal="faqModal" data-tooltip="View Frequently Asked Questions">FAQ</a></li>
+          <li><a href="#" id="startTutorialBtn" class="navbar-link" data-tooltip="Start the interactive tutorial">Tutorial</a></li>
+          <li><a href="/api/docs" class="navbar-link" target="_blank" aria-label="OpenAPI Documentation" data-tooltip="View the API documentation">API</a></li>
           
           <!-- Server Load Indicator -->
           <li id="serverLoadIndicator" class="server-load-indicator">
-            <a href="#" class="navbar-link" aria-label="Current Server Load">
+            <a href="#" class="navbar-link" aria-label="Current Server Load" data-tooltip="Shows the number of jobs currently in the queue">
               <span id="serverLoadText">Jobs: </span>
               <span id="totalJobsInQueue" class="load-count">0</span>
             </a>
           </li>
 
           <!-- Disclaimer Indicator -->
-          <li id="disclaimerIndicator"">
-            <a href="#" id="disclaimerLink" class="navbar-link" aria-label="View Disclaimer Status">
+          <li id="disclaimerIndicator">
+            <a href="#" id="disclaimerLink" class="navbar-link" aria-label="View Disclaimer Status" data-tooltip="Check the disclaimer status">
               <span id="disclaimerStatusIcon" class="status-icon" aria-hidden="true">✔️</span>
               <span id="disclaimerStatusText" class="status-text">Disclaimer</span>
             </a>
@@ -134,7 +134,11 @@
     </nav>
 
     <!-- Drag & Drop File Input Container -->
-    <div class="drag-drop-container" data-intro="Upload your BAM and BAI files here. Each BAM file should have a corresponding BAI file." data-step="1">
+    <div 
+      class="drag-drop-container" 
+      data-intro="Upload your BAM and BAI files here. Each BAM file should have a corresponding BAI file." 
+      data-step="1"
+    >
       <label class="drag-drop-label" for="bamFiles">Upload sequencing files:</label>
       
       <div
@@ -143,6 +147,7 @@
         tabindex="0"
         role="button"
         aria-label="File Upload Area"
+        data-tooltip="Click or drag and drop your BAM and BAI files here"
       >
         <p>Drag & drop corresponding BAM and BAI files.</p>
         <input
@@ -151,28 +156,65 @@
           accept=".bam,.bai"
           multiple
           class="drag-drop-input"
+          aria-describedby="fileList"
         />
         <!-- Container to display selected files -->
-        <div id="fileList" class="file-list">
+        <div id="fileList" class="file-list" aria-live="polite">
           <p>No files selected.</p>
         </div>
       </div>
     </div>
 
     <!-- Region Select Dropdown -->
-    <div class="region-select" data-intro="Select the reference assembly used for your alignment. The region will be selected accordingly. If no region is selected the default behavior is to guess the assembly from the fields provided." data-step="2">
+    <div 
+      class="region-select" 
+      data-intro="Select the reference assembly used for your alignment. The region will be selected accordingly. If no region is selected the default behavior is to guess the assembly from the fields provided." 
+      data-step="2"
+    >
       <label for="region">Select reference:</label>
-      <select id="region" class="form-select">
+      <select 
+        id="region" 
+        class="form-select" 
+        data-tooltip="Choose the reference assembly used for alignment. If unsure, select 'Guess assembly'."
+        aria-label="Select Reference Assembly"
+      >
         <option value="guess" selected>Guess assembly</option>
         <!-- Options will be populated dynamically -->
       </select>
     </div>
 
     <!-- Button Group: Submit, Extract, Show Options -->
-    <div class="button-group" data-intro="Submit your job, extract regions, or provide additional optional inputs." data-step="3">
-      <button id="submitBtn" class="submit-button button" data-intro="Click here to submit your job for analysis. The MUC1 read data will be extracted locally on your devices browser and only this subset will be uploaded to the server for analysis." data-step="3">Submit Job</button>
-      <button id="extractBtn" class="extract-button button" data-intro="Optional: Use this button to extract MUC1 regions from your BAM files in your browser and save the subset BAM file." data-step="4">Extract Region</button>
-      <button id="toggleOptionalInputs" class="toggle-button button" aria-expanded="false" aria-controls="additionalInputs" data-intro="Show additional options for job submission." data-step="5">Show Options</button>
+    <div 
+      class="button-group" 
+      data-intro="Submit your job, extract regions, or provide additional optional inputs." 
+      data-step="3"
+    >
+      <button 
+        id="submitBtn" 
+        class="submit-button button" 
+        data-tooltip="Click here to submit your job for analysis.."
+        aria-label="Submit Job"
+      >
+        Submit Job
+      </button>
+      <button 
+        id="extractBtn" 
+        class="extract-button button" 
+        data-tooltip="Optional: Extract MUC1 regions from BAMs in your browser and save locally."
+        aria-label="Extract Region"
+      >
+        Extract Region
+      </button>
+      <button 
+        id="toggleOptionalInputs" 
+        class="toggle-button button" 
+        aria-expanded="false" 
+        aria-controls="additionalInputs" 
+        data-tooltip="Show additional options for job submission."
+        aria-label="Show Options"
+      >
+        Show Options
+      </button>
     </div>
 
     <!-- Optional Inputs: Hidden by Default -->
@@ -209,7 +251,11 @@
     </div>
 
     <!-- Output and Error Containers -->
-    <div id="output" data-intro="Here you will see the status and results of your job." data-step="6">
+    <div 
+      id="output" 
+      data-intro="Here you will see the status and results of your job." 
+      data-step="6"
+    >
       <!-- Placeholder Message -->
       <div id="placeholderMessage" class="placeholder-message">
         Your results will appear here after job submission.
@@ -256,9 +302,9 @@
       
       <!-- Dynamic Footer Links -->
       <div class="footer-links" id="footerLinks">
-        <a href="#" class="navbar-link" data-modal="faqModal">FAQ</a>
-        <a href="#citations">Citations</a>
-        <a href="https://github.com/berntpopp/vntyper-online-backend" class="navbar-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">GitHub</a>
+        <a href="#" class="navbar-link" data-modal="faqModal" data-tooltip="View Frequently Asked Questions">FAQ</a>
+        <a href="#citations" data-tooltip="Jump to citations">Citations</a>
+        <a href="https://github.com/berntpopp/vntyper-online-backend" class="navbar-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository" data-tooltip="Visit the GitHub repository">GitHub</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -271,9 +317,9 @@
       </p>
       <!-- Added Imprint and Contact Links Below Version Info -->
       <p>
-        <a href="impressum_en.html" target="_blank" aria-label="Imprint">Imprint</a> | 
-        <a href="contact.html" target="_blank" aria-label="Contact">Contact</a> | 
-        <a href="https://github.com/berntpopp/vntyper-online-backend" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">GitHub</a>
+        <a href="impressum_en.html" target="_blank" aria-label="Imprint" data-tooltip="View the imprint">Imprint</a> | 
+        <a href="contact.html" target="_blank" aria-label="Contact" data-tooltip="Contact us">Contact</a> | 
+        <a href="https://github.com/berntpopp/vntyper-online-backend" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository" data-tooltip="Visit the GitHub repository">GitHub</a>
       </p>
     </div>
   </footer>
@@ -292,7 +338,7 @@
         <strong>Usage Guidelines</strong><br>
         The results provided by this tool should not be used as a basis for diagnosis or treatment without consulting a healthcare professional.
       </p>
-      <button id="agreeBtn" class="agree-button">I Agree</button>
+      <button id="agreeBtn" class="agree-button" data-tooltip="Agree to the disclaimer">I Agree</button>
     </div>
   </div>
 
@@ -305,7 +351,7 @@
       <div id="faqDescription" class="faq-container">
         <div class="faq-item">
           <h3>What is vntyper-online?</h3>
-          <p>vntyper-online offers online MUC1 VNTR genotyping using the vntyper algorithm.</p>
+          <p>The website vntyper-online offers online MUC1 VNTR genotyping using the vntyper algorithm. The MUC1 read data will be extracted locally on your device's browser from the BAM files you select and only this subset will be uploaded to the server for analysis</p>
         </div>
         <div class="faq-item">
           <h3>How do I upload my data?</h3>

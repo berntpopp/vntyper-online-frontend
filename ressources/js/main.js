@@ -158,6 +158,7 @@ async function initializeApp() {
         shareLink.value = generateShareableLink(jobId);
         shareLink.readOnly = true;
         shareLink.classList.add('share-link-input');
+        shareLink.setAttribute('aria-label', `Shareable link for Job ID ${jobId}`);
 
         // Add copy icon/button
         const copyIcon = document.createElement('button');
@@ -365,6 +366,7 @@ async function initializeApp() {
         downloadLink.textContent = 'Download vntyper results';
         downloadLink.classList.add('download-link', 'download-button');
         downloadLink.target = '_blank'; // Open in a new tab
+        downloadLink.setAttribute('aria-label', `Download results for Job ID ${jobId}`);
 
         jobStatusDiv.appendChild(document.createElement('br'));
         jobStatusDiv.appendChild(downloadLink);
@@ -685,6 +687,7 @@ async function initializeApp() {
                     downloadBamLink.download = subsetName;
                     downloadBamLink.textContent = `Download ${subsetName}`;
                     downloadBamLink.classList.add('download-link', 'download-button');
+                    downloadBamLink.setAttribute('aria-label', `Download subset BAM file ${subsetName}`);
 
                     // Download Link for BAI
                     const downloadBaiLink = document.createElement('a');
@@ -692,10 +695,11 @@ async function initializeApp() {
                     downloadBaiLink.download = subsetBaiName;
                     downloadBaiLink.textContent = `Download ${subsetBaiName}`;
                     downloadBaiLink.classList.add('download-link', 'download-button');
+                    downloadBaiLink.setAttribute('aria-label', `Download subset BAI file ${subsetBaiName}`);
 
                     // Create a container for the download links
                     const linkContainer = document.createElement('div');
-                    linkContainer.classList.add('download-container', 'mb-2'); // Ensure 'mb-2' is defined in your CSS or remove if unnecessary
+                    linkContainer.classList.add('download-container', 'mb-2'); /* Ensure 'mb-2' is defined in your CSS or remove if unnecessary */
                     linkContainer.appendChild(downloadBamLink);
                     linkContainer.appendChild(downloadBaiLink);
 
@@ -720,6 +724,17 @@ async function initializeApp() {
         } catch (err) {
             displayError(`Error: ${err.message}`);
             console.error('Error during region extraction and indexing:', err);
+        }
+    });
+
+    // Handle keyboard activation for the drop area
+    const dropArea = document.getElementById('dropArea');
+    const bamFilesInput = document.getElementById('bamFiles');
+
+    dropArea.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            bamFilesInput.click();
         }
     });
 
