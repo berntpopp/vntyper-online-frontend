@@ -644,6 +644,11 @@ async function initializeApp() {
                     formData.append('cohort_id', cohortId);
                     logMessage(`Cohort ID ${cohortId} added to job submission.`, 'info');
                 }
+                // Include passphrase in job submission if provided
+                if (passphrase) {
+                    formData.append('passphrase', passphrase);
+                    logMessage(`Passphrase added to job submission.`, 'info');
+                }
 
                 // Submit job to API
                 try {
