@@ -197,7 +197,12 @@ async function initializeApp() {
 
         if (cohortId) {
             const cohortSection = document.getElementById(`cohort-${cohortId}`);
-            cohortSection.appendChild(shareContainer);
+            if (cohortSection) { // FIX: Check if cohortSection exists
+                cohortSection.appendChild(shareContainer);
+            } else { // FIX: Fallback if cohortSection is not found
+                jobInfoDiv.appendChild(shareContainer);
+                logMessage(`Cohort section for Cohort ID ${cohortId} not found. Appended shareable link to jobInfoDiv.`, 'warning');
+            }
         } else {
             jobInfoDiv.appendChild(shareContainer);
         }
@@ -644,11 +649,12 @@ async function initializeApp() {
                     formData.append('cohort_id', cohortId);
                     logMessage(`Cohort ID ${cohortId} added to job submission.`, 'info');
                 }
-                // Include passphrase in job submission if provided
-                if (passphrase) {
-                    formData.append('passphrase', passphrase);
-                    logMessage(`Passphrase added to job submission.`, 'info');
-                }
+
+                // FIX: Include passphrase in job submission if provided
+                if (passphrase) { // FIX:
+                    formData.append('passphrase', passphrase); // FIX:
+                    logMessage(`Passphrase added to job submission.`, 'info'); // FIX:
+                } // FIX:
 
                 // Submit job to API
                 try {
@@ -800,7 +806,9 @@ async function initializeApp() {
         }
     });
 
-    // Handle keyboard activation for the drop area
+    /**
+     * Handles file upload dialog activation via keyboard.
+     */
     const dropArea = document.getElementById('dropArea');
     const bamFilesInput = document.getElementById('bamFiles');
 
@@ -814,9 +822,10 @@ async function initializeApp() {
 
     // Check URL for job_id or cohort_id on initial load
     checkURLForJobOrCohort();
-}
 
-// Initialize the application once the DOM is fully loaded
+/**
+ * Initialize the application once the DOM is fully loaded
+ */
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
 });
