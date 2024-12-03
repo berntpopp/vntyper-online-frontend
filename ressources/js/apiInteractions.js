@@ -257,7 +257,7 @@ export async function getCohortStatus(cohortId) {
     try {
         logMessage(`Fetching status for Cohort ID: ${cohortId}`, 'info');
 
-        const response = await fetch(`${window.CONFIG.API_URL}/cohort-status/${cohortId}/`);
+        const response = await fetch(`${window.CONFIG.API_URL}/cohort-status/?cohort_id=${cohortId}`);
         if (!response.ok) {
             let errorMessage = 'Failed to fetch cohort status.';
             try {
