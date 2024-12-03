@@ -1,6 +1,6 @@
 // frontend/resources/js/jobManager.js
 
-import { getCohortStatus, pollJobStatusAPI, getJobStatus } from './apiInteractions.js';
+import { getCohortStatus, pollJobStatusAPI, getJobStatus, pollCohortStatusAPI } from './apiInteractions.js';
 import { displayError, clearError } from './errorHandling.js';
 import { hideSpinner, clearCountdown, displayShareableLink, hidePlaceholderMessage } from './uiUtils.js';
 import { logMessage } from './log.js';

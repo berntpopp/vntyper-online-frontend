@@ -8,6 +8,7 @@ import {
     pollJobStatusAPI,
     getCohortStatus,
     createCohort,
+    pollCohortStatusAPI,
 } from './apiInteractions.js';
 import {
     initializeAioli,
