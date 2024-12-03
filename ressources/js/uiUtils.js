@@ -76,16 +76,16 @@ function generateShareableLink(jobId) {
 }
 
 /**
- * Displays the shareable link to the user within the jobInfoDiv.
- * Includes a copy link icon next to it.
+ * Displays the shareable link to the user within the specified container.
+ * Includes a copy link button next to it.
  * @param {string} jobId - The job identifier.
+ * @param {HTMLElement} targetContainer - The DOM element where the link should be appended.
  */
-export function displayShareableLink(jobId) {
+export function displayShareableLink(jobId, targetContainer) { // Updated to accept targetContainer
     hidePlaceholderMessage(); // Hide placeholder when displaying shareable link
 
-    const jobInfoDiv = document.getElementById('jobInfo');
-    if (!jobInfoDiv) {
-        logMessage('Job info div (#jobInfo) not found in the DOM.', 'warning');
+    if (!targetContainer) {
+        logMessage('Target container not provided for shareable link.', 'warning');
         return;
     }
 
@@ -110,26 +110,34 @@ export function displayShareableLink(jobId) {
     shareLink.classList.add('share-link-input');
     shareLink.setAttribute('aria-label', `Shareable link for Job ID ${jobId}`);
 
-    // Add copy icon/button
-    const copyIcon = document.createElement('button');
-    copyIcon.classList.add('copy-button');
-    copyIcon.setAttribute('aria-label', 'Copy link');
-    copyIcon.innerHTML = '📋'; // Using clipboard emoji as copy icon
-    copyIcon.addEventListener('click', () => {
-        shareLink.select();
-        document.execCommand('copy');
-        copyIcon.textContent = '✅'; // Change icon to indicate success
-        setTimeout(() => {
-            copyIcon.textContent = '📋'; // Revert icon back
-        }, 2000);
-        logMessage(`Shareable link for Job ID ${jobId} copied to clipboard.`, 'info');
+    // Add copy button
+    const copyButton = document.createElement('button');
+    copyButton.classList.add('copy-button');
+    copyButton.setAttribute('aria-label', 'Copy link');
+    copyButton.innerHTML = '📋'; // Using clipboard emoji as copy icon
+
+    // Event listener for copy functionality
+    copyButton.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(shareLink.value);
+            copyButton.innerHTML = '✅'; // Change icon to indicate success
+            logMessage(`Shareable link for Job ID ${jobId} copied to clipboard.`, 'info');
+
+            // Revert the icon back after 2 seconds
+            setTimeout(() => {
+                copyButton.innerHTML = '📋';
+            }, 2000);
+        } catch (err) {
+            logMessage(`Failed to copy shareable link for Job ID ${jobId}: ${err.message}`, 'error');
+            alert('Failed to copy the link. Please try manually.');
+        }
     });
 
     shareContainer.appendChild(shareLink);
-    shareContainer.appendChild(copyIcon);
+    shareContainer.appendChild(copyButton);
 
-    // Append to jobInfoDiv
-    jobInfoDiv.appendChild(shareContainer);
+    // Append to target container
+    targetContainer.appendChild(shareContainer);
     logMessage(`Shareable link generated for Job ID ${jobId}.`, 'info');
 }
 

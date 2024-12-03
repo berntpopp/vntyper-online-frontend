@@ -1,4 +1,4 @@
-// frontend/ressources/js/main.js
+// frontend/resources/js/main.js
 
 import { 
     validateFiles, 
@@ -41,13 +41,22 @@ import { logMessage, initializeLogging } from './log.js';
 import { fetchAndUpdateJobStatus, loadJobFromURL, displayDownloadLink } from './jobManager.js';
 
 /**
+ * Generates a default alias for cohorts without a user-provided alias.
+ * @returns {string} - A default cohort alias.
+ */
+function generateDefaultCohortAlias() {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    return `Cohort-${timestamp}`;
+}
+
+/**
  * Initializes the application by setting up event listeners and dynamic content.
  */
 async function initializeApp() {
     // Initialize modal and footer functionalities
     initializeModal();
-    initializeFooter(); // Initialize the actual footer
-    initializeDisclaimer(); // Initialize the disclaimer functionality
+    initializeFooter();
+    initializeDisclaimer();
 
     // Initialize other sections
     initializeFAQ();
@@ -79,10 +88,8 @@ async function initializeApp() {
     // Initialize server load monitoring
     const serverLoad = initializeServerLoad();
 
-    // Initialize cohorts container
-    const cohortsContainer = document.getElementById('cohortsContainer');
-
-    const displayedCohorts = new Set();
+    // Reference to output div
+    const outputDiv = document.getElementById('output');
 
     /**
      * Capitalizes the first letter of a string.
@@ -106,7 +113,7 @@ async function initializeApp() {
                 hideSpinner,
                 clearError,
                 clearMessage,
-                jobInfoDiv: cohortsContainer, // Display within cohorts container
+                jobInfoDiv: outputDiv, // Display in output div for individual jobs
                 jobStatusDiv: document.createElement('div'), // Placeholder
                 jobQueuePositionDiv: document.createElement('div'), // Placeholder
                 regionOutputDiv,
@@ -116,8 +123,8 @@ async function initializeApp() {
                 resetCountdown,
                 logMessage,
                 serverLoad,
-                displayedCohorts,
-                cohortsContainer
+                displayedCohorts: new Set(), // Initialize as empty Set
+                outputDiv
             });
         }
     }
@@ -134,7 +141,7 @@ async function initializeApp() {
 
         try {
             // Clear previous outputs and errors
-            cohortsContainer.innerHTML = '';
+            outputDiv.innerHTML = ''; // Clear individual job outputs
             regionOutputDiv.innerHTML = '';
             clearError();
             clearMessage();
@@ -168,45 +175,40 @@ async function initializeApp() {
             const passphrase = passphraseInput.value.trim() || null; // **Captured Passphrase**
 
             let cohortId = null;
-            let cohortSection = null; // **Reference to the current cohort section**
 
-            // Determine if batch submission is needed and cohort creation is desired
+            // **Always create a cohort when multiple files are submitted**
             if (matchedPairs.length > 1) {
-                // **Batch Submission: Cohort Creation Optional**
-                if (cohortAlias) {
-                    // Cohort Alias provided, attempt to create cohort
-                    // Passphrase is optional
-                    try {
-                        const cohortData = await createCohort(cohortAlias, passphrase); // Pass alias and passphrase
-                        cohortId = cohortData.cohort_id; // Retrieve cohort_id from response
-                        logMessage(`Cohort created with ID: ${cohortId}`, 'info');
+                try {
+                    // If no alias is provided, generate a default one
+                    const aliasToUse = cohortAlias || generateDefaultCohortAlias();
+                    const cohortData = await createCohort(aliasToUse, passphrase); // Pass alias and passphrase
+                    cohortId = cohortData.cohort_id; // Retrieve cohort_id from response
+                    logMessage(`Cohort created with ID: ${cohortId}`, 'info');
 
-                        cohortSection = document.createElement('div');
-                        cohortSection.id = `cohort-${cohortId}`;
-                        cohortSection.classList.add('cohort-section');
+                    // Create a cohort section within the output div
+                    const cohortSection = document.createElement('div');
+                    cohortSection.id = `cohort-${cohortId}`;
+                    cohortSection.classList.add('cohort-section');
 
-                        const cohortInfo = document.createElement('div');
-                        cohortInfo.classList.add('cohort-info');
-                        cohortInfo.innerHTML = `Cohort Alias: <strong>${cohortData.alias}</strong> | Cohort ID: <strong>${cohortId}</strong>`;
+                    const cohortInfo = document.createElement('div');
+                    cohortInfo.classList.add('cohort-info');
+                    cohortInfo.innerHTML = `Cohort Alias: <strong>${cohortData.alias || 'N/A'}</strong> | Cohort ID: <strong>${cohortId}</strong>`;
 
-                        const jobsContainer = document.createElement('div');
-                        jobsContainer.id = `jobs-container-${cohortId}`;
-                        jobsContainer.classList.add('jobs-container');
+                    const jobsContainer = document.createElement('div');
+                    jobsContainer.id = `jobs-container-${cohortId}`;
+                    jobsContainer.classList.add('jobs-container');
 
-                        cohortSection.appendChild(cohortInfo);
-                        cohortSection.appendChild(jobsContainer);
-                        cohortsContainer.appendChild(cohortSection);
-                        logMessage(`Cohort section created for Cohort ID: ${cohortId}`, 'info');
-                    } catch (cohortError) {
-                        // Handle cohort creation error
-                        displayError(`Cohort Creation Failed: ${cohortError.message}`);
-                        logMessage(`Cohort creation failed: ${cohortError.message}`, 'error');
-                        hideSpinner();
-                        clearCountdown();
-                        return;
-                    }
-                } else {
-                    logMessage('Cohort Alias not provided. Proceeding without cohort creation.', 'info');
+                    cohortSection.appendChild(cohortInfo);
+                    cohortSection.appendChild(jobsContainer);
+                    outputDiv.appendChild(cohortSection);
+                    logMessage(`Cohort section created for Cohort ID: ${cohortId}`, 'info');
+                } catch (cohortError) {
+                    // Handle cohort creation error
+                    displayError(`Cohort Creation Failed: ${cohortError.message}`);
+                    logMessage(`Cohort creation failed: ${cohortError.message}`, 'error');
+                    hideSpinner();
+                    clearCountdown();
+                    return;
                 }
             }
 
@@ -255,7 +257,7 @@ async function initializeApp() {
 
                 // Submit job to API
                 try {
-                    const data = await submitJobToAPI(formData);
+                    const data = await submitJobToAPI(formData, cohortId); // **Pass cohortId here**
                     logMessage(`Job submitted successfully! Job ID: ${data.job_id}`, 'success');
 
                     jobIds.push(data.job_id);
@@ -276,7 +278,7 @@ async function initializeApp() {
                     if (cohortId) {
                         targetContainer = document.getElementById(`jobs-container-${cohortId}`);
                     } else {
-                        targetContainer = cohortsContainer; // For single job submissions without cohort
+                        targetContainer = outputDiv; // For individual job submissions without cohort
                     }
 
                     // Append job info and status to the target container
@@ -284,7 +286,7 @@ async function initializeApp() {
                     targetContainer.appendChild(jobStatus);
 
                     // Generate and display shareable link
-                    displayShareableLink(data.job_id);
+                    displayShareableLink(data.job_id, targetContainer); // **Pass targetContainer**
 
                     // Start polling cohort status if cohort exists, else poll individual job
                     if (cohortId) {
@@ -294,7 +296,11 @@ async function initializeApp() {
                             async () => {
                                 // Fetch the cohort status
                                 const cohortStatus = await getCohortStatus(cohortId);
-                                updateCohortUI(cohortStatus);
+                                updateCohortUI(cohortStatus, {
+                                    hidePlaceholderMessage,
+                                    logMessage,
+                                    outputDiv
+                                });
                             },
                             () => {
                                 // On Complete: All jobs in cohort are completed
@@ -352,13 +358,22 @@ async function initializeApp() {
                                 // onQueueUpdate callback
                                 const { position_in_queue, total_jobs_in_queue, status } = queueData;
                                 if (position_in_queue) {
-                                    jobQueuePositionDiv.innerHTML = `Position in Queue: <strong>${position_in_queue}</strong> out of <strong>${total_jobs_in_queue}</strong>`;
+                                    const jobQueuePositionDiv = document.getElementById(`queue-${data.job_id}`);
+                                    if (jobQueuePositionDiv) {
+                                        jobQueuePositionDiv.innerHTML = `Position in Queue: <strong>${position_in_queue}</strong> out of <strong>${total_jobs_in_queue}</strong>`;
+                                    }
                                     logMessage(`Job ID ${data.job_id} is position ${position_in_queue} out of ${total_jobs_in_queue} in the queue.`, 'info');
                                 } else if (status) {
-                                    jobQueuePositionDiv.innerHTML = `${status}`;
+                                    const jobQueuePositionDiv = document.getElementById(`queue-${data.job_id}`);
+                                    if (jobQueuePositionDiv) {
+                                        jobQueuePositionDiv.innerHTML = `${status}`;
+                                    }
                                     logMessage(`Job ID ${data.job_id} queue status: ${status}.`, 'info');
                                 } else {
-                                    jobQueuePositionDiv.innerHTML = '';
+                                    const jobQueuePositionDiv = document.getElementById(`queue-${data.job_id}`);
+                                    if (jobQueuePositionDiv) {
+                                        jobQueuePositionDiv.innerHTML = '';
+                                    }
                                 }
                                 // Update server load indicator
                                 serverLoad.updateServerLoad();
@@ -396,9 +411,13 @@ async function initializeApp() {
     /**
      * Updates the UI based on the current cohort status.
      * @param {Object} cohortStatus - The cohort status object returned from the API.
+     * @param {Object} context - An object containing necessary DOM elements and state.
      */
-    function updateCohortUI(cohortStatus) {
+    function updateCohortUI(cohortStatus, context) {
         const { cohort_id, alias, jobs } = cohortStatus;
+        const outputDiv = context.outputDiv;
+        const { hidePlaceholderMessage, logMessage } = context;
+
         const cohortSection = document.getElementById(`cohort-${cohort_id}`);
         if (!cohortSection) return;
 
@@ -431,6 +450,8 @@ async function initializeApp() {
                     jobStatusDiv: jobStatus,
                     logMessage
                 });
+                // Generate and display shareable link
+                displayShareableLink(job_id, jobsContainer); // **Pass jobsContainer as target**
             } else if (status === 'failed') {
                 const errorMessage = error || 'Job failed.';
                 displayError(errorMessage);
@@ -585,9 +606,13 @@ async function initializeApp() {
 /**
  * Updates the UI based on the current cohort status.
  * @param {Object} cohortStatus - The cohort status object returned from the API.
+ * @param {Object} context - An object containing necessary DOM elements and state.
  */
-function updateCohortUI(cohortStatus) {
+function updateCohortUI(cohortStatus, context) {
     const { cohort_id, alias, jobs } = cohortStatus;
+    const outputDiv = context.outputDiv;
+    const { hidePlaceholderMessage, logMessage } = context;
+
     const cohortSection = document.getElementById(`cohort-${cohort_id}`);
     if (!cohortSection) return;
 
@@ -620,6 +645,8 @@ function updateCohortUI(cohortStatus) {
                 jobStatusDiv: jobStatus,
                 logMessage
             });
+            // Generate and display shareable link
+            displayShareableLink(job_id, jobsContainer); // **Pass jobsContainer as target**
         } else if (status === 'failed') {
             const errorMessage = error || 'Job failed.';
             displayError(errorMessage);

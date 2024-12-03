@@ -1,4 +1,4 @@
-// frontend/ressources/js/jobManager.js
+// frontend/resources/js/jobManager.js
 
 import { getCohortStatus, pollJobStatusAPI } from './apiInteractions.js';
 import { displayError, clearError } from './errorHandling.js';
@@ -23,7 +23,7 @@ function capitalizeFirstLetter(string) {
 export function displayDownloadLink(jobId, context) {
     const { hidePlaceholderMessage, jobStatusDiv, logMessage } = context;
 
-    hidePlaceholderMessage(); // Now correctly imported
+    hidePlaceholderMessage(); // Hide placeholder when displaying download link
 
     const downloadLink = document.createElement('a');
     downloadLink.href = `${window.CONFIG.API_URL}/download/${jobId}/`;
@@ -31,10 +31,30 @@ export function displayDownloadLink(jobId, context) {
     downloadLink.classList.add('download-link', 'download-button');
     downloadLink.target = '_blank'; // Open in a new tab
     downloadLink.setAttribute('aria-label', `Download results for Job ID ${jobId}`);
+    downloadLink.setAttribute('data-copyable', 'true'); // Make link copyable
 
+    // Create a copy button for the shareable link
+    const copyButton = document.createElement('button');
+    copyButton.textContent = 'Copy Link';
+    copyButton.classList.add('copy-button');
+    copyButton.setAttribute('aria-label', `Copy shareable link for Job ID ${jobId}`);
+    copyButton.addEventListener('click', () => {
+        navigator.clipboard.writeText(downloadLink.href)
+            .then(() => {
+                logMessage(`Shareable link copied for Job ID ${jobId}.`, 'success');
+                alert('Shareable link copied to clipboard!');
+            })
+            .catch((err) => {
+                logMessage(`Failed to copy link for Job ID ${jobId}: ${err.message}`, 'error');
+                alert('Failed to copy the link. Please try manually.');
+            });
+    });
+
+    // Append download link and copy button to the job status div
     jobStatusDiv.appendChild(document.createElement('br'));
     jobStatusDiv.appendChild(downloadLink);
-    logMessage(`Download link generated for Job ID ${jobId}.`, 'info');
+    jobStatusDiv.appendChild(copyButton);
+    logMessage(`Download and shareable links generated for Job ID ${jobId}.`, 'info');
 }
 
 /**
@@ -128,6 +148,8 @@ function updateCohortUI(cohortStatus, context) {
                 jobStatusDiv: jobStatus,
                 logMessage
             });
+            // Generate and display shareable link
+            displayShareableLink(job_id, jobsContainer); // Pass jobsContainer as targetContainer
         } else if (status === 'failed') {
             const errorMessage = error || 'Job failed.';
             displayError(errorMessage);
@@ -181,7 +203,7 @@ export async function loadJobFromURL(jobId, context) {
         logMessage(`Loading details for Job ID ${jobId}.`, 'info');
 
         // Generate and display the shareable link
-        displayShareableLink(jobId);
+        displayShareableLink(jobId, jobInfoDiv); // Pass jobInfoDiv as targetContainer
 
         // Create a status element for this job
         const statusElement = document.createElement('div');
@@ -203,6 +225,12 @@ export async function loadJobFromURL(jobId, context) {
                 displayDownloadLink(jobId, {
                     hidePlaceholderMessage,
                     jobStatusDiv: statusElement,
+                    logMessage
+                });
+                // Generate and display the shareable link again if needed
+                displayShareableLink(jobId, {
+                    targetContainer: jobStatusDiv,
+                    jobId: jobId,
                     logMessage
                 });
                 hideSpinner();
