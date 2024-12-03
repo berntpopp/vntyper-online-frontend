@@ -1,11 +1,11 @@
 // frontend/resources/js/main.js
 
 import { validateFiles } from './inputWrangling.js';
-import { submitJobToAPI, pollJobStatusAPI, getJobStatus, createCohort } from './apiInteractions.js';
+import { submitJobToAPI, createCohort } from './apiInteractions.js';
 import { initializeAioli, extractRegionAndIndex } from './bamProcessing.js';
-import { initializeModal } from './modal.js'; // Removed checkAndShowDisclaimer
-import { initializeFooter } from './footer.js'; // Import from the new footer.js
-import { initializeDisclaimer } from './disclaimer.js'; // Import from disclaimer.js
+import { initializeModal } from './modal.js';
+import { initializeFooter } from './footer.js';
+import { initializeDisclaimer } from './disclaimer.js';
 import { initializeFAQ } from './faq.js';
 import { initializeUserGuide } from './userGuide.js';
 import { initializeCitations } from './citations.js';
@@ -22,12 +22,13 @@ import {
     displayMessage,
     clearMessage,
     displayShareableLink,
-    hidePlaceholderMessage, // Imported hidePlaceholderMessage
-    showPlaceholderMessage  // Imported showPlaceholderMessage
-} from './uiUtils.js'; // Import the moved UI helper functions
+    hidePlaceholderMessage,
+    showPlaceholderMessage
+} from './uiUtils.js';
 import { initializeFileSelection } from './fileSelection.js';
 import { initializeServerLoad } from './serverLoad.js';
-import { logMessage, initializeLogging } from './log.js'; // Import logging functions
+import { logMessage, initializeLogging } from './log.js';
+import { fetchAndUpdateJobStatus, loadJobFromURL, displayDownloadLink } from './jobManager.js'; // Updated import
 
 /**
  * Initializes the application by setting up event listeners and dynamic content.
@@ -88,197 +89,31 @@ async function initializeApp() {
     }
 
     /**
-     * Fetches the current job status and updates the UI immediately.
-     * Utilizes the getJobStatus function from apiInteractions.js.
-     * @param {string} jobId - The job identifier.
-     */
-    async function fetchAndUpdateJobStatus(jobId) {
-        try {
-            const data = await getJobStatus(jobId);
-
-            if (data.cohort_id && !displayedCohorts.has(data.cohort_id)) {
-                // Create a new cohort section
-                const cohortSection = document.createElement('div');
-                cohortSection.id = `cohort-${data.cohort_id}`;
-                cohortSection.classList.add('cohort-section');
-
-                const cohortInfo = document.createElement('div');
-                cohortInfo.classList.add('cohort-info');
-                cohortInfo.innerHTML = `Cohort ID: <strong>${data.cohort_id}</strong>`;
-
-                cohortSection.appendChild(cohortInfo);
-                cohortsContainer.appendChild(cohortSection);
-
-                // Add to displayed cohorts
-                displayedCohorts.add(data.cohort_id);
-                logMessage(`Cohort ${data.cohort_id} displayed in UI.`, 'info');
-            }
-
-            // Determine where to append job info
-            let targetContainer;
-            if (data.cohort_id) {
-                targetContainer = document.getElementById(`cohort-${data.cohort_id}`);
-            } else {
-                targetContainer = jobInfoDiv;
-            }
-
-            // Create job information element
-            const jobInfo = document.createElement('div');
-            jobInfo.innerHTML = `Job ID: <strong>${jobId}</strong> - Status: <strong>${capitalizeFirstLetter(data.status)}</strong>`;
-            jobInfo.classList.add('job-info');
-
-            targetContainer.appendChild(jobInfo);
-
-            logMessage(`Status fetched for Job ID ${jobId}: ${data.status}`, 'info');
-
-            if (data.status === 'completed') {
-                // On Complete
-                displayDownloadLink(jobId);
-                hideSpinner();
-                clearCountdown();
-                jobQueuePositionDiv.innerHTML = '';
-                serverLoad.updateServerLoad();
-                logMessage(`Job ID ${jobId} completed successfully.`, 'success');
-            } else if (data.status === 'failed') {
-                // On Error
-                const errorMessage = data.error || 'Job failed.';
-                displayError(errorMessage);
-                logMessage(`Job ID ${jobId} failed with error: ${errorMessage}`, 'error');
-                hideSpinner();
-                clearCountdown();
-                jobQueuePositionDiv.innerHTML = '';
-                serverLoad.updateServerLoad();
-            } else {
-                // Job is still processing
-                logMessage(`Job ID ${jobId} is currently ${data.status}.`, 'info');
-            }
-        } catch (error) {
-            logMessage(`Error fetching job status for Job ID ${jobId}: ${error.message}`, 'error');
-            hideSpinner();
-            clearCountdown();
-        }
-    }
-
-    /**
-     * Fetches and displays job details based on the job ID.
-     * Utilizes pollJobStatusAPI to retrieve job status and details.
-     * Performs an immediate poll and then continues polling at intervals.
-     * @param {string} jobId - The job identifier.
-     */
-    async function loadJobFromURL(jobId) {
-        try {
-            showSpinner();
-            clearError();
-            clearMessage();
-            jobInfoDiv.innerHTML = '';
-            jobStatusDiv.innerHTML = '';
-            jobQueuePositionDiv.innerHTML = '';
-            regionOutputDiv.innerHTML = '';
-
-            // Display initial job information
-            const jobInfo = document.createElement('div');
-            jobInfo.innerHTML = `Loading job details for Job ID: <strong>${jobId}</strong>`;
-            jobInfoDiv.appendChild(jobInfo);
-            logMessage(`Loading details for Job ID ${jobId}.`, 'info');
-
-            // Generate and display the shareable link
-            displayShareableLink(jobId);
-
-            // Create a status element for this job
-            const statusElement = document.createElement('div');
-            statusElement.id = `status-${jobId}`;
-            statusElement.innerHTML = `Status: <strong>Loading...</strong>`;
-            statusElement.classList.add('job-status');
-            jobStatusDiv.appendChild(statusElement);
-
-            // Immediately fetch and update job status
-            await fetchAndUpdateJobStatus(jobId);
-
-            // Start polling job status every 20 seconds
-            pollJobStatusAPI(
-                jobId,
-                (status) => {
-                    // Update status in the jobStatusDiv
-                    if (statusElement) {
-                        statusElement.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
-                    }
-                    logMessage(`Status updated to ${status} for Job ID ${jobId}.`, 'info');
-                },
-                () => {
-                    // On Complete
-                    displayDownloadLink(jobId);
-                    hideSpinner();
-                    clearCountdown();
-                    logMessage(`Job ID ${jobId} has been completed.`, 'success');
-                    jobQueuePositionDiv.innerHTML = '';
-                    serverLoad.updateServerLoad();
-                },
-                (errorMessage) => {
-                    // On Error
-                    displayError(errorMessage);
-                    logMessage(`Job ID ${jobId} encountered an error: ${errorMessage}`, 'error');
-                    hideSpinner();
-                    clearCountdown();
-                    jobQueuePositionDiv.innerHTML = '';
-                    serverLoad.updateServerLoad();
-                },
-                () => {
-                    // onPoll Callback to reset countdown
-                    resetCountdown();
-                    logMessage(`Countdown reset for polling Job ID ${jobId}.`, 'info');
-                },
-                (queueData) => {
-                    // onQueueUpdate callback
-                    const { position_in_queue, total_jobs_in_queue, status } = queueData;
-                    if (position_in_queue) {
-                        jobQueuePositionDiv.innerHTML = `Position in Queue: <strong>${position_in_queue}</strong> out of <strong>${total_jobs_in_queue}</strong>`;
-                        logMessage(`Job ID ${jobId} is position ${position_in_queue} out of ${total_jobs_in_queue} in the queue.`, 'info');
-                    } else if (status) {
-                        jobQueuePositionDiv.innerHTML = `${status}`;
-                        logMessage(`Job ID ${jobId} queue status: ${status}.`, 'info');
-                    } else {
-                        jobQueuePositionDiv.innerHTML = '';
-                    }
-                    // Update server load indicator
-                    serverLoad.updateServerLoad();
-                }
-            );
-
-            hideSpinner();
-        } catch (error) {
-            logMessage(`Error loading Job ID ${jobId}: ${error.message}`, 'error');
-            hideSpinner();
-        }
-    }
-
-    /**
      * Checks URL parameters for job_id and loads the job if present.
      */
     function checkURLForJob() {
         const urlParams = new URLSearchParams(window.location.search);
         const jobId = urlParams.get('job_id');
         if (jobId) {
-            loadJobFromURL(jobId);
+            loadJobFromURL(jobId, {
+                showSpinner,
+                hideSpinner,
+                clearError,
+                clearMessage,
+                jobInfoDiv,
+                jobStatusDiv,
+                jobQueuePositionDiv,
+                regionOutputDiv,
+                displayShareableLink,
+                pollJobStatusAPI,
+                fetchAndUpdateJobStatus,
+                resetCountdown,
+                logMessage,
+                serverLoad,
+                displayedCohorts,
+                cohortsContainer
+            });
         }
-    }
-
-    /**
-     * Displays the download link once the job is completed.
-     * @param {string} jobId - The job identifier.
-     */
-    function displayDownloadLink(jobId) {
-        hidePlaceholderMessage(); // Now correctly imported
-
-        const downloadLink = document.createElement('a');
-        downloadLink.href = `${window.CONFIG.API_URL}/download/${jobId}/`;
-        downloadLink.textContent = 'Download vntyper results';
-        downloadLink.classList.add('download-link', 'download-button');
-        downloadLink.target = '_blank'; // Open in a new tab
-        downloadLink.setAttribute('aria-label', `Download results for Job ID ${jobId}`);
-
-        jobStatusDiv.appendChild(document.createElement('br'));
-        jobStatusDiv.appendChild(downloadLink);
-        logMessage(`Download link generated for Job ID ${jobId}.`, 'info');
     }
 
     /**
@@ -444,7 +279,19 @@ async function initializeApp() {
                     }
 
                     // Immediately fetch and update job status
-                    await fetchAndUpdateJobStatus(data.job_id);
+                    await fetchAndUpdateJobStatus(data.job_id, {
+                        jobInfoDiv,
+                        jobStatusDiv,
+                        jobQueuePositionDiv,
+                        displayedCohorts,
+                        cohortsContainer,
+                        serverLoad,
+                        hideSpinner,
+                        clearCountdown,
+                        displayDownloadLink,
+                        logMessage,
+                        displayError
+                    });
 
                     // Start polling job status every 20 seconds
                     pollJobStatusAPI(
@@ -458,7 +305,11 @@ async function initializeApp() {
                         },
                         () => {
                             // On Complete
-                            displayDownloadLink(data.job_id);
+                            displayDownloadLink(data.job_id, {
+                                hidePlaceholderMessage,
+                                jobStatusDiv,
+                                logMessage
+                            });
                             hideSpinner();
                             clearCountdown();
                             logMessage(`Spinner and countdown hidden for Job ID ${data.job_id}.`, 'info');
