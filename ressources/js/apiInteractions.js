@@ -104,11 +104,9 @@ export async function getCohortStatus(cohortId) {
             try {
                 const errorData = await response.json();
                 if (errorData.detail) {
-                    if (Array.isArray(errorData.detail)) {
-                        errorMessage = errorData.detail.map((err) => err.msg).join(', ');
-                    } else if (typeof errorData.detail === 'string') {
-                        errorMessage = errorData.detail;
-                    }
+                    errorMessage = Array.isArray(errorData.detail)
+                        ? errorData.detail.map((err) => err.msg).join(', ')
+                        : errorData.detail;
                 }
             } catch (e) {
                 logMessage('Error parsing cohort status error response.', 'error');
@@ -216,10 +214,8 @@ export function pollCohortStatusAPI(cohortId, onStatusUpdate, onComplete, onErro
             const data = await getCohortStatus(cohortId);
 
             // Update status using the provided callback
-            onStatusUpdate(data.status);
-            logMessage(`Cohort ID ${cohortId} status updated to: ${data.status}`, 'info');
+            onStatusUpdate(data);
 
-            // Handle the status of the cohort
             if (data.status === 'completed') {
                 clearInterval(interval);
                 logMessage(`Cohort ID ${cohortId} has been completed.`, 'success');
@@ -230,9 +226,7 @@ export function pollCohortStatusAPI(cohortId, onStatusUpdate, onComplete, onErro
                 logMessage(`Cohort ID ${cohortId} failed with error: ${errorMsg}`, 'error');
                 onError(errorMsg);
             } else {
-                // Cohort is still processing
                 logMessage(`Cohort ID ${cohortId} is in status: ${data.status}`, 'info');
-                // Additional handling if needed
             }
         } catch (error) {
             clearInterval(interval);

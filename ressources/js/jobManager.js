@@ -224,6 +224,25 @@ export async function fetchAndUpdateJobStatus(cohortId, context) {
 }
 
 /**
+ * Fetches and updates the cohort UI immediately.
+ * Utilizes the getCohortStatus function.
+ * @param {string} cohortId - The cohort identifier.
+ * @param {object} context - An object containing necessary DOM elements and state.
+ */
+export async function fetchAndUpdateCohortStatus(cohortId, context) {
+    try {
+        const data = await getCohortStatus(cohortId);
+
+        // Update the cohort UI with current job statuses
+        updateCohortUI(data, context);
+    } catch (error) {
+        logMessage(`Error fetching cohort status for Cohort ID ${cohortId}: ${error.message}`, 'error');
+        hideSpinner();
+        clearCountdown();
+    }
+}
+
+/**
  * Updates the UI based on the current cohort status.
  * @param {Object} cohortStatus - The cohort status object returned from the API.
  * @param {Object} context - An object containing necessary DOM elements and state.
@@ -250,21 +269,13 @@ function updateCohortUI(cohortStatus, context) {
         // Create job status element
         const jobStatus = document.createElement('div');
         jobStatus.id = `status-${job_id}`;
-        jobStatus.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+        jobStatus.innerHTML = `Status: <strong>${status}</strong>`;
         jobStatus.classList.add('job-status');
 
         jobsContainer.appendChild(jobInfo);
         jobsContainer.appendChild(jobStatus);
 
-        if (status === 'completed') {
-            displayDownloadLink(job_id, {
-                hidePlaceholderMessage,
-                jobStatusDiv: jobStatus,
-                logMessage,
-            });
-            // Generate and display shareable link
-            displayShareableLink(job_id, jobsContainer); // Pass jobsContainer as targetContainer
-        } else if (status === 'failed') {
+        if (status === 'failed') {
             const errorMessage = error || 'Job failed.';
             displayError(errorMessage);
             logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
