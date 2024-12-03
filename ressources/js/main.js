@@ -3,7 +3,7 @@
 import { validateFiles } from './inputWrangling.js';
 import { submitJobToAPI, pollJobStatusAPI, getJobStatus, createCohort } from './apiInteractions.js';
 import { initializeAioli, extractRegionAndIndex } from './bamProcessing.js';
-import { initializeModal, checkAndShowDisclaimer } from './modal.js';
+import { initializeModal } from './modal.js'; // Removed checkAndShowDisclaimer
 import { initializeFooter } from './footer.js'; // Import from the new footer.js
 import { initializeDisclaimer } from './disclaimer.js'; // Import from disclaimer.js
 import { initializeFAQ } from './faq.js';
@@ -18,8 +18,11 @@ import {
     startCountdown,
     resetCountdown,
     clearCountdown,
-    initializeUIUtils
-} from './uiUtils.js';
+    initializeUIUtils,
+    displayMessage,
+    clearMessage,
+    displayShareableLink
+} from './uiUtils.js'; // Import the moved UI helper functions
 import { initializeFileSelection } from './fileSelection.js';
 import { initializeServerLoad } from './serverLoad.js';
 import { logMessage, initializeLogging } from './log.js'; // Import logging functions
@@ -45,9 +48,6 @@ async function initializeApp() {
     // Initialize Logging System
     initializeLogging();
     logMessage('Application initialized.', 'info');
-
-    // Check and show disclaimer modal or indicator based on acknowledgment
-    checkAndShowDisclaimer();
 
     // Get references to DOM elements
     const submitBtn = document.getElementById('submitBtn');
@@ -83,111 +83,6 @@ async function initializeApp() {
     function capitalizeFirstLetter(string) {
         if (!string) return '';
         return string.charAt(0).toUpperCase() + string.slice(1);
-    }
-
-    /**
-     * Shows the placeholder message in the output area.
-     */
-    function showPlaceholderMessage() {
-        const placeholderMessage = document.getElementById('placeholderMessage');
-        if (placeholderMessage) {
-            placeholderMessage.classList.remove('hidden');
-        }
-    }
-
-    /**
-     * Hides the placeholder message in the output area.
-     */
-    function hidePlaceholderMessage() {
-        const placeholderMessage = document.getElementById('placeholderMessage');
-        if (placeholderMessage) {
-            placeholderMessage.classList.add('hidden');
-        }
-    }
-
-    /**
-     * Displays a message to the user in the output area.
-     * @param {string} message - The message to display.
-     * @param {string} type - The type of message ('info', 'error', 'success').
-     */
-    function displayMessage(message, type = 'info') {
-        hidePlaceholderMessage(); // Hide placeholder when displaying a message
-        const messageDiv = document.getElementById('message');
-        if (messageDiv) {
-            messageDiv.innerHTML = message;
-            messageDiv.className = ''; // Reset classes
-            messageDiv.classList.add('message', `message-${type}`);
-            messageDiv.classList.remove('hidden');
-        }
-    }
-
-    /**
-     * Clears the displayed message.
-     */
-    function clearMessage() {
-        const messageDiv = document.getElementById('message');
-        if (messageDiv) {
-            messageDiv.innerHTML = '';
-            messageDiv.className = ''; // Reset classes
-            messageDiv.classList.add('message', 'hidden');
-        }
-        showPlaceholderMessage(); // Show placeholder when message is cleared
-    }
-
-    /**
-     * Generates a shareable URL containing the job ID.
-     * @param {string} jobId - The job identifier.
-     * @returns {string} - The shareable URL.
-     */
-    function generateShareableLink(jobId) {
-        const url = new URL(window.location.href);
-        url.searchParams.set('job_id', jobId);
-        return url.toString();
-    }
-
-    /**
-     * Displays the shareable link to the user within the jobInfoDiv.
-     * Includes a copy link icon next to it.
-     * @param {string} jobId - The job identifier.
-     */
-    function displayShareableLink(jobId) {
-        hidePlaceholderMessage(); // Hide placeholder when displaying shareable link
-
-        const shareContainer = document.createElement('div');
-        shareContainer.classList.add('share-container', 'mt-2');
-
-        const shareLabel = document.createElement('span');
-        shareLabel.textContent = 'Shareable Link: ';
-        shareContainer.appendChild(shareLabel);
-
-        const shareLink = document.createElement('input');
-        shareLink.type = 'text';
-        shareLink.value = generateShareableLink(jobId);
-        shareLink.readOnly = true;
-        shareLink.classList.add('share-link-input');
-        shareLink.setAttribute('aria-label', `Shareable link for Job ID ${jobId}`);
-
-        // Add copy icon/button
-        const copyIcon = document.createElement('button');
-        copyIcon.classList.add('copy-button');
-        copyIcon.setAttribute('aria-label', 'Copy link');
-        copyIcon.innerHTML = '📋'; // Using clipboard emoji as copy icon
-        copyIcon.addEventListener('click', () => {
-            shareLink.select();
-            document.execCommand('copy');
-            copyIcon.textContent = '✅'; // Change icon to indicate success
-            setTimeout(() => {
-                copyIcon.textContent = '📋'; // Revert icon back
-            }, 2000);
-            logMessage(`Shareable link for Job ID ${jobId} copied to clipboard.`, 'info');
-        });
-
-        shareContainer.appendChild(shareLink);
-        shareContainer.appendChild(copyIcon);
-
-        // Append to jobInfoDiv
-        jobInfoDiv.appendChild(shareContainer);
-        logMessage(`Shareable link generated for Job ID ${jobId}.`, 'info');
     }
 
     /**
@@ -370,7 +265,7 @@ async function initializeApp() {
      * @param {string} jobId - The job identifier.
      */
     function displayDownloadLink(jobId) {
-        hidePlaceholderMessage(); // Hide placeholder when results are available
+        // Remove the call to hidePlaceholderMessage() as it's now handled by uiUtils.js
 
         const downloadLink = document.createElement('a');
         downloadLink.href = `${window.CONFIG.API_URL}/download/${jobId}/`;
@@ -642,7 +537,7 @@ async function initializeApp() {
             regionOutputDiv.innerHTML = '';
             clearError();
             clearMessage();
-            hidePlaceholderMessage(); // Hide placeholder when extracting region
+            // hidePlaceholderMessage(); // Removed this call
 
             const CLI = await initializeAioli();
             const { matchedPairs, invalidFiles } = validateFiles(selectedFiles, false);
@@ -743,7 +638,9 @@ async function initializeApp() {
         }
     });
 
-    // Handle keyboard activation for the drop area
+    /**
+     * Handle keyboard activation for the drop area
+     */
     const dropArea = document.getElementById('dropArea');
     const bamFilesInput = document.getElementById('bamFiles');
 
@@ -754,6 +651,25 @@ async function initializeApp() {
             logMessage('File upload dialog triggered via keyboard.', 'info');
         }
     });
+
+    /**
+     * Displays the download link once the job is completed.
+     * @param {string} jobId - The job identifier.
+     */
+    function displayDownloadLink(jobId) {
+        // Removed the call to hidePlaceholderMessage() as it's now handled by uiUtils.js
+
+        const downloadLink = document.createElement('a');
+        downloadLink.href = `${window.CONFIG.API_URL}/download/${jobId}/`;
+        downloadLink.textContent = 'Download vntyper results';
+        downloadLink.classList.add('download-link', 'download-button');
+        downloadLink.target = '_blank'; // Open in a new tab
+        downloadLink.setAttribute('aria-label', `Download results for Job ID ${jobId}`);
+
+        jobStatusDiv.appendChild(document.createElement('br'));
+        jobStatusDiv.appendChild(downloadLink);
+        logMessage(`Download link generated for Job ID ${jobId}.`, 'info');
+    }
 
     // Check URL for job_id on initial load
     checkURLForJob();

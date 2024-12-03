@@ -6,6 +6,127 @@ let countdownInterval = null;
 let timeLeft = 20; // Countdown time in seconds
 
 /**
+ * Shows the placeholder message in the output area.
+ */
+function showPlaceholderMessage() {
+    const placeholderMessage = document.getElementById('placeholderMessage');
+    if (placeholderMessage) {
+        placeholderMessage.classList.remove('hidden');
+        logMessage('Placeholder message displayed.', 'info');
+    } else {
+        logMessage('Placeholder message div (#placeholderMessage) not found in the DOM.', 'warning');
+    }
+}
+
+/**
+ * Hides the placeholder message in the output area.
+ */
+function hidePlaceholderMessage() {
+    const placeholderMessage = document.getElementById('placeholderMessage');
+    if (placeholderMessage) {
+        placeholderMessage.classList.add('hidden');
+        logMessage('Placeholder message hidden.', 'info');
+    } else {
+        logMessage('Placeholder message div (#placeholderMessage) not found in the DOM.', 'warning');
+    }
+}
+
+/**
+ * Displays a message to the user in the output area.
+ * @param {string} message - The message to display.
+ * @param {string} type - The type of message ('info', 'error', 'success').
+ */
+export function displayMessage(message, type = 'info') {
+    hidePlaceholderMessage(); // Hide placeholder when displaying a message
+    const messageDiv = document.getElementById('message');
+    if (messageDiv) {
+        messageDiv.innerHTML = message;
+        messageDiv.className = ''; // Reset classes
+        messageDiv.classList.add('message', `message-${type}`);
+        messageDiv.classList.remove('hidden');
+        logMessage(`Displayed message: "${message}" with type "${type}".`, 'info');
+    } else {
+        logMessage('Message div (#message) not found in the DOM.', 'warning');
+    }
+}
+
+/**
+ * Clears the displayed message.
+ */
+export function clearMessage() {
+    const messageDiv = document.getElementById('message');
+    if (messageDiv) {
+        messageDiv.innerHTML = '';
+        messageDiv.className = ''; // Reset classes
+        messageDiv.classList.add('message', 'hidden');
+        logMessage('Cleared message display.', 'info');
+    }
+    showPlaceholderMessage(); // Show placeholder when message is cleared
+}
+
+/**
+ * Generates a shareable URL containing the job ID.
+ * @param {string} jobId - The job identifier.
+ * @returns {string} - The shareable URL.
+ */
+function generateShareableLink(jobId) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('job_id', jobId);
+    return url.toString();
+}
+
+/**
+ * Displays the shareable link to the user within the jobInfoDiv.
+ * Includes a copy link icon next to it.
+ * @param {string} jobId - The job identifier.
+ */
+export function displayShareableLink(jobId) {
+    hidePlaceholderMessage(); // Hide placeholder when displaying shareable link
+
+    const jobInfoDiv = document.getElementById('jobInfo');
+    if (!jobInfoDiv) {
+        logMessage('Job info div (#jobInfo) not found in the DOM.', 'warning');
+        return;
+    }
+
+    const shareContainer = document.createElement('div');
+    shareContainer.classList.add('share-container', 'mt-2');
+
+    const shareLabel = document.createElement('span');
+    shareLabel.textContent = 'Shareable Link: ';
+    shareContainer.appendChild(shareLabel);
+
+    const shareLink = document.createElement('input');
+    shareLink.type = 'text';
+    shareLink.value = generateShareableLink(jobId);
+    shareLink.readOnly = true;
+    shareLink.classList.add('share-link-input');
+    shareLink.setAttribute('aria-label', `Shareable link for Job ID ${jobId}`);
+
+    // Add copy icon/button
+    const copyIcon = document.createElement('button');
+    copyIcon.classList.add('copy-button');
+    copyIcon.setAttribute('aria-label', 'Copy link');
+    copyIcon.innerHTML = '📋'; // Using clipboard emoji as copy icon
+    copyIcon.addEventListener('click', () => {
+        shareLink.select();
+        document.execCommand('copy');
+        copyIcon.textContent = '✅'; // Change icon to indicate success
+        setTimeout(() => {
+            copyIcon.textContent = '📋'; // Revert icon back
+        }, 2000);
+        logMessage(`Shareable link for Job ID ${jobId} copied to clipboard.`, 'info');
+    });
+
+    shareContainer.appendChild(shareLink);
+    shareContainer.appendChild(copyIcon);
+
+    // Append to jobInfoDiv
+    jobInfoDiv.appendChild(shareContainer);
+    logMessage(`Shareable link generated for Job ID ${jobId}.`, 'info');
+}
+
+/**
  * Displays the loading spinner in the UI.
  */
 export function showSpinner() {
@@ -97,7 +218,7 @@ export function clearCountdown() {
  * Initializes the toggle functionality for optional inputs (Email and Cohort Alias).
  * This function adds an event listener to the toggle button to show/hide the optional inputs.
  */
-export function initializeToggleOptionalInputs() {
+function initializeToggleOptionalInputs() {
     const toggleButton = document.getElementById('toggleOptionalInputs');
     const additionalInputs = document.getElementById('additionalInputs');
 
