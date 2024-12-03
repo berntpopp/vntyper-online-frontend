@@ -1,17 +1,17 @@
 // frontend/resources/js/main.js
 
-import { 
-    validateFiles, 
+import {
+    validateFiles,
 } from './inputWrangling.js';
-import { 
-    submitJobToAPI, 
-    pollJobStatusAPI, 
-    getCohortStatus, 
-    createCohort 
+import {
+    submitJobToAPI,
+    pollJobStatusAPI,
+    getCohortStatus,
+    createCohort,
 } from './apiInteractions.js';
-import { 
-    initializeAioli, 
-    extractRegionAndIndex 
+import {
+    initializeAioli,
+    extractRegionAndIndex,
 } from './bamProcessing.js';
 import { initializeModal } from './modal.js';
 import { initializeFooter } from './footer.js';
@@ -33,12 +33,17 @@ import {
     clearMessage,
     displayShareableLink,
     hidePlaceholderMessage,
-    showPlaceholderMessage
+    showPlaceholderMessage,
 } from './uiUtils.js';
 import { initializeFileSelection } from './fileSelection.js';
 import { initializeServerLoad } from './serverLoad.js';
 import { logMessage, initializeLogging } from './log.js';
-import { fetchAndUpdateJobStatus, loadJobFromURL, displayDownloadLink } from './jobManager.js';
+import {
+    fetchAndUpdateJobStatus,
+    loadJobFromURL,
+    loadCohortFromURL,
+    displayDownloadLink,
+} from './jobManager.js';
 
 /**
  * Generates a default alias for cohorts without a user-provided alias.
@@ -102,12 +107,33 @@ async function initializeApp() {
     }
 
     /**
-     * Checks URL parameters for job_id and loads the job if present.
+     * Checks URL parameters for job_id and cohort_id and loads the respective details.
      */
-    function checkURLForJob() {
+    function checkURLParameters() {
         const urlParams = new URLSearchParams(window.location.search);
         const jobId = urlParams.get('job_id');
-        if (jobId) {
+        const cohortId = urlParams.get('cohort_id');
+
+        if (cohortId) {
+            loadCohortFromURL(cohortId, {
+                showSpinner,
+                hideSpinner,
+                clearError,
+                clearMessage,
+                jobInfoDiv: outputDiv, // Display in output div for cohort
+                jobStatusDiv: document.createElement('div'), // Placeholder
+                jobQueuePositionDiv: document.createElement('div'), // Placeholder
+                regionOutputDiv,
+                displayShareableLink,
+                pollJobStatusAPI,
+                fetchAndUpdateJobStatus,
+                resetCountdown,
+                logMessage,
+                serverLoad,
+                displayedCohorts: new Set(), // Initialize as empty Set
+                outputDiv,
+            });
+        } else if (jobId) {
             loadJobFromURL(jobId, {
                 showSpinner,
                 hideSpinner,
@@ -124,7 +150,7 @@ async function initializeApp() {
                 logMessage,
                 serverLoad,
                 displayedCohorts: new Set(), // Initialize as empty Set
-                outputDiv
+                outputDiv,
             });
         }
     }
@@ -157,7 +183,7 @@ async function initializeApp() {
             const { matchedPairs, invalidFiles } = validateFiles(selectedFiles, false);
 
             if (invalidFiles.length > 0) {
-                displayError(`Some files were invalid and not added: ${invalidFiles.map(f => f.name).join(', ')}`);
+                displayError(`Some files were invalid and not added: ${invalidFiles.map((f) => f.name).join(', ')}`);
                 logMessage('Invalid files detected during submission.', 'warning');
             }
 
@@ -296,10 +322,10 @@ async function initializeApp() {
                             async () => {
                                 // Fetch the cohort status
                                 const cohortStatus = await getCohortStatus(cohortId);
-                                updateCohortUI(cohortStatus, {
+                                fetchAndUpdateJobStatus(cohortId, {
                                     hidePlaceholderMessage,
                                     logMessage,
-                                    outputDiv
+                                    outputDiv,
                                 });
                             },
                             () => {
@@ -322,19 +348,20 @@ async function initializeApp() {
                         // Poll individual job status
                         pollJobStatusAPI(
                             data.job_id,
-                            (status) => {
-                                // Update status in the jobStatusDiv
-                                if (jobStatus) {
-                                    jobStatus.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
-                                }
-                                logMessage(`Status updated to: ${status} for Job ID ${data.job_id}.`, 'info');
+                            async () => {
+                                // Fetch the job status
+                                const jobStatus = await getJobStatus(data.job_id);
+                                updateJobUI(jobStatus, {
+                                    hidePlaceholderMessage,
+                                    logMessage,
+                                });
                             },
                             () => {
                                 // On Complete
                                 displayDownloadLink(data.job_id, {
                                     hidePlaceholderMessage,
                                     jobStatusDiv: jobStatus,
-                                    logMessage
+                                    logMessage,
                                 });
                                 hideSpinner();
                                 clearCountdown();
@@ -362,7 +389,10 @@ async function initializeApp() {
                                     if (jobQueuePositionDiv) {
                                         jobQueuePositionDiv.innerHTML = `Position in Queue: <strong>${position_in_queue}</strong> out of <strong>${total_jobs_in_queue}</strong>`;
                                     }
-                                    logMessage(`Job ID ${data.job_id} is position ${position_in_queue} out of ${total_jobs_in_queue} in the queue.`, 'info');
+                                    logMessage(
+                                        `Job ID ${data.job_id} is position ${position_in_queue} out of ${total_jobs_in_queue} in the queue.`,
+                                        'info'
+                                    );
                                 } else if (status) {
                                     const jobQueuePositionDiv = document.getElementById(`queue-${data.job_id}`);
                                     if (jobQueuePositionDiv) {
@@ -393,7 +423,6 @@ async function initializeApp() {
             selectedFiles = [];
             displaySelectedFiles();
             logMessage('All selected files have been submitted.', 'info');
-
         } catch (err) {
             logMessage(`Error during job submission: ${err.message}`, 'error');
             hideSpinner();
@@ -427,7 +456,7 @@ async function initializeApp() {
         // Clear existing job statuses
         jobsContainer.innerHTML = '';
 
-        jobs.forEach(job => {
+        jobs.forEach((job) => {
             const { job_id, status, error } = job;
 
             // Create job info element
@@ -448,10 +477,10 @@ async function initializeApp() {
                 displayDownloadLink(job_id, {
                     hidePlaceholderMessage,
                     jobStatusDiv: jobStatus,
-                    logMessage
+                    logMessage,
                 });
                 // Generate and display shareable link
-                displayShareableLink(job_id, jobsContainer); // **Pass jobsContainer as target**
+                displayShareableLink(job_id, jobsContainer); // **Pass jobsContainer as targetContainer**
             } else if (status === 'failed') {
                 const errorMessage = error || 'Job failed.';
                 displayError(errorMessage);
@@ -483,7 +512,7 @@ async function initializeApp() {
             const { matchedPairs, invalidFiles } = validateFiles(selectedFiles, false);
 
             if (invalidFiles.length > 0) {
-                displayError(`Some files were invalid and not added: ${invalidFiles.map(f => f.name).join(', ')}`);
+                displayError(`Some files were invalid and not added: ${invalidFiles.map((f) => f.name).join(', ')}`);
                 logMessage('Invalid files detected during region extraction.', 'warning');
             }
 
@@ -599,65 +628,10 @@ async function initializeApp() {
         logMessage(`${selectedFiles.length} file(s) selected for upload.`, 'info');
     });
 
-    // Check URL for job_id on initial load
-    checkURLForJob();
+    // Check URL for job_id or cohort_id on initial load
+    checkURLParameters();
 }
 
-/**
- * Updates the UI based on the current cohort status.
- * @param {Object} cohortStatus - The cohort status object returned from the API.
- * @param {Object} context - An object containing necessary DOM elements and state.
- */
-function updateCohortUI(cohortStatus, context) {
-    const { cohort_id, alias, jobs } = cohortStatus;
-    const outputDiv = context.outputDiv;
-    const { hidePlaceholderMessage, logMessage } = context;
-
-    const cohortSection = document.getElementById(`cohort-${cohort_id}`);
-    if (!cohortSection) return;
-
-    const jobsContainer = document.getElementById(`jobs-container-${cohort_id}`);
-    if (!jobsContainer) return;
-
-    // Clear existing job statuses
-    jobsContainer.innerHTML = '';
-
-    jobs.forEach(job => {
-        const { job_id, status, error } = job;
-
-        // Create job info element
-        const jobInfo = document.createElement('div');
-        jobInfo.innerHTML = `Job ID: <strong>${job_id}</strong>`;
-        jobInfo.classList.add('job-info');
-
-        // Create job status element
-        const jobStatus = document.createElement('div');
-        jobStatus.id = `status-${job_id}`;
-        jobStatus.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
-        jobStatus.classList.add('job-status');
-
-        jobsContainer.appendChild(jobInfo);
-        jobsContainer.appendChild(jobStatus);
-
-        if (status === 'completed') {
-            displayDownloadLink(job_id, {
-                hidePlaceholderMessage,
-                jobStatusDiv: jobStatus,
-                logMessage
-            });
-            // Generate and display shareable link
-            displayShareableLink(job_id, jobsContainer); // **Pass jobsContainer as target**
-        } else if (status === 'failed') {
-            const errorMessage = error || 'Job failed.';
-            displayError(errorMessage);
-            logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
-        }
-    });
-
-    logMessage(`Cohort ID ${cohort_id} status updated.`, 'info');
-}
-
-// Initialize the application once the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
 });

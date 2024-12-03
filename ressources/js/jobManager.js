@@ -1,6 +1,6 @@
 // frontend/resources/js/jobManager.js
 
-import { getCohortStatus, pollJobStatusAPI } from './apiInteractions.js';
+import { getCohortStatus, pollJobStatusAPI, getJobStatus } from './apiInteractions.js';
 import { displayError, clearError } from './errorHandling.js';
 import { hideSpinner, clearCountdown, displayShareableLink, hidePlaceholderMessage } from './uiUtils.js';
 import { logMessage } from './log.js';
@@ -58,7 +58,122 @@ export function displayDownloadLink(jobId, context) {
 }
 
 /**
- * Fetches the current job status and updates the UI immediately.
+ * Updates the UI based on the current job status.
+ * @param {Object} jobStatus - The job status object returned from the API.
+ * @param {Object} context - An object containing necessary DOM elements and state.
+ */
+function updateJobUI(jobStatus, context) {
+    const { job_id, status, error } = jobStatus;
+    const jobSection = document.getElementById(`job-${job_id}`);
+    if (!jobSection) return;
+
+    const jobStatusDiv = document.getElementById(`status-${job_id}`);
+    if (!jobStatusDiv) return;
+
+    // Update job status
+    jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+
+    if (status === 'completed') {
+        displayDownloadLink(job_id, {
+            hidePlaceholderMessage: context.hidePlaceholderMessage,
+            jobStatusDiv: jobStatusDiv,
+            logMessage: context.logMessage,
+        });
+        // Generate and display shareable link
+        displayShareableLink(job_id, jobSection); // Pass jobSection as targetContainer
+    } else if (status === 'failed') {
+        const errorMessage = error || 'Job failed.';
+        displayError(errorMessage);
+        logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
+    }
+
+    logMessage(`Job ID ${job_id} status updated to: ${status}`, 'info');
+}
+
+/**
+ * Fetches and displays cohort details based on the cohort ID.
+ * @param {string} cohortId - The cohort identifier.
+ * @param {object} context - An object containing necessary DOM elements and state.
+ */
+export async function loadCohortFromURL(cohortId, context) {
+    const {
+        showSpinner,
+        hideSpinner,
+        clearError,
+        clearMessage,
+        jobInfoDiv,
+        jobStatusDiv,
+        jobQueuePositionDiv,
+        regionOutputDiv,
+        displayShareableLink,
+        pollCohortStatusAPI,
+        fetchAndUpdateJobStatus,
+        resetCountdown,
+        logMessage,
+        serverLoad,
+        displayedCohorts,
+        cohortsContainer,
+    } = context;
+
+    try {
+        showSpinner();
+        clearError();
+        clearMessage();
+        jobInfoDiv.innerHTML = '';
+        jobStatusDiv.innerHTML = '';
+        jobQueuePositionDiv.innerHTML = '';
+        regionOutputDiv.innerHTML = '';
+
+        // Display initial cohort information
+        const cohortInfo = document.createElement('div');
+        cohortInfo.innerHTML = `Loading cohort details for Cohort ID: <strong>${cohortId}</strong>`;
+        jobInfoDiv.appendChild(cohortInfo);
+        logMessage(`Loading details for Cohort ID ${cohortId}.`, 'info');
+
+        // Generate and display the shareable link for the cohort
+        displayShareableLink(cohortId, jobInfoDiv); // Assuming cohortId can be used similarly to jobId
+
+        // Create a status element for the cohort
+        const statusElement = document.createElement('div');
+        statusElement.id = `status-${cohortId}`;
+        statusElement.innerHTML = `Status: <strong>Loading...</strong>`;
+        statusElement.classList.add('job-status');
+        jobStatusDiv.appendChild(statusElement);
+
+        // Start polling cohort status every 20 seconds
+        pollCohortStatusAPI(
+            cohortId,
+            async () => {
+                // Fetch the cohort status
+                const cohortStatus = await getCohortStatus(cohortId);
+                fetchAndUpdateJobStatus(cohortId, context); // Update cohort UI
+            },
+            () => {
+                // On Complete
+                hideSpinner();
+                clearCountdown();
+                logMessage(`Cohort ID ${cohortId} has been completed.`, 'success');
+                serverLoad.updateServerLoad();
+            },
+            (errorMessage) => {
+                // On Error
+                displayError(errorMessage);
+                logMessage(`Cohort ID ${cohortId} encountered an error: ${errorMessage}`, 'error');
+                hideSpinner();
+                clearCountdown();
+                serverLoad.updateServerLoad();
+            }
+        );
+
+        hideSpinner();
+    } catch (error) {
+        logMessage(`Error loading Cohort ID ${cohortId}: ${error.message}`, 'error');
+        hideSpinner();
+    }
+}
+
+/**
+ * Fetches the current cohort status and updates the UI immediately.
  * Utilizes the getCohortStatus function from apiInteractions.js.
  * @param {string} cohortId - The cohort identifier.
  * @param {object} context - An object containing necessary DOM elements and state.
@@ -70,7 +185,7 @@ export async function fetchAndUpdateJobStatus(cohortId, context) {
         jobQueuePositionDiv,
         displayedCohorts,
         cohortsContainer,
-        serverLoad
+        serverLoad,
     } = context;
 
     try {
@@ -101,7 +216,6 @@ export async function fetchAndUpdateJobStatus(cohortId, context) {
 
         // Update the cohort UI with current job statuses
         updateCohortUI(data, context);
-
     } catch (error) {
         logMessage(`Error fetching cohort status for Cohort ID ${cohortId}: ${error.message}`, 'error');
         hideSpinner();
@@ -125,7 +239,7 @@ function updateCohortUI(cohortStatus, context) {
     // Clear existing job statuses
     jobsContainer.innerHTML = '';
 
-    jobs.forEach(job => {
+    jobs.forEach((job) => {
         const { job_id, status, error } = job;
 
         // Create job info element
@@ -146,7 +260,7 @@ function updateCohortUI(cohortStatus, context) {
             displayDownloadLink(job_id, {
                 hidePlaceholderMessage,
                 jobStatusDiv: jobStatus,
-                logMessage
+                logMessage,
             });
             // Generate and display shareable link
             displayShareableLink(job_id, jobsContainer); // Pass jobsContainer as targetContainer
