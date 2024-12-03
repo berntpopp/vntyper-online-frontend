@@ -1,4 +1,4 @@
-// frontend/resources/js/main.js
+// frontend/ressources/js/main.js
 
 import { 
     validateFiles, 
@@ -6,9 +6,9 @@ import {
 import { 
     submitJobToAPI, 
     pollJobStatusAPI, 
-    getJobStatus, 
+    getCohortStatus, 
     createCohort 
-} from './apiInteractions.js'; // Updated import
+} from './apiInteractions.js';
 import { 
     initializeAioli, 
     extractRegionAndIndex 
@@ -38,7 +38,7 @@ import {
 import { initializeFileSelection } from './fileSelection.js';
 import { initializeServerLoad } from './serverLoad.js';
 import { logMessage, initializeLogging } from './log.js';
-import { fetchAndUpdateJobStatus, loadJobFromURL, displayDownloadLink } from './jobManager.js'; // Updated import
+import { fetchAndUpdateJobStatus, loadJobFromURL, displayDownloadLink } from './jobManager.js';
 
 /**
  * Initializes the application by setting up event listeners and dynamic content.
@@ -65,26 +65,22 @@ async function initializeApp() {
     // Get references to DOM elements
     const submitBtn = document.getElementById('submitBtn');
     const extractBtn = document.getElementById('extractBtn');
-    const jobInfoDiv = document.getElementById('jobInfo');
-    const jobStatusDiv = document.getElementById('jobStatus');
-    const jobQueuePositionDiv = document.getElementById('jobQueuePosition');
+    const cohortAliasInput = document.getElementById('cohortAlias');
+    const passphraseInput = document.getElementById('passphrase');
     const regionSelect = document.getElementById('region');
     const regionOutputDiv = document.getElementById('regionOutput');
     const emailInput = document.getElementById('email');
-    const cohortAliasInput = document.getElementById('cohortAlias');
-    const passphraseInput = document.getElementById('passphrase'); // **Added**
 
     // Initialize file selection
     let selectedFiles = [];
     const fileSelection = initializeFileSelection(selectedFiles);
-    const { displaySelectedFiles } = fileSelection;
+    const { displaySelectedFiles, onFilesSelected } = fileSelection;
 
     // Initialize server load monitoring
     const serverLoad = initializeServerLoad();
 
-    const cohortsContainer = document.createElement('div');
-    cohortsContainer.id = 'cohortsContainer';
-    jobInfoDiv.appendChild(cohortsContainer);
+    // Initialize cohorts container
+    const cohortsContainer = document.getElementById('cohortsContainer');
 
     const displayedCohorts = new Set();
 
@@ -110,9 +106,9 @@ async function initializeApp() {
                 hideSpinner,
                 clearError,
                 clearMessage,
-                jobInfoDiv,
-                jobStatusDiv,
-                jobQueuePositionDiv,
+                jobInfoDiv: cohortsContainer, // Display within cohorts container
+                jobStatusDiv: document.createElement('div'), // Placeholder
+                jobQueuePositionDiv: document.createElement('div'), // Placeholder
                 regionOutputDiv,
                 displayShareableLink,
                 pollJobStatusAPI,
@@ -138,9 +134,7 @@ async function initializeApp() {
 
         try {
             // Clear previous outputs and errors
-            jobInfoDiv.innerHTML = '';
-            jobStatusDiv.innerHTML = '';
-            jobQueuePositionDiv.innerHTML = '';
+            cohortsContainer.innerHTML = '';
             regionOutputDiv.innerHTML = '';
             clearError();
             clearMessage();
@@ -193,9 +187,14 @@ async function initializeApp() {
 
                         const cohortInfo = document.createElement('div');
                         cohortInfo.classList.add('cohort-info');
-                        cohortInfo.innerHTML = `Cohort ID: <strong>${cohortId}</strong>`;
+                        cohortInfo.innerHTML = `Cohort Alias: <strong>${cohortData.alias}</strong> | Cohort ID: <strong>${cohortId}</strong>`;
+
+                        const jobsContainer = document.createElement('div');
+                        jobsContainer.id = `jobs-container-${cohortId}`;
+                        jobsContainer.classList.add('jobs-container');
 
                         cohortSection.appendChild(cohortInfo);
+                        cohortSection.appendChild(jobsContainer);
                         cohortsContainer.appendChild(cohortSection);
                         logMessage(`Cohort section created for Cohort ID: ${cohortId}`, 'info');
                     } catch (cohortError) {
@@ -263,99 +262,109 @@ async function initializeApp() {
 
                     // **Create job information element**
                     const jobInfo = document.createElement('div');
-                    jobInfo.innerHTML = `Job submitted successfully!<br>Job ID: <strong>${data.job_id}</strong>`;
+                    jobInfo.innerHTML = `Job ID: <strong>${data.job_id}</strong>`;
                     jobInfo.classList.add('job-info');
 
-                    if (cohortSection) {
-                        cohortSection.appendChild(jobInfo);
+                    // **Create job status element**
+                    const jobStatus = document.createElement('div');
+                    jobStatus.id = `status-${data.job_id}`;
+                    jobStatus.innerHTML = `Status: <strong>Submitted</strong>`;
+                    jobStatus.classList.add('job-status');
+
+                    // Determine the target container
+                    let targetContainer;
+                    if (cohortId) {
+                        targetContainer = document.getElementById(`jobs-container-${cohortId}`);
                     } else {
-                        jobInfoDiv.appendChild(jobInfo);
+                        targetContainer = cohortsContainer; // For single job submissions without cohort
                     }
+
+                    // Append job info and status to the target container
+                    targetContainer.appendChild(jobInfo);
+                    targetContainer.appendChild(jobStatus);
 
                     // Generate and display shareable link
                     displayShareableLink(data.job_id);
 
-                    // Create a status element for this job
-                    const statusElement = document.createElement('div');
-                    statusElement.id = `status-${data.job_id}`;
-                    statusElement.innerHTML = `Status: <strong>Submitted</strong>`;
-                    statusElement.classList.add('job-status');
-
+                    // Start polling cohort status if cohort exists, else poll individual job
                     if (cohortId) {
-                        // Assuming all jobs share the same cohort section
-                        jobStatusDiv.appendChild(statusElement);
+                        // Poll the cohort status
+                        pollJobStatusAPI(
+                            cohortId,
+                            async () => {
+                                // Fetch the cohort status
+                                const cohortStatus = await getCohortStatus(cohortId);
+                                updateCohortUI(cohortStatus);
+                            },
+                            () => {
+                                // On Complete: All jobs in cohort are completed
+                                hideSpinner();
+                                clearCountdown();
+                                logMessage(`All jobs in Cohort ID ${cohortId} have been completed.`, 'success');
+                                serverLoad.updateServerLoad();
+                            },
+                            (errorMessage) => {
+                                // On Error: At least one job in cohort failed
+                                displayError(errorMessage);
+                                hideSpinner();
+                                clearCountdown();
+                                logMessage(`Cohort ID ${cohortId} encountered an error: ${errorMessage}`, 'error');
+                                serverLoad.updateServerLoad();
+                            }
+                        );
                     } else {
-                        jobStatusDiv.appendChild(statusElement);
+                        // Poll individual job status
+                        pollJobStatusAPI(
+                            data.job_id,
+                            (status) => {
+                                // Update status in the jobStatusDiv
+                                if (jobStatus) {
+                                    jobStatus.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+                                }
+                                logMessage(`Status updated to: ${status} for Job ID ${data.job_id}.`, 'info');
+                            },
+                            () => {
+                                // On Complete
+                                displayDownloadLink(data.job_id, {
+                                    hidePlaceholderMessage,
+                                    jobStatusDiv: jobStatus,
+                                    logMessage
+                                });
+                                hideSpinner();
+                                clearCountdown();
+                                logMessage(`Spinner and countdown hidden for Job ID ${data.job_id}.`, 'info');
+                                serverLoad.updateServerLoad();
+                            },
+                            (errorMessage) => {
+                                // On Error
+                                displayError(errorMessage);
+                                logMessage(`Job ID ${data.job_id} failed with error: ${errorMessage}`, 'error');
+                                hideSpinner();
+                                clearCountdown();
+                                serverLoad.updateServerLoad();
+                            },
+                            () => {
+                                // onPoll Callback to reset countdown
+                                resetCountdown();
+                                logMessage('Countdown reset to 20 seconds.', 'info');
+                            },
+                            (queueData) => {
+                                // onQueueUpdate callback
+                                const { position_in_queue, total_jobs_in_queue, status } = queueData;
+                                if (position_in_queue) {
+                                    jobQueuePositionDiv.innerHTML = `Position in Queue: <strong>${position_in_queue}</strong> out of <strong>${total_jobs_in_queue}</strong>`;
+                                    logMessage(`Job ID ${data.job_id} is position ${position_in_queue} out of ${total_jobs_in_queue} in the queue.`, 'info');
+                                } else if (status) {
+                                    jobQueuePositionDiv.innerHTML = `${status}`;
+                                    logMessage(`Job ID ${data.job_id} queue status: ${status}.`, 'info');
+                                } else {
+                                    jobQueuePositionDiv.innerHTML = '';
+                                }
+                                // Update server load indicator
+                                serverLoad.updateServerLoad();
+                            }
+                        );
                     }
-
-                    // Immediately fetch and update job status
-                    await fetchAndUpdateJobStatus(data.job_id, {
-                        jobInfoDiv,
-                        jobStatusDiv,
-                        jobQueuePositionDiv,
-                        displayedCohorts,
-                        cohortsContainer,
-                        serverLoad,
-                        hideSpinner,
-                        clearCountdown,
-                        displayDownloadLink,
-                        logMessage,
-                        displayError
-                    });
-
-                    // Start polling job status every 20 seconds
-                    pollJobStatusAPI(
-                        data.job_id,
-                        (status) => {
-                            // Update status in the jobStatusDiv
-                            if (statusElement) {
-                                statusElement.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
-                            }
-                            logMessage(`Status updated to: ${status} for Job ID ${data.job_id}.`, 'info');
-                        },
-                        () => {
-                            // On Complete
-                            displayDownloadLink(data.job_id, {
-                                hidePlaceholderMessage,
-                                jobStatusDiv,
-                                logMessage
-                            });
-                            hideSpinner();
-                            clearCountdown();
-                            logMessage(`Spinner and countdown hidden for Job ID ${data.job_id}.`, 'info');
-                            jobQueuePositionDiv.innerHTML = '';
-                            serverLoad.updateServerLoad();
-                        },
-                        (errorMessage) => {
-                            // On Error
-                            displayError(errorMessage);
-                            logMessage(`Job ID ${data.job_id} failed with error: ${errorMessage}`, 'error');
-                            hideSpinner();
-                            clearCountdown();
-                            jobQueuePositionDiv.innerHTML = '';
-                            serverLoad.updateServerLoad();
-                        },
-                        () => {
-                            // onPoll Callback to reset countdown
-                            resetCountdown();
-                            logMessage('Countdown reset to 20 seconds.', 'info');
-                        },
-                        (queueData) => {
-                            // onQueueUpdate callback
-                            const { position_in_queue, total_jobs_in_queue, status } = queueData;
-                            if (position_in_queue) {
-                                jobQueuePositionDiv.innerHTML = `Position in Queue: <strong>${position_in_queue}</strong> out of <strong>${total_jobs_in_queue}</strong>`;
-                                logMessage(`Job ID ${data.job_id} is position ${position_in_queue} out of ${total_jobs_in_queue} in the queue.`, 'info');
-                            } else if (status) {
-                                jobQueuePositionDiv.innerHTML = `${status}`;
-                                logMessage(`Job ID ${data.job_id} queue status: ${status}.`, 'info');
-                            } else {
-                                jobQueuePositionDiv.innerHTML = '';
-                            }
-                            // Update server load indicator
-                            serverLoad.updateServerLoad();
-                        }
-                    );
                 } catch (jobError) {
                     // Handle individual job submission error
                     displayError(`Job Submission Failed: ${jobError.message}`);
@@ -375,15 +384,62 @@ async function initializeApp() {
             hideSpinner();
             clearCountdown();
             logMessage('Spinner and countdown hidden due to exception.', 'info');
-            jobQueuePositionDiv.innerHTML = '';
             serverLoad.updateServerLoad();
         } finally {
             // Reset the button
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit Job';
-            logMessage('Submit button re-enabled and text reset to "Submit Job".', 'info');
+            submitBtn.textContent = 'Submit Jobs';
+            logMessage('Submit button re-enabled and text reset to "Submit Jobs".', 'info');
         }
     });
+
+    /**
+     * Updates the UI based on the current cohort status.
+     * @param {Object} cohortStatus - The cohort status object returned from the API.
+     */
+    function updateCohortUI(cohortStatus) {
+        const { cohort_id, alias, jobs } = cohortStatus;
+        const cohortSection = document.getElementById(`cohort-${cohort_id}`);
+        if (!cohortSection) return;
+
+        const jobsContainer = document.getElementById(`jobs-container-${cohort_id}`);
+        if (!jobsContainer) return;
+
+        // Clear existing job statuses
+        jobsContainer.innerHTML = '';
+
+        jobs.forEach(job => {
+            const { job_id, status, error } = job;
+
+            // Create job info element
+            const jobInfo = document.createElement('div');
+            jobInfo.innerHTML = `Job ID: <strong>${job_id}</strong>`;
+            jobInfo.classList.add('job-info');
+
+            // Create job status element
+            const jobStatus = document.createElement('div');
+            jobStatus.id = `status-${job_id}`;
+            jobStatus.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+            jobStatus.classList.add('job-status');
+
+            jobsContainer.appendChild(jobInfo);
+            jobsContainer.appendChild(jobStatus);
+
+            if (status === 'completed') {
+                displayDownloadLink(job_id, {
+                    hidePlaceholderMessage,
+                    jobStatusDiv: jobStatus,
+                    logMessage
+                });
+            } else if (status === 'failed') {
+                const errorMessage = error || 'Job failed.';
+                displayError(errorMessage);
+                logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
+            }
+        });
+
+        logMessage(`Cohort ID ${cohort_id} status updated.`, 'info');
+    }
 
     /**
      * Handle Region Extraction via Extract Button
@@ -515,8 +571,63 @@ async function initializeApp() {
         }
     });
 
+    // Initialize file selection listener
+    bamFilesInput.addEventListener('change', (event) => {
+        selectedFiles = Array.from(event.target.files);
+        displaySelectedFiles(selectedFiles);
+        logMessage(`${selectedFiles.length} file(s) selected for upload.`, 'info');
+    });
+
     // Check URL for job_id on initial load
     checkURLForJob();
+}
+
+/**
+ * Updates the UI based on the current cohort status.
+ * @param {Object} cohortStatus - The cohort status object returned from the API.
+ */
+function updateCohortUI(cohortStatus) {
+    const { cohort_id, alias, jobs } = cohortStatus;
+    const cohortSection = document.getElementById(`cohort-${cohort_id}`);
+    if (!cohortSection) return;
+
+    const jobsContainer = document.getElementById(`jobs-container-${cohort_id}`);
+    if (!jobsContainer) return;
+
+    // Clear existing job statuses
+    jobsContainer.innerHTML = '';
+
+    jobs.forEach(job => {
+        const { job_id, status, error } = job;
+
+        // Create job info element
+        const jobInfo = document.createElement('div');
+        jobInfo.innerHTML = `Job ID: <strong>${job_id}</strong>`;
+        jobInfo.classList.add('job-info');
+
+        // Create job status element
+        const jobStatus = document.createElement('div');
+        jobStatus.id = `status-${job_id}`;
+        jobStatus.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+        jobStatus.classList.add('job-status');
+
+        jobsContainer.appendChild(jobInfo);
+        jobsContainer.appendChild(jobStatus);
+
+        if (status === 'completed') {
+            displayDownloadLink(job_id, {
+                hidePlaceholderMessage,
+                jobStatusDiv: jobStatus,
+                logMessage
+            });
+        } else if (status === 'failed') {
+            const errorMessage = error || 'Job failed.';
+            displayError(errorMessage);
+            logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
+        }
+    });
+
+    logMessage(`Cohort ID ${cohort_id} status updated.`, 'info');
 }
 
 // Initialize the application once the DOM is fully loaded

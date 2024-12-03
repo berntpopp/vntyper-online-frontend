@@ -150,7 +150,7 @@
         aria-label="File Upload Area"
         data-tooltip="Click or drag and drop your BAM and BAI files here"
       >
-        <p>Drag & drop corresponding BAM and BAI files.</p>
+        <p>Drag & drop BAM and BAI files or click to select multiple files.</p>
         <input
           type="file"
           id="bamFiles"
@@ -187,16 +187,16 @@
     <!-- Button Group: Submit, Extract, Show Options -->
     <div 
       class="button-group" 
-      data-intro="Submit your job, extract regions, or provide additional optional inputs." 
+      data-intro="Submit your jobs, extract regions, or provide additional optional inputs." 
       data-step="3"
     >
       <button 
         id="submitBtn" 
         class="submit-button button" 
-        data-tooltip="Click here to submit your job for analysis.."
-        aria-label="Submit Job"
+        data-tooltip="Click here to submit your jobs for analysis."
+        aria-label="Submit Jobs"
       >
-        Submit Job
+        Submit Jobs
       </button>
       <button 
         id="extractBtn" 
@@ -230,7 +230,7 @@
         aria-label="Email for notifications"
       >
 
-      <label for="cohortAlias">Cohort alias:</label>
+      <label for="cohortAlias">Cohort Alias:</label>
       <input 
         type="text" 
         id="cohortAlias" 
@@ -240,7 +240,7 @@
         aria-label="Cohort Alias"
       >
       
-      <label for="passphrase">Pass:</label>
+      <label for="passphrase">Passphrase:</label>
       <input 
         type="password" 
         id="passphrase" 
@@ -251,10 +251,15 @@
       >
     </div>
 
+    <!-- Cohorts and Jobs Display -->
+    <div id="cohortsContainer" class="cohorts-container" aria-live="polite">
+      <!-- Cohort sections will be dynamically injected here -->
+    </div>
+
     <!-- Output and Error Containers -->
     <div 
       id="output" 
-      data-intro="Here you will see the status and results of your job." 
+      data-intro="Here you will see the status and results of your jobs." 
       data-step="6"
     >
       <!-- Placeholder Message -->
@@ -267,12 +272,7 @@
 
       <!-- Job Information and Status -->
       <div id="jobOutput">
-        <div id="jobInfo"></div>
-        <div id="jobStatus"></div>
-        <div id="jobQueuePosition"></div>
-        <!-- Spinner and Countdown -->
-        <div id="spinner" class="spinner hidden" aria-label="Loading" role="status"></div>
-        <div id="countdown" class="countdown"></div>
+        <!-- This section is now handled within cohortsContainer -->
       </div>
       
       <!-- Region Extraction Output -->

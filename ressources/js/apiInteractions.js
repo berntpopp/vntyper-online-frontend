@@ -1,16 +1,22 @@
-// frontend/ressources/js/apiInteractions.js
+// frontend/resources/js/apiInteractions.js
 
 import { logMessage } from './log.js'; // Import the logMessage function
 
 /**
- * Submits a job to the backend API.
+ * Submits a job or batch of jobs to the backend API.
  * @param {FormData} formData - The form data containing job parameters and files.
+ * @param {string} [cohortId] - Optional cohort ID to associate the jobs with.
  * @returns {Promise<Object>} - The JSON response from the API.
  * @throws {Error} - If the submission fails.
  */
-export async function submitJobToAPI(formData) {
+export async function submitJobToAPI(formData, cohortId = null) {
     try {
-        logMessage('Submitting job to the API...', 'info');
+        logMessage('Submitting job(s) to the API...', 'info');
+
+        if (cohortId) {
+            formData.append('cohort_id', cohortId);
+            logMessage(`Associating jobs with Cohort ID: ${cohortId}`, 'info');
+        }
 
         const response = await fetch(`${window.CONFIG.API_URL}/run-job/`, {
             method: 'POST',
@@ -18,7 +24,7 @@ export async function submitJobToAPI(formData) {
         });
 
         if (!response.ok) {
-            let errorMessage = 'Failed to submit job.';
+            let errorMessage = 'Failed to submit job(s).';
             try {
                 const errorData = await response.json();
                 if (errorData.detail) {
@@ -37,7 +43,7 @@ export async function submitJobToAPI(formData) {
         }
 
         const data = await response.json();
-        logMessage(`Job submitted successfully! Job ID: ${data.job_id}`, 'success');
+        logMessage(`Job(s) submitted successfully! Job ID(s): ${data.job_id}`, 'success');
         return data;
     } catch (error) {
         logMessage(`Error in submitJobToAPI: ${error.message}`, 'error');
@@ -192,7 +198,7 @@ export async function getJobQueueStatus(jobId) {
 
 /**
  * Creates a cohort by sending a POST request to the backend API.
- * @param {string} [alias] - The cohort alias provided by the user.
+ * @param {string} alias - The cohort alias provided by the user.
  * @param {string} [passphrase] - The passphrase for the cohort (optional).
  * @returns {Promise<Object>} - The created cohort object containing cohort_id and alias.
  * @throws {Error} - If the cohort creation fails.
@@ -239,4 +245,92 @@ export async function createCohort(alias, passphrase) {
         logMessage(`Error in createCohort: ${error.message}`, 'error');
         throw error;
     }
+}
+
+/**
+ * Fetches the current status of a cohort from the backend API.
+ * @param {string} cohortId - The unique identifier of the cohort.
+ * @returns {Promise<Object>} - The JSON response containing cohort status and job details.
+ * @throws {Error} - If the request fails.
+ */
+export async function getCohortStatus(cohortId) {
+    try {
+        logMessage(`Fetching status for Cohort ID: ${cohortId}`, 'info');
+
+        const response = await fetch(`${window.CONFIG.API_URL}/cohort-status/${cohortId}/`);
+        if (!response.ok) {
+            let errorMessage = 'Failed to fetch cohort status.';
+            try {
+                const errorData = await response.json();
+                if (errorData.detail) {
+                    if (Array.isArray(errorData.detail)) {
+                        errorMessage = errorData.detail.map(err => err.msg).join(', ');
+                    } else if (typeof errorData.detail === 'string') {
+                        errorMessage = errorData.detail;
+                    }
+                }
+            } catch (e) {
+                logMessage('Error parsing cohort status error response.', 'error');
+            }
+            logMessage(`Failed to fetch status for Cohort ID ${cohortId}: ${errorMessage}`, 'error');
+            throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+        logMessage(`Status fetched for Cohort ID ${cohortId}: ${data.status}`, 'info');
+        return data;
+    } catch (error) {
+        logMessage(`Error in getCohortStatus for Cohort ID ${cohortId}: ${error.message}`, 'error');
+        throw error;
+    }
+}
+
+/**
+ * Polls the cohort status from the backend API at regular intervals.
+ * Utilizes the getCohortStatus function to fetch the current status.
+ *
+ * @param {string} cohortId - The unique identifier of the cohort.
+ * @param {Function} onStatusUpdate - Callback function to handle status updates.
+ * @param {Function} onComplete - Callback function when the cohort is completed.
+ * @param {Function} onError - Callback function when an error occurs.
+ * @param {Function} [onPoll] - Optional callback function when a poll is made.
+ */
+export function pollCohortStatusAPI(cohortId, onStatusUpdate, onComplete, onError, onPoll = null) {
+    logMessage(`Starting to poll status for Cohort ID: ${cohortId}`, 'info');
+
+    const interval = setInterval(async () => {
+        try {
+            if (onPoll && typeof onPoll === 'function') {
+                onPoll();
+                logMessage(`Polling initiated for Cohort ID: ${cohortId}`, 'info');
+            }
+
+            // Use the getCohortStatus function to fetch current status
+            const data = await getCohortStatus(cohortId);
+
+            // Update status using the provided callback
+            onStatusUpdate(data.status);
+            logMessage(`Cohort ID ${cohortId} status updated to: ${data.status}`, 'info');
+
+            // Handle the status of the cohort
+            if (data.status === 'completed') {
+                clearInterval(interval);
+                logMessage(`Cohort ID ${cohortId} has been completed.`, 'success');
+                onComplete();
+            } else if (data.status === 'failed') {
+                clearInterval(interval);
+                const errorMsg = data.error || 'Cohort processing failed.';
+                logMessage(`Cohort ID ${cohortId} failed with error: ${errorMsg}`, 'error');
+                onError(errorMsg);
+            } else {
+                // Cohort is still processing
+                logMessage(`Cohort ID ${cohortId} is in status: ${data.status}`, 'info');
+                // Additional handling if needed
+            }
+        } catch (error) {
+            clearInterval(interval);
+            logMessage(`Error polling status for Cohort ID ${cohortId}: ${error.message}`, 'error');
+            onError(error.message);
+        }
+    }, 20000); // Poll every 20 seconds
 }
