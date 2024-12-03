@@ -1,8 +1,18 @@
 // frontend/resources/js/main.js
 
-import { validateFiles } from './inputWrangling.js';
-import { submitJobToAPI, createCohort } from './apiInteractions.js';
-import { initializeAioli, extractRegionAndIndex } from './bamProcessing.js';
+import { 
+    validateFiles, 
+} from './inputWrangling.js';
+import { 
+    submitJobToAPI, 
+    pollJobStatusAPI, 
+    getJobStatus, 
+    createCohort 
+} from './apiInteractions.js'; // Updated import
+import { 
+    initializeAioli, 
+    extractRegionAndIndex 
+} from './bamProcessing.js';
 import { initializeModal } from './modal.js';
 import { initializeFooter } from './footer.js';
 import { initializeDisclaimer } from './disclaimer.js';
