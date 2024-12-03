@@ -1,4 +1,4 @@
-// frontend/ressources/js/main.js
+// frontend/resources/js/main.js
 
 import { validateFiles } from './inputWrangling.js';
 import { submitJobToAPI, pollJobStatusAPI, getJobStatus, createCohort } from './apiInteractions.js';
@@ -21,7 +21,9 @@ import {
     initializeUIUtils,
     displayMessage,
     clearMessage,
-    displayShareableLink
+    displayShareableLink,
+    hidePlaceholderMessage, // Imported hidePlaceholderMessage
+    showPlaceholderMessage  // Imported showPlaceholderMessage
 } from './uiUtils.js'; // Import the moved UI helper functions
 import { initializeFileSelection } from './fileSelection.js';
 import { initializeServerLoad } from './serverLoad.js';
@@ -265,7 +267,7 @@ async function initializeApp() {
      * @param {string} jobId - The job identifier.
      */
     function displayDownloadLink(jobId) {
-        // Remove the call to hidePlaceholderMessage() as it's now handled by uiUtils.js
+        hidePlaceholderMessage(); // Now correctly imported
 
         const downloadLink = document.createElement('a');
         downloadLink.href = `${window.CONFIG.API_URL}/download/${jobId}/`;
@@ -537,7 +539,7 @@ async function initializeApp() {
             regionOutputDiv.innerHTML = '';
             clearError();
             clearMessage();
-            // hidePlaceholderMessage(); // Removed this call
+            hidePlaceholderMessage(); // Hide placeholder when extracting region
 
             const CLI = await initializeAioli();
             const { matchedPairs, invalidFiles } = validateFiles(selectedFiles, false);
@@ -651,25 +653,6 @@ async function initializeApp() {
             logMessage('File upload dialog triggered via keyboard.', 'info');
         }
     });
-
-    /**
-     * Displays the download link once the job is completed.
-     * @param {string} jobId - The job identifier.
-     */
-    function displayDownloadLink(jobId) {
-        // Removed the call to hidePlaceholderMessage() as it's now handled by uiUtils.js
-
-        const downloadLink = document.createElement('a');
-        downloadLink.href = `${window.CONFIG.API_URL}/download/${jobId}/`;
-        downloadLink.textContent = 'Download vntyper results';
-        downloadLink.classList.add('download-link', 'download-button');
-        downloadLink.target = '_blank'; // Open in a new tab
-        downloadLink.setAttribute('aria-label', `Download results for Job ID ${jobId}`);
-
-        jobStatusDiv.appendChild(document.createElement('br'));
-        jobStatusDiv.appendChild(downloadLink);
-        logMessage(`Download link generated for Job ID ${jobId}.`, 'info');
-    }
 
     // Check URL for job_id on initial load
     checkURLForJob();

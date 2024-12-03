@@ -1,4 +1,4 @@
-// frontend/ressources/js/uiUtils.js
+// frontend/resources/js/uiUtils.js
 
 import { logMessage } from './log.js'; // Import the logMessage function
 
@@ -8,7 +8,7 @@ let timeLeft = 20; // Countdown time in seconds
 /**
  * Shows the placeholder message in the output area.
  */
-function showPlaceholderMessage() {
+export function showPlaceholderMessage() { // Exported
     const placeholderMessage = document.getElementById('placeholderMessage');
     if (placeholderMessage) {
         placeholderMessage.classList.remove('hidden');
@@ -21,7 +21,7 @@ function showPlaceholderMessage() {
 /**
  * Hides the placeholder message in the output area.
  */
-function hidePlaceholderMessage() {
+export function hidePlaceholderMessage() { // Exported
     const placeholderMessage = document.getElementById('placeholderMessage');
     if (placeholderMessage) {
         placeholderMessage.classList.add('hidden');
@@ -89,7 +89,14 @@ export function displayShareableLink(jobId) {
         return;
     }
 
+    // Avoid duplicating the shareable link if it already exists
+    if (document.getElementById(`shareContainer-${jobId}`)) {
+        logMessage(`Shareable link for Job ID ${jobId} already exists.`, 'info');
+        return;
+    }
+
     const shareContainer = document.createElement('div');
+    shareContainer.id = `shareContainer-${jobId}`; // Unique ID to prevent duplicates
     shareContainer.classList.add('share-container', 'mt-2');
 
     const shareLabel = document.createElement('span');
@@ -203,7 +210,7 @@ export function clearCountdown() {
         countdownInterval = null;
         logMessage('Countdown interval cleared.', 'info');
     }
-    
+
     if (countdownDiv) {
         countdownDiv.textContent = '';
         logMessage('Countdown display cleared from UI.', 'info');
@@ -229,7 +236,7 @@ function initializeToggleOptionalInputs() {
 
     toggleButton.addEventListener('click', () => {
         const isHidden = additionalInputs.classList.contains('hidden');
-        
+
         if (isHidden) {
             // Show optional inputs
             additionalInputs.classList.remove('hidden');
