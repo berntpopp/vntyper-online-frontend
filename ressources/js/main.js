@@ -3,10 +3,7 @@
 import { validateFiles } from './inputWrangling.js';
 import {
     submitJobToAPI,
-    pollJobStatusAPI,
-    getCohortStatus,
     createCohort,
-    pollCohortStatusAPI,
 } from './apiInteractions.js';
 import { initializeAioli, extractRegionAndIndex } from './bamProcessing.js';
 import { initializeModal } from './modal.js';
@@ -74,6 +71,7 @@ async function initializeApp() {
 
     // Define displayedCohorts at a higher scope
     const displayedCohorts = new Set();
+    const activePolls = new Set(); // Track active polling cohorts
 
     // Get references to DOM elements
     const submitBtn = document.getElementById('submitBtn');
@@ -134,7 +132,7 @@ async function initializeApp() {
                 displayedCohorts, // Pass the existing Set
                 outputDiv,
                 cohortsContainer: cohortsContainerDiv, // Pass the cohorts container
-                passphraseInput, // Passphrase input added to context
+                passphrase, // Passphrase captured below
             });
         } else if (jobId) {
             loadJobFromURL(jobId, {
@@ -153,9 +151,8 @@ async function initializeApp() {
                 logMessage,
                 serverLoad,
                 displayedCohorts, // Pass the existing Set
-                outputDiv,
                 cohortsContainer: cohortsContainerDiv, // Pass the cohorts container
-                passphraseInput, // Passphrase input added to context
+                passphrase, // Passphrase captured below
             });
         }
     }
@@ -331,41 +328,52 @@ async function initializeApp() {
 
             // After submitting all jobs, start polling cohort status once
             if (cohortId) {
-                // Define a stopPolling function to be passed to jobManager.js
-                const stopPolling = () => {
-                    logMessage(`Polling stopped for Cohort ID ${cohortId}.`, 'info');
-                };
+                // Prevent multiple polling instances for the same cohort
+                if (activePolls.has(cohortId)) {
+                    logMessage(`Polling already active for Cohort ID ${cohortId}.`, 'warning');
+                } else {
+                    activePolls.add(cohortId);
 
-                // Start polling cohort status
-                pollCohortStatusAPI(
-                    cohortId,
-                    async () => {
-                        const cohortStatus = await getCohortStatus(cohortId, passphrase);
-                        fetchAndUpdateJobStatus(cohortId, cohortStatus, {
-                            hidePlaceholderMessage,
-                            logMessage,
-                            clearCountdown,
-                            stopPolling,
-                        });
-                    },
-                    () => {
-                        // On Complete
-                        hideSpinner();
-                        clearCountdown();
-                        logMessage(`Cohort ID ${cohortId} polling completed.`, 'success');
-                        serverLoad.updateServerLoad();
-                    },
-                    (errorMessage) => {
-                        // On Error
-                        displayError(errorMessage);
-                        logMessage(`Cohort ID ${cohortId} encountered an error: ${errorMessage}`, 'error');
-                        hideSpinner();
-                        clearCountdown();
-                        serverLoad.updateServerLoad();
-                    },
-                    stopPolling, // Pass the stopPolling function
-                    passphrase // Passphrase passed to pollCohortStatusAPI
-                );
+                    // Define a stopPolling function to be passed to jobManager.js
+                    const stopPolling = () => {
+                        logMessage(`Polling stopped for Cohort ID ${cohortId}.`, 'info');
+                        activePolls.delete(cohortId);
+                    };
+
+                    // Start polling cohort status
+                    pollCohortStatusAPI(
+                        cohortId,
+                        async () => {
+                            const cohortStatus = await getCohortStatus(cohortId, passphrase);
+                            fetchAndUpdateJobStatus(cohortId, cohortStatus, {
+                                hidePlaceholderMessage,
+                                logMessage,
+                                clearCountdown,
+                                stopPolling,
+                                passphrase, // Add passphrase here
+                            });
+                        },
+                        () => {
+                            // On Complete
+                            hideSpinner();
+                            clearCountdown();
+                            logMessage(`Cohort ID ${cohortId} polling completed.`, 'success');
+                            serverLoad.updateServerLoad();
+                            activePolls.delete(cohortId);
+                        },
+                        (errorMessage) => {
+                            // On Error
+                            displayError(errorMessage);
+                            logMessage(`Cohort ID ${cohortId} encountered an error: ${errorMessage}`, 'error');
+                            hideSpinner();
+                            clearCountdown();
+                            serverLoad.updateServerLoad();
+                            activePolls.delete(cohortId);
+                        },
+                        stopPolling, // Pass the stopPolling function
+                        passphrase // Passphrase passed to pollCohortStatusAPI
+                    );
+                }
             }
 
             selectedFiles = [];

@@ -118,8 +118,8 @@ export async function loadCohortFromURL(cohortId, context) {
         jobQueuePositionDiv.innerHTML = '';
         regionOutputDiv.innerHTML = '';
 
-        // Retrieve passphrase from the passphrase input field
-        const passphrase = passphraseInput.value.trim() || null;
+        // Retrieve passphrase from the context
+        const passphrase = context.passphrase || null;
 
         // Display initial cohort information
         const cohortInfo = document.createElement('div');
@@ -155,6 +155,7 @@ export async function loadCohortFromURL(cohortId, context) {
                     logMessage,
                     clearCountdown,
                     stopPolling,
+                    passphrase, // Add passphrase here
                 });
             },
             () => {
@@ -199,12 +200,13 @@ export async function fetchAndUpdateJobStatus(cohortId, cohortStatus, context) {
         displayedCohorts,
         cohortsContainer,
         serverLoad,
-        passphraseInput,
+        passphrase,
         logMessage,
     } = context;
 
     try {
-        const passphrase = passphraseInput.value.trim() || null;
+        // Use passphrase from context
+        const passphraseValue = passphrase || null;
 
         if (cohortStatus.cohort_id && !displayedCohorts.has(cohortStatus.cohort_id)) {
             // Create a new cohort section if not already displayed
