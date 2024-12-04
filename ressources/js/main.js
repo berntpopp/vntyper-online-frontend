@@ -191,7 +191,9 @@ async function initializeApp() {
             const { matchedPairs, invalidFiles } = validateFiles(selectedFiles, false);
 
             if (invalidFiles.length > 0) {
-                displayError(`Some files were invalid and not added: ${invalidFiles.map((f) => f.name).join(', ')}`);
+                displayError(
+                    `Some files were invalid and not added: ${invalidFiles.map((f) => f.name).join(', ')}`
+                );
                 logMessage('Invalid files detected during submission.', 'warning');
             }
 
@@ -406,6 +408,17 @@ async function initializeApp() {
                                 const jobStatusDiv = document.getElementById(`status-${jobId}`);
                                 if (jobStatusDiv) {
                                     jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+                                }
+
+                                // **Added Code: Display Download and Copy Buttons When Job is Completed**
+                                if (status === 'completed') {
+                                    displayDownloadLink(jobId, {
+                                        hidePlaceholderMessage,
+                                        jobStatusDiv,
+                                        logMessage,
+                                        clearCountdown,
+                                    });
+                                    displayShareableLink(jobId, jobStatusDiv.parentElement); // Pass the job container as targetContainer
                                 }
                             },
                             () => {
