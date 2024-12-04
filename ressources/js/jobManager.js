@@ -88,15 +88,7 @@ function updateJobUI(jobStatus, context) {
     // Update job status
     jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
 
-    if (status === 'completed') {
-        displayDownloadLink(job_id, {
-            hidePlaceholderMessage: context.hidePlaceholderMessage,
-            jobStatusDiv: jobStatusDiv,
-            logMessage: context.logMessage,
-        });
-        // Generate and display shareable link
-        displayShareableLink(job_id, jobSection); // Pass jobSection as targetContainer
-    } else if (status === 'failed') {
+    if (status === 'failed') {
         const errorMessage = error || 'Job failed.';
         displayError(errorMessage);
         logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
@@ -284,13 +276,21 @@ function updateCohortUI(cohortStatus, context) {
         // Create job status element
         const jobStatus = document.createElement('div');
         jobStatus.id = `status-${job_id}`;
-        jobStatus.innerHTML = `Status: <strong>${status}</strong>`;
+        jobStatus.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
         jobStatus.classList.add('job-status');
 
         jobsContainer.appendChild(jobInfo);
         jobsContainer.appendChild(jobStatus);
 
-        if (status === 'failed') {
+        if (status === 'completed') {
+            displayDownloadLink(job_id, {
+                hidePlaceholderMessage,
+                jobStatusDiv: jobStatus,
+                logMessage: context.logMessage,
+            });
+            // Generate and display shareable link
+            displayShareableLink(job_id, jobsContainer); // Pass jobsContainer as targetContainer
+        } else if (status === 'failed') {
             const errorMessage = error || 'Job failed.';
             displayError(errorMessage);
             logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
@@ -357,21 +357,21 @@ export async function loadJobFromURL(jobId, context) {
             jobId,
             async () => {
                 // Fetch the job status
-                const jobStatus = await getCohortStatus(jobId); // Assuming jobId is also cohortId for single jobs
-                updateCohortUI(jobStatus, context);
+                const jobStatus = await getJobStatus(jobId);
+                updateJobUI(jobStatus, context);
             },
             () => {
                 // On Complete
                 displayDownloadLink(jobId, {
                     hidePlaceholderMessage,
                     jobStatusDiv: statusElement,
-                    logMessage
+                    logMessage: context.logMessage,
                 });
                 // Generate and display the shareable link again if needed
                 displayShareableLink(jobId, {
                     targetContainer: jobStatusDiv,
                     jobId: jobId,
-                    logMessage
+                    logMessage: context.logMessage,
                 });
                 hideSpinner();
                 clearCountdown();
@@ -393,4 +393,4 @@ export async function loadJobFromURL(jobId, context) {
         logMessage(`Error loading Job ID ${jobId}: ${error.message}`, 'error');
         hideSpinner();
     }
-}
+};
