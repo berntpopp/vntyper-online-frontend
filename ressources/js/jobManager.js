@@ -116,6 +116,7 @@ export async function loadCohortFromURL(cohortId, context) {
     } catch (error) {
         logMessage(`Error loading Cohort ID ${cohortId}: ${error.message}`, 'error');
         hideSpinner();
+        clearCountdown();
     }
 }
 
@@ -306,8 +307,10 @@ export async function loadJobFromURL(jobId, context) {
         );
 
         hideSpinner();
+        clearCountdown();
     } catch (error) {
         logMessage(`Error loading Job ID ${jobId}: ${error.message}`, 'error');
         hideSpinner();
+        clearCountdown();
     }
 }

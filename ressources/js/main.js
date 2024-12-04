@@ -359,6 +359,7 @@ async function initializeApp() {
                                 displayError(errorMessage);
                                 logMessage(`Job ID ${data.job_id} failed: ${errorMessage}`, 'error');
                                 hideSpinner(); // Hide spinner when individual job fails
+                                clearCountdown();
                             }
                         );
                     }
