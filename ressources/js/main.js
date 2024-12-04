@@ -324,15 +324,15 @@ async function initializeApp() {
 
                     // Generate and display shareable link
                     displayShareableLink(data.job_id, targetContainer); // Pass targetContainer
-
                 } catch (jobError) {
                     displayError(`Job Submission Failed: ${jobError.message}`);
                     logMessage(`Job submission failed: ${jobError.message}`, 'error');
                 }
             }
 
-            // After submitting all jobs, start polling cohort status once
+            // After submitting all jobs, start polling
             if (cohortId) {
+                // Polling for cohort status (existing functionality)
                 // Prevent multiple polling instances for the same cohort
                 if (activePolls.has(cohortId)) {
                     logMessage(`Polling already active for Cohort ID ${cohortId}.`, 'warning');
@@ -379,6 +379,55 @@ async function initializeApp() {
                         stopPolling, // Pass the stopPolling function
                         passphrase // Passphrase passed to pollCohortStatusAPI
                     );
+                }
+            } else {
+                // Polling for individual jobs in single mode
+                if (jobIds.length > 0) {
+                    jobIds.forEach((jobId) => {
+                        // Prevent multiple polling instances for the same job
+                        if (activePolls.has(jobId)) {
+                            logMessage(`Polling already active for Job ID ${jobId}.`, 'warning');
+                            return;
+                        }
+
+                        activePolls.add(jobId);
+
+                        // Define a stopPolling function
+                        const stopPolling = () => {
+                            logMessage(`Polling stopped for Job ID ${jobId}.`, 'info');
+                            activePolls.delete(jobId);
+                        };
+
+                        // Start polling job status
+                        pollJobStatusAPI(
+                            jobId,
+                            (status) => {
+                                // Update job status in the UI
+                                const jobStatusDiv = document.getElementById(`status-${jobId}`);
+                                if (jobStatusDiv) {
+                                    jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+                                }
+                            },
+                            () => {
+                                // On Complete
+                                hideSpinner();
+                                clearCountdown();
+                                logMessage(`Job ID ${jobId} has been completed.`, 'success');
+                                serverLoad.updateServerLoad();
+                                stopPolling();
+                            },
+                            (errorMessage) => {
+                                // On Error
+                                displayError(errorMessage);
+                                logMessage(`Job ID ${jobId} encountered an error: ${errorMessage}`, 'error');
+                                hideSpinner();
+                                clearCountdown();
+                                serverLoad.updateServerLoad();
+                                stopPolling();
+                            },
+                            stopPolling // Pass the stopPolling function
+                        );
+                    });
                 }
             }
 
