@@ -3,7 +3,10 @@
 import { validateFiles } from './inputWrangling.js';
 import {
     submitJobToAPI,
+    pollJobStatusAPI,
+    getCohortStatus,
     createCohort,
+    pollCohortStatusAPI,
 } from './apiInteractions.js';
 import { initializeAioli, extractRegionAndIndex } from './bamProcessing.js';
 import { initializeModal } from './modal.js';
