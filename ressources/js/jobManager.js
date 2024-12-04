@@ -23,10 +23,16 @@ function capitalizeFirstLetter(string) {
 function updateCohortUI(cohortStatus, context) {
     const { cohort_id, alias, jobs } = cohortStatus;
     const cohortSection = document.getElementById(`cohort-${cohort_id}`);
-    if (!cohortSection) return;
+    if (!cohortSection) {
+        logMessage(`Cohort section #cohort-${cohort_id} not found in the DOM.`, 'warning');
+        return;
+    }
 
     const jobsContainer = document.getElementById(`jobs-container-${cohort_id}`);
-    if (!jobsContainer) return;
+    if (!jobsContainer) {
+        logMessage(`Jobs container #jobs-container-${cohort_id} not found in the DOM.`, 'warning');
+        return;
+    }
 
     // Clear existing job statuses
     jobsContainer.innerHTML = '';
@@ -36,8 +42,8 @@ function updateCohortUI(cohortStatus, context) {
     jobs.forEach((job) => {
         const { job_id, status, error } = job;
 
-        if (!job_id) {
-            logMessage(`Job without job_id encountered: ${JSON.stringify(job)}`, 'error');
+        if (!job_id || typeof job_id !== 'string' || job_id.trim() === '') {
+            logMessage(`Invalid or missing job_id in job: ${JSON.stringify(job)}`, 'error');
             return; // Skip jobs without a valid job_id
         }
 
@@ -82,8 +88,10 @@ function updateCohortUI(cohortStatus, context) {
 
     // If all jobs are completed, stop polling
     if (allCompleted) {
-        if (context.stopPolling) {
+        if (context.stopPolling && typeof context.stopPolling === 'function') {
             context.stopPolling();
+        } else {
+            logMessage('stopPolling function not provided or is not a function in context.', 'warning');
         }
         hideSpinner();
         clearCountdown();
@@ -105,7 +113,6 @@ export async function loadCohortFromURL(cohortId, context) {
         clearMessage,
         jobInfoDiv,
         regionOutputDiv,
-        // Removed displayShareableLink to prevent misuse with cohortId
         pollCohortStatusAPI,
         fetchAndUpdateJobStatus,
         resetCountdown,
@@ -115,6 +122,17 @@ export async function loadCohortFromURL(cohortId, context) {
         cohortsContainer,
         passphrase,
     } = context;
+
+    // Validate cohortId
+    if (!cohortId || typeof cohortId !== 'string' || cohortId.trim() === '') {
+        logMessage('Invalid Cohort ID provided to loadCohortFromURL.', 'error');
+        displayError('Invalid Cohort ID provided.');
+        hideSpinner();
+        clearCountdown();
+        return;
+    }
+
+    logMessage(`Starting to load Cohort ID: ${cohortId}`, 'info');
 
     try {
         showSpinner();
@@ -128,9 +146,6 @@ export async function loadCohortFromURL(cohortId, context) {
         cohortInfo.innerHTML = `Loading cohort details for Cohort ID: <strong>${cohortId}</strong>`;
         jobInfoDiv.appendChild(cohortInfo);
         logMessage(`Loading details for Cohort ID ${cohortId}.`, 'info');
-
-        // Removed incorrect usage
-        // displayShareableLink(cohortId, jobInfoDiv, 'cohort'); // Only if you have a separate shareable link for cohorts
 
         // Create a status element for the cohort and append it to jobInfoDiv
         const statusElement = document.createElement('div');
@@ -148,7 +163,7 @@ export async function loadCohortFromURL(cohortId, context) {
         };
 
         // Start polling cohort status with passphrase
-        const stopper = pollCohortStatusAPI(
+        pollCohortStatusAPI(
             cohortId,
             async () => {
                 const cohortStatus = await getCohortStatus(cohortId, passphrase);
@@ -166,7 +181,7 @@ export async function loadCohortFromURL(cohortId, context) {
                 hideSpinner();
                 clearCountdown();
                 logMessage(`Cohort ID ${cohortId} polling completed.`, 'success');
-                serverLoad.updateServerLoad();
+                serverLoad.updateServerLoad(cohortId); // Pass cohortId here
                 displayedCohorts.delete(cohortId); // Clean up after completion
             },
             (errorMessage) => {
@@ -175,10 +190,10 @@ export async function loadCohortFromURL(cohortId, context) {
                 logMessage(`Cohort ID ${cohortId} encountered an error: ${errorMessage}`, 'error');
                 hideSpinner();
                 clearCountdown();
-                serverLoad.updateServerLoad();
+                serverLoad.updateServerLoad(cohortId); // Pass cohortId here
                 displayedCohorts.delete(cohortId); // Clean up after error
             },
-            stopPolling, // Pass the stopPolling function
+            null, // No onPoll callback needed
             passphrase // Passphrase passed to pollCohortStatusAPI
         );
 
@@ -264,6 +279,17 @@ export async function loadJobFromURL(jobId, context) {
         passphrase,
     } = context;
 
+    // Validate jobId
+    if (!jobId || typeof jobId !== 'string' || jobId.trim() === '') {
+        logMessage('Invalid Job ID provided to loadJobFromURL.', 'error');
+        displayError('Invalid Job ID provided.');
+        hideSpinner();
+        clearCountdown();
+        return;
+    }
+
+    logMessage(`Starting to load Job ID: ${jobId}`, 'info');
+
     try {
         showSpinner();
         clearError();
@@ -288,7 +314,7 @@ export async function loadJobFromURL(jobId, context) {
         jobInfoDiv.appendChild(statusElement); // Append directly to jobInfoDiv
 
         // Start polling job status
-        const stopPolling = pollJobStatusAPI(
+        pollJobStatusAPI(
             jobId,
             async (status) => {
                 // Update job status in the UI
@@ -305,7 +331,7 @@ export async function loadJobFromURL(jobId, context) {
                         logMessage,
                         clearCountdown,
                     });
-                    displayShareableLink(jobId, jobStatusDivElement.parentElement, 'job'); // Pass the job container as targetContainer
+                    // Shareable link already displayed above
                 } else if (status === 'failed') {
                     const errorMessage = 'Job failed.'; // Customize as needed
                     displayError(errorMessage);
@@ -320,7 +346,7 @@ export async function loadJobFromURL(jobId, context) {
                 hideSpinner();
                 clearCountdown();
                 logMessage(`Job ID ${jobId} polling completed.`, 'success');
-                serverLoad.updateServerLoad();
+                serverLoad.updateServerLoad(jobId); // Pass jobId here
             },
             (errorMessage) => {
                 // On Error
@@ -328,7 +354,10 @@ export async function loadJobFromURL(jobId, context) {
                 logMessage(`Job ID ${jobId} encountered an error: ${errorMessage}`, 'error');
                 hideSpinner(); // Hide spinner when individual job fails
                 clearCountdown();
-            }
+                serverLoad.updateServerLoad(jobId); // Pass jobId here
+            },
+            null, // No onPoll callback needed
+            null  // No onQueueUpdate callback needed
         );
 
         hideSpinner();

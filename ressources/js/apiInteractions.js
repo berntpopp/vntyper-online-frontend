@@ -5,7 +5,7 @@ import { logMessage } from './log.js';
 /**
  * Submits a job or batch of jobs to the backend API.
  * @param {FormData} formData - The form data containing job parameters and files.
- * @param {string} [cohortId=null] - Optional cohort ID to associate the jobs with.
+ * @param {string|null} [cohortId=null] - Optional cohort ID to associate the jobs with.
  * @param {string|null} [passphrase=null] - Optional passphrase for the cohort.
  * @returns {Promise<Object>} - The JSON response from the API.
  * @throws {Error} - If the submission fails.
@@ -14,11 +14,21 @@ export async function submitJobToAPI(formData, cohortId = null, passphrase = nul
     try {
         logMessage('Submitting job(s) to the API...', 'info');
 
+        // Validate cohortId if provided
         if (cohortId) {
+            if (typeof cohortId !== 'string' || cohortId.trim() === '') {
+                logMessage('Invalid Cohort ID provided to submitJobToAPI.', 'error');
+                throw new Error('Invalid Cohort ID provided.');
+            }
             formData.append('cohort_id', cohortId);
             logMessage(`Associating jobs with Cohort ID: ${cohortId}`, 'info');
 
+            // Validate passphrase if provided
             if (passphrase) {
+                if (typeof passphrase !== 'string') {
+                    logMessage('Passphrase must be a string in submitJobToAPI.', 'error');
+                    throw new Error('Passphrase must be a string.');
+                }
                 formData.append('passphrase', passphrase);
                 logMessage('Passphrase included in job submission.', 'info');
             }
@@ -61,13 +71,19 @@ export async function submitJobToAPI(formData, cohortId = null, passphrase = nul
  * Fetches the current status of a job from the backend API.
  * @param {string} jobId - The unique identifier of the job.
  * @returns {Promise<Object>} - The JSON response containing job status and details.
- * @throws {Error} - If the request fails.
+ * @throws {Error} - If the request fails or jobId is invalid.
  */
 export async function getJobStatus(jobId) {
+    // Added validation for jobId
+    if (typeof jobId !== 'string' || jobId.trim() === '') {
+        logMessage('getJobStatus called with invalid Job ID.', 'error');
+        throw new Error('Invalid Job ID provided.');
+    }
+
     try {
         logMessage(`Fetching status for Job ID: ${jobId}`, 'info');
 
-        const response = await fetch(`${window.CONFIG.API_URL}/job-status/${jobId}/`);
+        const response = await fetch(`${window.CONFIG.API_URL}/job-status/${encodeURIComponent(jobId)}/`);
         if (!response.ok) {
             let errorMessage = 'Failed to fetch job status.';
             try {
@@ -99,15 +115,25 @@ export async function getJobStatus(jobId) {
  * @param {string} cohortId - The unique identifier of the cohort.
  * @param {string|null} [passphrase=null] - Optional passphrase for the cohort.
  * @returns {Promise<Object>} - The JSON response containing cohort status and job details.
- * @throws {Error} - If the request fails.
+ * @throws {Error} - If the request fails or cohortId is invalid.
  */
 export async function getCohortStatus(cohortId, passphrase = null) {
+    // Added validation for cohortId
+    if (typeof cohortId !== 'string' || cohortId.trim() === '') {
+        logMessage('getCohortStatus called with invalid Cohort ID.', 'error');
+        throw new Error('Invalid Cohort ID provided.');
+    }
+
     try {
         logMessage(`Fetching status for Cohort ID: ${cohortId}`, 'info');
 
         // Construct URL with passphrase if provided
         let url = `${window.CONFIG.API_URL}/cohort-status/?cohort_id=${encodeURIComponent(cohortId)}`;
         if (passphrase) {
+            if (typeof passphrase !== 'string') {
+                logMessage('Passphrase must be a string in getCohortStatus.', 'error');
+                throw new Error('Passphrase must be a string.');
+            }
             url += `&passphrase=${encodeURIComponent(passphrase)}`;
             logMessage('Passphrase included in cohort status request.', 'info');
         }
@@ -151,6 +177,13 @@ export async function getCohortStatus(cohortId, passphrase = null) {
  * @returns {Function} - A function to stop the polling.
  */
 export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onPoll = null, onQueueUpdate = null) {
+    // Added validation for jobId
+    if (typeof jobId !== 'string' || jobId.trim() === '') {
+        logMessage('pollJobStatusAPI called with invalid Job ID.', 'error');
+        onError('Invalid Job ID provided.');
+        return () => {}; // Return a no-op stopper function
+    }
+
     logMessage(`Starting to poll status for Job ID: ${jobId}`, 'info');
 
     const POLL_INTERVAL = 5000; // 5 seconds
@@ -235,6 +268,13 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
  * @returns {Function} - A function to stop the polling.
  */
 export function pollCohortStatusAPI(cohortId, onStatusUpdate, onComplete, onError, onPoll = null, passphrase = null) {
+    // Added validation for cohortId
+    if (typeof cohortId !== 'string' || cohortId.trim() === '') {
+        logMessage('pollCohortStatusAPI called with invalid Cohort ID.', 'error');
+        onError('Invalid Cohort ID provided.');
+        return () => {}; // Return a no-op stopper function
+    }
+
     logMessage(`Starting to poll status for Cohort ID: ${cohortId}`, 'info');
 
     const POLL_INTERVAL = 5000; // 5 seconds
@@ -291,9 +331,15 @@ export function pollCohortStatusAPI(cohortId, onStatusUpdate, onComplete, onErro
  * Fetches the job queue status from the backend API.
  * @param {string} jobId - The unique identifier of the job.
  * @returns {Promise<Object>} - The JSON response from the API.
- * @throws {Error} - If the request fails.
+ * @throws {Error} - If the request fails or jobId is invalid.
  */
 export async function getJobQueueStatus(jobId) {
+    // Added validation for jobId
+    if (typeof jobId !== 'string' || jobId.trim() === '') {
+        logMessage('getJobQueueStatus called with invalid Job ID.', 'error');
+        throw new Error('Invalid Job ID provided.');
+    }
+
     try {
         logMessage(`Fetching queue status for Job ID: ${jobId}`, 'info');
 
@@ -329,17 +375,29 @@ export async function getJobQueueStatus(jobId) {
 /**
  * Creates a cohort by sending a POST request to the backend API.
  * @param {string} alias - The cohort alias provided by the user.
- * @param {string} [passphrase] - The passphrase for the cohort (optional).
+ * @param {string|null} [passphrase=null] - The passphrase for the cohort (optional).
  * @returns {Promise<Object>} - The created cohort object containing cohort_id and alias.
- * @throws {Error} - If the cohort creation fails.
+ * @throws {Error} - If the cohort creation fails or input is invalid.
  */
-export async function createCohort(alias, passphrase) {
+export async function createCohort(alias, passphrase = null) {
+    // Added validation for alias
+    if (typeof alias !== 'string' || alias.trim() === '') {
+        logMessage('createCohort called with invalid alias.', 'error');
+        throw new Error('Invalid alias provided.');
+    }
+
+    // Optional passphrase validation
+    if (passphrase !== null && typeof passphrase !== 'string') {
+        logMessage('Passphrase must be a string in createCohort.', 'error');
+        throw new Error('Passphrase must be a string.');
+    }
+
     try {
         logMessage(`Creating cohort with alias: ${alias}`, 'info');
 
         // Construct the payload as a URL-encoded string
         const params = new URLSearchParams();
-        if (alias) params.append('alias', alias);
+        params.append('alias', alias);
         if (passphrase) params.append('passphrase', passphrase);
 
         const response = await fetch(`${window.CONFIG.API_URL}/create-cohort/`, {

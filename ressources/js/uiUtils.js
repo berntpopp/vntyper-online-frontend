@@ -92,8 +92,9 @@ function generateShareableLink(id, type) {
 export function displayShareableLink(id, targetContainer, type = 'job') {
     hidePlaceholderMessage(); // Hide placeholder when displaying shareable link
 
-    if (!id) {
-        logMessage('Invalid ID provided to displayShareableLink: undefined or null.', 'error');
+    // Enhanced validation for 'id'
+    if (typeof id !== 'string' || id.trim() === '') {
+        logMessage('Invalid ID provided to displayShareableLink: undefined, null, or empty string.', 'error');
         return;
     }
 
@@ -102,8 +103,8 @@ export function displayShareableLink(id, targetContainer, type = 'job') {
         return;
     }
 
-    if (!targetContainer) {
-        logMessage('Target container not provided for shareable link.', 'warning');
+    if (!(targetContainer instanceof HTMLElement)) {
+        logMessage('Target container provided to displayShareableLink is not a valid DOM element.', 'error');
         return;
     }
 
@@ -171,6 +172,17 @@ export function displayDownloadLink(jobId, context) {
 
     hidePlaceholderMessage(); // Hide placeholder when displaying download link
 
+    // Enhanced validation for 'jobId'
+    if (typeof jobId !== 'string' || jobId.trim() === '') {
+        logMessage('Invalid Job ID provided to displayDownloadLink: undefined, null, or empty string.', 'error');
+        return;
+    }
+
+    if (!(jobStatusDiv instanceof HTMLElement)) {
+        logMessage('jobStatusDiv provided to displayDownloadLink is not a valid DOM element.', 'error');
+        return;
+    }
+
     // Check if the download and copy buttons already exist
     const existingDownloadLink = document.getElementById(`download-${jobId}`);
     const existingCopyButton = document.getElementById(`copy-${jobId}`);
@@ -183,7 +195,7 @@ export function displayDownloadLink(jobId, context) {
     // Create Download Link
     const downloadLink = document.createElement('a');
     downloadLink.id = `download-${jobId}`; // Assign unique ID
-    downloadLink.href = `${window.CONFIG.API_URL}/download/${jobId}/`;
+    downloadLink.href = `${window.CONFIG.API_URL}/download/${encodeURIComponent(jobId)}/`;
     downloadLink.textContent = 'Download vntyper results';
     downloadLink.classList.add('download-link', 'download-button');
     downloadLink.target = '_blank'; // Open in a new tab
