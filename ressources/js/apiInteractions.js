@@ -141,130 +141,163 @@ export async function getCohortStatus(cohortId, passphrase = null) {
 /**
  * Polls the job status from the backend API at regular intervals.
  * Utilizes the getJobStatus function to fetch the current status.
+ * Implements immediate polling and recursive polling using setTimeout.
  * @param {string} jobId - The unique identifier of the job.
  * @param {Function} onStatusUpdate - Callback function to handle status updates.
  * @param {Function} onComplete - Callback function when the job is completed.
  * @param {Function} onError - Callback function when an error occurs.
- * @param {Function} [onPoll] - Optional callback function when a poll is made.
- * @param {Function} [onQueueUpdate] - Optional callback function to handle queue updates.
+ * @param {Function} [onPoll=null] - Optional callback function when a poll is made.
+ * @param {Function} [onQueueUpdate=null] - Optional callback function to handle queue updates.
+ * @returns {Function} - A function to stop the polling.
  */
-export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onPoll, onQueueUpdate) {
+export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onPoll = null, onQueueUpdate = null) {
     logMessage(`Starting to poll status for Job ID: ${jobId}`, 'info');
 
-    const interval = setInterval(async () => {
+    const POLL_INTERVAL = 5000; // 5 seconds
+
+    let isPolling = true;
+
+    const poll = async () => {
+        if (!isPolling) return;
+
         try {
             if (onPoll && typeof onPoll === 'function') {
                 onPoll();
                 logMessage(`Polling initiated for Job ID: ${jobId}`, 'info');
             }
 
-            // Use the getJobStatus function to fetch current status
+            // Fetch current job status
             const data = await getJobStatus(jobId);
 
             // Update status using the provided callback
             onStatusUpdate(data.status);
             logMessage(`Job ID ${jobId} status updated to: ${data.status}`, 'info');
 
-            // Optionally, handle additional job details if available
+            // Handle additional job details if available
             if (data.details) {
                 logMessage(`Job ID ${jobId} details: ${JSON.stringify(data.details)}`, 'info');
                 // For example, update the UI with additional details here
             }
 
             if (data.status === 'completed') {
-                clearInterval(interval);
                 logMessage(`Job ID ${jobId} has been completed.`, 'success');
                 onComplete();
+                isPolling = false;
             } else if (data.status === 'failed') {
-                clearInterval(interval);
                 const errorMsg = data.error || 'Job failed.';
                 logMessage(`Job ID ${jobId} failed with error: ${errorMsg}`, 'error');
                 onError(errorMsg);
+                isPolling = false;
             } else {
-                // Job is still processing
                 logMessage(`Job ID ${jobId} is in status: ${data.status}`, 'info');
+                // Schedule the next poll
+                setTimeout(poll, POLL_INTERVAL);
+            }
 
-                // Fetch job queue position if applicable
-                if (onQueueUpdate && typeof onQueueUpdate === 'function') {
-                    try {
-                        const queueData = await getJobQueueStatus(jobId);
-                        onQueueUpdate(queueData);
-                        logMessage(`Queue data updated for Job ID ${jobId}: ${JSON.stringify(queueData)}`, 'info');
-                    } catch (queueError) {
-                        logMessage(`Error fetching job queue status for Job ID ${jobId}: ${queueError.message}`, 'error');
-                        // Optionally, you can decide how to handle queue fetch errors
-                    }
+            // Fetch job queue position if applicable
+            if (onQueueUpdate && typeof onQueueUpdate === 'function') {
+                try {
+                    const queueData = await getJobQueueStatus(jobId);
+                    onQueueUpdate(queueData);
+                    logMessage(`Queue data updated for Job ID ${jobId}: ${JSON.stringify(queueData)}`, 'info');
+                } catch (queueError) {
+                    logMessage(`Error fetching job queue status for Job ID ${jobId}: ${queueError.message}`, 'error');
+                    // Optionally, decide how to handle queue fetch errors
                 }
             }
         } catch (error) {
-            clearInterval(interval);
             logMessage(`Error polling status for Job ID ${jobId}: ${error.message}`, 'error');
             onError(error.message);
+            isPolling = false;
         }
-    }, 20000); // Poll every 20 seconds
+    };
+
+    // Start polling immediately
+    poll();
+
+    // Return a function to stop polling
+    return () => {
+        isPolling = false;
+        logMessage(`Polling manually stopped for Job ID ${jobId}.`, 'info');
+    };
 }
 
 /**
  * Polls the cohort status from the backend API at regular intervals.
  * Utilizes the getCohortStatus function to fetch the current status.
- *
+ * Implements immediate polling and recursive polling using setTimeout.
  * @param {string} cohortId - The unique identifier of the cohort.
  * @param {Function} onStatusUpdate - Callback function to handle status updates.
  * @param {Function} onComplete - Callback function when the cohort is completed.
  * @param {Function} onError - Callback function when an error occurs.
  * @param {Function} [onPoll=null] - Optional callback function when a poll is made.
  * @param {string|null} [passphrase=null] - Optional passphrase for the cohort.
+ * @returns {Function} - A function to stop the polling.
  */
 export function pollCohortStatusAPI(cohortId, onStatusUpdate, onComplete, onError, onPoll = null, passphrase = null) {
     logMessage(`Starting to poll status for Cohort ID: ${cohortId}`, 'info');
 
-    const interval = setInterval(async () => {
+    const POLL_INTERVAL = 5000; // 5 seconds
+
+    let isPolling = true;
+
+    const poll = async () => {
+        if (!isPolling) return;
+
         try {
             if (onPoll && typeof onPoll === 'function') {
                 onPoll();
                 logMessage(`Polling initiated for Cohort ID: ${cohortId}`, 'info');
             }
 
-            // Use the getCohortStatus function to fetch current status with passphrase
+            // Fetch current cohort status
             const data = await getCohortStatus(cohortId, passphrase);
 
             // Update status using the provided callback
             onStatusUpdate(data);
 
             if (data.status === 'completed') {
-                clearInterval(interval);
                 logMessage(`Cohort ID ${cohortId} has been completed.`, 'success');
                 onComplete();
+                isPolling = false;
             } else if (data.status === 'failed') {
-                clearInterval(interval);
                 const errorMsg = data.error || 'Cohort processing failed.';
                 logMessage(`Cohort ID ${cohortId} failed with error: ${errorMsg}`, 'error');
                 onError(errorMsg);
+                isPolling = false;
             } else {
                 logMessage(`Cohort ID ${cohortId} is in status: ${data.status}`, 'info');
+                // Schedule the next poll
+                setTimeout(poll, POLL_INTERVAL);
             }
         } catch (error) {
-            clearInterval(interval);
             logMessage(`Error polling status for Cohort ID ${cohortId}: ${error.message}`, 'error');
             onError(error.message);
+            isPolling = false;
         }
-    }, 20000); // Poll every 20 seconds
+    };
+
+    // Start polling immediately
+    poll();
+
+    // Return a function to stop polling
+    return () => {
+        isPolling = false;
+        logMessage(`Polling manually stopped for Cohort ID ${cohortId}.`, 'info');
+    };
 }
 
 /**
  * Fetches the job queue status from the backend API.
- * @param {string} [jobId] - Optional job ID to get position in the queue.
+ * @param {string} jobId - The unique identifier of the job.
  * @returns {Promise<Object>} - The JSON response from the API.
  * @throws {Error} - If the request fails.
  */
 export async function getJobQueueStatus(jobId) {
     try {
-        logMessage(`Fetching queue status${jobId ? ` for Job ID: ${jobId}` : ''}`, 'info');
+        logMessage(`Fetching queue status for Job ID: ${jobId}`, 'info');
 
-        let url = `${window.CONFIG.API_URL}/job-queue/`;
-        if (jobId) {
-            url += `?job_id=${encodeURIComponent(jobId)}`;
-        }
+        const url = `${window.CONFIG.API_URL}/job-queue/?job_id=${encodeURIComponent(jobId)}`;
 
         const response = await fetch(url);
         if (!response.ok) {
@@ -281,14 +314,14 @@ export async function getJobQueueStatus(jobId) {
             } catch (e) {
                 logMessage('Error parsing job queue status error response.', 'error');
             }
-            logMessage(`Failed to fetch queue status${jobId ? ` for Job ID ${jobId}` : ''}: ${errorMessage}`, 'error');
+            logMessage(`Failed to fetch queue status for Job ID ${jobId}: ${errorMessage}`, 'error');
             throw new Error(errorMessage);
         }
         const data = await response.json();
-        logMessage(`Queue status fetched${jobId ? ` for Job ID ${jobId}` : ''}: ${JSON.stringify(data)}`, 'info');
+        logMessage(`Queue status fetched for Job ID ${jobId}: ${JSON.stringify(data)}`, 'info');
         return data;
     } catch (error) {
-        logMessage(`Error in getJobQueueStatus${jobId ? ` for Job ID ${jobId}` : ''}: ${error.message}`, 'error');
+        logMessage(`Error in getJobQueueStatus for Job ID ${jobId}: ${error.message}`, 'error');
         throw error;
     }
 }

@@ -98,8 +98,6 @@ export async function loadCohortFromURL(cohortId, context) {
         clearError,
         clearMessage,
         jobInfoDiv,
-        jobStatusDiv,
-        jobQueuePositionDiv,
         regionOutputDiv,
         displayShareableLink,
         pollCohortStatusAPI,
@@ -117,8 +115,6 @@ export async function loadCohortFromURL(cohortId, context) {
         clearError();
         clearMessage();
         jobInfoDiv.innerHTML = '';
-        jobStatusDiv.innerHTML = '';
-        jobQueuePositionDiv.innerHTML = '';
         regionOutputDiv.innerHTML = '';
 
         // Display initial cohort information
@@ -130,12 +126,12 @@ export async function loadCohortFromURL(cohortId, context) {
         // Generate and display the shareable link for the cohort
         displayShareableLink(cohortId, jobInfoDiv); // Assuming cohortId can be used similarly to jobId
 
-        // Create a status element for the cohort
+        // Create a status element for the cohort and append it to jobInfoDiv
         const statusElement = document.createElement('div');
         statusElement.id = `status-${cohortId}`;
         statusElement.innerHTML = `Status: <strong>Loading...</strong>`;
         statusElement.classList.add('job-status');
-        jobStatusDiv.appendChild(statusElement);
+        jobInfoDiv.appendChild(statusElement); // Append directly to jobInfoDiv
 
         // Add to displayed cohorts
         displayedCohorts.add(cohortId);
@@ -249,9 +245,7 @@ export async function loadJobFromURL(jobId, context) {
         hideSpinner,
         clearError,
         clearMessage,
-        jobInfoDiv,
-        jobStatusDiv,
-        jobQueuePositionDiv,
+        jobInfoDiv,           // Container to display job information
         regionOutputDiv,
         displayShareableLink,
         pollJobStatusAPI,
@@ -269,8 +263,6 @@ export async function loadJobFromURL(jobId, context) {
         clearError();
         clearMessage();
         jobInfoDiv.innerHTML = '';
-        jobStatusDiv.innerHTML = '';
-        jobQueuePositionDiv.innerHTML = '';
         regionOutputDiv.innerHTML = '';
 
         // Display initial job information
@@ -282,15 +274,15 @@ export async function loadJobFromURL(jobId, context) {
         // Generate and display the shareable link
         displayShareableLink(jobId, jobInfoDiv); // Pass jobInfoDiv as targetContainer
 
-        // Create a status element for this job
+        // Create a status element for this job and append it to jobInfoDiv
         const statusElement = document.createElement('div');
         statusElement.id = `status-${jobId}`;
         statusElement.innerHTML = `Status: <strong>Loading...</strong>`;
         statusElement.classList.add('job-status');
-        jobStatusDiv.appendChild(statusElement);
+        jobInfoDiv.appendChild(statusElement); // Append directly to jobInfoDiv
 
         // Start polling job status
-        pollJobStatusAPI(
+        const stopPolling = pollJobStatusAPI(
             jobId,
             async (status) => {
                 // Update job status in the UI
@@ -302,14 +294,14 @@ export async function loadJobFromURL(jobId, context) {
                 // Display Download and Copy Buttons When Job is Completed
                 if (status === 'completed') {
                     displayDownloadLink(jobId, {
-                        hidePlaceholderMessage,
+                        hidePlaceholderMessage: () => {}, // No action needed here
                         jobStatusDiv: jobStatusDivElement,
                         logMessage,
                         clearCountdown,
                     });
                     displayShareableLink(jobId, jobStatusDivElement.parentElement); // Pass the job container as targetContainer
                 } else if (status === 'failed') {
-                    const errorMessage = 'Job failed.'; // You can customize this message or retrieve from response
+                    const errorMessage = 'Job failed.'; // Customize as needed
                     displayError(errorMessage);
                     logMessage(`Job ID ${jobId} failed with error: ${errorMessage}`, 'error');
                 } else {

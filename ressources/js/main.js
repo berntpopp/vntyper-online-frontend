@@ -75,7 +75,7 @@ async function initializeApp() {
 
     // Define displayedCohorts and activePolls at a higher scope
     const displayedCohorts = new Set();
-    const activePolls = new Set(); // Track active polling cohorts
+    const activePolls = new Set(); // Track active polling cohorts and jobs
 
     // Get references to DOM elements
     const submitBtn = document.getElementById('submitBtn');
@@ -125,8 +125,6 @@ async function initializeApp() {
                 clearError,
                 clearMessage,
                 jobInfoDiv: outputDiv, // Display in output div for cohort
-                jobStatusDiv: document.createElement('div'), // Placeholder
-                jobQueuePositionDiv: document.createElement('div'), // Placeholder
                 regionOutputDiv,
                 displayShareableLink,
                 pollCohortStatusAPI,
@@ -135,7 +133,6 @@ async function initializeApp() {
                 logMessage,
                 serverLoad,
                 displayedCohorts, // Pass the existing Set
-                outputDiv,
                 cohortsContainer: cohortsContainerDiv, // Pass the cohorts container
                 passphrase, // Passphrase captured here
             });
@@ -147,8 +144,6 @@ async function initializeApp() {
                 clearError,
                 clearMessage,
                 jobInfoDiv: jobOutputDiv, // Display in jobOutputDiv for individual jobs
-                jobStatusDiv: document.createElement('div'), // Placeholder
-                jobQueuePositionDiv: document.createElement('div'), // Placeholder
                 regionOutputDiv,
                 displayShareableLink,
                 pollJobStatusAPI,
@@ -348,7 +343,7 @@ async function initializeApp() {
                     };
 
                     // Start polling cohort status
-                    pollCohortStatusAPI(
+                    const stop = pollCohortStatusAPI(
                         cohortId,
                         async () => {
                             const cohortStatus = await getCohortStatus(cohortId, passphrase);
@@ -381,6 +376,9 @@ async function initializeApp() {
                         stopPolling, // Pass the stopPolling function
                         passphrase // Passphrase passed to pollCohortStatusAPI
                     );
+
+                    // Optionally, store the stopper function if you need to stop polling later
+                    // activePolls.set(cohortId, stop);
                 }
             } else {
                 // Polling for individual jobs in single mode
@@ -401,7 +399,7 @@ async function initializeApp() {
                         };
 
                         // Start polling job status
-                        pollJobStatusAPI(
+                        const stop = pollJobStatusAPI(
                             jobId,
                             async (status) => {
                                 // Update job status in the UI
@@ -440,6 +438,9 @@ async function initializeApp() {
                             },
                             stopPolling // Pass the stopPolling function
                         );
+
+                        // Optionally, store the stopper function if you need to stop polling later
+                        // activePolls.set(jobId, stop);
                     });
                 }
             }
