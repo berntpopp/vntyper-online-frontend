@@ -16,7 +16,8 @@ function capitalizeFirstLetter(string) {
 }
 
 /**
- * Displays the download link once the job is completed.
+ * Displays the download link and copy button once the job is completed.
+ * Checks if the buttons already exist to prevent duplicates.
  * @param {string} jobId - The job identifier.
  * @param {object} context - An object containing necessary DOM elements and state.
  */
@@ -25,7 +26,18 @@ export function displayDownloadLink(jobId, context) {
 
     hidePlaceholderMessage(); // Hide placeholder when displaying download link
 
+    // Check if the download and copy buttons already exist
+    const existingDownloadLink = document.getElementById(`download-${jobId}`);
+    const existingCopyButton = document.getElementById(`copy-${jobId}`);
+
+    if (existingDownloadLink && existingCopyButton) {
+        logMessage(`Download and Copy Link buttons already exist for Job ID ${jobId}. Skipping creation.`, 'info');
+        return; // Exit the function to prevent duplication
+    }
+
+    // Create Download Link
     const downloadLink = document.createElement('a');
+    downloadLink.id = `download-${jobId}`; // Assign unique ID
     downloadLink.href = `${window.CONFIG.API_URL}/download/${jobId}/`;
     downloadLink.textContent = 'Download vntyper results';
     downloadLink.classList.add('download-link', 'download-button');
@@ -33,8 +45,9 @@ export function displayDownloadLink(jobId, context) {
     downloadLink.setAttribute('aria-label', `Download results for Job ID ${jobId}`);
     downloadLink.setAttribute('data-copyable', 'true'); // Make link copyable
 
-    // Create a copy button for the shareable link
+    // Create Copy Button
     const copyButton = document.createElement('button');
+    copyButton.id = `copy-${jobId}`; // Assign unique ID
     copyButton.textContent = 'Copy Link';
     copyButton.classList.add('copy-button');
     copyButton.setAttribute('aria-label', `Copy shareable link for Job ID ${jobId}`);
@@ -50,11 +63,13 @@ export function displayDownloadLink(jobId, context) {
             });
     });
 
-    // Append download link and copy button to the job status div
-    jobStatusDiv.appendChild(document.createElement('br'));
+    // Append Download Link and Copy Button to the job status div
+    const lineBreak = document.createElement('br');
+    jobStatusDiv.appendChild(lineBreak);
     jobStatusDiv.appendChild(downloadLink);
     jobStatusDiv.appendChild(copyButton);
-    logMessage(`Download and shareable links generated for Job ID ${jobId}.`, 'info');
+
+    logMessage(`Download and Copy Link buttons generated for Job ID ${jobId}.`, 'info');
 }
 
 /**
