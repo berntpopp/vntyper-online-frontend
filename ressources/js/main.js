@@ -329,7 +329,7 @@ async function initializeApp() {
                             cohortId,
                             async () => {
                                 const cohortStatus = await getCohortStatus(cohortId, passphrase);
-                                fetchAndUpdateJobStatus(cohortId, {
+                                fetchAndUpdateJobStatus(cohortId, cohortStatus, {
                                     hidePlaceholderMessage,
                                     logMessage,
                                     outputDiv,
@@ -357,11 +357,14 @@ async function initializeApp() {
                     } else {
                         pollJobStatusAPI(
                             data.job_id,
-                            () => displayDownloadLink(data.job_id, {
-                                hidePlaceholderMessage,
-                                jobStatusDiv: jobStatus,
-                                logMessage,
-                            }),
+                            () => {
+                                displayDownloadLink(data.job_id, {
+                                    hidePlaceholderMessage,
+                                    jobStatusDiv: jobStatus,
+                                    logMessage,
+                                });
+                                displayShareableLink(data.job_id, targetContainer);
+                            },
                             (errorMessage) => {
                                 displayError(errorMessage);
                                 logMessage(`Job ID ${data.job_id} failed: ${errorMessage}`, 'error');
@@ -484,7 +487,7 @@ async function initializeApp() {
 
                     // Create a container for the download links
                     const linkContainer = document.createElement('div');
-                    linkContainer.classList.add('download-container', 'mb-2'); // Ensure 'mb-2' is defined in your CSS or remove if unnecessary
+                    linkContainer.classList.add('download-container', 'mb-2'); /* Ensure 'mb-2' is defined in your CSS or remove if unnecessary */
                     linkContainer.appendChild(downloadBamLink);
                     linkContainer.appendChild(downloadBaiLink);
 

@@ -28,7 +28,17 @@ function updateJobUI(jobStatus, context) {
     // Update job status
     jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
 
-    if (status === 'failed') {
+    if (status === 'completed') {
+        // Display download and shareable links immediately for the completed job
+        displayDownloadLink(job_id, {
+            hidePlaceholderMessage,
+            jobStatusDiv: jobStatusDiv,
+            logMessage: context.logMessage,
+            clearCountdown: context.clearCountdown,
+        });
+        displayShareableLink(job_id, jobStatusDiv.parentElement); // Assuming parentElement is the job container
+
+    } else if (status === 'failed') {
         const errorMessage = error || 'Job failed.';
         displayError(errorMessage);
         logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
@@ -97,7 +107,7 @@ export async function loadCohortFromURL(cohortId, context) {
             cohortId,
             async () => {
                 const cohortStatus = await getCohortStatus(cohortId, passphrase);
-                fetchAndUpdateJobStatus(cohortId, context); // Update cohort UI
+                fetchAndUpdateJobStatus(cohortId, cohortStatus, context); // Update cohort UI with current status
             },
             () => {
                 // On Complete
@@ -130,9 +140,10 @@ export async function loadCohortFromURL(cohortId, context) {
  * Fetches the current cohort status and updates the UI immediately.
  * Utilizes the getCohortStatus function.
  * @param {string} cohortId - The cohort identifier.
+ * @param {Object} cohortStatus - The cohort status object returned from the API.
  * @param {object} context - An object containing necessary DOM elements and state.
  */
-export async function fetchAndUpdateJobStatus(cohortId, context) {
+export async function fetchAndUpdateJobStatus(cohortId, cohortStatus, context) {
     const {
         jobInfoDiv,
         jobStatusDiv,
@@ -146,20 +157,19 @@ export async function fetchAndUpdateJobStatus(cohortId, context) {
 
     try {
         const passphrase = passphraseInput.value.trim() || null;
-        const data = await getCohortStatus(cohortId, passphrase);
 
-        if (data.cohort_id && !displayedCohorts.has(data.cohort_id)) {
+        if (cohortStatus.cohort_id && !displayedCohorts.has(cohortStatus.cohort_id)) {
             // Create a new cohort section if not already displayed
             const cohortSection = document.createElement('div');
-            cohortSection.id = `cohort-${data.cohort_id}`;
+            cohortSection.id = `cohort-${cohortStatus.cohort_id}`;
             cohortSection.classList.add('cohort-section');
 
             const cohortInfo = document.createElement('div');
             cohortInfo.classList.add('cohort-info');
-            cohortInfo.innerHTML = `Cohort Alias: <strong>${data.alias}</strong> | Cohort ID: <strong>${data.cohort_id}</strong>`;
+            cohortInfo.innerHTML = `Cohort Alias: <strong>${cohortStatus.alias}</strong> | Cohort ID: <strong>${cohortStatus.cohort_id}</strong>`;
 
             const jobsContainer = document.createElement('div');
-            jobsContainer.id = `jobs-container-${data.cohort_id}`;
+            jobsContainer.id = `jobs-container-${cohortStatus.cohort_id}`;
             jobsContainer.classList.add('jobs-container');
 
             cohortSection.appendChild(cohortInfo);
@@ -167,12 +177,12 @@ export async function fetchAndUpdateJobStatus(cohortId, context) {
             cohortsContainer.appendChild(cohortSection);
 
             // Add to displayed cohorts
-            displayedCohorts.add(data.cohort_id);
-            logMessage(`Cohort ${data.cohort_id} displayed in UI.`, 'info');
+            displayedCohorts.add(cohortStatus.cohort_id);
+            logMessage(`Cohort ${cohortStatus.cohort_id} displayed in UI.`, 'info');
         }
 
         // Update the cohort UI with current job statuses
-        updateCohortUI(data, context);
+        updateCohortUI(cohortStatus, context);
     } catch (error) {
         logMessage(`Error fetching cohort status for Cohort ID ${cohortId}: ${error.message}`, 'error');
         hideSpinner();
@@ -214,13 +224,13 @@ function updateCohortUI(cohortStatus, context) {
         jobsContainer.appendChild(jobStatus);
 
         if (status === 'completed') {
+            // Display download and shareable links immediately for the completed job
             displayDownloadLink(job_id, {
                 hidePlaceholderMessage,
                 jobStatusDiv: jobStatus,
                 logMessage: context.logMessage,
                 clearCountdown: context.clearCountdown,
             });
-            // Generate and display shareable link
             displayShareableLink(job_id, jobsContainer); // Pass jobsContainer as targetContainer
         } else if (status === 'failed') {
             const errorMessage = error || 'Job failed.';
@@ -291,9 +301,10 @@ export async function loadJobFromURL(jobId, context) {
             () => {
                 displayDownloadLink(jobId, {
                     hidePlaceholderMessage,
-                    jobStatusDiv: jobStatus,
+                    jobStatusDiv: statusElement,
                     logMessage: context.logMessage,
                 });
+                displayShareableLink(jobId, jobInfoDiv.parentElement); // Assuming parentElement is the job container
             },
             (errorMessage) => {
                 displayError(errorMessage);
