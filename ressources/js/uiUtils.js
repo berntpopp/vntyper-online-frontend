@@ -182,7 +182,6 @@ export function startCountdown() {
             timeLeft--;
             if (timeLeft > 0) {
                 countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
-                logMessage(`Countdown updated: ${timeLeft} seconds remaining.`, 'info');
             } else {
                 timeLeft = 20;
                 countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
