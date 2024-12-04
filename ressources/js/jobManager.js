@@ -79,9 +79,6 @@ export function displayDownloadLink(jobId, context) {
  */
 function updateJobUI(jobStatus, context) {
     const { job_id, status, error } = jobStatus;
-    const jobSection = document.getElementById(`job-${job_id}`);
-    if (!jobSection) return;
-
     const jobStatusDiv = document.getElementById(`status-${job_id}`);
     if (!jobStatusDiv) return;
 
@@ -355,9 +352,7 @@ export async function loadJobFromURL(jobId, context) {
         // Start polling job status every 20 seconds
         pollJobStatusAPI(
             jobId,
-            async () => {
-                // Fetch the job status
-                const jobStatus = await getJobStatus(jobId);
+            (jobStatus) => {
                 updateJobUI(jobStatus, context);
             },
             () => {
