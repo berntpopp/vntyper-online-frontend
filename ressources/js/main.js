@@ -72,7 +72,7 @@ async function initializeApp() {
     initializeLogging();
     logMessage('Application initialized.', 'info');
 
-    // Define displayedCohorts at a higher scope
+    // Define displayedCohorts and activePolls at a higher scope
     const displayedCohorts = new Set();
     const activePolls = new Set(); // Track active polling cohorts
 
@@ -117,6 +117,7 @@ async function initializeApp() {
         const cohortId = urlParams.get('cohort_id');
 
         if (cohortId) {
+            const passphrase = passphraseInput.value.trim() || null;
             loadCohortFromURL(cohortId, {
                 showSpinner,
                 hideSpinner,
@@ -135,9 +136,10 @@ async function initializeApp() {
                 displayedCohorts, // Pass the existing Set
                 outputDiv,
                 cohortsContainer: cohortsContainerDiv, // Pass the cohorts container
-                passphrase, // Passphrase captured below
+                passphrase, // Passphrase captured here
             });
         } else if (jobId) {
+            const passphrase = passphraseInput.value.trim() || null;
             loadJobFromURL(jobId, {
                 showSpinner,
                 hideSpinner,
@@ -155,7 +157,7 @@ async function initializeApp() {
                 serverLoad,
                 displayedCohorts, // Pass the existing Set
                 cohortsContainer: cohortsContainerDiv, // Pass the cohorts container
-                passphrase, // Passphrase captured below
+                passphrase, // Passphrase captured here
             });
         }
     }
@@ -354,6 +356,7 @@ async function initializeApp() {
                                 clearCountdown,
                                 stopPolling,
                                 passphrase, // Add passphrase here
+                                displayedCohorts, // Ensure displayedCohorts is included
                             });
                         },
                         () => {
