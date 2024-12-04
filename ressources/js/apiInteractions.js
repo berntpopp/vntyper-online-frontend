@@ -97,14 +97,22 @@ export async function getJobStatus(jobId) {
 /**
  * Fetches the current status of a cohort from the backend API.
  * @param {string} cohortId - The unique identifier of the cohort.
+ * @param {string|null} [passphrase=null] - Optional passphrase for the cohort.
  * @returns {Promise<Object>} - The JSON response containing cohort status and job details.
  * @throws {Error} - If the request fails.
  */
-export async function getCohortStatus(cohortId) {
+export async function getCohortStatus(cohortId, passphrase = null) {
     try {
         logMessage(`Fetching status for Cohort ID: ${cohortId}`, 'info');
 
-        const response = await fetch(`${window.CONFIG.API_URL}/cohort-status/?cohort_id=${cohortId}`);
+        // Construct URL with passphrase if provided
+        let url = `${window.CONFIG.API_URL}/cohort-status/?cohort_id=${encodeURIComponent(cohortId)}`;
+        if (passphrase) {
+            url += `&passphrase=${encodeURIComponent(passphrase)}`;
+            logMessage('Passphrase included in cohort status request.', 'info');
+        }
+
+        const response = await fetch(url);
         if (!response.ok) {
             let errorMessage = 'Failed to fetch cohort status.';
             try {
@@ -205,8 +213,9 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
  * @param {Function} onComplete - Callback function when the cohort is completed.
  * @param {Function} onError - Callback function when an error occurs.
  * @param {Function} [onPoll=null] - Optional callback function when a poll is made.
+ * @param {string|null} [passphrase=null] - Optional passphrase for the cohort.
  */
-export function pollCohortStatusAPI(cohortId, onStatusUpdate, onComplete, onError, onPoll = null) {
+export function pollCohortStatusAPI(cohortId, onStatusUpdate, onComplete, onError, onPoll = null, passphrase = null) {
     logMessage(`Starting to poll status for Cohort ID: ${cohortId}`, 'info');
 
     const interval = setInterval(async () => {
@@ -216,8 +225,8 @@ export function pollCohortStatusAPI(cohortId, onStatusUpdate, onComplete, onErro
                 logMessage(`Polling initiated for Cohort ID: ${cohortId}`, 'info');
             }
 
-            // Use the getCohortStatus function to fetch current status
-            const data = await getCohortStatus(cohortId);
+            // Use the getCohortStatus function to fetch current status with passphrase
+            const data = await getCohortStatus(cohortId, passphrase);
 
             // Update status using the provided callback
             onStatusUpdate(data);

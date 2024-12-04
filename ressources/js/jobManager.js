@@ -61,6 +61,7 @@ export async function loadCohortFromURL(cohortId, context) {
         serverLoad,
         displayedCohorts,
         cohortsContainer,
+        passphraseInput, // Added to context
     } = context;
 
     try {
@@ -71,6 +72,9 @@ export async function loadCohortFromURL(cohortId, context) {
         jobStatusDiv.innerHTML = '';
         jobQueuePositionDiv.innerHTML = '';
         regionOutputDiv.innerHTML = '';
+
+        // Retrieve passphrase from the passphrase input field
+        const passphrase = passphraseInput.value.trim() || null;
 
         // Display initial cohort information
         const cohortInfo = document.createElement('div');
@@ -88,11 +92,11 @@ export async function loadCohortFromURL(cohortId, context) {
         statusElement.classList.add('job-status');
         jobStatusDiv.appendChild(statusElement);
 
-        // Start polling cohort status
+        // Start polling cohort status with passphrase
         pollCohortStatusAPI(
             cohortId,
             async () => {
-                const cohortStatus = await getCohortStatus(cohortId);
+                const cohortStatus = await getCohortStatus(cohortId, passphrase);
                 fetchAndUpdateJobStatus(cohortId, context); // Update cohort UI
             },
             () => {
@@ -109,7 +113,9 @@ export async function loadCohortFromURL(cohortId, context) {
                 hideSpinner();
                 clearCountdown();
                 serverLoad.updateServerLoad();
-            }
+            },
+            null,
+            passphrase // Passphrase passed to pollCohortStatusAPI
         );
 
         hideSpinner();
@@ -134,10 +140,12 @@ export async function fetchAndUpdateJobStatus(cohortId, context) {
         displayedCohorts,
         cohortsContainer,
         serverLoad,
+        passphraseInput, // Added to context
     } = context;
 
     try {
-        const data = await getCohortStatus(cohortId);
+        const passphrase = passphraseInput.value.trim() || null;
+        const data = await getCohortStatus(cohortId, passphrase);
 
         if (data.cohort_id && !displayedCohorts.has(data.cohort_id)) {
             // Create a new cohort section if not already displayed
@@ -248,6 +256,7 @@ export async function loadJobFromURL(jobId, context) {
         serverLoad,
         displayedCohorts,
         cohortsContainer,
+        passphraseInput, // Added to context
     } = context;
 
     try {
@@ -278,31 +287,18 @@ export async function loadJobFromURL(jobId, context) {
         // Start polling job status
         pollJobStatusAPI(
             jobId,
-            (jobStatus) => {
-                updateJobUI(jobStatus, context);
-            },
             () => {
-                // On Complete
                 displayDownloadLink(jobId, {
                     hidePlaceholderMessage,
-                    jobStatusDiv: statusElement,
-                    logMessage: context.logMessage,
-                    clearCountdown, // Ensure clearCountdown is passed
+                    jobStatusDiv: jobStatus,
+                    logMessage,
                 });
-                // Generate and display the shareable link again if needed
-                displayShareableLink(jobId, jobStatusDiv); // Pass jobStatusDiv as targetContainer
-                hideSpinner();
-                clearCountdown();
-                logMessage(`Job ID ${jobId} has been completed.`, 'success');
-                serverLoad.updateServerLoad();
             },
             (errorMessage) => {
-                // On Error
                 displayError(errorMessage);
-                logMessage(`Job ID ${jobId} encountered an error: ${errorMessage}`, 'error');
-                hideSpinner();
+                logMessage(`Job ID ${jobId} failed: ${errorMessage}`, 'error');
+                hideSpinner(); // Hide spinner when individual job fails
                 clearCountdown();
-                serverLoad.updateServerLoad();
             }
         );
 

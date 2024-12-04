@@ -136,6 +136,7 @@ async function initializeApp() {
                 displayedCohorts: new Set(), // Initialize as empty Set
                 outputDiv,
                 cohortsContainer: cohortsContainerDiv, // Pass the cohorts container
+                passphraseInput, // Passphrase input added to context
             });
         } else if (jobId) {
             loadJobFromURL(jobId, {
@@ -156,6 +157,7 @@ async function initializeApp() {
                 displayedCohorts: new Set(), // Initialize as empty Set
                 outputDiv,
                 cohortsContainer: cohortsContainerDiv, // Pass the cohorts container
+                passphraseInput, // Passphrase input added to context
             });
         }
     }
@@ -325,12 +327,13 @@ async function initializeApp() {
                         pollCohortStatusAPI(
                             cohortId,
                             async () => {
-                                const cohortStatus = await getCohortStatus(cohortId);
+                                const cohortStatus = await getCohortStatus(cohortId, passphrase);
                                 fetchAndUpdateJobStatus(cohortId, {
                                     hidePlaceholderMessage,
                                     logMessage,
                                     outputDiv,
                                     cohortsContainer: cohortsContainerDiv,
+                                    passphraseInput, // Passphrase input added to context
                                 });
                             },
                             () => {
@@ -345,7 +348,9 @@ async function initializeApp() {
                                 clearCountdown();
                                 logMessage(`Cohort ID ${cohortId} encountered an error: ${errorMessage}`, 'error');
                                 serverLoad.updateServerLoad();
-                            }
+                            },
+                            null,
+                            passphrase // Passphrase passed to pollCohortStatusAPI
                         );
                     } else {
                         pollJobStatusAPI(
