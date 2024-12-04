@@ -329,21 +329,18 @@ export function pollCohortStatusAPI(cohortId, onStatusUpdate, onComplete, onErro
 
 /**
  * Fetches the job queue status from the backend API.
- * @param {string} jobId - The unique identifier of the job.
+ * @param {string} [jobId] - Optional job ID to get position in the queue.
  * @returns {Promise<Object>} - The JSON response from the API.
- * @throws {Error} - If the request fails or jobId is invalid.
+ * @throws {Error} - If the request fails.
  */
 export async function getJobQueueStatus(jobId) {
-    // Added validation for jobId
-    if (typeof jobId !== 'string' || jobId.trim() === '') {
-        logMessage('getJobQueueStatus called with invalid Job ID.', 'error');
-        throw new Error('Invalid Job ID provided.');
-    }
-
     try {
-        logMessage(`Fetching queue status for Job ID: ${jobId}`, 'info');
+        logMessage(`Fetching queue status${jobId ? ` for Job ID: ${jobId}` : ''}`, 'info');
 
-        const url = `${window.CONFIG.API_URL}/job-queue/?job_id=${encodeURIComponent(jobId)}`;
+        let url = `${window.CONFIG.API_URL}/job-queue/`;
+        if (jobId) {
+            url += `?job_id=${encodeURIComponent(jobId)}`;
+        }
 
         const response = await fetch(url);
         if (!response.ok) {
@@ -360,17 +357,18 @@ export async function getJobQueueStatus(jobId) {
             } catch (e) {
                 logMessage('Error parsing job queue status error response.', 'error');
             }
-            logMessage(`Failed to fetch queue status for Job ID ${jobId}: ${errorMessage}`, 'error');
+            logMessage(`Failed to fetch queue status${jobId ? ` for Job ID ${jobId}` : ''}: ${errorMessage}`, 'error');
             throw new Error(errorMessage);
         }
         const data = await response.json();
-        logMessage(`Queue status fetched for Job ID ${jobId}: ${JSON.stringify(data)}`, 'info');
+        logMessage(`Queue status fetched${jobId ? ` for Job ID ${jobId}` : ''}: ${JSON.stringify(data)}`, 'info');
         return data;
     } catch (error) {
-        logMessage(`Error in getJobQueueStatus for Job ID ${jobId}: ${error.message}`, 'error');
+        logMessage(`Error in getJobQueueStatus${jobId ? ` for Job ID ${jobId}` : ''}: ${error.message}`, 'error');
         throw error;
     }
 }
+
 
 /**
  * Creates a cohort by sending a POST request to the backend API.
