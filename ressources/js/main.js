@@ -323,60 +323,49 @@ async function initializeApp() {
                     // Generate and display shareable link
                     displayShareableLink(data.job_id, targetContainer); // Pass targetContainer
 
-                    // Start polling cohort status if cohort exists, else poll individual job
-                    if (cohortId) {
-                        pollCohortStatusAPI(
-                            cohortId,
-                            async () => {
-                                const cohortStatus = await getCohortStatus(cohortId, passphrase);
-                                fetchAndUpdateJobStatus(cohortId, cohortStatus, {
-                                    hidePlaceholderMessage,
-                                    logMessage,
-                                    outputDiv,
-                                    cohortsContainer: cohortsContainerDiv,
-                                    passphraseInput, // Passphrase input added to context
-                                    displayedCohorts, // Ensure displayedCohorts is included
-                                });
-                            },
-                            () => {
-                                hideSpinner(); // Hide spinner when all jobs in the cohort are completed
-                                clearCountdown();
-                                logMessage(`All jobs in Cohort ID ${cohortId} have been completed.`, 'success');
-                                serverLoad.updateServerLoad();
-                            },
-                            (errorMessage) => {
-                                displayError(errorMessage);
-                                hideSpinner(); // Hide spinner when there's an error in the cohort
-                                clearCountdown();
-                                logMessage(`Cohort ID ${cohortId} encountered an error: ${errorMessage}`, 'error');
-                                serverLoad.updateServerLoad();
-                            },
-                            null,
-                            passphrase // Passphrase passed to pollCohortStatusAPI
-                        );
-                    } else {
-                        pollJobStatusAPI(
-                            data.job_id,
-                            () => {
-                                displayDownloadLink(data.job_id, {
-                                    hidePlaceholderMessage,
-                                    jobStatusDiv: jobStatus,
-                                    logMessage,
-                                });
-                                displayShareableLink(data.job_id, targetContainer);
-                            },
-                            (errorMessage) => {
-                                displayError(errorMessage);
-                                logMessage(`Job ID ${data.job_id} failed: ${errorMessage}`, 'error');
-                                hideSpinner(); // Hide spinner when individual job fails
-                                clearCountdown();
-                            }
-                        );
-                    }
                 } catch (jobError) {
                     displayError(`Job Submission Failed: ${jobError.message}`);
                     logMessage(`Job submission failed: ${jobError.message}`, 'error');
                 }
+            }
+
+            // After submitting all jobs, start polling cohort status once
+            if (cohortId) {
+                // Define a stopPolling function to be passed to jobManager.js
+                const stopPolling = () => {
+                    logMessage(`Polling stopped for Cohort ID ${cohortId}.`, 'info');
+                };
+
+                // Start polling cohort status
+                pollCohortStatusAPI(
+                    cohortId,
+                    async () => {
+                        const cohortStatus = await getCohortStatus(cohortId, passphrase);
+                        fetchAndUpdateJobStatus(cohortId, cohortStatus, {
+                            hidePlaceholderMessage,
+                            logMessage,
+                            clearCountdown,
+                            stopPolling,
+                        });
+                    },
+                    () => {
+                        // On Complete
+                        hideSpinner();
+                        clearCountdown();
+                        logMessage(`Cohort ID ${cohortId} polling completed.`, 'success');
+                        serverLoad.updateServerLoad();
+                    },
+                    (errorMessage) => {
+                        // On Error
+                        displayError(errorMessage);
+                        logMessage(`Cohort ID ${cohortId} encountered an error: ${errorMessage}`, 'error');
+                        hideSpinner();
+                        clearCountdown();
+                        serverLoad.updateServerLoad();
+                    },
+                    stopPolling, // Pass the stopPolling function
+                    passphrase // Passphrase passed to pollCohortStatusAPI
+                );
             }
 
             selectedFiles = [];
@@ -487,7 +476,7 @@ async function initializeApp() {
 
                     // Create a container for the download links
                     const linkContainer = document.createElement('div');
-                    linkContainer.classList.add('download-container', 'mb-2'); /* Ensure 'mb-2' is defined in your CSS or remove if unnecessary */
+                    linkContainer.classList.add('download-container', 'mb-2'); // Ensure 'mb-2' is defined in your CSS or remove if unnecessary
                     linkContainer.appendChild(downloadBamLink);
                     linkContainer.appendChild(downloadBaiLink);
 

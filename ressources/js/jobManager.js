@@ -1,7 +1,7 @@
 // frontend/resources/js/jobManager.js
 
-import { getCohortStatus, pollCohortStatusAPI, pollJobStatusAPI } from './apiInteractions.js';
-import { displayError, clearError } from './errorHandling.js';
+import { getCohortStatus, pollCohortStatusAPI } from './apiInteractions.js';
+import { displayError } from './errorHandling.js';
 import { hideSpinner, clearCountdown, displayShareableLink, hidePlaceholderMessage, displayDownloadLink } from './uiUtils.js';
 import { logMessage } from './log.js';
 
@@ -16,35 +16,70 @@ function capitalizeFirstLetter(string) {
 }
 
 /**
- * Updates the UI based on the current job status.
- * @param {Object} jobStatus - The job status object returned from the API.
+ * Updates the UI based on the current cohort status.
+ * @param {Object} cohortStatus - The cohort status object returned from the API.
  * @param {Object} context - An object containing necessary DOM elements and state.
  */
-function updateJobUI(jobStatus, context) {
-    const { job_id, status, error } = jobStatus;
-    const jobStatusDiv = document.getElementById(`status-${job_id}`);
-    if (!jobStatusDiv) return;
+function updateCohortUI(cohortStatus, context) {
+    const { cohort_id, alias, jobs } = cohortStatus;
+    const cohortSection = document.getElementById(`cohort-${cohort_id}`);
+    if (!cohortSection) return;
 
-    // Update job status
-    jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+    const jobsContainer = document.getElementById(`jobs-container-${cohort_id}`);
+    if (!jobsContainer) return;
 
-    if (status === 'completed') {
-        // Display download and shareable links immediately for the completed job
-        displayDownloadLink(job_id, {
-            hidePlaceholderMessage,
-            jobStatusDiv: jobStatusDiv,
-            logMessage: context.logMessage,
-            clearCountdown: context.clearCountdown,
-        });
-        displayShareableLink(job_id, jobStatusDiv.parentElement); // Assuming parentElement is the job container
+    // Clear existing job statuses
+    jobsContainer.innerHTML = '';
 
-    } else if (status === 'failed') {
-        const errorMessage = error || 'Job failed.';
-        displayError(errorMessage);
-        logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
+    let allCompleted = true; // Flag to check if all jobs are completed
+
+    jobs.forEach((job) => {
+        const { job_id, status, error } = job;
+
+        // Create job info element
+        const jobInfo = document.createElement('div');
+        jobInfo.innerHTML = `Job ID: <strong>${job_id}</strong>`;
+        jobInfo.classList.add('job-info');
+
+        // Create job status element
+        const jobStatus = document.createElement('div');
+        jobStatus.id = `status-${job_id}`;
+        jobStatus.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+        jobStatus.classList.add('job-status');
+
+        jobsContainer.appendChild(jobInfo);
+        jobsContainer.appendChild(jobStatus);
+
+        if (status === 'completed') {
+            // Display download and shareable links immediately for the completed job
+            displayDownloadLink(job_id, {
+                hidePlaceholderMessage,
+                jobStatusDiv: jobStatus,
+                logMessage: context.logMessage,
+                clearCountdown: context.clearCountdown,
+            });
+            displayShareableLink(job_id, jobsContainer); // Pass jobsContainer as targetContainer
+        } else if (status === 'failed') {
+            const errorMessage = error || 'Job failed.';
+            displayError(errorMessage);
+            logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
+            allCompleted = false;
+        } else {
+            allCompleted = false;
+        }
+    });
+
+    logMessage(`Cohort ID ${cohort_id} status updated.`, 'info');
+
+    // If all jobs are completed, stop polling
+    if (allCompleted) {
+        if (context.stopPolling) {
+            context.stopPolling();
+        }
+        hideSpinner();
+        clearCountdown();
+        logMessage(`All jobs in Cohort ID ${cohort_id} have been completed.`, 'success');
     }
-
-    logMessage(`Job ID ${job_id} status updated to: ${status}`, 'info');
 }
 
 /**
@@ -102,18 +137,31 @@ export async function loadCohortFromURL(cohortId, context) {
         statusElement.classList.add('job-status');
         jobStatusDiv.appendChild(statusElement);
 
+        // Add to displayed cohorts
+        displayedCohorts.add(cohortId);
+
+        // Define a stopPolling function to be called when polling should cease
+        const stopPolling = () => {
+            logMessage(`Polling stopped for Cohort ID ${cohortId}.`, 'info');
+        };
+
         // Start polling cohort status with passphrase
         pollCohortStatusAPI(
             cohortId,
             async () => {
                 const cohortStatus = await getCohortStatus(cohortId, passphrase);
-                fetchAndUpdateJobStatus(cohortId, cohortStatus, context); // Update cohort UI with current status
+                fetchAndUpdateJobStatus(cohortId, cohortStatus, {
+                    hidePlaceholderMessage,
+                    logMessage,
+                    clearCountdown,
+                    stopPolling,
+                });
             },
             () => {
                 // On Complete
                 hideSpinner();
                 clearCountdown();
-                logMessage(`Cohort ID ${cohortId} has been completed.`, 'success');
+                logMessage(`Cohort ID ${cohortId} polling completed.`, 'success');
                 serverLoad.updateServerLoad();
             },
             (errorMessage) => {
@@ -124,7 +172,7 @@ export async function loadCohortFromURL(cohortId, context) {
                 clearCountdown();
                 serverLoad.updateServerLoad();
             },
-            null,
+            stopPolling, // Pass the stopPolling function
             passphrase // Passphrase passed to pollCohortStatusAPI
         );
 
@@ -188,58 +236,6 @@ export async function fetchAndUpdateJobStatus(cohortId, cohortStatus, context) {
         hideSpinner();
         clearCountdown();
     }
-}
-
-/**
- * Updates the UI based on the current cohort status.
- * @param {Object} cohortStatus - The cohort status object returned from the API.
- * @param {Object} context - An object containing necessary DOM elements and state.
- */
-function updateCohortUI(cohortStatus, context) {
-    const { cohort_id, alias, jobs } = cohortStatus;
-    const cohortSection = document.getElementById(`cohort-${cohort_id}`);
-    if (!cohortSection) return;
-
-    const jobsContainer = document.getElementById(`jobs-container-${cohort_id}`);
-    if (!jobsContainer) return;
-
-    // Clear existing job statuses
-    jobsContainer.innerHTML = '';
-
-    jobs.forEach((job) => {
-        const { job_id, status, error } = job;
-
-        // Create job info element
-        const jobInfo = document.createElement('div');
-        jobInfo.innerHTML = `Job ID: <strong>${job_id}</strong>`;
-        jobInfo.classList.add('job-info');
-
-        // Create job status element
-        const jobStatus = document.createElement('div');
-        jobStatus.id = `status-${job_id}`;
-        jobStatus.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
-        jobStatus.classList.add('job-status');
-
-        jobsContainer.appendChild(jobInfo);
-        jobsContainer.appendChild(jobStatus);
-
-        if (status === 'completed') {
-            // Display download and shareable links immediately for the completed job
-            displayDownloadLink(job_id, {
-                hidePlaceholderMessage,
-                jobStatusDiv: jobStatus,
-                logMessage: context.logMessage,
-                clearCountdown: context.clearCountdown,
-            });
-            displayShareableLink(job_id, jobsContainer); // Pass jobsContainer as targetContainer
-        } else if (status === 'failed') {
-            const errorMessage = error || 'Job failed.';
-            displayError(errorMessage);
-            logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
-        }
-    });
-
-    logMessage(`Cohort ID ${cohort_id} status updated.`, 'info');
 }
 
 /**
