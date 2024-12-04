@@ -73,9 +73,8 @@ async function initializeApp() {
     initializeLogging();
     logMessage('Application initialized.', 'info');
 
-    // Define displayedCohorts and activePolls at a higher scope
+    // Define displayedCohorts at a higher scope
     const displayedCohorts = new Set();
-    const activePolls = new Set(); // Track active polling cohorts and jobs
 
     // Get references to DOM elements
     const submitBtn = document.getElementById('submitBtn');
@@ -331,75 +330,50 @@ async function initializeApp() {
             // After submitting all jobs, start polling
             if (cohortId) {
                 // Polling for cohort status
-                if (activePolls.has(cohortId)) {
-                    logMessage(`Polling already active for Cohort ID ${cohortId}.`, 'warning');
-                } else {
-                    activePolls.add(cohortId);
+                // No need to track with activePolls, as apiInteractions.js handles it
+                const passphrase = passphraseInput.value.trim() || null;
 
-                    // Define a stopPolling function to be passed to jobManager.js
-                    const stopPolling = () => {
-                        logMessage(`Polling stopped for Cohort ID ${cohortId}.`, 'info');
-                        activePolls.delete(cohortId);
-                    };
+                // Start polling cohort status
+                const stopPolling = pollCohortStatusAPI(
+                    cohortId,
+                    async () => {
+                        const cohortStatus = await getCohortStatus(cohortId, passphrase);
+                        fetchAndUpdateJobStatus(cohortId, cohortStatus, {
+                            hidePlaceholderMessage,
+                            logMessage,
+                            clearCountdown,
+                            passphrase, // Passphrase captured here
+                            displayedCohorts, // Ensure displayedCohorts is included
+                        });
+                    },
+                    () => {
+                        // On Complete
+                        hideSpinner();
+                        clearCountdown();
+                        logMessage(`Cohort ID ${cohortId} polling completed.`, 'success');
+                        serverLoad.updateServerLoad(cohortId); // Pass cohortId here
+                        displayedCohorts.delete(cohortId); // Clean up after completion
+                    },
+                    (errorMessage) => {
+                        // On Error
+                        displayError(errorMessage);
+                        logMessage(`Cohort ID ${cohortId} encountered an error: ${errorMessage}`, 'error');
+                        hideSpinner();
+                        clearCountdown();
+                        serverLoad.updateServerLoad(cohortId); // Pass cohortId here
+                        displayedCohorts.delete(cohortId); // Clean up after error
+                    },
+                    null, // No onPoll callback needed
+                    passphrase // Passphrase passed to pollCohortStatusAPI
+                );
 
-                    // Start polling cohort status
-                    const stop = pollCohortStatusAPI(
-                        cohortId,
-                        async () => {
-                            const cohortStatus = await getCohortStatus(cohortId, passphrase);
-                            fetchAndUpdateJobStatus(cohortId, cohortStatus, {
-                                hidePlaceholderMessage,
-                                logMessage,
-                                clearCountdown,
-                                stopPolling,
-                                passphrase, // Passphrase captured here
-                                displayedCohorts, // Ensure displayedCohorts is included
-                            });
-                        },
-                        () => {
-                            // On Complete
-                            hideSpinner();
-                            clearCountdown();
-                            logMessage(`Cohort ID ${cohortId} polling completed.`, 'success');
-                            serverLoad.updateServerLoad();
-                            activePolls.delete(cohortId);
-                        },
-                        (errorMessage) => {
-                            // On Error
-                            displayError(errorMessage);
-                            logMessage(`Cohort ID ${cohortId} encountered an error: ${errorMessage}`, 'error');
-                            hideSpinner();
-                            clearCountdown();
-                            serverLoad.updateServerLoad();
-                            activePolls.delete(cohortId);
-                        },
-                        stopPolling, // Pass the stopPolling function
-                        passphrase // Passphrase passed to pollCohortStatusAPI
-                    );
-
-                    // Optionally, store the stopper function if you need to stop polling later
-                    // activePolls.set(cohortId, stop);
-                }
+                // No need to store the stopper function in main.js as apiInteractions.js manages it
             } else {
                 // Polling for individual jobs in single mode
                 if (jobIds.length > 0) {
                     jobIds.forEach((jobId) => {
-                        // Prevent multiple polling instances for the same job
-                        if (activePolls.has(jobId)) {
-                            logMessage(`Polling already active for Job ID ${jobId}.`, 'warning');
-                            return;
-                        }
-
-                        activePolls.add(jobId);
-
-                        // Define a stopPolling function
-                        const stopPolling = () => {
-                            logMessage(`Polling stopped for Job ID ${jobId}.`, 'info');
-                            activePolls.delete(jobId);
-                        };
-
                         // Start polling job status
-                        const stop = pollJobStatusAPI(
+                        pollJobStatusAPI(
                             jobId,
                             async (status) => {
                                 // Update job status in the UI
@@ -417,6 +391,13 @@ async function initializeApp() {
                                         clearCountdown,
                                     });
                                     displayShareableLink(jobId, jobStatusDiv.parentElement); // Pass the job container as targetContainer
+                                } else if (status === 'failed') {
+                                    const errorMessage = 'Job failed.'; // Customize as needed
+                                    displayError(errorMessage);
+                                    logMessage(`Job ID ${jobId} failed with error: ${errorMessage}`, 'error');
+                                } else {
+                                    // For statuses like 'submitted', 'running', etc.
+                                    logMessage(`Job ID ${jobId} is currently ${status}.`, 'info');
                                 }
                             },
                             () => {
@@ -424,8 +405,7 @@ async function initializeApp() {
                                 hideSpinner();
                                 clearCountdown();
                                 logMessage(`Job ID ${jobId} has been completed.`, 'success');
-                                serverLoad.updateServerLoad();
-                                stopPolling();
+                                serverLoad.updateServerLoad(jobId); // Pass jobId here
                             },
                             (errorMessage) => {
                                 // On Error
@@ -433,14 +413,11 @@ async function initializeApp() {
                                 logMessage(`Job ID ${jobId} encountered an error: ${errorMessage}`, 'error');
                                 hideSpinner();
                                 clearCountdown();
-                                serverLoad.updateServerLoad();
-                                stopPolling();
+                                serverLoad.updateServerLoad(jobId); // Pass jobId here
                             },
-                            stopPolling // Pass the stopPolling function
+                            null, // No onPoll callback needed
+                            null  // No onQueueUpdate callback needed
                         );
-
-                        // Optionally, store the stopper function if you need to stop polling later
-                        // activePolls.set(jobId, stop);
                     });
                 }
             }
@@ -455,7 +432,7 @@ async function initializeApp() {
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Submit Jobs';
-            // Removed hideSpinner() from here
+            // Removed hideSpinner() from here as it's handled above
         }
     });
 
