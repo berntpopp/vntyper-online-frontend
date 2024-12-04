@@ -94,8 +94,10 @@ async function initializeApp() {
     // Initialize server load monitoring
     const serverLoad = initializeServerLoad();
 
-    // Reference to output div
+    // References to output sub-containers
     const outputDiv = document.getElementById('output');
+    const jobOutputDiv = document.getElementById('jobOutput');
+    const cohortsContainerDiv = document.getElementById('cohortsContainer');
 
     /**
      * Capitalizes the first letter of a string.
@@ -133,6 +135,7 @@ async function initializeApp() {
                 serverLoad,
                 displayedCohorts: new Set(), // Initialize as empty Set
                 outputDiv,
+                cohortsContainer: cohortsContainerDiv, // Pass the cohorts container
             });
         } else if (jobId) {
             loadJobFromURL(jobId, {
@@ -140,7 +143,7 @@ async function initializeApp() {
                 hideSpinner,
                 clearError,
                 clearMessage,
-                jobInfoDiv: outputDiv, // Display in output div for individual jobs
+                jobInfoDiv: jobOutputDiv, // Display in jobOutputDiv for individual jobs
                 jobStatusDiv: document.createElement('div'), // Placeholder
                 jobQueuePositionDiv: document.createElement('div'), // Placeholder
                 regionOutputDiv,
@@ -152,6 +155,7 @@ async function initializeApp() {
                 serverLoad,
                 displayedCohorts: new Set(), // Initialize as empty Set
                 outputDiv,
+                cohortsContainer: cohortsContainerDiv, // Pass the cohorts container
             });
         }
     }
@@ -167,8 +171,9 @@ async function initializeApp() {
         }
 
         try {
-            // Clear previous outputs and errors
-            outputDiv.innerHTML = ''; // Clear individual job outputs
+            // Clear previous job outputs and errors, but preserve essential elements
+            jobOutputDiv.innerHTML = ''; // Clear individual job outputs
+            cohortsContainerDiv.innerHTML = ''; // Clear cohorts if any
             regionOutputDiv.innerHTML = '';
             clearError();
             clearMessage();
@@ -212,7 +217,7 @@ async function initializeApp() {
                     cohortId = cohortData.cohort_id; // Retrieve cohort_id from response
                     logMessage(`Cohort created with ID: ${cohortId}`, 'info');
 
-                    // Create a cohort section within the output div
+                    // Create a cohort section within the cohortsContainerDiv
                     const cohortSection = document.createElement('div');
                     cohortSection.id = `cohort-${cohortId}`;
                     cohortSection.classList.add('cohort-section');
@@ -227,7 +232,7 @@ async function initializeApp() {
 
                     cohortSection.appendChild(cohortInfo);
                     cohortSection.appendChild(jobsContainer);
-                    outputDiv.appendChild(cohortSection);
+                    cohortsContainerDiv.appendChild(cohortSection);
                     logMessage(`Cohort section created for Cohort ID: ${cohortId}`, 'info');
                 } catch (cohortError) {
                     // Handle cohort creation error
@@ -305,7 +310,7 @@ async function initializeApp() {
                     if (cohortId) {
                         targetContainer = document.getElementById(`jobs-container-${cohortId}`);
                     } else {
-                        targetContainer = outputDiv; // For individual job submissions without cohort
+                        targetContainer = jobOutputDiv; // For individual job submissions without cohort
                     }
 
                     // Append job info and status to the target container
@@ -325,6 +330,7 @@ async function initializeApp() {
                                     hidePlaceholderMessage,
                                     logMessage,
                                     outputDiv,
+                                    cohortsContainer: cohortsContainerDiv,
                                 });
                             },
                             () => {

@@ -96,6 +96,7 @@ function updateJobUI(jobStatus, context) {
 
 /**
  * Fetches and displays cohort details based on the cohort ID.
+ * Utilizes pollCohortStatusAPI to retrieve cohort status and update UI accordingly.
  * @param {string} cohortId - The cohort identifier.
  * @param {object} context - An object containing necessary DOM elements and state.
  */
@@ -144,11 +145,10 @@ export async function loadCohortFromURL(cohortId, context) {
         statusElement.classList.add('job-status');
         jobStatusDiv.appendChild(statusElement);
 
-        // Start polling cohort status every 20 seconds
+        // Start polling cohort status
         pollCohortStatusAPI(
             cohortId,
             async () => {
-                // Fetch the cohort status
                 const cohortStatus = await getCohortStatus(cohortId);
                 fetchAndUpdateJobStatus(cohortId, context); // Update cohort UI
             },
@@ -321,7 +321,7 @@ export async function loadJobFromURL(jobId, context) {
         logMessage,
         serverLoad,
         displayedCohorts,
-        cohortsContainer
+        cohortsContainer,
     } = context;
 
     try {
@@ -349,7 +349,7 @@ export async function loadJobFromURL(jobId, context) {
         statusElement.classList.add('job-status');
         jobStatusDiv.appendChild(statusElement);
 
-        // Start polling job status every 20 seconds
+        // Start polling job status
         pollJobStatusAPI(
             jobId,
             (jobStatus) => {
