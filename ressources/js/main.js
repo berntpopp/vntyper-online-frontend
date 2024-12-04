@@ -289,7 +289,7 @@ async function initializeApp() {
 
                 // Submit job to API
                 try {
-                    const data = await submitJobToAPI(formData, cohortId); // Pass cohortId here
+                    const data = await submitJobToAPI(formData, cohortId, passphrase); // Pass cohortId and passphrase here
                     logMessage(`Job submitted successfully! Job ID: ${data.job_id}`, 'success');
 
                     jobIds.push(data.job_id);

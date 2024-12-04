@@ -5,17 +5,23 @@ import { logMessage } from './log.js';
 /**
  * Submits a job or batch of jobs to the backend API.
  * @param {FormData} formData - The form data containing job parameters and files.
- * @param {string} [cohortId] - Optional cohort ID to associate the jobs with.
+ * @param {string} [cohortId=null] - Optional cohort ID to associate the jobs with.
+ * @param {string|null} [passphrase=null] - Optional passphrase for the cohort.
  * @returns {Promise<Object>} - The JSON response from the API.
  * @throws {Error} - If the submission fails.
  */
-export async function submitJobToAPI(formData, cohortId = null) {
+export async function submitJobToAPI(formData, cohortId = null, passphrase = null) {
     try {
         logMessage('Submitting job(s) to the API...', 'info');
 
         if (cohortId) {
             formData.append('cohort_id', cohortId);
             logMessage(`Associating jobs with Cohort ID: ${cohortId}`, 'info');
+
+            if (passphrase) {
+                formData.append('passphrase', passphrase);
+                logMessage('Passphrase included in job submission.', 'info');
+            }
         }
 
         const response = await fetch(`${window.CONFIG.API_URL}/run-job/`, {
@@ -198,7 +204,7 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
  * @param {Function} onStatusUpdate - Callback function to handle status updates.
  * @param {Function} onComplete - Callback function when the cohort is completed.
  * @param {Function} onError - Callback function when an error occurs.
- * @param {Function} [onPoll] - Optional callback function when a poll is made.
+ * @param {Function} [onPoll=null] - Optional callback function when a poll is made.
  */
 export function pollCohortStatusAPI(cohortId, onStatusUpdate, onComplete, onError, onPoll = null) {
     logMessage(`Starting to poll status for Cohort ID: ${cohortId}`, 'info');
