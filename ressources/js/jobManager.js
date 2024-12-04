@@ -36,6 +36,11 @@ function updateCohortUI(cohortStatus, context) {
     jobs.forEach((job) => {
         const { job_id, status, error } = job;
 
+        if (!job_id) {
+            logMessage(`Job without job_id encountered: ${JSON.stringify(job)}`, 'error');
+            return; // Skip jobs without a valid job_id
+        }
+
         // Create job info element
         const jobInfo = document.createElement('div');
         jobInfo.innerHTML = `Job ID: <strong>${job_id}</strong>`;
@@ -50,7 +55,8 @@ function updateCohortUI(cohortStatus, context) {
         jobsContainer.appendChild(jobInfo);
         jobsContainer.appendChild(jobStatus);
 
-        displayShareableLink(job_id, jobsContainer); // Pass jobsContainer as targetContainer
+        // Display shareable link with type 'job'
+        displayShareableLink(job_id, jobsContainer, 'job');
 
         if (status === 'completed') {
             // Display download links if job is completed
@@ -99,7 +105,7 @@ export async function loadCohortFromURL(cohortId, context) {
         clearMessage,
         jobInfoDiv,
         regionOutputDiv,
-        displayShareableLink,
+        // Removed displayShareableLink to prevent misuse with cohortId
         pollCohortStatusAPI,
         fetchAndUpdateJobStatus,
         resetCountdown,
@@ -123,8 +129,8 @@ export async function loadCohortFromURL(cohortId, context) {
         jobInfoDiv.appendChild(cohortInfo);
         logMessage(`Loading details for Cohort ID ${cohortId}.`, 'info');
 
-        // Generate and display the shareable link for the cohort
-        displayShareableLink(cohortId, jobInfoDiv); // Assuming cohortId can be used similarly to jobId
+        // Removed incorrect usage
+        // displayShareableLink(cohortId, jobInfoDiv, 'cohort'); // Only if you have a separate shareable link for cohorts
 
         // Create a status element for the cohort and append it to jobInfoDiv
         const statusElement = document.createElement('div');
@@ -142,7 +148,7 @@ export async function loadCohortFromURL(cohortId, context) {
         };
 
         // Start polling cohort status with passphrase
-        pollCohortStatusAPI(
+        const stopper = pollCohortStatusAPI(
             cohortId,
             async () => {
                 const cohortStatus = await getCohortStatus(cohortId, passphrase);
@@ -151,7 +157,7 @@ export async function loadCohortFromURL(cohortId, context) {
                     logMessage,
                     clearCountdown,
                     stopPolling,
-                    passphrase, // Passphrase added to context
+                    passphrase, // Passphrase added here
                     displayedCohorts, // Ensure displayedCohorts is included
                 });
             },
@@ -271,8 +277,8 @@ export async function loadJobFromURL(jobId, context) {
         jobInfoDiv.appendChild(jobInfo);
         logMessage(`Loading details for Job ID ${jobId}.`, 'info');
 
-        // Generate and display the shareable link
-        displayShareableLink(jobId, jobInfoDiv); // Pass jobInfoDiv as targetContainer
+        // Generate and display the shareable link with type 'job'
+        displayShareableLink(jobId, jobInfoDiv, 'job'); // Explicitly specify 'job' type
 
         // Create a status element for this job and append it to jobInfoDiv
         const statusElement = document.createElement('div');
@@ -294,12 +300,12 @@ export async function loadJobFromURL(jobId, context) {
                 // Display Download and Copy Buttons When Job is Completed
                 if (status === 'completed') {
                     displayDownloadLink(jobId, {
-                        hidePlaceholderMessage: () => {}, // No action needed here
+                        hidePlaceholderMessage,
                         jobStatusDiv: jobStatusDivElement,
                         logMessage,
                         clearCountdown,
                     });
-                    displayShareableLink(jobId, jobStatusDivElement.parentElement); // Pass the job container as targetContainer
+                    displayShareableLink(jobId, jobStatusDivElement.parentElement, 'job'); // Pass the job container as targetContainer
                 } else if (status === 'failed') {
                     const errorMessage = 'Job failed.'; // Customize as needed
                     displayError(errorMessage);

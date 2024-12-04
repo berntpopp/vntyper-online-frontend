@@ -69,11 +69,12 @@ export function clearMessage() {
 /**
  * Generates a shareable URL containing the job or cohort ID.
  * @param {string} id - The job or cohort identifier.
+ * @param {string} type - The type of identifier ('job' or 'cohort').
  * @returns {string} - The shareable URL.
  */
-function generateShareableLink(id) {
+function generateShareableLink(id, type) {
     const url = new URL(window.location.href);
-    if (id.startsWith('Cohort-') || id.startsWith('Cohort')) {
+    if (type === 'cohort') {
         url.searchParams.set('cohort_id', id);
     } else {
         url.searchParams.set('job_id', id);
@@ -86,26 +87,34 @@ function generateShareableLink(id) {
  * Includes a copy link button next to it.
  * @param {string} id - The job or cohort identifier.
  * @param {HTMLElement} targetContainer - The DOM element where the link should be appended.
+ * @param {string} type - The type of identifier ('job' or 'cohort').
  */
-export function displayShareableLink(id, targetContainer) {
+export function displayShareableLink(id, targetContainer, type = 'job') {
     hidePlaceholderMessage(); // Hide placeholder when displaying shareable link
+
+    if (!id) {
+        logMessage('Invalid ID provided to displayShareableLink: undefined or null.', 'error');
+        return;
+    }
+
+    if (!['job', 'cohort'].includes(type)) {
+        logMessage(`Unknown type "${type}" provided to displayShareableLink. Expected 'job' or 'cohort'.`, 'error');
+        return;
+    }
 
     if (!targetContainer) {
         logMessage('Target container not provided for shareable link.', 'warning');
         return;
     }
 
-    // Determine if the ID is for a cohort or a job
-    const isCohort = id.startsWith('Cohort') || id.startsWith('cohort'); // Adjust based on your ID naming convention
-
     // Avoid duplicating the shareable link if it already exists
-    if (document.getElementById(`shareContainer-${id}`)) {
-        logMessage(`Shareable link for ID ${id} already exists. Skipping creation.`, 'info');
+    if (document.getElementById(`shareContainer-${type}-${id}`)) {
+        logMessage(`Shareable link for ${type} ID ${id} already exists. Skipping creation.`, 'info');
         return;
     }
 
     const shareContainer = document.createElement('div');
-    shareContainer.id = `shareContainer-${id}`; // Unique ID to prevent duplicates
+    shareContainer.id = `shareContainer-${type}-${id}`; // Unique ID to prevent duplicates
     shareContainer.classList.add('share-container', 'mt-2');
 
     const shareLabel = document.createElement('span');
@@ -114,10 +123,10 @@ export function displayShareableLink(id, targetContainer) {
 
     const shareLink = document.createElement('input');
     shareLink.type = 'text';
-    shareLink.value = generateShareableLink(id);
+    shareLink.value = generateShareableLink(id, type);
     shareLink.readOnly = true;
     shareLink.classList.add('share-link-input');
-    shareLink.setAttribute('aria-label', `Shareable link for ID ${id}`);
+    shareLink.setAttribute('aria-label', `Shareable link for ${type} ID ${id}`);
 
     // Add copy button
     const copyButton = document.createElement('button');
@@ -130,14 +139,14 @@ export function displayShareableLink(id, targetContainer) {
         try {
             await navigator.clipboard.writeText(shareLink.value);
             copyButton.innerHTML = '✅'; // Change icon to indicate success
-            logMessage(`Shareable link for ID ${id} copied to clipboard.`, 'info');
+            logMessage(`Shareable link for ${type} ID ${id} copied to clipboard.`, 'info');
 
             // Revert the icon back after 2 seconds
             setTimeout(() => {
                 copyButton.innerHTML = '📋';
             }, 2000);
         } catch (err) {
-            logMessage(`Failed to copy shareable link for ID ${id}: ${err.message}`, 'error');
+            logMessage(`Failed to copy shareable link for ${type} ID ${id}: ${err.message}`, 'error');
             alert('Failed to copy the link. Please try manually.');
         }
     });
@@ -147,7 +156,7 @@ export function displayShareableLink(id, targetContainer) {
 
     // Append to target container
     targetContainer.appendChild(shareContainer);
-    logMessage(`Shareable link generated for ID ${id}.`, 'info');
+    logMessage(`Shareable link generated for ${type} ID ${id}.`, 'info');
 }
 
 /**
