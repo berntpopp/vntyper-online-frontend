@@ -67,6 +67,7 @@ async function initializeApp() {
 
     // Initialize UI Utilities (includes toggle functionality)
     initializeUIUtils();
+    logMessage('UI utilities initialized.', 'info');
 
     // Initialize Logging System
     initializeLogging();
@@ -223,7 +224,7 @@ async function initializeApp() {
 
                     // Create a cohort section within the cohortsContainerDiv
                     const cohortSection = document.createElement('div');
-                    cohortSection.id = `cohort-${cohortId}`;
+                    cohortSection.id = `cohort-${cohortId}`; // Unique ID to prevent duplicates
                     cohortSection.classList.add('cohort-section');
 
                     const cohortInfo = document.createElement('div');
@@ -308,7 +309,7 @@ async function initializeApp() {
 
                     // Create job status element
                     const jobStatus = document.createElement('div');
-                    jobStatus.id = `status-${data.job_id}`;
+                    jobStatus.id = `status-${data.job_id}`; // Unique ID
                     jobStatus.innerHTML = `Status: <strong>Submitted</strong>`;
                     jobStatus.classList.add('job-status');
 
@@ -334,8 +335,7 @@ async function initializeApp() {
 
             // After submitting all jobs, start polling
             if (cohortId) {
-                // Polling for cohort status (existing functionality)
-                // Prevent multiple polling instances for the same cohort
+                // Polling for cohort status
                 if (activePolls.has(cohortId)) {
                     logMessage(`Polling already active for Cohort ID ${cohortId}.`, 'warning');
                 } else {
@@ -357,7 +357,7 @@ async function initializeApp() {
                                 logMessage,
                                 clearCountdown,
                                 stopPolling,
-                                passphrase, // Add passphrase here
+                                passphrase, // Passphrase captured here
                                 displayedCohorts, // Ensure displayedCohorts is included
                             });
                         },
@@ -403,14 +403,14 @@ async function initializeApp() {
                         // Start polling job status
                         pollJobStatusAPI(
                             jobId,
-                            (status) => {
+                            async (status) => {
                                 // Update job status in the UI
                                 const jobStatusDiv = document.getElementById(`status-${jobId}`);
                                 if (jobStatusDiv) {
                                     jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
                                 }
 
-                                // **Added Code: Display Download and Copy Buttons When Job is Completed**
+                                // Display Download and Copy Buttons When Job is Completed
                                 if (status === 'completed') {
                                     displayDownloadLink(jobId, {
                                         hidePlaceholderMessage,

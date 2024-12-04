@@ -1,7 +1,6 @@
 // frontend/resources/js/jobManager.js
 
-import { getCohortStatus, pollCohortStatusAPI } from './apiInteractions.js';
-import { getJobStatus } from './apiInteractions.js'; // Ensure getJobStatus is exported from apiInteractions.js
+import { getCohortStatus, getJobStatus, pollCohortStatusAPI, pollJobStatusAPI } from './apiInteractions.js';
 import { displayError } from './errorHandling.js';
 import { hideSpinner, clearCountdown, displayShareableLink, hidePlaceholderMessage, displayDownloadLink } from './uiUtils.js';
 import { logMessage } from './log.js';
@@ -241,7 +240,6 @@ export async function fetchAndUpdateJobStatus(cohortId, cohortStatus, context) {
 /**
  * Fetches and displays job details based on the job ID.
  * Utilizes pollJobStatusAPI to retrieve job status and details.
- * Performs an immediate poll and then continues polling at intervals.
  * @param {string} jobId - The job identifier.
  * @param {object} context - An object containing necessary DOM elements and state.
  */
@@ -294,9 +292,30 @@ export async function loadJobFromURL(jobId, context) {
         // Start polling job status
         pollJobStatusAPI(
             jobId,
-            async () => {
-                const jobStatus = await getJobStatus(jobId);
-                updateJobStatusUI(jobId, jobStatus, context);
+            async (status) => {
+                // Update job status in the UI
+                const jobStatusDivElement = document.getElementById(`status-${jobId}`);
+                if (jobStatusDivElement) {
+                    jobStatusDivElement.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+                }
+
+                // Display Download and Copy Buttons When Job is Completed
+                if (status === 'completed') {
+                    displayDownloadLink(jobId, {
+                        hidePlaceholderMessage,
+                        jobStatusDiv: jobStatusDivElement,
+                        logMessage,
+                        clearCountdown,
+                    });
+                    displayShareableLink(jobId, jobStatusDivElement.parentElement); // Pass the job container as targetContainer
+                } else if (status === 'failed') {
+                    const errorMessage = 'Job failed.'; // You can customize this message or retrieve from response
+                    displayError(errorMessage);
+                    logMessage(`Job ID ${jobId} failed with error: ${errorMessage}`, 'error');
+                } else {
+                    // For statuses like 'submitted', 'running', etc.
+                    logMessage(`Job ID ${jobId} is currently ${status}.`, 'info');
+                }
             },
             () => {
                 // On Complete
@@ -319,39 +338,5 @@ export async function loadJobFromURL(jobId, context) {
         logMessage(`Error loading Job ID ${jobId}: ${error.message}`, 'error');
         hideSpinner();
         clearCountdown();
-    }
-}
-
-/**
- * Updates the UI based on the current job status.
- * @param {string} jobId - The job identifier.
- * @param {string} status - The current status of the job.
- * @param {object} context - An object containing necessary DOM elements and state.
- */
-function updateJobStatusUI(jobId, status, context) {
-    const { displayDownloadLink, displayShareableLink, logMessage, clearCountdown, hidePlaceholderMessage } = context;
-
-    const jobStatusDiv = document.getElementById(`status-${jobId}`);
-    if (!jobStatusDiv) return;
-
-    jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
-
-    displayShareableLink(jobId, jobStatusDiv.parentElement); // Pass the job container as targetContainer
-
-    if (status === 'completed') {
-        // Display download links if job is completed
-        displayDownloadLink(jobId, {
-            hidePlaceholderMessage,
-            jobStatusDiv,
-            logMessage,
-            clearCountdown,
-        });
-    } else if (status === 'failed') {
-        const errorMessage = 'Job failed.'; // You can customize this message or retrieve from response
-        displayError(errorMessage);
-        logMessage(`Job ID ${jobId} failed with error: ${errorMessage}`, 'error');
-    } else {
-        // For statuses like 'submitted', 'running', etc.
-        logMessage(`Job ID ${jobId} is currently ${status}.`, 'info');
     }
 }
