@@ -1,6 +1,6 @@
 // frontend/resources/js/jobManager.js
 
-import { getCohortStatus, pollJobStatusAPI, getJobStatus, pollCohortStatusAPI } from './apiInteractions.js';
+import { getCohortStatus, pollCohortStatusAPI, pollJobStatusAPI } from './apiInteractions.js';
 import { displayError, clearError } from './errorHandling.js';
 import { hideSpinner, clearCountdown, displayShareableLink, hidePlaceholderMessage, displayDownloadLink } from './uiUtils.js';
 import { logMessage } from './log.js';
@@ -61,7 +61,7 @@ export async function loadCohortFromURL(cohortId, context) {
         serverLoad,
         displayedCohorts,
         cohortsContainer,
-        passphraseInput, // Added to context
+        passphraseInput,
     } = context;
 
     try {
@@ -140,7 +140,8 @@ export async function fetchAndUpdateJobStatus(cohortId, context) {
         displayedCohorts,
         cohortsContainer,
         serverLoad,
-        passphraseInput, // Added to context
+        passphraseInput,
+        logMessage,
     } = context;
 
     try {
@@ -217,7 +218,7 @@ function updateCohortUI(cohortStatus, context) {
                 hidePlaceholderMessage,
                 jobStatusDiv: jobStatus,
                 logMessage: context.logMessage,
-                clearCountdown, // Ensure clearCountdown is passed
+                clearCountdown: context.clearCountdown,
             });
             // Generate and display shareable link
             displayShareableLink(job_id, jobsContainer); // Pass jobsContainer as targetContainer
@@ -256,7 +257,7 @@ export async function loadJobFromURL(jobId, context) {
         serverLoad,
         displayedCohorts,
         cohortsContainer,
-        passphraseInput, // Added to context
+        passphraseInput,
     } = context;
 
     try {
@@ -291,7 +292,7 @@ export async function loadJobFromURL(jobId, context) {
                 displayDownloadLink(jobId, {
                     hidePlaceholderMessage,
                     jobStatusDiv: jobStatus,
-                    logMessage,
+                    logMessage: context.logMessage,
                 });
             },
             (errorMessage) => {

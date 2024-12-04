@@ -1,8 +1,6 @@
 // frontend/resources/js/main.js
 
-import {
-    validateFiles,
-} from './inputWrangling.js';
+import { validateFiles } from './inputWrangling.js';
 import {
     submitJobToAPI,
     pollJobStatusAPI,
@@ -10,10 +8,7 @@ import {
     createCohort,
     pollCohortStatusAPI,
 } from './apiInteractions.js';
-import {
-    initializeAioli,
-    extractRegionAndIndex,
-} from './bamProcessing.js';
+import { initializeAioli, extractRegionAndIndex } from './bamProcessing.js';
 import { initializeModal } from './modal.js';
 import { initializeFooter } from './footer.js';
 import { initializeDisclaimer } from './disclaimer.js';
@@ -77,6 +72,9 @@ async function initializeApp() {
     initializeLogging();
     logMessage('Application initialized.', 'info');
 
+    // Define displayedCohorts at a higher scope
+    const displayedCohorts = new Set();
+
     // Get references to DOM elements
     const submitBtn = document.getElementById('submitBtn');
     const extractBtn = document.getElementById('extractBtn');
@@ -133,7 +131,7 @@ async function initializeApp() {
                 resetCountdown,
                 logMessage,
                 serverLoad,
-                displayedCohorts: new Set(), // Initialize as empty Set
+                displayedCohorts, // Pass the existing Set
                 outputDiv,
                 cohortsContainer: cohortsContainerDiv, // Pass the cohorts container
                 passphraseInput, // Passphrase input added to context
@@ -154,7 +152,7 @@ async function initializeApp() {
                 resetCountdown,
                 logMessage,
                 serverLoad,
-                displayedCohorts: new Set(), // Initialize as empty Set
+                displayedCohorts, // Pass the existing Set
                 outputDiv,
                 cohortsContainer: cohortsContainerDiv, // Pass the cohorts container
                 passphraseInput, // Passphrase input added to context
@@ -236,6 +234,9 @@ async function initializeApp() {
                     cohortSection.appendChild(jobsContainer);
                     cohortsContainerDiv.appendChild(cohortSection);
                     logMessage(`Cohort section created for Cohort ID: ${cohortId}`, 'info');
+
+                    // Add to displayed cohorts
+                    displayedCohorts.add(cohortId);
                 } catch (cohortError) {
                     // Handle cohort creation error
                     displayError(`Cohort Creation Failed: ${cohortError.message}`);
@@ -334,6 +335,7 @@ async function initializeApp() {
                                     outputDiv,
                                     cohortsContainer: cohortsContainerDiv,
                                     passphraseInput, // Passphrase input added to context
+                                    displayedCohorts, // Ensure displayedCohorts is included
                                 });
                             },
                             () => {
@@ -375,7 +377,7 @@ async function initializeApp() {
             }
 
             selectedFiles = [];
-            displaySelectedFiles();
+            displaySelectedFiles(selectedFiles);
             logMessage('All selected files have been submitted.', 'info');
         } catch (err) {
             logMessage(`Error during job submission: ${err.message}`, 'error');
@@ -387,60 +389,6 @@ async function initializeApp() {
             // Removed hideSpinner() from here
         }
     });
-
-    /**
-     * Updates the UI based on the current cohort status.
-     * @param {Object} cohortStatus - The cohort status object returned from the API.
-     * @param {Object} context - An object containing necessary DOM elements and state.
-     */
-    function updateCohortUI(cohortStatus, context) {
-        const { cohort_id, alias, jobs } = cohortStatus;
-        const outputDiv = context.outputDiv;
-        const { hidePlaceholderMessage, logMessage } = context;
-
-        const cohortSection = document.getElementById(`cohort-${cohort_id}`);
-        if (!cohortSection) return;
-
-        const jobsContainer = document.getElementById(`jobs-container-${cohort_id}`);
-        if (!jobsContainer) return;
-
-        // Clear existing job statuses
-        jobsContainer.innerHTML = '';
-
-        jobs.forEach((job) => {
-            const { job_id, status, error } = job;
-
-            // Create job info element
-            const jobInfo = document.createElement('div');
-            jobInfo.innerHTML = `Job ID: <strong>${job_id}</strong>`;
-            jobInfo.classList.add('job-info');
-
-            // Create job status element
-            const jobStatus = document.createElement('div');
-            jobStatus.id = `status-${job_id}`;
-            jobStatus.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
-            jobStatus.classList.add('job-status');
-
-            jobsContainer.appendChild(jobInfo);
-            jobsContainer.appendChild(jobStatus);
-
-            if (status === 'completed') {
-                displayDownloadLink(job_id, {
-                    hidePlaceholderMessage,
-                    jobStatusDiv: jobStatus,
-                    logMessage,
-                });
-                // Generate and display shareable link
-                displayShareableLink(job_id, jobsContainer); // **Pass jobsContainer as targetContainer**
-            } else if (status === 'failed') {
-                const errorMessage = error || 'Job failed.';
-                displayError(errorMessage);
-                logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
-            }
-        });
-
-        logMessage(`Cohort ID ${cohort_id} status updated.`, 'info');
-    }
 
     /**
      * Handle Region Extraction via Extract Button
@@ -536,7 +484,7 @@ async function initializeApp() {
 
                     // Create a container for the download links
                     const linkContainer = document.createElement('div');
-                    linkContainer.classList.add('download-container', 'mb-2'); /* Ensure 'mb-2' is defined in your CSS or remove if unnecessary */
+                    linkContainer.classList.add('download-container', 'mb-2'); // Ensure 'mb-2' is defined in your CSS or remove if unnecessary
                     linkContainer.appendChild(downloadBamLink);
                     linkContainer.appendChild(downloadBaiLink);
 
