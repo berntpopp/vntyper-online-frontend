@@ -8,10 +8,11 @@ let timeLeft = 20; // Countdown time in seconds
 /**
  * Shows the placeholder message in the output area.
  */
-export function showPlaceholderMessage() { // Exported
+export function showPlaceholderMessage() {
     const placeholderMessage = document.getElementById('placeholderMessage');
     if (placeholderMessage) {
         placeholderMessage.classList.remove('hidden');
+        placeholderMessage.classList.add('visible');
         logMessage('Placeholder message displayed.', 'info');
     } else {
         logMessage('Placeholder message div (#placeholderMessage) not found in the DOM.', 'warning');
@@ -21,9 +22,10 @@ export function showPlaceholderMessage() { // Exported
 /**
  * Hides the placeholder message in the output area.
  */
-export function hidePlaceholderMessage() { // Exported
+export function hidePlaceholderMessage() {
     const placeholderMessage = document.getElementById('placeholderMessage');
     if (placeholderMessage) {
+        placeholderMessage.classList.remove('visible');
         placeholderMessage.classList.add('hidden');
         logMessage('Placeholder message hidden.', 'info');
     } else {
@@ -65,23 +67,27 @@ export function clearMessage() {
 }
 
 /**
- * Generates a shareable URL containing the job ID.
- * @param {string} jobId - The job identifier.
+ * Generates a shareable URL containing the job or cohort ID.
+ * @param {string} id - The job or cohort identifier.
  * @returns {string} - The shareable URL.
  */
-function generateShareableLink(jobId) {
+function generateShareableLink(id) {
     const url = new URL(window.location.href);
-    url.searchParams.set('job_id', jobId);
+    if (id.startsWith('Cohort-') || id.startsWith('Cohort')) {
+        url.searchParams.set('cohort_id', id);
+    } else {
+        url.searchParams.set('job_id', id);
+    }
     return url.toString();
 }
 
 /**
  * Displays the shareable link to the user within the specified container.
  * Includes a copy link button next to it.
- * @param {string} jobId - The job identifier.
+ * @param {string} id - The job or cohort identifier.
  * @param {HTMLElement} targetContainer - The DOM element where the link should be appended.
  */
-export function displayShareableLink(jobId, targetContainer) { // Updated to accept targetContainer
+export function displayShareableLink(id, targetContainer) {
     hidePlaceholderMessage(); // Hide placeholder when displaying shareable link
 
     if (!targetContainer) {
@@ -89,14 +95,17 @@ export function displayShareableLink(jobId, targetContainer) { // Updated to acc
         return;
     }
 
+    // Determine if the ID is for a cohort or a job
+    const isCohort = id.startsWith('Cohort') || id.startsWith('cohort'); // Adjust based on your ID naming convention
+
     // Avoid duplicating the shareable link if it already exists
-    if (document.getElementById(`shareContainer-${jobId}`)) {
-        logMessage(`Shareable link for Job ID ${jobId} already exists.`, 'info');
+    if (document.getElementById(`shareContainer-${id}`)) {
+        logMessage(`Shareable link for ID ${id} already exists. Skipping creation.`, 'info');
         return;
     }
 
     const shareContainer = document.createElement('div');
-    shareContainer.id = `shareContainer-${jobId}`; // Unique ID to prevent duplicates
+    shareContainer.id = `shareContainer-${id}`; // Unique ID to prevent duplicates
     shareContainer.classList.add('share-container', 'mt-2');
 
     const shareLabel = document.createElement('span');
@@ -105,10 +114,10 @@ export function displayShareableLink(jobId, targetContainer) { // Updated to acc
 
     const shareLink = document.createElement('input');
     shareLink.type = 'text';
-    shareLink.value = generateShareableLink(jobId);
+    shareLink.value = generateShareableLink(id);
     shareLink.readOnly = true;
     shareLink.classList.add('share-link-input');
-    shareLink.setAttribute('aria-label', `Shareable link for Job ID ${jobId}`);
+    shareLink.setAttribute('aria-label', `Shareable link for ID ${id}`);
 
     // Add copy button
     const copyButton = document.createElement('button');
@@ -121,14 +130,14 @@ export function displayShareableLink(jobId, targetContainer) { // Updated to acc
         try {
             await navigator.clipboard.writeText(shareLink.value);
             copyButton.innerHTML = '✅'; // Change icon to indicate success
-            logMessage(`Shareable link for Job ID ${jobId} copied to clipboard.`, 'info');
+            logMessage(`Shareable link for ID ${id} copied to clipboard.`, 'info');
 
             // Revert the icon back after 2 seconds
             setTimeout(() => {
                 copyButton.innerHTML = '📋';
             }, 2000);
         } catch (err) {
-            logMessage(`Failed to copy shareable link for Job ID ${jobId}: ${err.message}`, 'error');
+            logMessage(`Failed to copy shareable link for ID ${id}: ${err.message}`, 'error');
             alert('Failed to copy the link. Please try manually.');
         }
     });
@@ -138,7 +147,7 @@ export function displayShareableLink(jobId, targetContainer) { // Updated to acc
 
     // Append to target container
     targetContainer.appendChild(shareContainer);
-    logMessage(`Shareable link generated for Job ID ${jobId}.`, 'info');
+    logMessage(`Shareable link generated for ID ${id}.`, 'info');
 }
 
 /**

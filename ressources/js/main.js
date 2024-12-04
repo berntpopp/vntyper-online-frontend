@@ -196,7 +196,7 @@ async function initializeApp() {
             if (matchedPairs.length === 0) {
                 displayError('No valid BAM and BAI file pairs found for submission.');
                 logMessage('No valid file pairs found for submission.', 'warning');
-                hideSpinner();
+                hideSpinner(); // Hide spinner since there's nothing to poll
                 clearCountdown();
                 return;
             }
@@ -238,7 +238,7 @@ async function initializeApp() {
                     // Handle cohort creation error
                     displayError(`Cohort Creation Failed: ${cohortError.message}`);
                     logMessage(`Cohort creation failed: ${cohortError.message}`, 'error');
-                    hideSpinner();
+                    hideSpinner(); // Hide spinner since cohort creation failed
                     clearCountdown();
                     return;
                 }
@@ -334,14 +334,14 @@ async function initializeApp() {
                                 });
                             },
                             () => {
-                                hideSpinner();
+                                hideSpinner(); // Hide spinner when all jobs in the cohort are completed
                                 clearCountdown();
                                 logMessage(`All jobs in Cohort ID ${cohortId} have been completed.`, 'success');
                                 serverLoad.updateServerLoad();
                             },
                             (errorMessage) => {
                                 displayError(errorMessage);
-                                hideSpinner();
+                                hideSpinner(); // Hide spinner when there's an error in the cohort
                                 clearCountdown();
                                 logMessage(`Cohort ID ${cohortId} encountered an error: ${errorMessage}`, 'error');
                                 serverLoad.updateServerLoad();
@@ -358,6 +358,7 @@ async function initializeApp() {
                             (errorMessage) => {
                                 displayError(errorMessage);
                                 logMessage(`Job ID ${data.job_id} failed: ${errorMessage}`, 'error');
+                                hideSpinner(); // Hide spinner when individual job fails
                             }
                         );
                     }
@@ -372,16 +373,15 @@ async function initializeApp() {
             logMessage('All selected files have been submitted.', 'info');
         } catch (err) {
             logMessage(`Error during job submission: ${err.message}`, 'error');
-            hideSpinner();
+            hideSpinner(); // Hide spinner on unexpected errors
             clearCountdown();
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Submit Jobs';
-            hideSpinner();
+            // Removed hideSpinner() from here
         }
     });
-
-
+    
     /**
      * Updates the UI based on the current cohort status.
      * @param {Object} cohortStatus - The cohort status object returned from the API.
@@ -453,6 +453,11 @@ async function initializeApp() {
             clearMessage();
             hidePlaceholderMessage(); // Hide placeholder when extracting region
 
+            // Show spinner and initialize countdown
+            showSpinner();
+            startCountdown();
+            logMessage('Region extraction started.', 'info');
+
             const CLI = await initializeAioli();
             const { matchedPairs, invalidFiles } = validateFiles(selectedFiles, false);
 
@@ -464,6 +469,8 @@ async function initializeApp() {
             if (matchedPairs.length === 0) {
                 displayError('No valid BAM and BAI file pairs found for extraction.');
                 logMessage('No valid file pairs found for region extraction.', 'warning');
+                hideSpinner(); // Hide spinner since extraction cannot proceed
+                clearCountdown();
                 return;
             }
 
@@ -492,6 +499,8 @@ async function initializeApp() {
                     );
                     logMessage('Automatic assembly detection failed. Prompting user to select manually.', 'warning');
                     regionSelect.value = ''; // Reset selection
+                    hideSpinner(); // Hide spinner since extraction cannot proceed
+                    clearCountdown();
                     return;
                 }
 
@@ -545,10 +554,14 @@ async function initializeApp() {
                 });
             }, 60000); // Revoke after 60 seconds
 
+            hideSpinner(); // Hide spinner after extraction is complete
+            clearCountdown();
             logMessage('Region extraction completed.', 'info');
         } catch (err) {
             displayError(`Error: ${err.message}`);
             logMessage(`Error during region extraction: ${err.message}`, 'error');
+            hideSpinner(); // Hide spinner on error
+            clearCountdown();
         }
     });
 
