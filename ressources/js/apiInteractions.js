@@ -3,6 +3,16 @@
 import { logMessage } from './log.js';
 
 /**
+ * Set to keep track of active job polling instances.
+ */
+const activeJobPolls = new Set();
+
+/**
+ * Set to keep track of active cohort polling instances.
+ */
+const activeCohortPolls = new Set();
+
+/**
  * Submits a job or batch of jobs to the backend API.
  * @param {FormData} formData - The form data containing job parameters and files.
  * @param {string|null} [cohortId=null] - Optional cohort ID to associate the jobs with.
@@ -168,6 +178,7 @@ export async function getCohortStatus(cohortId, passphrase = null) {
  * Polls the job status from the backend API at regular intervals.
  * Utilizes the getJobStatus function to fetch the current status.
  * Implements immediate polling and recursive polling using setTimeout.
+ * Prevents duplicate polling for the same Job ID.
  * @param {string} jobId - The unique identifier of the job.
  * @param {Function} onStatusUpdate - Callback function to handle status updates.
  * @param {Function} onComplete - Callback function when the job is completed.
@@ -176,14 +187,20 @@ export async function getCohortStatus(cohortId, passphrase = null) {
  * @param {Function} [onQueueUpdate=null] - Optional callback function to handle queue updates.
  * @returns {Function} - A function to stop the polling.
  */
-export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onPoll = null, onQueueUpdate = null) {
-    // Added validation for jobId
-    if (typeof jobId !== 'string' || jobId.trim() === '') {
-        logMessage('pollJobStatusAPI called with invalid Job ID.', 'error');
-        onError('Invalid Job ID provided.');
-        return () => {}; // Return a no-op stopper function
+export function pollJobStatusAPI(
+    jobId,
+    onStatusUpdate,
+    onComplete,
+    onError,
+    onPoll = null,
+    onQueueUpdate = null
+) {
+    if (activeJobPolls.has(jobId)) {
+        logMessage(`Polling already active for Job ID: ${jobId}`, 'warning');
+        return () => {}; // Return a no-op function
     }
 
+    activeJobPolls.add(jobId);
     logMessage(`Starting to poll status for Job ID: ${jobId}`, 'info');
 
     const POLL_INTERVAL = 5000; // 5 seconds
@@ -216,11 +233,13 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
                 logMessage(`Job ID ${jobId} has been completed.`, 'success');
                 onComplete();
                 isPolling = false;
+                activeJobPolls.delete(jobId);
             } else if (data.status === 'failed') {
                 const errorMsg = data.error || 'Job failed.';
                 logMessage(`Job ID ${jobId} failed with error: ${errorMsg}`, 'error');
                 onError(errorMsg);
                 isPolling = false;
+                activeJobPolls.delete(jobId);
             } else {
                 logMessage(`Job ID ${jobId} is in status: ${data.status}`, 'info');
                 // Schedule the next poll
@@ -232,9 +251,15 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
                 try {
                     const queueData = await getJobQueueStatus(jobId);
                     onQueueUpdate(queueData);
-                    logMessage(`Queue data updated for Job ID ${jobId}: ${JSON.stringify(queueData)}`, 'info');
+                    logMessage(
+                        `Queue data updated for Job ID ${jobId}: ${JSON.stringify(queueData)}`,
+                        'info'
+                    );
                 } catch (queueError) {
-                    logMessage(`Error fetching job queue status for Job ID ${jobId}: ${queueError.message}`, 'error');
+                    logMessage(
+                        `Error fetching job queue status for Job ID ${jobId}: ${queueError.message}`,
+                        'error'
+                    );
                     // Optionally, decide how to handle queue fetch errors
                 }
             }
@@ -242,6 +267,7 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
             logMessage(`Error polling status for Job ID ${jobId}: ${error.message}`, 'error');
             onError(error.message);
             isPolling = false;
+            activeJobPolls.delete(jobId);
         }
     };
 
@@ -251,6 +277,7 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
     // Return a function to stop polling
     return () => {
         isPolling = false;
+        activeJobPolls.delete(jobId);
         logMessage(`Polling manually stopped for Job ID ${jobId}.`, 'info');
     };
 }
@@ -259,6 +286,7 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
  * Polls the cohort status from the backend API at regular intervals.
  * Utilizes the getCohortStatus function to fetch the current status.
  * Implements immediate polling and recursive polling using setTimeout.
+ * Prevents duplicate polling for the same Cohort ID.
  * @param {string} cohortId - The unique identifier of the cohort.
  * @param {Function} onStatusUpdate - Callback function to handle status updates.
  * @param {Function} onComplete - Callback function when the cohort is completed.
@@ -267,14 +295,20 @@ export function pollJobStatusAPI(jobId, onStatusUpdate, onComplete, onError, onP
  * @param {string|null} [passphrase=null] - Optional passphrase for the cohort.
  * @returns {Function} - A function to stop the polling.
  */
-export function pollCohortStatusAPI(cohortId, onStatusUpdate, onComplete, onError, onPoll = null, passphrase = null) {
-    // Added validation for cohortId
-    if (typeof cohortId !== 'string' || cohortId.trim() === '') {
-        logMessage('pollCohortStatusAPI called with invalid Cohort ID.', 'error');
-        onError('Invalid Cohort ID provided.');
-        return () => {}; // Return a no-op stopper function
+export function pollCohortStatusAPI(
+    cohortId,
+    onStatusUpdate,
+    onComplete,
+    onError,
+    onPoll = null,
+    passphrase = null
+) {
+    if (activeCohortPolls.has(cohortId)) {
+        logMessage(`Polling already active for Cohort ID: ${cohortId}`, 'warning');
+        return () => {}; // Return a no-op function
     }
 
+    activeCohortPolls.add(cohortId);
     logMessage(`Starting to poll status for Cohort ID: ${cohortId}`, 'info');
 
     const POLL_INTERVAL = 5000; // 5 seconds
@@ -300,11 +334,13 @@ export function pollCohortStatusAPI(cohortId, onStatusUpdate, onComplete, onErro
                 logMessage(`Cohort ID ${cohortId} has been completed.`, 'success');
                 onComplete();
                 isPolling = false;
+                activeCohortPolls.delete(cohortId);
             } else if (data.status === 'failed') {
                 const errorMsg = data.error || 'Cohort processing failed.';
                 logMessage(`Cohort ID ${cohortId} failed with error: ${errorMsg}`, 'error');
                 onError(errorMsg);
                 isPolling = false;
+                activeCohortPolls.delete(cohortId);
             } else {
                 logMessage(`Cohort ID ${cohortId} is in status: ${data.status}`, 'info');
                 // Schedule the next poll
@@ -314,6 +350,7 @@ export function pollCohortStatusAPI(cohortId, onStatusUpdate, onComplete, onErro
             logMessage(`Error polling status for Cohort ID ${cohortId}: ${error.message}`, 'error');
             onError(error.message);
             isPolling = false;
+            activeCohortPolls.delete(cohortId);
         }
     };
 
@@ -323,6 +360,7 @@ export function pollCohortStatusAPI(cohortId, onStatusUpdate, onComplete, onErro
     // Return a function to stop polling
     return () => {
         isPolling = false;
+        activeCohortPolls.delete(cohortId);
         logMessage(`Polling manually stopped for Cohort ID ${cohortId}.`, 'info');
     };
 }
@@ -357,18 +395,26 @@ export async function getJobQueueStatus(jobId) {
             } catch (e) {
                 logMessage('Error parsing job queue status error response.', 'error');
             }
-            logMessage(`Failed to fetch queue status${jobId ? ` for Job ID ${jobId}` : ''}: ${errorMessage}`, 'error');
+            logMessage(
+                `Failed to fetch queue status${jobId ? ` for Job ID ${jobId}` : ''}: ${errorMessage}`,
+                'error'
+            );
             throw new Error(errorMessage);
         }
         const data = await response.json();
-        logMessage(`Queue status fetched${jobId ? ` for Job ID ${jobId}` : ''}: ${JSON.stringify(data)}`, 'info');
+        logMessage(
+            `Queue status fetched${jobId ? ` for Job ID ${jobId}` : ''}: ${JSON.stringify(data)}`,
+            'info'
+        );
         return data;
     } catch (error) {
-        logMessage(`Error in getJobQueueStatus${jobId ? ` for Job ID ${jobId}` : ''}: ${error.message}`, 'error');
+        logMessage(
+            `Error in getJobQueueStatus${jobId ? ` for Job ID ${jobId}` : ''}: ${error.message}`,
+            'error'
+        );
         throw error;
     }
 }
-
 
 /**
  * Creates a cohort by sending a POST request to the backend API.
