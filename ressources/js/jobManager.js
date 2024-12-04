@@ -51,21 +51,24 @@ function updateCohortUI(cohortStatus, context) {
         jobsContainer.appendChild(jobInfo);
         jobsContainer.appendChild(jobStatus);
 
+        displayShareableLink(job_id, jobsContainer); // Pass jobsContainer as targetContainer
+
         if (status === 'completed') {
-            // Display download and shareable links immediately for the completed job
+            // Display download links if job is completed
             displayDownloadLink(job_id, {
                 hidePlaceholderMessage,
                 jobStatusDiv: jobStatus,
                 logMessage: context.logMessage,
                 clearCountdown: context.clearCountdown,
             });
-            displayShareableLink(job_id, jobsContainer); // Pass jobsContainer as targetContainer
-        } else if (status === 'failed') {
+        }
+
+        if (status === 'failed') {
             const errorMessage = error || 'Job failed.';
             displayError(errorMessage);
             logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
             allCompleted = false;
-        } else {
+        } else if (status !== 'completed') {
             allCompleted = false;
         }
     });
@@ -187,11 +190,10 @@ export async function loadCohortFromURL(cohortId, context) {
 }
 
 /**
- * Fetches the current cohort status and updates the UI immediately.
- * Utilizes the getCohortStatus function.
+ * Fetches and updates job status within a cohort.
  * @param {string} cohortId - The cohort identifier.
- * @param {Object} cohortStatus - The cohort status object returned from the API.
- * @param {object} context - An object containing necessary DOM elements and state.
+ * @param {Object} cohortStatus - The current status of the cohort.
+ * @param {Object} context - An object containing necessary DOM elements and state.
  */
 export async function fetchAndUpdateJobStatus(cohortId, cohortStatus, context) {
     const {
@@ -334,15 +336,16 @@ function updateJobStatusUI(jobId, status, context) {
 
     jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
 
+    displayShareableLink(jobId, jobStatusDiv.parentElement); // Pass the job container as targetContainer
+
     if (status === 'completed') {
-        // Display download and shareable links immediately for the completed job
+        // Display download links if job is completed
         displayDownloadLink(jobId, {
             hidePlaceholderMessage,
             jobStatusDiv,
             logMessage,
             clearCountdown,
         });
-        displayShareableLink(jobId, jobStatusDiv.parentElement); // Pass the job container as targetContainer
     } else if (status === 'failed') {
         const errorMessage = 'Job failed.'; // You can customize this message or retrieve from response
         displayError(errorMessage);
