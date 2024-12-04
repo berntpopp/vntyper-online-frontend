@@ -35,6 +35,7 @@ import {
     displayShareableLink,
     hidePlaceholderMessage,
     showPlaceholderMessage,
+    displayDownloadLink,
 } from './uiUtils.js';
 import { initializeFileSelection } from './fileSelection.js';
 import { initializeServerLoad } from './serverLoad.js';
@@ -43,7 +44,6 @@ import {
     fetchAndUpdateJobStatus,
     loadJobFromURL,
     loadCohortFromURL,
-    displayDownloadLink,
 } from './jobManager.js';
 
 /**
@@ -381,7 +381,7 @@ async function initializeApp() {
             // Removed hideSpinner() from here
         }
     });
-    
+
     /**
      * Updates the UI based on the current cohort status.
      * @param {Object} cohortStatus - The cohort status object returned from the API.

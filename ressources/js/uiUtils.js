@@ -151,6 +151,71 @@ export function displayShareableLink(id, targetContainer) {
 }
 
 /**
+ * Displays the download link and copy button once the job is completed.
+ * Checks if the buttons already exist to prevent duplicates.
+ * Also clears the countdown and hides the spinner.
+ * @param {string} jobId - The job identifier.
+ * @param {object} context - An object containing necessary DOM elements and state.
+ */
+export function displayDownloadLink(jobId, context) {
+    const { hidePlaceholderMessage, jobStatusDiv, logMessage, clearCountdown } = context;
+
+    hidePlaceholderMessage(); // Hide placeholder when displaying download link
+
+    // Check if the download and copy buttons already exist
+    const existingDownloadLink = document.getElementById(`download-${jobId}`);
+    const existingCopyButton = document.getElementById(`copy-${jobId}`);
+
+    if (existingDownloadLink && existingCopyButton) {
+        logMessage(`Download and Copy Link buttons already exist for Job ID ${jobId}. Skipping creation.`, 'info');
+        return; // Exit the function to prevent duplication
+    }
+
+    // Create Download Link
+    const downloadLink = document.createElement('a');
+    downloadLink.id = `download-${jobId}`; // Assign unique ID
+    downloadLink.href = `${window.CONFIG.API_URL}/download/${jobId}/`;
+    downloadLink.textContent = 'Download vntyper results';
+    downloadLink.classList.add('download-link', 'download-button');
+    downloadLink.target = '_blank'; // Open in a new tab
+    downloadLink.setAttribute('aria-label', `Download results for Job ID ${jobId}`);
+    downloadLink.setAttribute('data-copyable', 'true'); // Make link copyable
+
+    // Create Copy Button
+    const copyButton = document.createElement('button');
+    copyButton.id = `copy-${jobId}`; // Assign unique ID
+    copyButton.textContent = 'Copy Link';
+    copyButton.classList.add('copy-button');
+    copyButton.setAttribute('aria-label', `Copy shareable link for Job ID ${jobId}`);
+    copyButton.addEventListener('click', () => {
+        navigator.clipboard.writeText(downloadLink.href)
+            .then(() => {
+                logMessage(`Shareable link copied for Job ID ${jobId}.`, 'success');
+                alert('Shareable link copied to clipboard!');
+            })
+            .catch((err) => {
+                logMessage(`Failed to copy link for Job ID ${jobId}: ${err.message}`, 'error');
+                alert('Failed to copy the link. Please try manually.');
+            });
+    });
+
+    // Append Download Link and Copy Button to the job status div
+    const lineBreak = document.createElement('br');
+    jobStatusDiv.appendChild(lineBreak);
+    jobStatusDiv.appendChild(downloadLink);
+    jobStatusDiv.appendChild(copyButton);
+
+    logMessage(`Download and Copy Link buttons generated for Job ID ${jobId}.`, 'info');
+
+    // Clear the countdown and hide the spinner
+    if (typeof clearCountdown === 'function') {
+        clearCountdown();
+    } else {
+        logMessage('clearCountdown function not provided in context.', 'warning');
+    }
+}
+
+/**
  * Displays the loading spinner in the UI.
  */
 export function showSpinner() {
