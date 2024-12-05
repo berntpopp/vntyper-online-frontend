@@ -359,6 +359,21 @@ function initializeToggleOptionalInputs() {
     logMessage('Toggle functionality for optional inputs initialized.', 'info');
 }
 
+/**
+ * Initializes click functionality for the header to reset the page.
+ */
+export function initializePageReset() {
+    const resetHeader = document.getElementById('resetHeader');
+    if (resetHeader) {
+        resetHeader.addEventListener('click', () => {
+            window.location.reload(); // Reload the page
+        });
+        logMessage('Page reset functionality initialized.', 'info');
+    } else {
+        logMessage('Reset header (#resetHeader) not found in the DOM.', 'warning');
+    }
+}
+
 /* --- Initialize All UI Utilities --- */
 
 /**
@@ -368,6 +383,6 @@ function initializeToggleOptionalInputs() {
 export function initializeUIUtils() {
     logMessage('Initializing UI utilities...', 'info');
     initializeToggleOptionalInputs();
+    initializePageReset(); // Add the new functionality here
     logMessage('UI utilities initialized.', 'info');
-    // Add other UI utilities initialization here if needed in the future
 }
