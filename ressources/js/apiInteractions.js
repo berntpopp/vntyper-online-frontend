@@ -330,21 +330,28 @@ export function pollCohortStatusAPI(
             // Update status using the provided callback
             onStatusUpdate(data);
 
-            if (data.status === 'completed') {
-                logMessage(`Cohort ID ${cohortId} has been completed.`, 'success');
-                onComplete();
-                isPolling = false;
-                activeCohortPolls.delete(cohortId);
-            } else if (data.status === 'failed') {
-                const errorMsg = data.error || 'Cohort processing failed.';
-                logMessage(`Cohort ID ${cohortId} failed with error: ${errorMsg}`, 'error');
-                onError(errorMsg);
-                isPolling = false;
-                activeCohortPolls.delete(cohortId);
+            if (data.jobs && Array.isArray(data.jobs)) {
+                const allCompleted = data.jobs.every(job => job.status === 'completed');
+
+                if (allCompleted) {
+                    logMessage(`All jobs in Cohort ID ${cohortId} have been completed.`, 'success');
+                    onComplete();
+                    isPolling = false;
+                    activeCohortPolls.delete(cohortId);
+                } else if (data.status === 'failed') {
+                    const errorMsg = data.error || 'Cohort processing failed.';
+                    logMessage(`Cohort ID ${cohortId} failed with error: ${errorMsg}`, 'error');
+                    onError(errorMsg);
+                    isPolling = false;
+                    activeCohortPolls.delete(cohortId);
+                } else {
+                    logMessage(`Cohort ID ${cohortId} is still processing.`, 'info');
+                    // Schedule the next poll
+                    setTimeout(poll, POLL_INTERVAL);
+                }
             } else {
-                logMessage(`Cohort ID ${cohortId} is in status: ${data.status}`, 'info');
-                // Schedule the next poll
-                setTimeout(poll, POLL_INTERVAL);
+                logMessage(`Invalid cohort status data for Cohort ID ${cohortId}.`, 'error');
+                throw new Error('Invalid cohort status data.');
             }
         } catch (error) {
             logMessage(`Error polling status for Cohort ID ${cohortId}: ${error.message}`, 'error');

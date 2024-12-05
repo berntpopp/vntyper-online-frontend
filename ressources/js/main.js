@@ -330,10 +330,9 @@ async function initializeApp() {
             // After submitting all jobs, start polling
             if (cohortId) {
                 // Polling for cohort status
-                // No need to track with activePolls, as apiInteractions.js handles it
                 const passphrase = passphraseInput.value.trim() || null;
 
-                // Start polling cohort status
+                // Start polling cohort status and capture the stopPolling function
                 const stopPolling = pollCohortStatusAPI(
                     cohortId,
                     async () => {
@@ -342,6 +341,7 @@ async function initializeApp() {
                             hidePlaceholderMessage,
                             logMessage,
                             clearCountdown,
+                            stopPolling, // Pass the actual stopPolling function
                             passphrase, // Passphrase captured here
                             displayedCohorts, // Ensure displayedCohorts is included
                         });
@@ -377,20 +377,20 @@ async function initializeApp() {
                             jobId,
                             async (status) => {
                                 // Update job status in the UI
-                                const jobStatusDiv = document.getElementById(`status-${jobId}`);
-                                if (jobStatusDiv) {
-                                    jobStatusDiv.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+                                const jobStatusDivElement = document.getElementById(`status-${jobId}`);
+                                if (jobStatusDivElement) {
+                                    jobStatusDivElement.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
                                 }
 
                                 // Display Download and Copy Buttons When Job is Completed
                                 if (status === 'completed') {
                                     displayDownloadLink(jobId, {
                                         hidePlaceholderMessage,
-                                        jobStatusDiv,
+                                        jobStatusDiv: jobStatusDivElement,
                                         logMessage,
                                         clearCountdown,
                                     });
-                                    displayShareableLink(jobId, jobStatusDiv.parentElement); // Pass the job container as targetContainer
+                                    displayShareableLink(jobId, jobStatusDivElement.parentElement); // Pass the job container as targetContainer
                                 } else if (status === 'failed') {
                                     const errorMessage = 'Job failed.'; // Customize as needed
                                     displayError(errorMessage);

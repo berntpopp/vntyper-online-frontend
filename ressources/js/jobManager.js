@@ -157,13 +157,8 @@ export async function loadCohortFromURL(cohortId, context) {
         // Add to displayed cohorts
         displayedCohorts.add(cohortId);
 
-        // Define a stopPolling function to be passed to pollCohortStatusAPI
-        const stopPolling = () => {
-            logMessage(`Polling stopped for Cohort ID ${cohortId}.`, 'info');
-        };
-
-        // Start polling cohort status with passphrase
-        pollCohortStatusAPI(
+        // Start polling cohort status with passphrase and capture stopPolling function
+        const stopPolling = pollCohortStatusAPI(
             cohortId,
             async () => {
                 const cohortStatus = await getCohortStatus(cohortId, passphrase);
@@ -171,7 +166,7 @@ export async function loadCohortFromURL(cohortId, context) {
                     hidePlaceholderMessage,
                     logMessage,
                     clearCountdown,
-                    stopPolling,
+                    stopPolling, // Pass the actual stopPolling function
                     passphrase, // Passphrase added here
                     displayedCohorts, // Ensure displayedCohorts is included
                 });
