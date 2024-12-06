@@ -34,7 +34,7 @@ function updateCohortUI(cohortStatus, context) {
         return;
     }
 
-    // Clear existing job statuses
+    // Clear existing job statuses to prevent duplicates
     jobsContainer.innerHTML = '';
 
     let allCompleted = true; // Flag to check if all jobs are completed
@@ -100,6 +100,41 @@ function updateCohortUI(cohortStatus, context) {
 }
 
 /**
+ * Fetches and updates job status within a cohort.
+ * 
+ * **Bug Fix**: Removed code that duplicates cohort header elements.
+ * Now we rely solely on initial cohort creation logic (in main.js) and do not
+ * recreate the cohort section here. The existing code only updates the UI.
+ *
+ * @param {string} cohortId - The cohort identifier.
+ * @param {Object} cohortStatus - The current status of the cohort.
+ * @param {Object} context - An object containing necessary DOM elements and state.
+ */
+export async function fetchAndUpdateJobStatus(cohortId, cohortStatus, context) {
+    const {
+        hidePlaceholderMessage,
+        logMessage,
+        clearCountdown,
+        stopPolling,
+        passphrase,
+        displayedCohorts,
+    } = context;
+
+    try {
+        // We no longer create a new cohort section if it doesn't exist.
+        // The creation of the cohort section is handled elsewhere (main.js),
+        // preventing duplicate headers from appearing at the bottom of the output.
+        
+        // Simply update the UI for the existing cohort.
+        updateCohortUI(cohortStatus, context);
+    } catch (error) {
+        logMessage(`Error fetching cohort status for Cohort ID ${cohortId}: ${error.message}`, 'error');
+        hideSpinner();
+        clearCountdown();
+    }
+}
+
+/**
  * Fetches and displays cohort details based on the cohort ID.
  * Utilizes pollCohortStatusAPI to retrieve cohort status and update UI accordingly.
  * @param {string} cohortId - The cohort identifier.
@@ -154,10 +189,10 @@ export async function loadCohortFromURL(cohortId, context) {
         statusElement.classList.add('job-status');
         jobInfoDiv.appendChild(statusElement); // Append directly to jobInfoDiv
 
-        // Add to displayed cohorts
+        // Add to displayed cohorts if not already there (no duplication here)
         displayedCohorts.add(cohortId);
 
-        // Start polling cohort status with passphrase and capture stopPolling function
+        // Start polling cohort status and capture stopPolling
         const stopPolling = pollCohortStatusAPI(
             cohortId,
             async () => {
@@ -166,9 +201,9 @@ export async function loadCohortFromURL(cohortId, context) {
                     hidePlaceholderMessage,
                     logMessage,
                     clearCountdown,
-                    stopPolling, // Pass the actual stopPolling function
-                    passphrase, // Passphrase added here
-                    displayedCohorts, // Ensure displayedCohorts is included
+                    stopPolling,
+                    passphrase,
+                    displayedCohorts,
                 });
             },
             () => {
@@ -185,65 +220,16 @@ export async function loadCohortFromURL(cohortId, context) {
                 logMessage(`Cohort ID ${cohortId} encountered an error: ${errorMessage}`, 'error');
                 hideSpinner();
                 clearCountdown();
-                serverLoad.updateServerLoad(cohortId); // Pass cohortId here
-                displayedCohorts.delete(cohortId); // Clean up after error
+                serverLoad.updateServerLoad(cohortId);
+                displayedCohorts.delete(cohortId);
             },
-            null, // No onPoll callback needed
-            passphrase // Passphrase passed to pollCohortStatusAPI
+            null,
+            passphrase
         );
 
         hideSpinner();
     } catch (error) {
         logMessage(`Error loading Cohort ID ${cohortId}: ${error.message}`, 'error');
-        hideSpinner();
-        clearCountdown();
-    }
-}
-
-/**
- * Fetches and updates job status within a cohort.
- * @param {string} cohortId - The cohort identifier.
- * @param {Object} cohortStatus - The current status of the cohort.
- * @param {Object} context - An object containing necessary DOM elements and state.
- */
-export async function fetchAndUpdateJobStatus(cohortId, cohortStatus, context) {
-    const {
-        hidePlaceholderMessage,
-        logMessage,
-        clearCountdown,
-        stopPolling,
-        passphrase,
-        displayedCohorts,
-    } = context;
-
-    try {
-        if (cohortStatus.cohort_id && !displayedCohorts.has(cohortStatus.cohort_id)) {
-            // Create a new cohort section if not already displayed
-            const cohortSection = document.createElement('div');
-            cohortSection.id = `cohort-${cohortStatus.cohort_id}`;
-            cohortSection.classList.add('cohort-section');
-
-            const cohortInfo = document.createElement('div');
-            cohortInfo.classList.add('cohort-info');
-            cohortInfo.innerHTML = `Cohort Alias: <strong>${cohortStatus.alias}</strong> | Cohort ID: <strong>${cohortStatus.cohort_id}</strong>`;
-
-            const jobsContainer = document.createElement('div');
-            jobsContainer.id = `jobs-container-${cohortStatus.cohort_id}`;
-            jobsContainer.classList.add('jobs-container');
-
-            cohortSection.appendChild(cohortInfo);
-            cohortSection.appendChild(jobsContainer);
-            document.getElementById('cohortsContainer').appendChild(cohortSection);
-
-            // Add to displayed cohorts
-            displayedCohorts.add(cohortStatus.cohort_id);
-            logMessage(`Cohort ${cohortStatus.cohort_id} displayed in UI.`, 'info');
-        }
-
-        // Update the cohort UI with current job statuses
-        updateCohortUI(cohortStatus, context);
-    } catch (error) {
-        logMessage(`Error fetching cohort status for Cohort ID ${cohortId}: ${error.message}`, 'error');
         hideSpinner();
         clearCountdown();
     }
@@ -261,7 +247,7 @@ export async function loadJobFromURL(jobId, context) {
         hideSpinner,
         clearError,
         clearMessage,
-        jobInfoDiv,           // Container to display job information
+        jobInfoDiv,
         regionOutputDiv,
         displayShareableLink,
         pollJobStatusAPI,
@@ -299,14 +285,14 @@ export async function loadJobFromURL(jobId, context) {
         logMessage(`Loading details for Job ID ${jobId}.`, 'info');
 
         // Generate and display the shareable link with type 'job'
-        displayShareableLink(jobId, jobInfoDiv, 'job'); // Explicitly specify 'job' type
+        displayShareableLink(jobId, jobInfoDiv, 'job');
 
         // Create a status element for this job and append it to jobInfoDiv
         const statusElement = document.createElement('div');
         statusElement.id = `status-${jobId}`;
         statusElement.innerHTML = `Status: <strong>Loading...</strong>`;
         statusElement.classList.add('job-status');
-        jobInfoDiv.appendChild(statusElement); // Append directly to jobInfoDiv
+        jobInfoDiv.appendChild(statusElement);
 
         // Start polling job status
         pollJobStatusAPI(
@@ -318,7 +304,7 @@ export async function loadJobFromURL(jobId, context) {
                     jobStatusDivElement.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
                 }
 
-                // Display Download and Copy Buttons When Job is Completed
+                // Display Download and Copy Buttons when completed
                 if (status === 'completed') {
                     displayDownloadLink(jobId, {
                         hidePlaceholderMessage,
@@ -326,13 +312,11 @@ export async function loadJobFromURL(jobId, context) {
                         logMessage,
                         clearCountdown,
                     });
-                    // Shareable link already displayed above
                 } else if (status === 'failed') {
-                    const errorMessage = 'Job failed.'; // Customize as needed
+                    const errorMessage = 'Job failed.';
                     displayError(errorMessage);
                     logMessage(`Job ID ${jobId} failed with error: ${errorMessage}`, 'error');
                 } else {
-                    // For statuses like 'submitted', 'running', etc.
                     logMessage(`Job ID ${jobId} is currently ${status}.`, 'info');
                 }
             },
@@ -341,18 +325,18 @@ export async function loadJobFromURL(jobId, context) {
                 hideSpinner();
                 clearCountdown();
                 logMessage(`Job ID ${jobId} polling completed.`, 'success');
-                serverLoad.updateServerLoad(jobId); // Pass jobId here
+                serverLoad.updateServerLoad(jobId);
             },
             (errorMessage) => {
                 // On Error
                 displayError(errorMessage);
                 logMessage(`Job ID ${jobId} encountered an error: ${errorMessage}`, 'error');
-                hideSpinner(); // Hide spinner when individual job fails
+                hideSpinner();
                 clearCountdown();
-                serverLoad.updateServerLoad(jobId); // Pass jobId here
+                serverLoad.updateServerLoad(jobId);
             },
-            null, // No onPoll callback needed
-            null  // No onQueueUpdate callback needed
+            null,
+            null
         );
 
         hideSpinner();
