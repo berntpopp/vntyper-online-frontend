@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.25.0'; // Update this as needed
+const frontendVersion = '0.26.0'; // Update this as needed
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;
