@@ -16,6 +16,7 @@ import { initializeFAQ } from './faq.js';
 import { initializeUserGuide } from './userGuide.js';
 import { initializeCitations } from './citations.js';
 import { initializeTutorial } from './tutorial.js';
+import { initializeUsageStats } from './usageStats.js'
 import { regions } from './regionsConfig.js';
 import { displayError, clearError } from './errorHandling.js';
 import {
@@ -72,6 +73,9 @@ async function initializeApp() {
     // Initialize Logging System
     initializeLogging();
     logMessage('Application initialized.', 'info');
+
+    // Initialize Usage Statistics Panel
+    initializeUsageStats(); 
 
     // Define displayedCohorts at a higher scope
     const displayedCohorts = new Set();

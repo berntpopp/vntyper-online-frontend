@@ -1,6 +1,6 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "vntyper-online",
+  "short_name": "vntyper",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

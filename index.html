@@ -36,6 +36,7 @@
   <link rel="stylesheet" href="ressources/css/citations.css">
   <link rel="stylesheet" href="ressources/css/footer.css">
   <link rel="stylesheet" href="ressources/css/log.css">
+  <link rel="stylesheet" href="ressources/css/usageStats.css">
   
   <!-- Intro.js JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0/intro.min.js" integrity="sha512-+hhhH0eKqYCmXsO28OJE1HHWkgNYwlpceBwmeeDEt5jpCL8jOuqAVunXlZ/WZ4qIluJdwlcv4f5BUIQ/l1w9iw==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
@@ -58,6 +59,7 @@
   <script type="module" src="ressources/js/modal.js" defer></script>
   <script type="module" src="ressources/js/populateRegions.js" defer></script>
   <script type="module" src="ressources/js/uiUtils.js" defer></script>
+  <script type="module" src="ressources/js/usageStats.js" defer></script>
   
   <!-- Version and Current Year Script -->
   <script type="module" src="ressources/js/version.js" defer></script>
@@ -400,6 +402,23 @@
   <button id="toggleLogBtn" aria-controls="logContainer" aria-expanded="false" aria-label="Toggle Logs Panel">
     📜 Logs
   </button>
+
+  <!-- Add the Stats Button and Stats Container -->
+  <button id="toggleStatsBtn" aria-controls="usageStatsContainer" aria-expanded="false" aria-label="Toggle Usage Statistics Panel">
+    📊 Stats
+  </button>
+
+  <div id="usageStatsContainer" class="hidden" aria-label="Usage Statistics">
+    <div class="usage-stats-header">
+      <h2>Usage Statistics</h2>
+      <div>
+        <button class="close-stats-btn" aria-label="Close Usage Statistics">✖️</button>
+      </div>
+    </div>
+    <div class="usage-stats-content" id="usageStatsContent" role="region" aria-live="polite" aria-atomic="false">
+      <!-- Statistics will be displayed here -->
+    </div>
+  </div>
 
 </body>
 </html>
