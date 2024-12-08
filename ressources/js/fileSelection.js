@@ -2,12 +2,16 @@
 
 import { validateFiles } from './inputWrangling.js';
 import { displayError, clearError } from './errorHandling.js';
+import { showSpinner, hideSpinner } from './uiUtils.js';
 
 export function initializeFileSelection(selectedFiles) {
     const dropArea = document.getElementById('dropArea');
     const bamFilesInput = document.getElementById('bamFiles');
     const fileList = document.getElementById('fileList');
 
+    /**
+     * Updates the UI to show the selected files.
+     */
     function displaySelectedFiles() {
         fileList.innerHTML = '';
         if (selectedFiles.length > 0) {
@@ -37,36 +41,55 @@ export function initializeFileSelection(selectedFiles) {
         }
     }
 
+    /**
+     * Removes a file from the selected files list by index.
+     * @param {number} index - Index of the file to remove.
+     */
     function removeFile(index) {
         selectedFiles.splice(index, 1);
         displaySelectedFiles();
     }
 
+    /**
+     * Handles the file validation and UI updating when files are selected.
+     * Shows a spinner immediately and uses setTimeout to ensure the UI updates before processing.
+     * After processing completes, hides the spinner.
+     * @param {FileList|File[]} files - The files selected or dropped by the user.
+     */
     function handleFileSelection(files) {
-        const filesArray = Array.from(files);
-        const { matchedPairs, invalidFiles } = validateFiles(filesArray, false);
+        // Show spinner immediately when file selection starts
+        showSpinner();
 
-        // Add matched pairs to selectedFiles, ensuring no duplicates
-        matchedPairs.forEach(pair => {
-            if (!selectedFiles.some(f => f.name === pair.bam.name && f.size === pair.bam.size)) {
-                selectedFiles.push(pair.bam);
+        // Use setTimeout to allow the UI thread to update (show the spinner) before processing
+        setTimeout(() => {
+            const filesArray = Array.from(files);
+            const { matchedPairs, invalidFiles } = validateFiles(filesArray, false);
+
+            // Add matched pairs to selectedFiles if not already present
+            matchedPairs.forEach(pair => {
+                if (!selectedFiles.some(f => f.name === pair.bam.name && f.size === pair.bam.size)) {
+                    selectedFiles.push(pair.bam);
+                }
+                if (pair.bai && !selectedFiles.some(f => f.name === pair.bai.name && f.size === pair.bai.size)) {
+                    selectedFiles.push(pair.bai);
+                }
+            });
+
+            // Handle invalid files
+            if (invalidFiles.length > 0) {
+                displayError(`Some files were invalid and not added: ${invalidFiles.map(f => f.name).join(', ')}`);
+            } else {
+                clearError();
             }
-            if (pair.bai && !selectedFiles.some(f => f.name === pair.bai.name && f.size === pair.bai.size)) {
-                selectedFiles.push(pair.bai);
-            }
-        });
 
-        // Handle invalid files
-        if (invalidFiles.length > 0) {
-            displayError(`Some files were invalid and not added: ${invalidFiles.map(f => f.name).join(', ')}`);
-        } else {
-            clearError();
-        }
+            displaySelectedFiles();
 
-        displaySelectedFiles();
+            // Hide spinner after processing is complete
+            hideSpinner();
+        }, 0);
     }
 
-    // Drag & Drop Events
+    // Drag & Drop events setup
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropArea.addEventListener(eventName, preventDefaults, false);
     });
@@ -96,6 +119,10 @@ export function initializeFileSelection(selectedFiles) {
         }
     });
 
+    /**
+     * Handles the drop event from drag & drop functionality.
+     * @param {DragEvent} e - The drop event.
+     */
     function handleDrop(e) {
         const dt = e.dataTransfer;
         const files = dt.files;
@@ -104,7 +131,7 @@ export function initializeFileSelection(selectedFiles) {
         }
     }
 
-    // File Selection via Click
+    // File selection via click
     bamFilesInput.addEventListener('change', () => {
         const files = bamFilesInput.files;
         if (files && files.length > 0) {
