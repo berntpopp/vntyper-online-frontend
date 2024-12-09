@@ -384,41 +384,39 @@
     </div>
   </div>
 
-  <!-- Logging Panel -->
-  <div id="logContainer" class="hidden" aria-label="Application Logs">
-    <div class="log-header">
-        <h2>Logs</h2>
-        <div>
-            <button class="clear-log-btn" aria-label="Clear Logs">🗑️</button>
-            <button class="close-log-btn" aria-label="Close Logs">✖️</button>
+  <!-- Panels Container for Logs and Stats -->
+  <div id="panelsContainer">
+    <!-- Logging Panel -->
+    <div id="logContainer" class="hidden" aria-label="Application Logs">
+        <div class="log-header">
+            <h2>Logs</h2>
+            <div>
+                <button class="clear-log-btn" aria-label="Clear Logs">🗑️</button>
+                <button class="close-log-btn" aria-label="Close Logs">✖️</button>
+            </div>
+        </div>
+        <div class="log-content" id="logContent" role="log" aria-live="polite" aria-atomic="false">
+            <!-- Log entries will be appended here -->
         </div>
     </div>
-    <div class="log-content" id="logContent" role="log" aria-live="polite" aria-atomic="false">
-        <!-- Log entries will be appended here -->
-    </div>
-  </div>
 
-  <!-- Toggle Logs Button -->
-  <button id="toggleLogBtn" aria-controls="logContainer" aria-expanded="false" aria-label="Toggle Logs Panel">
-    📜 Logs
-  </button>
-
-  <!-- Add the Stats Button and Stats Container -->
-  <button id="toggleStatsBtn" aria-controls="usageStatsContainer" aria-expanded="false" aria-label="Toggle Usage Statistics Panel">
-    📊 Stats
-  </button>
-
-  <div id="usageStatsContainer" class="hidden" aria-label="Usage Statistics">
-    <div class="usage-stats-header">
-      <h2>Usage Statistics</h2>
-      <div>
-        <button class="close-stats-btn" aria-label="Close Usage Statistics">✖️</button>
+    <!-- Usage Statistics Panel -->
+    <div id="usageStatsContainer" class="hidden" aria-label="Usage Statistics">
+      <div class="usage-stats-header">
+        <h2>Usage Statistics</h2>
+        <div>
+          <button class="close-stats-btn" aria-label="Close Usage Statistics">✖️</button>
+        </div>
+      </div>
+      <div class="usage-stats-content" id="usageStatsContent" role="region" aria-live="polite" aria-atomic="false">
+        <!-- Statistics will be displayed here -->
       </div>
     </div>
-    <div class="usage-stats-content" id="usageStatsContent" role="region" aria-live="polite" aria-atomic="false">
-      <!-- Statistics will be displayed here -->
-    </div>
   </div>
+
+  <!-- Toggle Buttons remain outside as before -->
+  <button id="toggleLogBtn" aria-controls="logContainer" aria-expanded="false" aria-label="Toggle Logs Panel">📜 Logs</button>
+  <button id="toggleStatsBtn" aria-controls="usageStatsContainer" aria-expanded="false" aria-label="Toggle Usage Statistics Panel">📊 Stats</button>
 
 </body>
 </html>

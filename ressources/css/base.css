@@ -258,3 +258,15 @@ select:focus,
       margin: 5px 0;
   }
 }
+
+/* Create a parent container to hold the logs and usage stats panels */
+#panelsContainer {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column-reverse; /* Start from bottom and stack upwards */
+  align-items: flex-end;
+  gap: 20px; /* Space between panels when both are visible */
+  z-index: 1000; /* Ensure panels appear above other elements */
+}

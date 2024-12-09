@@ -2,9 +2,7 @@
 
 /* Usage Statistics Panel Container */
 #usageStatsContainer {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
+    position: static;
     width: 350px;
     max-height: 300px;
     background-color: #1d3557;
@@ -15,17 +13,16 @@
     display: flex;
     flex-direction: column;
     font-family: Arial, sans-serif;
-    z-index: 1001;
+    z-index: 2; /* Ensure stats appear above logs if both are visible */
     transition: transform 0.3s ease-in-out;
     overflow: hidden;
 }
 
-/* Hidden by default */
+/* The .hidden and .visible classes remain the same to control slide-in animations via transform */
 #usageStatsContainer.hidden {
     transform: translateY(100%);
 }
 
-/* Visible state */
 #usageStatsContainer.visible {
     transform: translateY(0);
 }
