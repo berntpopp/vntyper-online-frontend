@@ -5,7 +5,7 @@
  * @returns {Promise<Object>} The usage statistics object.
  */
 async function fetchUsageStatistics() {
-    const response = await fetch('/usage-statistics/');
+    const response = await fetch(`${window.CONFIG.API_URL}//usage-statistics/`);
     if (!response.ok) {
         throw new Error(`Failed to fetch usage statistics: ${response.statusText}`);
     }
@@ -15,15 +15,6 @@ async function fetchUsageStatistics() {
 /**
  * Displays the fetched usage statistics in the usageStatsContent div.
  * @param {Object} stats - The usage statistics object.
- *   Example:
- *   {
- *     "total_jobs": 208,
- *     "unique_users": 1,
- *     "job_statuses": {
- *       "completed": 206,
- *       "started": 2
- *     }
- *   }
  */
 function displayUsageStatistics(stats) {
     const usageStatsContent = document.getElementById('usageStatsContent');
