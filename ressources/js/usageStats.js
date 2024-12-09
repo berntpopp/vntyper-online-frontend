@@ -5,7 +5,7 @@
  * @returns {Promise<Object>} The usage statistics object.
  */
 async function fetchUsageStatistics() {
-    const response = await fetch(`${window.CONFIG.API_URL}//usage-statistics/`);
+    const response = await fetch(`${window.CONFIG.API_URL}/usage-statistics/`);
     if (!response.ok) {
         throw new Error(`Failed to fetch usage statistics: ${response.statusText}`);
     }
