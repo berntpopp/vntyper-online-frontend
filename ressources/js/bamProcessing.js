@@ -1,7 +1,6 @@
-// frontend/resources/js/bamProcessing.js
+// frontend/ressources/js/bamProcessing.js
 
 import { logMessage } from './log.js'; // Import the logMessage function
-import { assemblies } from './assemblyConfigs.js'; // Import assemblies configuration
 
 /**
  * Initializes Aioli with Samtools.
@@ -39,7 +38,7 @@ export async function initializeAioli() {
  */
 async function extractBamHeader(CLI, bamPath) {
     const viewArgs = ["view", "-H", bamPath];
-    logMessage(`Executing Samtools View Command to extract header: samtools ${viewArgs.join(' ')}`, 'info');
+    logMessage(`Executing Samtools View Command to extract header: ${viewArgs.join(' ')}`, 'info');
 
     try {
         const result = await CLI.exec("samtools", viewArgs);
@@ -135,18 +134,11 @@ function extractAssemblyFromHints(assemblyHints) {
 
 /**
  * Detects the reference genome assembly by comparing contig lengths and assembly hints.
- * Respects user selection if provided.
  * @param {Object[]} bamContigs - Contigs extracted from the BAM header.
  * @param {string[]} assemblyHints - Assembly hints extracted from @PG lines.
- * @param {string} userSelectedAssembly - Assembly selected by the user.
  * @returns {string|null} - The detected assembly name or null if uncertain.
  */
-function detectAssembly(bamContigs, assemblyHints, userSelectedAssembly) {
-    if (userSelectedAssembly && userSelectedAssembly !== 'guess') {
-        logMessage(`Using user-selected assembly: ${userSelectedAssembly}`, 'info');
-        return userSelectedAssembly;
-    }
-
+function detectAssembly(bamContigs, assemblyHints) {
     const threshold = 0.9; // At least 90% of contigs should match
     let detectedAssembly = null;
 
@@ -197,7 +189,7 @@ async function extractRegion(CLI, bamPath, region, subsetBamName) {
     const subsetBamPath = subsetBamName;
     const viewCommand = "samtools";
     const viewArgs = ["view", "-P", "-b", bamPath, region, "-o", subsetBamPath];
-    logMessage(`Executing Samtools View Command: samtools ${viewArgs.join(' ')}`, 'info');
+    logMessage(`Executing Samtools View Command: ${viewCommand} ${viewArgs.join(' ')}`, 'info');
 
     try {
         const viewResult = await CLI.exec(viewCommand, viewArgs);
@@ -250,10 +242,9 @@ async function indexBam(CLI, subsetBamPath) {
 
 /**
  * Processes a single BAM and BAI pair: extracts the specified region, indexes the subset BAM, and detects the assembly.
- * Respects user assembly selection.
  * @param {Aioli} CLI - The initialized Aioli CLI object.
  * @param {Object} pair - A single matched BAM and BAI file pair.
- * @returns {Promise<Object>} - An object containing subset BAM/BAI Blobs, detected assembly, and region.
+ * @returns {Promise<Object>} - An object containing subset BAM/BAI Blobs and detected assembly.
  */
 export async function extractRegionAndIndex(CLI, pair) {
     const regionSelect = document.getElementById("region");
@@ -293,27 +284,29 @@ export async function extractRegionAndIndex(CLI, pair) {
         const header = await extractBamHeader(CLI, bamPath);
         const { contigs: bamContigs, assemblyHints } = parseHeader(header);
 
-        // Detect Assembly based on user selection
-        detectedAssembly = detectAssembly(bamContigs, assemblyHints, regionValue);
+        // Detect Assembly
+        if (!detectedAssembly) {
+            detectedAssembly = detectAssembly(bamContigs, assemblyHints);
+            logMessage(`Detected Assembly: ${detectedAssembly}`, 'info');
+        }
 
         // Determine Region
         if (regionValue === 'guess') {
             // Set region based on detected assembly
             if (detectedAssembly === 'hg19') {
-                region = assemblies.hg19.region;
+                region = 'chr1:155158000-155163000';
             } else if (detectedAssembly === 'hg38') {
-                region = assemblies.hg38.region;
+                region = 'chr1:155184000-155194000';
             } else {
                 throw new Error('Could not determine region based on detected assembly.');
             }
-        } else if (assemblies[regionValue]) {
-            // Use predefined region for the selected assembly
-            region = assemblies[regionValue].region;
-            logMessage(`Using predefined region for ${regionValue}: ${region}`, 'info');
+        } else if (regionValue === 'hg19') {
+            region = 'chr1:155158000-155163000';
+        } else if (regionValue === 'hg38') {
+            region = 'chr1:155184000-155194000';
         } else {
             // Assume the regionValue is a custom region string provided by the user
             region = regionValue;
-            logMessage(`Using custom region provided by user: ${region}`, 'info');
         }
 
         logMessage(`Region to extract: ${region}`, 'info');
