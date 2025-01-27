@@ -16,7 +16,7 @@ import { initializeFAQ } from './faq.js';
 import { initializeUserGuide } from './userGuide.js';
 import { initializeCitations } from './citations.js';
 import { initializeTutorial } from './tutorial.js';
-import { initializeUsageStats } from './usageStats.js'
+import { initializeUsageStats } from './usageStats.js';
 import { regions } from './regionsConfig.js';
 import { displayError, clearError } from './errorHandling.js';
 import {
@@ -75,7 +75,7 @@ async function initializeApp() {
     logMessage('Application initialized.', 'info');
 
     // Initialize Usage Statistics Panel
-    initializeUsageStats(); 
+    initializeUsageStats();
 
     // Define displayedCohorts at a higher scope
     const displayedCohorts = new Set();
@@ -420,7 +420,7 @@ async function initializeApp() {
                                 serverLoad.updateServerLoad(jobId); // Pass jobId here
                             },
                             null, // No onPoll callback needed
-                            null  // No onQueueUpdate callback needed
+                            null // No onQueueUpdate callback needed
                         );
                     });
                 }
