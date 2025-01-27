@@ -485,25 +485,22 @@ async function initializeApp() {
                 logMessage(`Detected Assembly: ${detectedAssembly}`, 'info');
                 logMessage(`Region used: ${region}`, 'info');
 
-                // Update the region select dropdown based on detected assembly
-                if (detectedAssembly) {
+                // Only display "Detected reference assembly..." if user had chosen "Guess assembly"
+                if (detectedAssembly && regionSelect.value === 'guess') {
                     regionSelect.value = detectedAssembly;
-
-                    // Display message about the detected assembly
                     displayMessage(
                         `Detected reference assembly: ${detectedAssembly.toUpperCase()}. Please confirm or select manually.`,
                         'info'
                     );
                     logMessage(`Reference assembly detected as ${detectedAssembly}.`, 'info');
-                } else {
-                    // Prompt the user to select manually
+                } else if (!detectedAssembly && regionSelect.value === 'guess') {
                     displayMessage(
                         'Could not automatically detect the reference assembly. Please select it manually.',
                         'error'
                     );
                     logMessage('Automatic assembly detection failed. Prompting user to select manually.', 'warning');
                     regionSelect.value = ''; // Reset selection
-                    hideSpinner(); // Hide spinner since extraction cannot proceed
+                    hideSpinner();
                     clearCountdown();
                     return;
                 }
