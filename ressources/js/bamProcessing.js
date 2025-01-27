@@ -1,6 +1,10 @@
 // frontend/ressources/js/bamProcessing.js
 
-import { logMessage } from './log.js'; // Import the logMessage function
+// Import the logging function
+import { logMessage } from './log.js';
+
+// Import assemblies
+import { assemblies } from './assemblyConfigs.js';
 
 /**
  * Initializes Aioli with Samtools.
@@ -62,12 +66,12 @@ function parseHeader(header) {
     const assemblyHints = [];
     const lines = header.split('\n');
 
-    lines.forEach(line => {
+    lines.forEach((line) => {
         if (line.startsWith('@SQ')) {
             // Parse contig lines
             const tokens = line.split('\t');
             const contig = {};
-            tokens.forEach(token => {
+            tokens.forEach((token) => {
                 const [key, value] = token.split(':');
                 if (key === 'SN') {
                     contig.name = value;
@@ -140,23 +144,21 @@ function extractAssemblyFromHints(assemblyHints) {
  */
 function detectAssembly(bamContigs, assemblyHints) {
     const threshold = 0.9; // At least 90% of contigs should match
-    let detectedAssembly = null;
+    let detectedAssembly = extractAssemblyFromHints(assemblyHints);
 
-    // First, try to detect assembly from hints
-    detectedAssembly = extractAssemblyFromHints(assemblyHints);
+    // If we found something from @PG lines, we can return early
     if (detectedAssembly) {
         return detectedAssembly;
     }
 
-    // If no assembly detected from hints, proceed with contig comparison
+    // Otherwise, proceed with contig comparison
     for (const assemblyKey in assemblies) {
         const assembly = assemblies[assemblyKey];
         const matchCount = bamContigs.reduce((count, bamContig) => {
-            const assemblyContig = assembly.contigs.find(aContig => aContig.name === bamContig.name);
-            if (assemblyContig && assemblyContig.length === bamContig.length) {
-                return count + 1;
-            }
-            return count;
+            const assemblyContig = assembly.contigs.find(
+                (aContig) => aContig.name === bamContig.name && aContig.length === bamContig.length
+            );
+            return assemblyContig ? count + 1 : count;
         }, 0);
 
         const matchPercentage = matchCount / assembly.contigs.length;
@@ -200,7 +202,9 @@ async function extractRegion(CLI, bamPath, region, subsetBamName) {
         logMessage(`${subsetBamPath} Stats: ${JSON.stringify(subsetBamStats)}`, 'info');
 
         if (!subsetBamStats || subsetBamStats.size === 0) {
-            throw new Error(`Subset BAM file ${subsetBamPath} was not created or is empty. No reads found in the specified region.`);
+            throw new Error(
+                `Subset BAM file ${subsetBamPath} was not created or is empty. No reads found in the specified region.`
+            );
         }
 
         return subsetBamPath;
@@ -241,17 +245,19 @@ async function indexBam(CLI, subsetBamPath) {
 }
 
 /**
- * Processes a single BAM and BAI pair: extracts the specified region, indexes the subset BAM, and detects the assembly.
+ * Processes a single BAM and BAI pair: extracts the specified region, indexes the subset BAM,
+ * and respects the user's assembly choice if not set to "guess".
+ *
  * @param {Aioli} CLI - The initialized Aioli CLI object.
  * @param {Object} pair - A single matched BAM and BAI file pair.
- * @returns {Promise<Object>} - An object containing subset BAM/BAI Blobs and detected assembly.
+ * @returns {Promise<Object>} - An object containing subset BAM/BAI Blobs and detected assembly & region.
  */
 export async function extractRegionAndIndex(CLI, pair) {
     const regionSelect = document.getElementById("region");
     const regionValue = regionSelect.value;
 
     logMessage("Extract Region and Index Function Triggered", 'info');
-    logMessage(`Selected Region: ${regionValue}`, 'info');
+    logMessage(`Selected Region from dropdown: ${regionValue}`, 'info');
 
     // Input Validation
     if (!regionValue) {
@@ -275,37 +281,43 @@ export async function extractRegionAndIndex(CLI, pair) {
         const paths = await CLI.mount([pair.bam, pair.bai]);
         logMessage(`Mounted Paths: ${paths.join(', ')}`, 'info');
 
-        const bamPath = paths.find(p => p.endsWith(pair.bam.name));
-        const baiPath = paths.find(p => p.endsWith(pair.bai.name));
+        const bamPath = paths.find((p) => p.endsWith(pair.bam.name));
+        // We do not strictly need the BAI path reference here; it's enough it's mounted.
+        logMessage(`Processing BAM: ${bamPath}`, 'info');
 
-        logMessage(`Processing BAM: ${bamPath}, BAI: ${baiPath}`, 'info');
-
-        // Extract and Parse BAM Header
+        // Extract and parse BAM Header
         const header = await extractBamHeader(CLI, bamPath);
         const { contigs: bamContigs, assemblyHints } = parseHeader(header);
 
-        // Detect Assembly
-        if (!detectedAssembly) {
+        // Only auto-detect assembly if the user selected "guess"
+        if (regionValue === 'guess') {
             detectedAssembly = detectAssembly(bamContigs, assemblyHints);
-            logMessage(`Detected Assembly: ${detectedAssembly}`, 'info');
+            logMessage(`Auto-detected assembly: ${detectedAssembly || 'None'}`, 'info');
+        } else {
+            // If the user explicitly chose an assembly, use that as "detectedAssembly"
+            detectedAssembly = regionValue;
+            logMessage(
+                `User-selected assembly (skipping auto-detection): ${detectedAssembly}`,
+                'info'
+            );
         }
 
         // Determine Region
         if (regionValue === 'guess') {
-            // Set region based on detected assembly
+            // Use auto-detected assembly if possible
             if (detectedAssembly === 'hg19') {
                 region = 'chr1:155158000-155163000';
             } else if (detectedAssembly === 'hg38') {
                 region = 'chr1:155184000-155194000';
             } else {
-                throw new Error('Could not determine region based on detected assembly.');
+                throw new Error('Could not determine region based on auto-detected assembly.');
             }
         } else if (regionValue === 'hg19') {
             region = 'chr1:155158000-155163000';
         } else if (regionValue === 'hg38') {
             region = 'chr1:155184000-155194000';
         } else {
-            // Assume the regionValue is a custom region string provided by the user
+            // Assume the regionValue is a custom region string typed by the user
             region = regionValue;
         }
 
@@ -313,23 +325,22 @@ export async function extractRegionAndIndex(CLI, pair) {
 
         // Extract Region
         const subsetBamName = `subset_${pair.bam.name}`;
-        const subsetBamPath = subsetBamName;
         await extractRegion(CLI, bamPath, region, subsetBamName);
 
         // Index Subset BAM
-        await indexBam(CLI, subsetBamPath);
+        await indexBam(CLI, subsetBamName);
 
         // Create Blob for subset BAM
-        const subsetBam = await CLI.fs.readFile(subsetBamPath);
+        const subsetBam = await CLI.fs.readFile(subsetBamName);
         const subsetBamBlob = new Blob([subsetBam], { type: 'application/octet-stream' });
         if (subsetBamBlob.size === 0) {
-            logMessage(`Failed to create Blob from subset BAM file ${subsetBamPath}.`, 'error');
-            throw new Error(`Failed to create Blob from subset BAM file ${subsetBamPath}.`);
+            logMessage(`Failed to create Blob from subset BAM file ${subsetBamName}.`, 'error');
+            throw new Error(`Failed to create Blob from subset BAM file ${subsetBamName}.`);
         }
-        logMessage(`Created Blob for subset BAM: ${subsetBamPath}`, 'info');
+        logMessage(`Created Blob for subset BAM: ${subsetBamName}`, 'info');
 
         // Create Blob for subset BAI
-        const subsetBaiPath = `${subsetBamPath}.bai`;
+        const subsetBaiPath = `${subsetBamName}.bai`;
         const subsetBai = await CLI.fs.readFile(subsetBaiPath);
         const subsetBaiBlob = new Blob([subsetBai], { type: 'application/octet-stream' });
         if (subsetBaiBlob.size === 0) {
@@ -342,7 +353,7 @@ export async function extractRegionAndIndex(CLI, pair) {
         subsetBamAndBaiBlobs.push({
             subsetBamBlob,
             subsetBaiBlob,
-            subsetName: subsetBamPath
+            subsetName: subsetBamName
         });
 
         logMessage(`Subset BAM and BAI for ${pair.bam.name} created successfully.`, 'success');
@@ -352,7 +363,6 @@ export async function extractRegionAndIndex(CLI, pair) {
             detectedAssembly,
             region
         };
-
     } catch (err) {
         logMessage(`Error during extraction and indexing: ${err.message}`, 'error');
         const errorDiv = document.getElementById("error");
