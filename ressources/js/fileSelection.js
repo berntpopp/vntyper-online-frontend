@@ -27,7 +27,10 @@ export function initializeFileSelection(selectedFiles) {
                 removeBtn.textContent = '×';
                 removeBtn.classList.add('remove-file');
                 removeBtn.setAttribute('aria-label', `Remove ${file.name}`);
-                removeBtn.addEventListener('click', () => {
+
+                // FIX: Stop event propagation to avoid triggering the file selector
+                removeBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
                     removeFile(index);
                 });
 
@@ -66,18 +69,18 @@ export function initializeFileSelection(selectedFiles) {
             const { matchedPairs, invalidFiles } = validateFiles(filesArray, false);
 
             // Add matched pairs to selectedFiles if not already present
-            matchedPairs.forEach(pair => {
-                if (!selectedFiles.some(f => f.name === pair.bam.name && f.size === pair.bam.size)) {
+            matchedPairs.forEach((pair) => {
+                if (!selectedFiles.some((f) => f.name === pair.bam.name && f.size === pair.bam.size)) {
                     selectedFiles.push(pair.bam);
                 }
-                if (pair.bai && !selectedFiles.some(f => f.name === pair.bai.name && f.size === pair.bai.size)) {
+                if (pair.bai && !selectedFiles.some((f) => f.name === pair.bai.name && f.size === pair.bai.size)) {
                     selectedFiles.push(pair.bai);
                 }
             });
 
             // Handle invalid files
             if (invalidFiles.length > 0) {
-                displayError(`Some files were invalid and not added: ${invalidFiles.map(f => f.name).join(', ')}`);
+                displayError(`Some files were invalid and not added: ${invalidFiles.map((f) => f.name).join(', ')}`);
             } else {
                 clearError();
             }
@@ -90,7 +93,7 @@ export function initializeFileSelection(selectedFiles) {
     }
 
     // Drag & Drop events setup
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((eventName) => {
         dropArea.addEventListener(eventName, preventDefaults, false);
     });
 
@@ -99,13 +102,13 @@ export function initializeFileSelection(selectedFiles) {
         e.stopPropagation();
     }
 
-    ['dragenter', 'dragover'].forEach(eventName => {
+    ['dragenter', 'dragover'].forEach((eventName) => {
         dropArea.addEventListener(eventName, () => {
             dropArea.classList.add('dragover');
         }, false);
     });
 
-    ['dragleave', 'drop'].forEach(eventName => {
+    ['dragleave', 'drop'].forEach((eventName) => {
         dropArea.addEventListener(eventName, () => {
             dropArea.classList.remove('dragover');
         }, false);
