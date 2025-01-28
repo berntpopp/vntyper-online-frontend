@@ -1,10 +1,9 @@
-/* frontend/ressources/css/drag-drop.css */
-
 /* --- Drag & Drop Styles --- */
 
 /* Drag & Drop Container */
 .drag-drop-container {
   margin-bottom: 1rem;
+  position: relative;
 }
 
 /* Drag & Drop Label */
@@ -92,4 +91,21 @@
 /* Hidden File Input */
 .drag-drop-input {
   display: none;
+}
+
+/* Reset file selection button styling */
+.reset-file-selection-button {
+  position: absolute;
+  top: -0.2rem;
+  right: 0;
+  background-color: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  /* Matching '×' removal color */
+  color: #000;
+}
+
+.reset-file-selection-button:hover {
+  color: #a71d2a;
 }

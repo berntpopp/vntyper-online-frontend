@@ -73,7 +73,10 @@ export function initializeFileSelection(selectedFiles) {
                 if (!selectedFiles.some((f) => f.name === pair.bam.name && f.size === pair.bam.size)) {
                     selectedFiles.push(pair.bam);
                 }
-                if (pair.bai && !selectedFiles.some((f) => f.name === pair.bai.name && f.size === pair.bai.size)) {
+                if (
+                    pair.bai &&
+                    !selectedFiles.some((f) => f.name === pair.bai.name && f.size === pair.bai.size)
+                ) {
                     selectedFiles.push(pair.bai);
                 }
             });
@@ -142,7 +145,18 @@ export function initializeFileSelection(selectedFiles) {
         }
     });
 
+    /**
+     * Resets the file selection entirely by clearing the array,
+     * resetting the hidden input value, and updating the UI.
+     */
+    function resetFileSelection() {
+        selectedFiles.length = 0;
+        bamFilesInput.value = '';
+        displaySelectedFiles();
+    }
+
     return {
-        displaySelectedFiles
+        displaySelectedFiles,
+        resetFileSelection
     };
 }

@@ -92,7 +92,20 @@ async function initializeApp() {
     // Initialize file selection
     let selectedFiles = [];
     const fileSelection = initializeFileSelection(selectedFiles);
-    const { displaySelectedFiles, onFilesSelected } = fileSelection;
+    const { displaySelectedFiles, onFilesSelected } = fileSelection; // no changes, keep onFilesSelected if needed
+
+    // NEW: Add reset button handling (minimal addition)
+    const resetFileSelectionBtn = document.getElementById('resetFileSelectionBtn');
+    if (resetFileSelectionBtn) {
+        // Add a hover title to explain its use
+        resetFileSelectionBtn.setAttribute('title', 'Reset file selection');
+        resetFileSelectionBtn.addEventListener('click', (event) => {
+            // Stop propagation so it doesn't trigger file selection
+            event.stopPropagation();
+            fileSelection.resetFileSelection();
+            logMessage('File selection reset.', 'info');
+        });
+    }
 
     // Initialize server load monitoring
     const serverLoad = initializeServerLoad();

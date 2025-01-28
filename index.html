@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>vntyper-online</title>  
-  
   <!-- Viewport Meta Tag -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
@@ -142,6 +141,16 @@
       data-intro="Upload your BAM and BAI files here. Each BAM file should have a corresponding BAI file." 
       data-step="1"
     >
+      <!-- NEW RESET BUTTON -->
+      <button 
+        id="resetFileSelectionBtn" 
+        class="reset-file-selection-button" 
+        aria-label="Reset File Selection"
+        data-tooltip="Reset files"
+      >
+        ↺
+      </button>
+
       <label class="drag-drop-label" for="bamFiles">Upload sequencing files:</label>
       
       <div
@@ -178,7 +187,7 @@
       <select 
         id="region" 
         class="form-select" 
-        data-tooltip="Choose the reference assembly used for alignment. If unsure, select 'Guess assembly'."
+        data-tooltip="Choose the reference assembly used for alignment. If unsure, select 'Guess assembly'." 
         aria-label="Select Reference Assembly"
       >
         <option value="guess" selected>Guess assembly</option>
@@ -212,7 +221,7 @@
         id="toggleOptionalInputs" 
         class="toggle-button button" 
         aria-expanded="false" 
-        aria-controls="additionalInputs" 
+        aria-controls="additionalInputs"
         data-tooltip="Show additional options for job submission."
         aria-label="Show Options"
       >
