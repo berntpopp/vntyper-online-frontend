@@ -1,6 +1,6 @@
 # frontend/Dockerfile
 
-FROM nginx:1.26.2-alpine-slim
+FROM nginx:1.27.3-alpine-slim
 
 # Install gettext, bash, and curl for health checks
 RUN apk add --no-cache gettext bash curl
