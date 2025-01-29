@@ -124,10 +124,11 @@ export async function getJobStatus(jobId) {
  * Fetches the current status of a cohort from the backend API.
  * @param {string} cohortId - The unique identifier of the cohort.
  * @param {string|null} [passphrase=null] - Optional passphrase for the cohort.
+ * @param {string|null} [alias=null] - Optional alias for the cohort. // NEW
  * @returns {Promise<Object>} - The JSON response containing cohort status and job details.
  * @throws {Error} - If the request fails or cohortId is invalid.
  */
-export async function getCohortStatus(cohortId, passphrase = null) {
+export async function getCohortStatus(cohortId, passphrase = null, alias = null) {
     // Added validation for cohortId
     if (typeof cohortId !== 'string' || cohortId.trim() === '') {
         logMessage('getCohortStatus called with invalid Cohort ID.', 'error');
@@ -137,8 +138,9 @@ export async function getCohortStatus(cohortId, passphrase = null) {
     try {
         logMessage(`Fetching status for Cohort ID: ${cohortId}`, 'info');
 
-        // Construct URL with passphrase if provided
+        // Construct URL with passphrase and alias if provided
         let url = `${window.CONFIG.API_URL}/cohort-status/?cohort_id=${encodeURIComponent(cohortId)}`;
+
         if (passphrase) {
             if (typeof passphrase !== 'string') {
                 logMessage('Passphrase must be a string in getCohortStatus.', 'error');
@@ -147,6 +149,17 @@ export async function getCohortStatus(cohortId, passphrase = null) {
             url += `&passphrase=${encodeURIComponent(passphrase)}`;
             logMessage('Passphrase included in cohort status request.', 'info');
         }
+
+        // NEW: Append alias if provided
+        if (alias) {
+            if (typeof alias !== 'string') {
+                logMessage('Alias must be a string in getCohortStatus.', 'error');
+                throw new Error('Alias must be a string.');
+            }
+            url += `&alias=${encodeURIComponent(alias)}`;
+            logMessage('Alias included in cohort status request.', 'info');
+        }
+        // END of NEW code
 
         const response = await fetch(url);
         if (!response.ok) {

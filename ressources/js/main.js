@@ -349,11 +349,10 @@ async function initializeApp() {
                 // Polling for cohort status
                 const passphrase = passphraseInput.value.trim() || null;
 
-                // Start polling cohort status and capture the stopPolling function
                 const stopPolling = pollCohortStatusAPI(
                     cohortId,
                     async () => {
-                        const cohortStatus = await getCohortStatus(cohortId, passphrase);
+                        const cohortStatus = await getCohortStatus(cohortId, passphrase, cohortAlias);
                         fetchAndUpdateJobStatus(cohortId, cohortStatus, {
                             hidePlaceholderMessage,
                             logMessage,
