@@ -332,6 +332,12 @@ async function initializeApp() {
                 formData.append('keep_intermediates', 'true');
                 formData.append('archive_results', 'true');
 
+                // NEW: Append the advntr_mode parameter based on checkbox state
+                const advntrModeCheckbox = document.getElementById('advntrMode');
+                const advntrMode = advntrModeCheckbox && advntrModeCheckbox.checked;
+                formData.append('advntr_mode', advntrMode ? 'true' : 'false');
+                logMessage(`adVNTR analysis mode set to ${advntrMode}`, 'info');
+
                 // Add email and cohort information if available
                 if (email) {
                     formData.append('email', email);

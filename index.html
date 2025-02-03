@@ -260,6 +260,17 @@
         placeholder="Password" 
         aria-label="Passphrase for cohort creation"
       >
+
+      <!-- NEW: Add a line break before the label and update the tooltip -->
+      <br>
+      <label for="advntrMode">Perform adVNTR analysis:</label>
+      <input 
+        type="checkbox" 
+        id="advntrMode" 
+        name="advntr_mode" 
+        aria-label="Enable adVNTR analysis" 
+        data-tooltip="Enable adVNTR analysis (this will take about 10 minutes)"
+      >
     </div>
 
     <!-- Output and Error Containers -->
