@@ -1,0 +1,88 @@
+/* frontend/resources/css/buttons.css */
+
+/* --- Button Styles --- */
+
+.submit-button,
+.extract-button,
+.agree-button,
+.download-button {
+    display: inline-block;
+    margin: 0.4rem 0.4rem;
+    padding: 0.6rem 1.2rem;
+    background-color: #005f73;
+    color: #ffffff;
+    border: none;
+    border-radius: 0.2rem;
+    cursor: pointer;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.submit-button:hover,
+.extract-button:hover,
+.agree-button:hover,
+.download-button:hover {
+    background-color: #0a9396;
+}
+
+.submit-button:disabled,
+.extract-button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* --- Download Link Styles --- */
+
+.download-link {
+    display: inline-block;
+    margin: 0.4rem 0.4rem;        /* Adjusted margin for consistent spacing */
+    padding: 0.3rem 0.6rem;       /* Further reduced padding for smaller buttons */
+    background-color: #3498db;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.8rem;            /* Smaller font size */
+    transition: background-color 0.3s ease;
+    vertical-align: middle;        /* Aligns buttons vertically if needed */
+}
+
+.download-link:hover {
+    background-color: #2980b9;
+}
+
+.download-link:active {
+    background-color: #1c5d99;    /* Darker shade on click */
+}
+
+/* --- Horizontal Divider Styles --- */
+
+hr.separator {
+    border: none;
+    border-top: 1px solid #ccc;    /* Light gray line */
+    margin: 00 0;                 /* Space above and below the divider */
+    width: 100%;                    /* Ensures the divider spans the full width */
+}
+
+/* --- Container for Download Buttons --- */
+
+.download-container {
+    display: flex;                  /* Uses Flexbox for horizontal alignment */
+    gap: 0.5rem;                    /* Space between buttons */
+    align-items: center;            /* Vertically centers the buttons */
+    margin-top: 10px;               /* Space above the container */
+}
+
+/* --- Responsive Adjustments --- */
+
+@media (max-width: 600px) {
+    .download-container {
+        flex-direction: column;     /* Stacks buttons vertically on small screens */
+        align-items: flex-start;
+    }
+
+    .download-link {
+        width: 100%;                /* Buttons take full width on small screens */
+        text-align: center;         /* Centers text within buttons */
+    }
+}

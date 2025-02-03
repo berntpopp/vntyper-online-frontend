@@ -1,0 +1,42 @@
+/* frontend/resources/css/output.css */
+
+/* --- Output Styles --- */
+
+#output {
+    margin-top: 20px;
+    background-color: #f4f4f4;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    position: relative; /* To position spinner and countdown properly */
+}
+
+/* Region Output Styles */
+#regionOutput {
+    margin-top: 20px;
+}
+
+/* Job Output Styles */
+#jobOutput {
+    margin-top: 20px;
+}
+
+/* Additional Styles for Job Info and Status */
+#jobInfo,
+#jobStatus,
+#jobQueuePosition {
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+#jobInfo strong,
+#jobStatus strong {
+    color: #333;
+}
+
+.placeholder-message {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    margin-top: 20px;
+  }
