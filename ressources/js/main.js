@@ -1,4 +1,4 @@
-// frontend/resources/js/main.js
+// frontend/ressources/js/main.js
 
 import { validateFiles } from './inputWrangling.js';
 import {
@@ -92,28 +92,39 @@ async function initializeApp() {
     // Initialize file selection
     let selectedFiles = [];
     const fileSelection = initializeFileSelection(selectedFiles);
-    const { displaySelectedFiles, onFilesSelected } = fileSelection; // no changes, keep onFilesSelected if needed
+    const { displaySelectedFiles } = fileSelection; // no changes, keep onFilesSelected if needed
 
-    // NEW: Add reset button handling (minimal addition)
-    const resetFileSelectionBtn = document.getElementById('resetFileSelectionBtn');
-    if (resetFileSelectionBtn) {
-        // Add a hover title to explain its use
-        resetFileSelectionBtn.setAttribute('title', 'Reset file selection');
-        resetFileSelectionBtn.addEventListener('click', (event) => {
-            // Stop propagation so it doesn't trigger file selection
-            event.stopPropagation();
-            fileSelection.resetFileSelection();
-            logMessage('File selection reset.', 'info');
-        });
+    // ***********************************************************************
+    // NEW: Add a function to reset the entire application state
+    // ***********************************************************************
+    function resetApplicationState() {
+        // Clear dynamic output areas
+        const jobOutputDiv = document.getElementById('jobOutput');
+        if (jobOutputDiv) {
+            jobOutputDiv.innerHTML = '';
+        }
+        const cohortsContainerDiv = document.getElementById('cohortsContainer');
+        if (cohortsContainerDiv) {
+            cohortsContainerDiv.innerHTML = '';
+        }
+        if (regionOutputDiv) {
+            regionOutputDiv.innerHTML = '';
+        }
+        // Clear error and message displays
+        clearError();
+        clearMessage();
+        // Reset the region select to its default value ('guess')
+        if (regionSelect) {
+            regionSelect.value = 'guess';
+        }
+        // Clear any displayed cohorts
+        displayedCohorts.clear();
+        // Clear any active countdown and hide the spinner
+        clearCountdown();
+        hideSpinner();
+        logMessage('Application state has been reset.', 'info');
     }
-
-    // Initialize server load monitoring
-    const serverLoad = initializeServerLoad();
-
-    // References to output sub-containers
-    const outputDiv = document.getElementById('output');
-    const jobOutputDiv = document.getElementById('jobOutput');
-    const cohortsContainerDiv = document.getElementById('cohortsContainer');
+    // ***********************************************************************
 
     /**
      * Capitalizes the first letter of a string.
@@ -149,7 +160,7 @@ async function initializeApp() {
                 logMessage,
                 serverLoad,
                 displayedCohorts, // Pass the existing Set
-                cohortsContainer: cohortsContainerDiv, // Pass the cohorts container
+                cohortsContainer: document.getElementById('cohortsContainer'), // Pass the cohorts container
                 passphrase, // Passphrase captured here
             });
         } else if (jobId) {
@@ -159,7 +170,7 @@ async function initializeApp() {
                 hideSpinner,
                 clearError,
                 clearMessage,
-                jobInfoDiv: jobOutputDiv, // Display in jobOutputDiv for individual jobs
+                jobInfoDiv: document.getElementById('jobOutput'), // Display in jobOutputDiv for individual jobs
                 regionOutputDiv,
                 displayShareableLink,
                 pollJobStatusAPI,
@@ -168,11 +179,36 @@ async function initializeApp() {
                 logMessage,
                 serverLoad,
                 displayedCohorts, // Pass the existing Set
-                cohortsContainer: cohortsContainerDiv, // Pass the cohorts container
+                cohortsContainer: document.getElementById('cohortsContainer'), // Pass the cohorts container
                 passphrase, // Passphrase captured here
             });
         }
     }
+
+    // ***********************************************************************
+    // NEW: Reset File Selection Button handling now resets entire application state
+    // ***********************************************************************
+    const resetFileSelectionBtn = document.getElementById('resetFileSelectionBtn');
+    if (resetFileSelectionBtn) {
+        // Add a hover title to explain its use
+        resetFileSelectionBtn.setAttribute('title', 'Reset file selection and application state');
+        resetFileSelectionBtn.addEventListener('click', (event) => {
+            // Stop propagation so it doesn't trigger file selection
+            event.stopPropagation();
+            fileSelection.resetFileSelection();
+            resetApplicationState();
+            logMessage('Application state and file selection have been reset.', 'info');
+        });
+    }
+    // ***********************************************************************
+
+    // Initialize server load monitoring
+    const serverLoad = initializeServerLoad();
+
+    // References to output sub-containers
+    const outputDiv = document.getElementById('output');
+    const jobOutputDiv = document.getElementById('jobOutput');
+    const cohortsContainerDiv = document.getElementById('cohortsContainer');
 
     /**
      * Handle Job Submission via Submit Button
@@ -376,10 +412,10 @@ async function initializeApp() {
                         logMessage(`Cohort ID ${cohortId} encountered an error: ${errorMessage}`, 'error');
                         hideSpinner();
                         clearCountdown();
-                        serverLoad.updateServerLoad(cohortId); // Pass cohortId here
-                        displayedCohorts.delete(cohortId); // Clean up after error
+                        serverLoad.updateServerLoad(cohortId);
+                        displayedCohorts.delete(cohortId);
                     },
-                    null, // No onPoll callback needed
+                    null,
                     passphrase // Passphrase passed to pollCohortStatusAPI
                 );
 
@@ -412,7 +448,6 @@ async function initializeApp() {
                                     displayError(errorMessage);
                                     logMessage(`Job ID ${jobId} failed with error: ${errorMessage}`, 'error');
                                 } else {
-                                    // For statuses like 'submitted', 'running', etc.
                                     logMessage(`Job ID ${jobId} is currently ${status}.`, 'info');
                                 }
                             },
@@ -431,8 +466,8 @@ async function initializeApp() {
                                 clearCountdown();
                                 serverLoad.updateServerLoad(jobId); // Pass jobId here
                             },
-                            null, // No onPoll callback needed
-                            null // No onQueueUpdate callback needed
+                            null,
+                            null
                         );
                     });
                 }
@@ -592,12 +627,16 @@ async function initializeApp() {
         }
     });
 
-    // Initialize file selection listener
+    // ***********************************************************************
+    // NEW: Modify file input change handler to reset application state on new file selection
+    // ***********************************************************************
     bamFilesInput.addEventListener('change', (event) => {
+        resetApplicationState();
         selectedFiles = Array.from(event.target.files);
         displaySelectedFiles(selectedFiles);
         logMessage(`${selectedFiles.length} file(s) selected for upload.`, 'info');
     });
+    // ***********************************************************************
 
     // Check URL for job_id or cohort_id on initial load
     checkURLParameters();
