@@ -1,0 +1,146 @@
+/* frontend/resources/css/log.css */
+
+/* Logging Panel Container */
+#logContainer {
+    position: static;
+    width: 350px;
+    max-height: 500px;
+    background-color: #1d3557;
+    color: #f1faee;
+    border: 2px solid #457b9d;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    z-index: 1; /* Lower than usageStatsContainer so logs appear behind if overlapping */
+    transition: transform 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+/* Hidden by default */
+#logContainer.hidden {
+    transform: translateY(100%);
+}
+
+/* Visible state */
+#logContainer.visible {
+    transform: translateY(0);
+}
+
+/* Logging Panel Header */
+#logContainer .log-header {
+    background-color: #457b9d;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0; /* Prevent header from shrinking */
+}
+
+#logContainer .log-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+#logContainer .log-header button {
+    background: none;
+    border: none;
+    color: #f1faee;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+#logContainer .log-header button:hover,
+#logContainer .log-header button:focus {
+    color: #a8dadc;
+}
+
+/* Logging Panel Content */
+#logContent {
+    padding: 5px;
+    height: 400px; /* Increased height for better visibility */
+    overflow-y: auto; /* Enable vertical scrolling */
+    flex-grow: 1; /* Allow content to grow and fill available space */
+    background-color: #f1faee;
+    color: #1d3557;
+    font-size: 0.8rem; /* Adjust font size for readability */
+}
+
+/* Log Entry Styles */
+.log-entry {
+    margin-bottom: 8px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+    word-wrap: break-word;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: fadeIn 0.3s forwards;
+}
+
+/* Log Levels */
+.log-info {
+    background-color: #a8dadc;
+    color: #1d3557;
+}
+
+.log-warning {
+    background-color: #ffe066;
+    color: #1d3557;
+}
+
+.log-error {
+    background-color: #e63946;
+    color: #f1faee;
+}
+
+.log-success {
+    background-color: #2a9d8f;
+    color: #f1faee;
+}
+
+/* Clear Logs Button */
+.clear-log-btn {
+    background: none;
+    border: none;
+    color: #f1faee;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.clear-log-btn:hover,
+.clear-log-btn:focus {
+    color: #a8dadc;
+}
+
+/* Scrollbar Styling (Optional) */
+#logContent::-webkit-scrollbar {
+    width: 8px;
+}
+
+#logContent::-webkit-scrollbar-track {
+    background: #f1faee;
+    border-radius: 4px;
+}
+
+#logContent::-webkit-scrollbar-thumb {
+    background-color: #a8dadc;
+    border-radius: 4px;
+    border: 2px solid #f1faee;
+}
+
+/* For Firefox */
+#logContent {
+    scrollbar-width: thin;
+    scrollbar-color: #a8dadc #f1faee;
+}
+
+/* Log Entry Animations */
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
