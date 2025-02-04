@@ -68,16 +68,22 @@ export function initializeFileSelection(selectedFiles) {
             const filesArray = Array.from(files);
             const { matchedPairs, invalidFiles } = validateFiles(filesArray, false);
 
-            // Add matched pairs to selectedFiles if not already present
+            // Add matched pairs to selectedFiles if not already present.
+            // For SAM files, use pair.sam; for BAM files, use pair.bam (and add bai if available).
             matchedPairs.forEach((pair) => {
-                if (!selectedFiles.some((f) => f.name === pair.bam.name && f.size === pair.bam.size)) {
-                    selectedFiles.push(pair.bam);
-                }
-                if (
-                    pair.bai &&
-                    !selectedFiles.some((f) => f.name === pair.bai.name && f.size === pair.bai.size)
-                ) {
-                    selectedFiles.push(pair.bai);
+                if (pair.sam) {
+                    if (!selectedFiles.some((f) => f.name === pair.sam.name && f.size === pair.sam.size)) {
+                        selectedFiles.push(pair.sam);
+                    }
+                } else if (pair.bam) {
+                    if (!selectedFiles.some((f) => f.name === pair.bam.name && f.size === pair.bam.size)) {
+                        selectedFiles.push(pair.bam);
+                    }
+                    if (pair.bai &&
+                        !selectedFiles.some((f) => f.name === pair.bai.name && f.size === pair.bai.size)
+                    ) {
+                        selectedFiles.push(pair.bai);
+                    }
                 }
             });
 

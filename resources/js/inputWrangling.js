@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 /**
- * Validates the selected BAM and BAI files.
+ * Validates the selected BAM, SAM, and BAI files.
  * @param {File[]} selectedFiles - Array of selected File objects.
  * @param {boolean} logWarnings - Whether to log warnings for invalid files.
  * @returns {Object} - Contains matchedPairs and invalidFiles arrays.
@@ -17,11 +17,12 @@ export function validateFiles(selectedFiles, logWarnings = true) {
         lowerCaseName: file.name.toLowerCase()
     }));
 
-    // Filter BAM and BAI files
+    // Filter BAM, SAM, and BAI files
     const bamFiles = lowerCaseFiles.filter(file => file.lowerCaseName.endsWith(".bam"));
+    const samFiles = lowerCaseFiles.filter(file => file.lowerCaseName.endsWith(".sam"));
     const baiFiles = lowerCaseFiles.filter(file => file.lowerCaseName.endsWith(".bai"));
 
-    logMessage(`Found ${bamFiles.length} BAM file(s) and ${baiFiles.length} BAI file(s).`, 'info');
+    logMessage(`Found ${bamFiles.length} BAM file(s), ${samFiles.length} SAM file(s), and ${baiFiles.length} BAI file(s).`, 'info');
 
     // Initialize arrays to hold matched pairs and invalid files
     const matchedPairs = [];
@@ -50,6 +51,12 @@ export function validateFiles(selectedFiles, logWarnings = true) {
                 logMessage(`Corresponding BAI file not found for BAM file: ${bam.originalFile.name}`, 'warning');
             }
         }
+    });
+
+    // Process SAM files (which do not require a BAI)
+    samFiles.forEach(sam => {
+        matchedPairs.push({ sam: sam.originalFile });
+        logMessage(`SAM file "${sam.originalFile.name}" added for conversion.`, 'success');
     });
 
     // Any remaining BAI files without corresponding BAM files are invalid

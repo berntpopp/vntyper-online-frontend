@@ -234,7 +234,7 @@ async function indexBam(CLI, subsetBamPath) {
         logMessage(`${subsetBaiPath} Stats: ${JSON.stringify(subsetBaiStats)}`, 'info');
 
         if (!subsetBaiStats || subsetBaiStats.size === 0) {
-            throw new Error(`Index BAI file ${subsetBaiPath} was not created or is empty.`);
+            throw new Error(`Index BAI file ${subsetBamPath}.bai was not created or is empty.`);
         }
 
         logMessage(`Successfully indexed BAM file: ${subsetBamPath}`, 'success');
@@ -245,11 +245,17 @@ async function indexBam(CLI, subsetBamPath) {
 }
 
 /**
- * Processes a single BAM and BAI pair: extracts the specified region, indexes the subset BAM,
+ * Processes a single BAM/BAI pair or a SAM file: extracts the specified region, indexes the subset BAM,
  * and respects the user's assembly choice if not set to "guess".
  *
+ * For SAM files, the pipeline mounts the SAM file, converts it to BAM (using "samtools view -bS"),
+ * sorts the resulting BAM file, indexes it, and then uses the header to auto-detect the assembly
+ * and region before returning the corresponding Blob objects.
+ *
  * @param {Aioli} CLI - The initialized Aioli CLI object.
- * @param {Object} pair - A single matched BAM and BAI file pair.
+ * @param {Object} pair - A single matched file pair. The object should have either:
+ *                          - a "bam" and (optionally) "bai" property, or
+ *                          - a "sam" property.
  * @returns {Promise<Object>} - An object containing subset BAM/BAI Blobs and detected assembly & region.
  */
 export async function extractRegionAndIndex(CLI, pair) {
@@ -276,93 +282,194 @@ export async function extractRegionAndIndex(CLI, pair) {
     const subsetBamAndBaiBlobs = [];
 
     try {
-        // Mount BAM and BAI files
-        logMessage("Mounting BAM and BAI files...", 'info');
-        const paths = await CLI.mount([pair.bam, pair.bai]);
-        logMessage(`Mounted Paths: ${paths.join(', ')}`, 'info');
+        if (pair.sam) {
+            // Process SAM file conversion branch
+            logMessage("SAM file detected. Starting SAM to BAM conversion pipeline...", "info");
+            // Mount the SAM file
+            const paths = await CLI.mount([pair.sam]);
+            logMessage(`Mounted Paths: ${paths.join(', ')}`, "info");
+            const samPath = paths.find((p) => p.endsWith(pair.sam.name));
+            if (!samPath) {
+                throw new Error(`Failed to mount SAM file: ${pair.sam.name}`);
+            }
+            logMessage(`Processing SAM file: ${samPath}`, "info");
+            // Define output filenames
+            const convertedBamName = `converted_${pair.sam.name.replace(/\.sam$/i, ".bam")}`;
+            const sortedBamName = `sorted_${convertedBamName}`;
 
-        const bamPath = paths.find((p) => p.endsWith(pair.bam.name));
-        // We do not strictly need the BAI path reference here; it's enough it's mounted.
-        logMessage(`Processing BAM: ${bamPath}`, 'info');
+            // Convert SAM to BAM
+            const convertArgs = ["view", "-bS", samPath, "-o", convertedBamName];
+            logMessage(`Executing Samtools View Command to convert SAM to BAM: ${convertArgs.join(' ')}`, "info");
+            const convertResult = await CLI.exec("samtools", convertArgs);
+            logMessage(`Samtools View Output for conversion: ${convertResult}`, "info");
 
-        // Extract and parse BAM Header
-        const header = await extractBamHeader(CLI, bamPath);
-        const { contigs: bamContigs, assemblyHints } = parseHeader(header);
+            // Sort the converted BAM file
+            const sortArgs = ["sort", convertedBamName, "-o", sortedBamName];
+            logMessage(`Executing Samtools Sort Command: ${sortArgs.join(' ')}`, "info");
+            const sortResult = await CLI.exec("samtools", sortArgs);
+            logMessage(`Samtools Sort Output for ${sortedBamName}: ${sortResult}`, "info");
 
-        // Only auto-detect assembly if the user selected "guess"
-        if (regionValue === 'guess') {
-            detectedAssembly = detectAssembly(bamContigs, assemblyHints);
-            logMessage(`Auto-detected assembly: ${detectedAssembly || 'None'}`, 'info');
-        } else {
-            // If the user explicitly chose an assembly, use that as "detectedAssembly"
-            detectedAssembly = regionValue;
-            logMessage(
-                `User-selected assembly (skipping auto-detection): ${detectedAssembly}`,
-                'info'
-            );
-        }
+            // Index the sorted BAM file
+            const indexArgs = ["index", sortedBamName];
+            logMessage(`Executing Samtools Index Command: ${indexArgs.join(' ')}`, "info");
+            const indexResult = await CLI.exec("samtools", indexArgs);
+            logMessage(`Samtools Index Output for ${sortedBamName}: ${indexResult}`, "info");
 
-        // Determine Region
-        if (regionValue === 'guess') {
-            // Use auto-detected assembly if possible
-            if (detectedAssembly === 'hg19') {
+            // Verify sorted BAM and index creation
+            const sortedBamStats = await CLI.fs.stat(sortedBamName);
+            logMessage(`${sortedBamName} Stats: ${JSON.stringify(sortedBamStats)}`, "info");
+            if (!sortedBamStats || sortedBamStats.size === 0) {
+                throw new Error(`Sorted BAM file ${sortedBamName} was not created or is empty.`);
+            }
+            const sortedBaiPath = `${sortedBamName}.bai`;
+            const sortedBaiStats = await CLI.fs.stat(sortedBaiPath);
+            logMessage(`${sortedBaiPath} Stats: ${JSON.stringify(sortedBaiStats)}`, "info");
+            if (!sortedBaiStats || sortedBaiStats.size === 0) {
+                throw new Error(`Index BAI file ${sortedBaiPath} was not created or is empty.`);
+            }
+
+            // Extract and parse header from the sorted BAM file
+            const header = await extractBamHeader(CLI, sortedBamName);
+            const { contigs: bamContigs, assemblyHints } = parseHeader(header);
+
+            // Determine assembly
+            if (regionValue === 'guess') {
+                detectedAssembly = detectAssembly(bamContigs, assemblyHints);
+                logMessage(`Auto-detected assembly: ${detectedAssembly || 'None'}`, "info");
+            } else {
+                detectedAssembly = regionValue;
+                logMessage(`User-selected assembly (skipping auto-detection): ${detectedAssembly}`, "info");
+            }
+
+            // Determine region based on detected or selected assembly
+            if (regionValue === 'guess') {
+                if (detectedAssembly === 'hg19') {
+                    region = 'chr1:155158000-155163000';
+                } else if (detectedAssembly === 'hg38') {
+                    region = 'chr1:155184000-155194000';
+                } else {
+                    throw new Error('Could not determine region based on auto-detected assembly.');
+                }
+            } else if (regionValue === 'hg19') {
                 region = 'chr1:155158000-155163000';
-            } else if (detectedAssembly === 'hg38') {
+            } else if (regionValue === 'hg38') {
                 region = 'chr1:155184000-155194000';
             } else {
-                throw new Error('Could not determine region based on auto-detected assembly.');
+                region = regionValue;
             }
-        } else if (regionValue === 'hg19') {
-            region = 'chr1:155158000-155163000';
-        } else if (regionValue === 'hg38') {
-            region = 'chr1:155184000-155194000';
-        } else {
-            // Assume the regionValue is a custom region string typed by the user
-            region = regionValue;
+            logMessage(`Region to extract: ${region}`, "info");
+
+            // For SAM branch, directly prepare the blobs from the sorted BAM and its index.
+            const sortedBamData = await CLI.fs.readFile(sortedBamName);
+            const sortedBamBlob = new Blob([sortedBamData], { type: 'application/octet-stream' });
+            if (sortedBamBlob.size === 0) {
+                logMessage(`Failed to create Blob from sorted BAM file ${sortedBamName}.`, "error");
+                throw new Error(`Failed to create Blob from sorted BAM file ${sortedBamName}.`);
+            }
+            logMessage(`Created Blob for sorted BAM: ${sortedBamName}`, "info");
+
+            const sortedBaiData = await CLI.fs.readFile(sortedBaiPath);
+            const sortedBaiBlob = new Blob([sortedBaiData], { type: 'application/octet-stream' });
+            if (sortedBaiBlob.size === 0) {
+                logMessage(`Failed to create Blob from index file ${sortedBaiPath}.`, "error");
+                throw new Error(`Failed to create Blob from index file ${sortedBaiPath}.`);
+            }
+            logMessage(`Created Blob for sorted BAI: ${sortedBaiPath}`, "info");
+
+            subsetBamAndBaiBlobs.push({
+                subsetBamBlob: sortedBamBlob,
+                subsetBaiBlob: sortedBaiBlob,
+                subsetName: sortedBamName
+            });
+
+            logMessage(`SAM file conversion, sorting, and indexing completed successfully for ${pair.sam.name}.`, "success");
+
+            return {
+                subsetBamAndBaiBlobs,
+                detectedAssembly,
+                region
+            };
+        } else if (pair.bam) {
+            // Existing processing for BAM and BAI pairs
+            logMessage("Mounting BAM and BAI files...", 'info');
+            const paths = await CLI.mount([pair.bam, pair.bai]);
+            logMessage(`Mounted Paths: ${paths.join(', ')}`, 'info');
+
+            const bamPath = paths.find((p) => p.endsWith(pair.bam.name));
+            logMessage(`Processing BAM: ${bamPath}`, 'info');
+
+            // Extract and parse BAM Header
+            const header = await extractBamHeader(CLI, bamPath);
+            const { contigs: bamContigs, assemblyHints } = parseHeader(header);
+
+            // Determine assembly
+            if (regionValue === 'guess') {
+                detectedAssembly = detectAssembly(bamContigs, assemblyHints);
+                logMessage(`Auto-detected assembly: ${detectedAssembly || 'None'}`, 'info');
+            } else {
+                detectedAssembly = regionValue;
+                logMessage(`User-selected assembly (skipping auto-detection): ${detectedAssembly}`, 'info');
+            }
+
+            // Determine Region
+            if (regionValue === 'guess') {
+                if (detectedAssembly === 'hg19') {
+                    region = 'chr1:155158000-155163000';
+                } else if (detectedAssembly === 'hg38') {
+                    region = 'chr1:155184000-155194000';
+                } else {
+                    throw new Error('Could not determine region based on auto-detected assembly.');
+                }
+            } else if (regionValue === 'hg19') {
+                region = 'chr1:155158000-155163000';
+            } else if (regionValue === 'hg38') {
+                region = 'chr1:155184000-155194000';
+            } else {
+                region = regionValue;
+            }
+
+            logMessage(`Region to extract: ${region}`, 'info');
+
+            // Extract Region
+            const subsetBamName = `subset_${pair.bam.name}`;
+            await extractRegion(CLI, bamPath, region, subsetBamName);
+
+            // Index Subset BAM
+            await indexBam(CLI, subsetBamName);
+
+            // Create Blob for subset BAM
+            const subsetBam = await CLI.fs.readFile(subsetBamName);
+            const subsetBamBlob = new Blob([subsetBam], { type: 'application/octet-stream' });
+            if (subsetBamBlob.size === 0) {
+                logMessage(`Failed to create Blob from subset BAM file ${subsetBamName}.`, 'error');
+                throw new Error(`Failed to create Blob from subset BAM file ${subsetBamName}.`);
+            }
+            logMessage(`Created Blob for subset BAM: ${subsetBamName}`, 'info');
+
+            // Create Blob for subset BAI
+            const subsetBaiPath = `${subsetBamName}.bai`;
+            const subsetBai = await CLI.fs.readFile(subsetBaiPath);
+            const subsetBaiBlob = new Blob([subsetBai], { type: 'application/octet-stream' });
+            if (subsetBaiBlob.size === 0) {
+                logMessage(`Failed to create Blob from subset BAI file ${subsetBaiPath}.`, 'error');
+                throw new Error(`Failed to create Blob from subset BAI file ${subsetBaiPath}.`);
+            }
+            logMessage(`Created Blob for subset BAI: ${subsetBaiPath}`, 'info');
+
+            subsetBamAndBaiBlobs.push({
+                subsetBamBlob,
+                subsetBaiBlob,
+                subsetName: subsetBamName
+            });
+
+            logMessage(`Subset BAM and BAI for ${pair.bam.name} created successfully.`, 'success');
+
+            return {
+                subsetBamAndBaiBlobs,
+                detectedAssembly,
+                region
+            };
         }
-
-        logMessage(`Region to extract: ${region}`, 'info');
-
-        // Extract Region
-        const subsetBamName = `subset_${pair.bam.name}`;
-        await extractRegion(CLI, bamPath, region, subsetBamName);
-
-        // Index Subset BAM
-        await indexBam(CLI, subsetBamName);
-
-        // Create Blob for subset BAM
-        const subsetBam = await CLI.fs.readFile(subsetBamName);
-        const subsetBamBlob = new Blob([subsetBam], { type: 'application/octet-stream' });
-        if (subsetBamBlob.size === 0) {
-            logMessage(`Failed to create Blob from subset BAM file ${subsetBamName}.`, 'error');
-            throw new Error(`Failed to create Blob from subset BAM file ${subsetBamName}.`);
-        }
-        logMessage(`Created Blob for subset BAM: ${subsetBamName}`, 'info');
-
-        // Create Blob for subset BAI
-        const subsetBaiPath = `${subsetBamName}.bai`;
-        const subsetBai = await CLI.fs.readFile(subsetBaiPath);
-        const subsetBaiBlob = new Blob([subsetBai], { type: 'application/octet-stream' });
-        if (subsetBaiBlob.size === 0) {
-            logMessage(`Failed to create Blob from subset BAI file ${subsetBaiPath}.`, 'error');
-            throw new Error(`Failed to create Blob from subset BAI file ${subsetBaiPath}.`);
-        }
-        logMessage(`Created Blob for subset BAI: ${subsetBaiPath}`, 'info');
-
-        // Collect the Blob and its name to return
-        subsetBamAndBaiBlobs.push({
-            subsetBamBlob,
-            subsetBaiBlob,
-            subsetName: subsetBamName
-        });
-
-        logMessage(`Subset BAM and BAI for ${pair.bam.name} created successfully.`, 'success');
-
-        return {
-            subsetBamAndBaiBlobs,
-            detectedAssembly,
-            region
-        };
     } catch (err) {
         logMessage(`Error during extraction and indexing: ${err.message}`, 'error');
         const errorDiv = document.getElementById("error");
