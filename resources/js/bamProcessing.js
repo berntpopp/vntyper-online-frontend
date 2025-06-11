@@ -6,6 +6,9 @@ import { logMessage } from './log.js';
 // Import assemblies
 import { assemblies } from './assemblyConfigs.js';
 
+// Import regions
+import { regions } from './regionsConfig.js';
+
 /**
  * Initializes Aioli with Samtools.
  * @returns {Promise<Aioli>} - The initialized Aioli CLI object.
@@ -115,8 +118,10 @@ function parseHeader(header) {
 function extractAssemblyFromHints(assemblyHints) {
     // Known assembly identifiers and their possible representations
     const assemblyIdentifiers = {
-        hg19: ['hg19', 'hs37', 'GRCh37'],
-        hg38: ['hg38', 'hs38', 'GRCh38', 'hs38DH']
+        hg19: ['hg19'],
+        hg38: ['hg38'],
+        GRCh37: ['GRCh37', 'hs37'],
+        GRCh38: ['GRCh38', 'hs38', 'hs38DH']
         // Add more assemblies and identifiers if needed
     };
 
@@ -335,27 +340,22 @@ export async function extractRegionAndIndex(CLI, pair) {
             // Determine assembly
             if (regionValue === 'guess') {
                 detectedAssembly = detectAssembly(bamContigs, assemblyHints);
-                logMessage(`Auto-detected assembly: ${detectedAssembly || 'None'}`, "info");
-            } else {
+                logMessage(`Auto-detected assembly: ${detectedAssembly || 'None'}`, "info");            } else {
                 detectedAssembly = regionValue;
                 logMessage(`User-selected assembly (skipping auto-detection): ${detectedAssembly}`, "info");
             }
 
-            // Determine region based on detected or selected assembly
-            if (regionValue === 'guess') {
-                if (detectedAssembly === 'hg19') {
-                    region = 'chr1:155158000-155163000';
-                } else if (detectedAssembly === 'hg38') {
-                    region = 'chr1:155184000-155194000';
-                } else {
-                    throw new Error('Could not determine region based on auto-detected assembly.');
-                }
-            } else if (regionValue === 'hg19') {
-                region = 'chr1:155158000-155163000';
-            } else if (regionValue === 'hg38') {
-                region = 'chr1:155184000-155194000';
+            // Determine Region
+            const assemblyForRegion = detectedAssembly || regionValue;
+            const regionInfo = regions[assemblyForRegion];
+
+            if (regionInfo) {
+                region = regionInfo.region;
             } else {
-                region = regionValue;
+                if (assemblyForRegion === 'guess' || !assemblyForRegion) {
+                     throw new Error('Could not determine region. Please select an assembly manually.');
+                }
+                throw new Error(`No region configured for assembly: ${assemblyForRegion}`);
             }
             logMessage(`Region to extract: ${region}`, "info");
 
@@ -405,27 +405,22 @@ export async function extractRegionAndIndex(CLI, pair) {
             // Determine assembly
             if (regionValue === 'guess') {
                 detectedAssembly = detectAssembly(bamContigs, assemblyHints);
-                logMessage(`Auto-detected assembly: ${detectedAssembly || 'None'}`, 'info');
-            } else {
+                logMessage(`Auto-detected assembly: ${detectedAssembly || 'None'}`, 'info');            } else {
                 detectedAssembly = regionValue;
                 logMessage(`User-selected assembly (skipping auto-detection): ${detectedAssembly}`, 'info');
             }
 
             // Determine Region
-            if (regionValue === 'guess') {
-                if (detectedAssembly === 'hg19') {
-                    region = 'chr1:155158000-155163000';
-                } else if (detectedAssembly === 'hg38') {
-                    region = 'chr1:155184000-155194000';
-                } else {
-                    throw new Error('Could not determine region based on auto-detected assembly.');
-                }
-            } else if (regionValue === 'hg19') {
-                region = 'chr1:155158000-155163000';
-            } else if (regionValue === 'hg38') {
-                region = 'chr1:155184000-155194000';
+            const assemblyForRegion = detectedAssembly || regionValue;
+            const regionInfo = regions[assemblyForRegion];
+
+            if (regionInfo) {
+                region = regionInfo.region;
             } else {
-                region = regionValue;
+                if (assemblyForRegion === 'guess' || !assemblyForRegion) {
+                     throw new Error('Could not determine region. Please select an assembly manually.');
+                }
+                throw new Error(`No region configured for assembly: ${assemblyForRegion}`);
             }
 
             logMessage(`Region to extract: ${region}`, 'info');
