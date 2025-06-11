@@ -56,6 +56,14 @@ body {
   border: 1px solid #d6e9c6;
 }
 
+.message-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  font-weight: bold;
+  border-left: 4px solid #ffc107;
+}
+
 .message.hidden {
   display: none;
 }

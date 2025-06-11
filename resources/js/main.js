@@ -536,15 +536,23 @@ async function initializeApp() {
                 const { subsetBamAndBaiBlobs, detectedAssembly, region } = await extractRegionAndIndex(CLI, pair);
                 logMessage('Subset BAM and BAI Blobs created during extraction.', 'info');
                 logMessage(`Detected Assembly: ${detectedAssembly}`, 'info');
-                logMessage(`Region used: ${region}`, 'info');
-
-                // Only display "Detected reference assembly..." if user had chosen "Guess assembly"
+                logMessage(`Region used: ${region}`, 'info');                // Only display "Detected reference assembly..." if user had chosen "Guess assembly"
                 if (detectedAssembly && regionSelect.value === 'guess') {
                     regionSelect.value = detectedAssembly;
-                    displayMessage(
-                        `Detected reference assembly: ${detectedAssembly.toUpperCase()}. Please confirm or select manually.`,
-                        'info'
-                    );
+                    
+                    // Check if there's already a warning message displayed and preserve it
+                    const messageDiv = document.getElementById('message');
+                    const hasWarning = messageDiv && messageDiv.classList.contains('message-warning');
+                    const existingWarning = hasWarning ? messageDiv.innerHTML : '';
+                    
+                    const assemblyMessage = `Detected reference assembly: ${detectedAssembly.toUpperCase()}. Please confirm or select manually.`;
+                    
+                    if (hasWarning && existingWarning) {
+                        // Combine warning with assembly detection message
+                        displayMessage(`${existingWarning}<br><br>${assemblyMessage}`, 'warning');
+                    } else {
+                        displayMessage(assemblyMessage, 'info');
+                    }
                     logMessage(`Reference assembly detected as ${detectedAssembly}.`, 'info');
                 } else if (!detectedAssembly && regionSelect.value === 'guess') {
                     displayMessage(

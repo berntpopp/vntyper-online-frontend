@@ -53,6 +53,29 @@ export function displayMessage(message, type = 'info') {
 }
 
 /**
+ * Appends a warning message to existing content without overwriting it.
+ * @param {string} message - The warning message to append.
+ */
+export function appendWarningMessage(message) {
+    hidePlaceholderMessage(); // Hide placeholder when displaying a message
+    const messageDiv = document.getElementById('message');
+    if (messageDiv) {
+        const currentContent = messageDiv.innerHTML;
+        const separator = currentContent ? '<br><br>' : '';
+        messageDiv.innerHTML = currentContent + separator + message;
+        
+        // Ensure warning class is applied (keep existing classes but ensure warning is included)
+        if (!messageDiv.classList.contains('message-warning')) {
+            messageDiv.classList.add('message-warning');
+        }
+        messageDiv.classList.remove('hidden');
+        logMessage(`Appended warning message: "${message}".`, 'info');
+    } else {
+        logMessage('Message div (#message) not found in the DOM.', 'warning');
+    }
+}
+
+/**
  * Clears the displayed message.
  */
 export function clearMessage() {

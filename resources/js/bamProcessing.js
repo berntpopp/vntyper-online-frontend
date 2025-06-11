@@ -1,7 +1,8 @@
 // frontend/resources/js/bamProcessing.js
 
-// Import the logging function
+// Import the logging and UI message functions
 import { logMessage } from './log.js';
+import { displayMessage } from './uiUtils.js'; // Import displayMessage
 
 // Import assemblies
 import { assemblies } from './assemblyConfigs.js';
@@ -105,10 +106,39 @@ function parseHeader(header) {
     logMessage("Parsed Contigs:", 'info');
     logMessage(JSON.stringify(contigs, null, 2), 'info');
     logMessage("Assembly Hints from @PG lines:", 'info');
-    logMessage(JSON.stringify(assemblyHints, null, 2), 'info');
-
-    return { contigs, assemblyHints };
+    logMessage(JSON.stringify(assemblyHints, null, 2), 'info');    return { contigs, assemblyHints };
 }
+
+// ===============================================================
+// NEW FUNCTION TO DETECT PIPELINE AND WARN USER
+// ===============================================================
+/**
+ * Detects the alignment pipeline from the BAM header and warns the user if it's potentially unsupported.
+ * @param {string} header - The BAM header as a string.
+ */
+function detectPipelineAndWarn(header) {
+    const lowerHeader = header.toLowerCase();
+    let pipeline = "Unknown";
+    let warningMessage = "";
+
+    if (lowerHeader.includes("dragen")) {
+        pipeline = "Dragen";
+        warningMessage = "<strong>⚠️ PIPELINE WARNING:</strong> The Dragen pipeline has known issues aligning reads in the MUC1 VNTR region. For best results, consider using the offline VNtyper CLI in normal mode.";
+    } else if (lowerHeader.includes("clc") || lowerHeader.includes("clcbio")) {
+        pipeline = "CLC";
+        warningMessage = "<strong>⚠️ PIPELINE WARNING:</strong> The CLC pipeline has not been fully tested and may have issues aligning reads in the MUC1 VNTR region. Please verify results carefully or use the offline VNtyper CLI.";
+    } else if (lowerHeader.includes("bwa")) {
+        pipeline = "BWA";
+    }
+
+    if (warningMessage) {
+        logMessage(`Detected pipeline: ${pipeline}. Displaying warning.`, 'warning');
+        displayMessage(warningMessage, 'warning'); // Use a new 'warning' message type
+    } else {
+        logMessage(`Detected pipeline: ${pipeline}. No warnings needed.`, 'info');
+    }
+}
+// ===============================================================
 
 /**
  * Extracts potential assembly names from assembly hints.
@@ -331,10 +361,14 @@ export async function extractRegionAndIndex(CLI, pair) {
             logMessage(`${sortedBaiPath} Stats: ${JSON.stringify(sortedBaiStats)}`, "info");
             if (!sortedBaiStats || sortedBaiStats.size === 0) {
                 throw new Error(`Index BAI file ${sortedBaiPath} was not created or is empty.`);
-            }
-
-            // Extract and parse header from the sorted BAM file
+            }            // Extract and parse header from the sorted BAM file
             const header = await extractBamHeader(CLI, sortedBamName);
+            
+            // ===============================================================
+            // MODIFICATION: Call the new pipeline detection function here.
+            // ===============================================================
+            detectPipelineAndWarn(header);
+            
             const { contigs: bamContigs, assemblyHints } = parseHeader(header);
 
             // Determine assembly
@@ -396,10 +430,14 @@ export async function extractRegionAndIndex(CLI, pair) {
             logMessage(`Mounted Paths: ${paths.join(', ')}`, 'info');
 
             const bamPath = paths.find((p) => p.endsWith(pair.bam.name));
-            logMessage(`Processing BAM: ${bamPath}`, 'info');
-
-            // Extract and parse BAM Header
+            logMessage(`Processing BAM: ${bamPath}`, 'info');            // Extract and parse BAM Header
             const header = await extractBamHeader(CLI, bamPath);
+            
+            // ===============================================================
+            // MODIFICATION: Call the new pipeline detection function here.
+            // ===============================================================
+            detectPipelineAndWarn(header);
+            
             const { contigs: bamContigs, assemblyHints } = parseHeader(header);
 
             // Determine assembly
