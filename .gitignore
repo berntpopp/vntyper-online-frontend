@@ -32,3 +32,7 @@ Thumbs.db
 # Miscellaneous
 *.tmp
 *.swp
+
+# claude files
+CLAUDE.md
+.claude

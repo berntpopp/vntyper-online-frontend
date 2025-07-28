@@ -3,3 +3,7 @@ README.md
 LICENSE
 .gitattributes
 .gitignore
+
+# claude files
+CLAUDE.md
+.claude
