@@ -36,3 +36,6 @@ Thumbs.db
 # claude files
 CLAUDE.md
 .claude
+
+# Documentation (code reviews, internal notes)
+docs/
