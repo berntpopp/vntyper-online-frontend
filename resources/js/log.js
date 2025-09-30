@@ -12,9 +12,12 @@ export function logMessage(message, level = 'info') {
     const logEntry = document.createElement('div');
     logEntry.classList.add('log-entry', `log-${level}`);
 
-    // Add timestamp
+    // Add timestamp (XSS-safe: use DOM API instead of innerHTML)
     const timestamp = new Date().toLocaleTimeString();
-    logEntry.innerHTML = `<strong>[${timestamp}] [${capitalizeFirstLetter(level)}]</strong> ${message}`;
+    const strong = document.createElement('strong');
+    strong.textContent = `[${timestamp}] [${capitalizeFirstLetter(level)}]`;
+    logEntry.appendChild(strong);
+    logEntry.appendChild(document.createTextNode(' ' + message));
 
     logContent.appendChild(logEntry);
 
