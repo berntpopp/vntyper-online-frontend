@@ -47,16 +47,22 @@ function updateCohortUI(cohortStatus, context) {
             return; // Skip jobs without a valid job_id
         }
 
-        // Create job info element
+        // Create job info element (XSS-safe)
         const jobInfo = document.createElement('div');
-        jobInfo.innerHTML = `Job ID: <strong>${job_id}</strong>`;
         jobInfo.classList.add('job-info');
+        jobInfo.appendChild(document.createTextNode('Job ID: '));
+        const jobIdStrong = document.createElement('strong');
+        jobIdStrong.textContent = job_id;
+        jobInfo.appendChild(jobIdStrong);
 
-        // Create job status element
+        // Create job status element (XSS-safe)
         const jobStatus = document.createElement('div');
         jobStatus.id = `status-${job_id}`;
-        jobStatus.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
         jobStatus.classList.add('job-status');
+        jobStatus.appendChild(document.createTextNode('Status: '));
+        const statusStrong = document.createElement('strong');
+        statusStrong.textContent = capitalizeFirstLetter(status);
+        jobStatus.appendChild(statusStrong);
 
         jobsContainer.appendChild(jobInfo);
         jobsContainer.appendChild(jobStatus);
@@ -176,9 +182,12 @@ export async function loadCohortFromURL(cohortId, context) {
         jobInfoDiv.innerHTML = '';
         regionOutputDiv.innerHTML = '';
 
-        // Display initial cohort information
+        // Display initial cohort information (XSS-safe)
         const cohortInfo = document.createElement('div');
-        cohortInfo.innerHTML = `Loading cohort details for Cohort ID: <strong>${cohortId}</strong>`;
+        cohortInfo.appendChild(document.createTextNode('Loading cohort details for Cohort ID: '));
+        const cohortIdStrong = document.createElement('strong');
+        cohortIdStrong.textContent = cohortId;
+        cohortInfo.appendChild(cohortIdStrong);
         jobInfoDiv.appendChild(cohortInfo);
         logMessage(`Loading details for Cohort ID ${cohortId}.`, 'info');
 
@@ -278,9 +287,12 @@ export async function loadJobFromURL(jobId, context) {
         jobInfoDiv.innerHTML = '';
         regionOutputDiv.innerHTML = '';
 
-        // Display initial job information
+        // Display initial job information (XSS-safe)
         const jobInfo = document.createElement('div');
-        jobInfo.innerHTML = `Loading job details for Job ID: <strong>${jobId}</strong>`;
+        jobInfo.appendChild(document.createTextNode('Loading job details for Job ID: '));
+        const jobIdStrong = document.createElement('strong');
+        jobIdStrong.textContent = jobId;
+        jobInfo.appendChild(jobIdStrong);
         jobInfoDiv.appendChild(jobInfo);
         logMessage(`Loading details for Job ID ${jobId}.`, 'info');
 
@@ -298,10 +310,14 @@ export async function loadJobFromURL(jobId, context) {
         pollJobStatusAPI(
             jobId,
             async (status) => {
-                // Update job status in the UI
+                // Update job status in the UI (XSS-safe)
                 const jobStatusDivElement = document.getElementById(`status-${jobId}`);
                 if (jobStatusDivElement) {
-                    jobStatusDivElement.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+                    jobStatusDivElement.textContent = '';
+                    jobStatusDivElement.appendChild(document.createTextNode('Status: '));
+                    const statusStrong = document.createElement('strong');
+                    statusStrong.textContent = capitalizeFirstLetter(status);
+                    jobStatusDivElement.appendChild(statusStrong);
                 }
 
                 // Display Download and Copy Buttons when completed
