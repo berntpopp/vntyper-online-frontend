@@ -194,8 +194,12 @@ export async function loadCohortFromURL(cohortId, context) {
         // Create a status element for the cohort and append it to jobInfoDiv
         const statusElement = document.createElement('div');
         statusElement.id = `status-${cohortId}`;
-        statusElement.innerHTML = `Status: <strong>Loading...</strong>`;
         statusElement.classList.add('job-status');
+        // XSS-safe: Use DOM API even for static strings
+        statusElement.appendChild(document.createTextNode('Status: '));
+        const loadingStrong = document.createElement('strong');
+        loadingStrong.textContent = 'Loading...';
+        statusElement.appendChild(loadingStrong);
         jobInfoDiv.appendChild(statusElement); // Append directly to jobInfoDiv
 
         // Add to displayed cohorts if not already there (no duplication here)
@@ -302,8 +306,12 @@ export async function loadJobFromURL(jobId, context) {
         // Create a status element for this job and append it to jobInfoDiv
         const statusElement = document.createElement('div');
         statusElement.id = `status-${jobId}`;
-        statusElement.innerHTML = `Status: <strong>Loading...</strong>`;
         statusElement.classList.add('job-status');
+        // XSS-safe: Use DOM API even for static strings
+        statusElement.appendChild(document.createTextNode('Status: '));
+        const loadingStrong = document.createElement('strong');
+        loadingStrong.textContent = 'Loading...';
+        statusElement.appendChild(loadingStrong);
         jobInfoDiv.appendChild(statusElement);
 
         // Start polling job status
