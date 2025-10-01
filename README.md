@@ -43,9 +43,27 @@
    cd vntyper-online-frontend
    ```
 
-3. **Open the Application:**
+3. **Start Development Server:**
 
-   Open the `index.html` file in your preferred web browser.
+   ```bash
+   # Using Python (recommended for development)
+   python3 -m http.server 3000
+
+   # Or using Node.js
+   npx serve -l 3000
+   ```
+
+   The application will be available at `http://localhost:3000`
+
+4. **Open the Application:**
+
+   Open `http://localhost:3000` in your preferred web browser.
+
+   **For development with cache disabled:**
+   - Open browser DevTools (F12)
+   - Go to Network tab
+   - Check "Disable cache"
+   - Keep DevTools open while developing
 
 ## Usage
 
