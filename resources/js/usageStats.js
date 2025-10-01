@@ -20,14 +20,23 @@ function displayUsageStatistics(stats) {
     const usageStatsContent = document.getElementById('usageStatsContent');
     usageStatsContent.innerHTML = ''; // Clear previous content
 
+    // XSS-safe: Use DOM API instead of innerHTML
     const totalJobs = document.createElement('p');
-    totalJobs.innerHTML = `<strong>Total Jobs:</strong> ${stats.total_jobs}`;
+    const totalJobsStrong = document.createElement('strong');
+    totalJobsStrong.textContent = 'Total Jobs:';
+    totalJobs.appendChild(totalJobsStrong);
+    totalJobs.appendChild(document.createTextNode(' ' + stats.total_jobs));
 
     const uniqueUsers = document.createElement('p');
-    uniqueUsers.innerHTML = `<strong>Unique Users:</strong> ${stats.unique_users}`;
+    const uniqueUsersStrong = document.createElement('strong');
+    uniqueUsersStrong.textContent = 'Unique Users:';
+    uniqueUsers.appendChild(uniqueUsersStrong);
+    uniqueUsers.appendChild(document.createTextNode(' ' + stats.unique_users));
 
     const jobStatuses = document.createElement('div');
-    jobStatuses.innerHTML = '<strong>Job Statuses:</strong>';
+    const jobStatusesStrong = document.createElement('strong');
+    jobStatusesStrong.textContent = 'Job Statuses:';
+    jobStatuses.appendChild(jobStatusesStrong);
 
     const jobList = document.createElement('ul');
     for (const [status, count] of Object.entries(stats.job_statuses)) {
@@ -71,8 +80,13 @@ export function initializeUsageStats() {
                 const stats = await fetchUsageStatistics();
                 displayUsageStatistics(stats);
             } catch (error) {
+                // XSS-safe: Use DOM API instead of innerHTML
                 const usageStatsContent = document.getElementById('usageStatsContent');
-                usageStatsContent.innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
+                usageStatsContent.textContent = '';
+                const errorP = document.createElement('p');
+                errorP.style.color = 'red';
+                errorP.textContent = 'Error: ' + error.message;
+                usageStatsContent.appendChild(errorP);
             }
         }
         usageStatsContainer.classList.toggle('visible');

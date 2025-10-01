@@ -19,6 +19,8 @@ import { initializeTutorial } from './tutorial.js';
 import { initializeUsageStats } from './usageStats.js';
 import { regions } from './regionsConfig.js';
 import { displayError, clearError } from './errorHandling.js';
+import { createLabelValue, replaceLabelValue } from './domHelpers.js';
+import { validateJobId, validateCohortId } from './validators.js';
 import {
     showSpinner,
     hideSpinner,
@@ -141,8 +143,24 @@ async function initializeApp() {
      */
     function checkURLParameters() {
         const urlParams = new URLSearchParams(window.location.search);
-        const jobId = urlParams.get('job_id');
-        const cohortId = urlParams.get('cohort_id');
+        const rawJobId = urlParams.get('job_id');
+        const rawCohortId = urlParams.get('cohort_id');
+
+        // Validate URL parameters (XSS/injection protection)
+        const cohortId = validateCohortId(rawCohortId);
+        const jobId = validateJobId(rawJobId);
+
+        // If invalid IDs were provided, show error
+        if (rawCohortId && !cohortId) {
+            displayError('Invalid cohort ID in URL');
+            logMessage(`Invalid cohort ID rejected: ${rawCohortId}`, 'warning');
+            return;
+        }
+        if (rawJobId && !jobId) {
+            displayError('Invalid job ID in URL');
+            logMessage(`Invalid job ID rejected: ${rawJobId}`, 'warning');
+            return;
+        }
 
         if (cohortId) {
             const passphrase = passphraseInput.value.trim() || null;
@@ -276,7 +294,16 @@ async function initializeApp() {
 
                     const cohortInfo = document.createElement('div');
                     cohortInfo.classList.add('cohort-info');
-                    cohortInfo.innerHTML = `Cohort Alias: <strong>${cohortData.alias || 'N/A'}</strong> | Cohort ID: <strong>${cohortId}</strong>`;
+
+                    // XSS-safe: Use DOM API instead of innerHTML
+                    cohortInfo.appendChild(document.createTextNode('Cohort Alias: '));
+                    const aliasStrong = document.createElement('strong');
+                    aliasStrong.textContent = cohortData.alias || 'N/A';
+                    cohortInfo.appendChild(aliasStrong);
+                    cohortInfo.appendChild(document.createTextNode(' | Cohort ID: '));
+                    const idStrong = document.createElement('strong');
+                    idStrong.textContent = cohortId;
+                    cohortInfo.appendChild(idStrong);
 
                     const jobsContainer = document.createElement('div');
                     jobsContainer.id = `jobs-container-${cohortId}`;
@@ -355,16 +382,22 @@ async function initializeApp() {
 
                     jobIds.push(data.job_id);
 
-                    // Create job information element
+                    // Create job information element (XSS-safe)
                     const jobInfo = document.createElement('div');
-                    jobInfo.innerHTML = `Job ID: <strong>${data.job_id}</strong>`;
                     jobInfo.classList.add('job-info');
+                    jobInfo.appendChild(document.createTextNode('Job ID: '));
+                    const jobIdStrong = document.createElement('strong');
+                    jobIdStrong.textContent = data.job_id;
+                    jobInfo.appendChild(jobIdStrong);
 
-                    // Create job status element
+                    // Create job status element (XSS-safe)
                     const jobStatus = document.createElement('div');
                     jobStatus.id = `status-${data.job_id}`; // Unique ID
-                    jobStatus.innerHTML = `Status: <strong>Submitted</strong>`;
                     jobStatus.classList.add('job-status');
+                    jobStatus.appendChild(document.createTextNode('Status: '));
+                    const statusStrong = document.createElement('strong');
+                    statusStrong.textContent = 'Submitted';
+                    jobStatus.appendChild(statusStrong);
 
                     // Determine the target container
                     let targetContainer;
@@ -434,10 +467,15 @@ async function initializeApp() {
                         pollJobStatusAPI(
                             jobId,
                             async (status) => {
-                                // Update job status in the UI
+                                // Update job status in the UI (XSS-safe)
                                 const jobStatusDivElement = document.getElementById(`status-${jobId}`);
                                 if (jobStatusDivElement) {
-                                    jobStatusDivElement.innerHTML = `Status: <strong>${capitalizeFirstLetter(status)}</strong>`;
+                                    // Clear and rebuild content safely
+                                    jobStatusDivElement.textContent = '';
+                                    jobStatusDivElement.appendChild(document.createTextNode('Status: '));
+                                    const statusStrong = document.createElement('strong');
+                                    statusStrong.textContent = capitalizeFirstLetter(status);
+                                    jobStatusDivElement.appendChild(statusStrong);
                                 }
 
                                 // Display Download and Copy Buttons When Job is Completed

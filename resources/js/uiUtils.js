@@ -42,7 +42,8 @@ export function displayMessage(message, type = 'info') {
     hidePlaceholderMessage(); // Hide placeholder when displaying a message
     const messageDiv = document.getElementById('message');
     if (messageDiv) {
-        messageDiv.innerHTML = message;
+        // XSS-safe: Use textContent instead of innerHTML
+        messageDiv.textContent = message;
         messageDiv.className = ''; // Reset classes
         messageDiv.classList.add('message', `message-${type}`);
         messageDiv.classList.remove('hidden');
@@ -60,9 +61,13 @@ export function appendWarningMessage(message) {
     hidePlaceholderMessage(); // Hide placeholder when displaying a message
     const messageDiv = document.getElementById('message');
     if (messageDiv) {
-        const currentContent = messageDiv.innerHTML;
-        const separator = currentContent ? '<br><br>' : '';
-        messageDiv.innerHTML = currentContent + separator + message;
+        // XSS-safe: Use DOM API to append content
+        if (messageDiv.textContent) {
+            // Add line breaks if there's existing content
+            messageDiv.appendChild(document.createElement('br'));
+            messageDiv.appendChild(document.createElement('br'));
+        }
+        messageDiv.appendChild(document.createTextNode(message));
         
         // Ensure warning class is applied (keep existing classes but ensure warning is included)
         if (!messageDiv.classList.contains('message-warning')) {
