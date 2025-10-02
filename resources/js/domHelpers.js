@@ -193,3 +193,104 @@ export function createList(items, options = {}) {
 
     return list;
 }
+
+/**
+ * Safely query DOM element with error handling
+ * Returns null if not found instead of crashing
+ *
+ * @param {string} selector - CSS selector
+ * @param {Element} parent - Parent element (default: document)
+ * @returns {Element|null} Element or null if not found
+ *
+ * @example
+ * const elem = safeQuerySelector('#myElement');
+ * if (elem) {
+ *   elem.textContent = 'Found!';
+ * }
+ */
+export function safeQuerySelector(selector, parent = document) {
+    try {
+        const element = parent.querySelector(selector);
+        if (!element) {
+            console.warn(`[DOM] Element not found: ${selector}`);
+        }
+        return element;
+    } catch (error) {
+        console.error(`[DOM] Error querying selector '${selector}':`, error);
+        return null;
+    }
+}
+
+/**
+ * Safely get element by ID with error handling
+ * Returns null if not found instead of crashing
+ *
+ * @param {string} id - Element ID (without # prefix)
+ * @returns {Element|null} Element or null if not found
+ *
+ * @example
+ * const submitBtn = safeGetElementById('submitBtn');
+ * if (submitBtn) {
+ *   submitBtn.addEventListener('click', handleSubmit);
+ * }
+ */
+export function safeGetElementById(id) {
+    try {
+        const element = document.getElementById(id);
+        if (!element) {
+            console.warn(`[DOM] Element not found: #${id}`);
+        }
+        return element;
+    } catch (error) {
+        console.error(`[DOM] Error getting element #${id}:`, error);
+        return null;
+    }
+}
+
+/**
+ * Require element (throws if not found)
+ * Use this for critical elements that MUST exist
+ *
+ * @param {string} id - Element ID (without # prefix)
+ * @returns {Element} Element (guaranteed to exist)
+ * @throws {Error} If element not found
+ *
+ * @example
+ * // Use for critical initialization
+ * const errorDiv = requireElementById('error');
+ * errorDiv.textContent = 'App initialized';
+ */
+export function requireElementById(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+        const error = new Error(`Required element not found: #${id}`);
+        console.error('[DOM]', error);
+        throw error;
+    }
+    return element;
+}
+
+/**
+ * Safely query all elements matching selector
+ * Returns empty array if none found instead of null
+ *
+ * @param {string} selector - CSS selector
+ * @param {Element} parent - Parent element (default: document)
+ * @returns {Element[]} Array of elements (empty if none found)
+ *
+ * @example
+ * const buttons = safeQuerySelectorAll('.btn');
+ * buttons.forEach(btn => btn.disabled = true);
+ */
+export function safeQuerySelectorAll(selector, parent = document) {
+    try {
+        const elements = Array.from(parent.querySelectorAll(selector));
+        if (elements.length === 0) {
+            console.warn(`[DOM] No elements found: ${selector}`);
+        }
+        return elements;
+    } catch (error) {
+        console.error(`[DOM] Error querying selector '${selector}':`, error);
+        return [];
+    }
+}

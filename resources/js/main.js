@@ -18,8 +18,8 @@ import { initializeCitations } from './citations.js';
 import { initializeTutorial } from './tutorial.js';
 import { initializeUsageStats } from './usageStats.js';
 import { regions } from './regionsConfig.js';
-import { displayError, clearError } from './errorHandling.js';
-import { createLabelValue, replaceLabelValue } from './domHelpers.js';
+import { displayError, clearError, errorHandler, ErrorLevel } from './errorHandling.js';
+import { createLabelValue, replaceLabelValue, safeGetElementById } from './domHelpers.js';
 import { validateJobId, validateCohortId } from './validators.js';
 import {
     showSpinner,
@@ -57,10 +57,14 @@ function generateDefaultCohortAlias() {
  * Initializes the application by setting up event listeners and dynamic content.
  */
 async function initializeApp() {
-    // Initialize modal and footer functionalities
-    initializeModal();
-    initializeFooter();
-    initializeDisclaimer();
+    // Register global error handlers FIRST to catch any initialization errors
+    errorHandler.registerGlobalHandlers();
+
+    try {
+        // Initialize modal and footer functionalities
+        initializeModal();
+        initializeFooter();
+        initializeDisclaimer();
 
     // Initialize other sections
     initializeFAQ();
@@ -690,8 +694,19 @@ async function initializeApp() {
     });
     // ***********************************************************************
 
-    // Check URL for job_id or cohort_id on initial load
-    checkURLParameters();
+        // Check URL for job_id or cohort_id on initial load
+        checkURLParameters();
+    } catch (error) {
+        // Handle critical initialization errors
+        errorHandler.handleError(error, {
+            phase: 'initialization',
+            function: 'initializeApp'
+        }, ErrorLevel.CRITICAL);
+
+        // Show user-friendly error
+        displayError('Failed to initialize application. Please refresh the page.');
+        console.error('[App] Critical initialization error:', error);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
