@@ -54,18 +54,34 @@
 }
 
 .copy-button {
-    padding: 8px 12px;
     background-color: #4CAF50; /* Green */
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px; /* Adjusted for better visibility */
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    /* Touch target sizing - WCAG 2.5.5 Level AAA */
+    min-width: 44px;
+    min-height: 44px;
+    padding: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .copy-button:hover {
     background-color: #45a049; /* Darker green on hover */
+    transform: translateY(-1px);
+}
+
+.copy-button:active {
+    transform: translateY(0);
+}
+
+.copy-button:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
 }
 
 /* --- Cohort Section Styles --- */
@@ -105,16 +121,11 @@
 
 /* --- Additional Enhancements (Optional) --- */
 
-/* Styling for Shareable Link Input and Button */
+/* Styling for Shareable Link Input - removed duplicate .copy-button definition */
 .share-link-input {
     width: 70%;
     padding: 5px;
     margin-right: 10px;
-}
-
-.copy-button {
-    padding: 5px 10px;
-    cursor: pointer;
 }
 
 /* Ensuring the spinner is centered and accessible */

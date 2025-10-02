@@ -1,35 +1,228 @@
 /* frontend/resources/css/buttons.css */
 
-/* --- Button Styles --- */
+/* --- Three-Tier Button Hierarchy System --- */
 
-.submit-button,
-.extract-button,
-.agree-button,
-.download-button {
+/* Base Button Class - Shared properties for all buttons */
+.button {
     display: inline-block;
     margin: 0.4rem 0.4rem;
-    padding: 0.6rem 1.2rem;
-    background-color: #005f73;
-    color: #ffffff;
     border: none;
     border-radius: 0.2rem;
     cursor: pointer;
-    font-size: 1rem;
     text-decoration: none;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    text-align: center;
+    font-family: inherit;
+    line-height: 1.5;
 }
 
-.submit-button:hover,
-.extract-button:hover,
-.agree-button:hover,
-.download-button:hover {
-    background-color: #0a9396;
+/* Primary Buttons - Most Important Actions (Submit, Critical) */
+.button-primary {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    min-width: 160px;
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.submit-button:disabled,
+.button-primary:hover {
+    background-color: var(--color-primary-hover);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.button-primary:active {
+    background-color: #004d5c;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transform: translateY(0);
+}
+
+.button-primary:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Secondary Buttons - Important but Optional Actions (Extract, Download) */
+.button-secondary {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    min-width: 150px;
+    background-color: var(--color-secondary);
+    color: var(--color-white);
+}
+
+.button-secondary:hover {
+    background-color: var(--color-secondary-hover);
+}
+
+.button-secondary:active {
+    background-color: var(--color-secondary-active);
+}
+
+.button-secondary:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Tertiary Buttons - Utility/Toggle Actions (Show Options) */
+.button-tertiary {
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    min-width: 140px;
+    background-color: transparent;
+    color: var(--color-tertiary);
+    border: 2px solid var(--color-tertiary);
+}
+
+.button-tertiary:hover {
+    background-color: var(--color-tertiary);
+    color: var(--color-white);
+    border-color: var(--color-tertiary);
+}
+
+.button-tertiary:active {
+    background-color: var(--color-tertiary-active);
+    border-color: var(--color-tertiary-active);
+    color: var(--color-white);
+}
+
+.button-tertiary:disabled {
+    border-color: #6c757d;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* --- Semantic Button Classes (Apply hierarchy styles for backward compatibility) --- */
+
+/* Submit Button - Primary Action */
+.submit-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    min-width: 160px;
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.submit-button:hover {
+    background-color: var(--color-primary-hover);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.submit-button:active {
+    background-color: #004d5c;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transform: translateY(0);
+}
+
+.submit-button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Extract Button - Secondary Action */
+.extract-button {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    min-width: 150px;
+    background-color: var(--color-secondary);
+    color: var(--color-white);
+}
+
+.extract-button:hover {
+    background-color: var(--color-secondary-hover);
+}
+
+.extract-button:active {
+    background-color: var(--color-secondary-active);
+}
+
 .extract-button:disabled {
     background-color: #6c757d;
     cursor: not-allowed;
+}
+
+/* Agree Button - Primary Action (Modal) */
+.agree-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    min-width: 160px;
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.agree-button:hover {
+    background-color: var(--color-primary-hover);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.agree-button:active {
+    background-color: #004d5c;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transform: translateY(0);
+}
+
+/* Download Button - Secondary Action */
+.download-button {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    min-width: 150px;
+    background-color: var(--color-secondary);
+    color: var(--color-white);
+}
+
+.download-button:hover {
+    background-color: var(--color-secondary-hover);
+}
+
+.download-button:active {
+    background-color: var(--color-secondary-active);
+}
+
+/* Toggle Button - Tertiary Action (Show/Hide Options) */
+.toggle-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    min-width: 140px;
+    background-color: transparent;
+    color: var(--color-tertiary);
+    border: 2px solid var(--color-tertiary);
+}
+
+.toggle-button:hover {
+    background-color: var(--color-tertiary);
+    color: var(--color-white);
+    border-color: var(--color-tertiary);
+}
+
+.toggle-button:active {
+    background-color: var(--color-tertiary-active);
+    border-color: var(--color-tertiary-active);
+    color: var(--color-white);
+}
+
+.toggle-button:disabled {
+    border-color: #6c757d;
+    color: #6c757d;
+    cursor: not-allowed;
+    background-color: transparent;
 }
 
 /* --- Download Link Styles --- */

@@ -40,63 +40,14 @@
 }
 
 /* --- Button Styles --- */
-
-/* Unified Button Class */
-.button {
-  padding: 0.6rem 1.2rem;
-  background-color: #005f73;
-  color: #ffffff;
-  border: none;
-  border-radius: 0.2rem;
-  cursor: pointer;
-  font-size: 1rem;
-  text-decoration: none;
-  transition: background-color 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 150px; /* Ensures uniform button width */
-  box-sizing: border-box; /* Include padding and border in width and height */
-}
-
-/* Submit Button Specific Styles */
-.submit-button {
-  background-color: #0a9396;
-}
-
-.submit-button:hover {
-  background-color: #94d2bd;
-}
-
-.submit-button:active {
-  background-color: #005f73;
-}
-
-/* Extract Button Specific Styles */
-.extract-button {
-  background-color: var(--color-secondary); /* WCAG AA compliant: 4.5:1 contrast */
-}
-
-.extract-button:hover {
-  background-color: var(--color-secondary-hover);
-}
-
-.extract-button:active {
-  background-color: var(--color-secondary-active);
-}
-
-/* Toggle Button Specific Styles */
-.toggle-button {
-  background-color: var(--color-tertiary); /* WCAG AA compliant: 5.1:1 contrast */
-}
-
-.toggle-button:hover {
-  background-color: var(--color-tertiary-hover);
-}
-
-.toggle-button:active {
-  background-color: var(--color-tertiary-active);
-}
+/*
+ * Button hierarchy and all button styles are defined in buttons.css
+ *
+ * Three-tier system:
+ * - Primary (.button-primary, .submit-button, .agree-button): Largest, most prominent
+ * - Secondary (.button-secondary, .extract-button, .download-button): Medium, important but optional
+ * - Tertiary (.button-tertiary, .toggle-button): Smaller, utility/toggle actions
+ */
 
 /* --- Optional Inputs Styles --- */
 

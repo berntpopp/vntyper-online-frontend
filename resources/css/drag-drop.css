@@ -83,14 +83,28 @@
   border: none;
   color: #dc3545;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.2rem; /* Increased from 1rem for better visibility */
   line-height: 1;
-  padding: 0;
+  padding: 12px; /* WCAG 2.5.5 AAA compliant touch target */
   margin-left: 0.5rem;
+  /* Touch target sizing - WCAG 2.5.5 Level AAA */
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px; /* Improve visual target area */
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .file-list .remove-file:hover {
   color: #a71d2a;
+  background-color: rgba(220, 53, 69, 0.1); /* Subtle background on hover */
+}
+
+.file-list .remove-file:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 /* Hidden File Input */
@@ -101,16 +115,30 @@
 /* Reset file selection button styling */
 .reset-file-selection-button {
   position: absolute;
-  top: -0.2rem;
+  top: -1.5rem; /* Positioned between label and drag area */
   right: 0;
   background-color: transparent;
   border: none;
-  font-size: 1.2rem;
+  font-size: 1.5rem; /* Increased from 1.2rem for better visibility */
   cursor: pointer;
-  /* Matching '×' removal color */
   color: #000;
+  /* Touch target sizing - WCAG 2.5.5 Level AAA */
+  min-width: 44px;
+  min-height: 44px;
+  padding: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px; /* Improve visual target area */
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .reset-file-selection-button:hover {
   color: #a71d2a;
+  background-color: rgba(167, 29, 42, 0.1); /* Subtle background on hover */
+}
+
+.reset-file-selection-button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }

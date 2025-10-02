@@ -46,20 +46,31 @@
     right: 20px;
     background: none;
     border: none;
-    font-size: 1.5em;
+    font-size: 2rem; /* Increased from 1.5em for better visibility */
     font-weight: bold;
     cursor: pointer;
     color: #aaaaaa;
-    transition: color 0.3s ease;
+    transition: background-color 0.2s ease, color 0.3s ease;
+    /* Touch target sizing - WCAG 2.5.5 Level AAA */
+    min-width: 44px;
+    min-height: 44px;
+    padding: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px; /* Improve visual target area */
 }
 
 .modal-close:hover {
     color: #000000;
+    background-color: rgba(0, 0, 0, 0.05); /* Subtle background on hover */
 }
 
 /* Focus handled by universal focus system in base.css */
 .modal-close:focus-visible {
     color: #000000;
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
 }
 
 /* Fade-in Animation */
