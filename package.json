@@ -1,0 +1,24 @@
+{
+  "name": "vntyper-frontend",
+  "version": "0.41.0",
+  "type": "module",
+  "description": "VNtyper Online - Frontend testing infrastructure",
+  "scripts": {
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest watch",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:browser": "vitest run --browser.name=chromium tests/integration"
+  },
+  "devDependencies": {
+    "@vitest/browser": "^3.0.0",
+    "@vitest/ui": "^3.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "happy-dom": "^15.0.0",
+    "playwright": "^1.47.0",
+    "vitest": "^3.0.0"
+  }
+}

@@ -5,6 +5,8 @@
 - [Overview](#overview)
 - [Features](#features)
 - [Technologies Used](#technologies-used)
+- [Development](#development)
+- [Testing](#testing)
 - [Usage](#usage)
 - [File Naming Conventions](#file-naming-conventions)
 - [License](#license)
@@ -28,6 +30,8 @@
 - **JavaScript (ES6):** Handles file uploads, processing logic, and user interactions.
 - **[BioWasm's Aioli](https://www.biowasm.com/):** Enables running `samtools` in the browser for genomic data processing.
 - **[samtools](http://www.htslib.org/):** A suite of programs for interacting with high-throughput sequencing data.
+
+## Development
 
 ### Running Locally
 
@@ -64,6 +68,81 @@
    - Go to Network tab
    - Check "Disable cache"
    - Keep DevTools open while developing
+
+## Testing
+
+The frontend uses **Vitest** with **happy-dom** for fast, modern testing of Vanilla JavaScript modules.
+
+### Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Run all tests
+npm test
+
+# Run tests once (CI mode)
+npm run test:run
+
+# Run with coverage report
+npm run test:coverage
+
+# Run in watch mode (for development)
+npm run test:watch
+
+# Run with UI
+npm run test:ui
+```
+
+### Test Structure
+
+```
+tests/
+├── unit/                    # Unit tests
+│   ├── controllers/         # Controller tests
+│   ├── models/              # Model tests
+│   ├── services/            # Service tests (httpUtils, etc.)
+│   ├── utils/               # Utility tests (EventBus, StateManager)
+│   └── fixtures/            # Shared test data
+├── integration/             # Integration tests
+└── e2e/                     # End-to-end tests (optional)
+```
+
+### Coverage
+
+- **Target:** 60-80% overall coverage
+- **Critical modules:** EventBus (100%), StateManager (95%), httpUtils (95%)
+- **Current status:** 228 tests passing across 4 test suites
+
+### Writing Tests
+
+Tests follow these principles:
+- **Pure Vanilla JS** - No TypeScript, no build step required
+- **ES6 modules** - Native import/export
+- **Vitest matchers** - `vi.fn()`, `vi.spyOn()`, `vi.useFakeTimers()`
+- **SOLID principles** - Tests mirror application architecture
+
+Example test:
+
+```javascript
+import { describe, it, expect, vi } from 'vitest';
+import { myFunction } from '../../../resources/js/myModule.js';
+
+describe('myFunction()', () => {
+  it('should return expected result', () => {
+    const result = myFunction('input');
+    expect(result).toBe('expected');
+  });
+});
+```
+
+### Configuration
+
+Test configuration in `vitest.config.js`:
+- Environment: `happy-dom` (fast DOM simulation)
+- Coverage provider: `v8` (native, fast)
+- Globals: `true` (describe, it, expect available everywhere)
 
 ## Usage
 
