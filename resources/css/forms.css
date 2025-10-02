@@ -77,6 +77,90 @@
   margin-bottom: 15px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+/* --- Enhanced Error and Success States --- */
+
+/* Error State - Invalid input with visual feedback */
+.form-input.error {
+  border: 2px solid var(--color-error, #dc3545);
+  border-left: 4px solid var(--color-error, #dc3545);
+  background-color: #fff5f5;
+}
+
+.form-input.error:focus-visible {
+  outline: 2px solid var(--color-error, #dc3545);
+  outline-offset: 2px;
+  box-shadow: 0 0 5px rgba(220, 53, 69, 0.3);
+}
+
+/* Success State - Valid input with visual confirmation */
+.form-input.success {
+  border: 2px solid var(--color-success, #28a745);
+  border-left: 4px solid var(--color-success, #28a745);
+  background-color: #f0fff4;
+}
+
+.form-input.success:focus-visible {
+  outline: 2px solid var(--color-success, #28a745);
+  outline-offset: 2px;
+  box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
+}
+
+/* Error Message Display */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: var(--color-error, #dc3545);
+  animation: slideIn 0.3s ease-out;
+}
+
+.error-message::before {
+  content: "⚠️";
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* Success Message Display (optional) */
+.success-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: var(--color-success, #28a745);
+  animation: slideIn 0.3s ease-out;
+}
+
+.success-message::before {
+  content: "✓";
+  font-size: 1rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+/* Validation Container - Wraps input and message */
+.validation-container {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+/* Slide-in animation for messages */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* --- Utility Classes --- */

@@ -2,6 +2,7 @@
 
 import { logMessage } from './log.js';
 import { stateManager } from './stateManager.js';
+import { initializeValidation, clearAllValidation } from './inputValidation.js';
 
 /**
  * Shows the placeholder message in the output area.
@@ -360,6 +361,16 @@ function initializeToggleOptionalInputs() {
             toggleButton.textContent = 'Hide options';
             toggleButton.setAttribute('aria-expanded', 'true');
             logMessage('Optional inputs displayed.', 'info');
+
+            // Initialize validation for optional inputs
+            try {
+                logMessage('About to initialize validation...', 'debug');
+                initializeValidation(['email', 'cohortAlias', 'passphrase']);
+                logMessage('Validation initialized successfully', 'success');
+            } catch (error) {
+                logMessage(`Error initializing validation: ${error.message}`, 'error');
+                console.error('Validation initialization error:', error);
+            }
         } else {
             // Hide optional inputs
             additionalInputs.classList.remove('visible');
@@ -367,6 +378,13 @@ function initializeToggleOptionalInputs() {
             toggleButton.textContent = 'Show options';
             toggleButton.setAttribute('aria-expanded', 'false');
             logMessage('Optional inputs hidden.', 'info');
+
+            // Clear validation states when hiding
+            try {
+                clearAllValidation(['email', 'cohortAlias', 'passphrase']);
+            } catch (error) {
+                logMessage(`Error clearing validation: ${error.message}`, 'error');
+            }
         }
     });
 
