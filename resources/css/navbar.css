@@ -99,9 +99,15 @@
     position: relative;
 }
 
-.navbar-link:hover,
-.navbar-link:focus {
+.navbar-link:hover {
     color: #096162;
+}
+
+/* Keyboard focus indicator - universal outline from base.css, specific color here */
+.navbar-link:focus-visible {
+    color: #096162;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
 }
 
 /* Server Load Indicator Styles */

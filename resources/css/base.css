@@ -193,27 +193,113 @@ body {
   z-index: 1000;
 }
 
-/* --- Focus Styles for Accessibility --- */
+/* --- Universal Focus Indicator System (WCAG 2.4.7) --- */
 
-/* Ensure that all focusable elements have a visible outline */
-button:focus, 
-input:focus, 
-select:focus, 
-[data-tabindex]:focus {
-  outline: 2px solid #0a9396; /* Customize color as needed */
+/* Modern :focus-visible for keyboard navigation - 3px thick for clear visibility */
+:focus-visible {
+  outline: 3px solid #0a9396;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Fallback for older browsers - 2px outline */
+:focus {
+  outline: 2px solid #0a9396;
   outline-offset: 2px;
 }
 
-/* Remove default outline and add custom focus styles for tooltip-enabled elements */
-[data-tooltip]:focus {
-  outline: none; /* Remove default outline */
+/* Remove outline when :focus-visible is supported (mouse clicks) */
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
-/* Enhanced Styles for Tooltip-Enabled Elements */
-[data-tooltip]:focus::after,
-[data-tooltip]:focus::before {
+/* High-contrast mode support */
+@media (prefers-contrast: high) {
+  :focus-visible {
+    outline: 4px solid currentColor;
+    outline-offset: 4px;
+  }
+}
+
+/* Windows High Contrast Mode */
+@media (forced-colors: active) {
+  :focus {
+    outline: 2px solid CanvasText;
+  }
+}
+
+/* Links specific focus treatment */
+a:focus-visible {
+  outline: 2px solid #0a9396;
+  outline-offset: 2px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+/* Button focus with subtle background shadow */
+button:focus-visible,
+.button:focus-visible {
+  outline: 3px solid #0a9396;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px rgba(10, 147, 150, 0.1);
+}
+
+/* Form input focus */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #0a9396;
+  border-color: #0a9396;
+  box-shadow: 0 0 0 3px rgba(10, 147, 150, 0.1);
+}
+
+/* Drag-drop area focus */
+.drag-drop-area:focus-visible {
+  outline: 3px solid #0a9396;
+  outline-offset: 2px;
+  border-color: #0a9396;
+}
+
+/* Tooltip-enabled elements - maintain focus visibility */
+[data-tooltip]:focus-visible {
+  outline: 2px solid #0a9396;
+  outline-offset: 2px;
+}
+
+/* Tooltip display on focus */
+[data-tooltip]:focus-visible::after,
+[data-tooltip]:focus-visible::before {
   opacity: 1;
   visibility: visible;
+}
+
+/* --- Skip to Main Content Link --- */
+
+.skip-to-main {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 9999;
+  padding: 1rem 1.5rem;
+  background-color: #0a9396;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 0 0 4px 0;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: left 0.3s ease;
+}
+
+.skip-to-main:focus {
+  left: 0;
+  outline: 3px solid #005f73;
+  outline-offset: 2px;
+}
+
+/* Main content focus indicator (when skip link is activated) */
+#main-content:focus {
+  outline: 2px dashed #0a9396;
+  outline-offset: 4px;
 }
 
 /* --- Responsive Adjustments --- */

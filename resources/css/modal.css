@@ -53,10 +53,13 @@
     transition: color 0.3s ease;
 }
 
-.modal-close:hover,
-.modal-close:focus {
+.modal-close:hover {
     color: #000000;
-    outline: none;
+}
+
+/* Focus handled by universal focus system in base.css */
+.modal-close:focus-visible {
+    color: #000000;
 }
 
 /* Fade-in Animation */

@@ -100,6 +100,8 @@
 
 </head>
 <body>
+  <!-- Skip to main content link for keyboard accessibility -->
+  <a href="#main-content" class="skip-to-main">Skip to main content</a>
 
   <div class="container" id="home">
     <!-- Navigation Bar -->
@@ -136,10 +138,13 @@
       </div>
     </nav>
 
+    <!-- Main Content Area - Skip link target -->
+    <main id="main-content" tabindex="-1">
+
     <!-- Drag & Drop File Input Container -->
-    <div 
-      class="drag-drop-container" 
-      data-intro="Upload your BAM, BAI, or SAM files here. Each BAM file should have a corresponding BAI file, and SAM files will be converted automatically." 
+    <div
+      class="drag-drop-container"
+      data-intro="Upload your BAM, BAI, or SAM files here. Each BAM file should have a corresponding BAI file, and SAM files will be converted automatically."
       data-step="1"
     >
       <!-- NEW RESET BUTTON -->
@@ -319,6 +324,9 @@
       <!-- Add more citation items as needed -->
     </div>
   </section>
+
+  </main>
+  <!-- End Main Content -->
 
   <!-- Footer Section -->
   <footer class="footer">

@@ -11,11 +11,12 @@ export function openDisclaimerModal() {
     const agreeBtn = document.getElementById("agreeBtn");
     if (disclaimerModal && agreeBtn) {
         disclaimerModal.style.display = "block";
+        disclaimerModal.setAttribute('aria-hidden', 'false');
         document.body.classList.add('modal-open');
         // Set focus to the "I Agree" button for accessibility
         agreeBtn.focus();
-        // Trap focus within the modal
-        trapFocus(disclaimerModal);
+        // Trap focus within the modal - Escape disabled for disclaimer
+        trapFocus(disclaimerModal, false);
     }
 }
 
@@ -26,8 +27,9 @@ export function closeDisclaimerModal() {
     const disclaimerModal = document.getElementById("disclaimerModal");
     if (disclaimerModal) {
         disclaimerModal.style.display = "none";
+        disclaimerModal.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('modal-open');
-        // Remove focus trap
+        // Remove focus trap and return focus
         removeTrapFocus(disclaimerModal);
     }
 }
@@ -54,13 +56,17 @@ export function checkAndShowDisclaimer() {
 }
 
 /**
- * Trap focus within a given element for accessibility.
+ * Trap focus within a given element for accessibility (ARIA best practices).
  * @param {HTMLElement} element - The element to trap focus within.
+ * @param {boolean} allowEscape - Whether Escape key should close the modal (default: true).
  */
-function trapFocus(element) {
-    const focusableElements = element.querySelectorAll('a[href], button:not([disabled]), textarea, input, select');
+function trapFocus(element, allowEscape = true) {
+    const focusableElements = element.querySelectorAll('a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])');
     const firstFocusable = focusableElements[0];
     const lastFocusable = focusableElements[focusableElements.length - 1];
+
+    // Store element that had focus before modal opened
+    element.previousFocus = document.activeElement;
 
     function handleFocus(event) {
         if (event.key === 'Tab') {
@@ -75,9 +81,10 @@ function trapFocus(element) {
                     firstFocusable.focus();
                 }
             }
-        } else if (event.key === 'Escape') {
-            // Prevent closing the modal with Escape
-            event.preventDefault();
+        } else if (event.key === 'Escape' && allowEscape) {
+            // Close modal and return focus
+            const closeEvent = new CustomEvent('modal:close', { detail: { modal: element } });
+            element.dispatchEvent(closeEvent);
         }
     }
 
@@ -87,13 +94,19 @@ function trapFocus(element) {
 }
 
 /**
- * Removes the focus trap from the modal.
+ * Removes the focus trap from the modal and returns focus to trigger element.
  * @param {HTMLElement} element - The modal element.
  */
 function removeTrapFocus(element) {
     if (element.focusHandler) {
         element.removeEventListener('keydown', element.focusHandler);
         delete element.focusHandler;
+    }
+
+    // Return focus to element that opened the modal
+    if (element.previousFocus && element.previousFocus.focus) {
+        element.previousFocus.focus();
+        delete element.previousFocus;
     }
 }
 
@@ -104,11 +117,20 @@ function openFaqModal() {
     const faqModal = document.getElementById("faqModal");
     if (faqModal) {
         faqModal.style.display = "block";
+        faqModal.setAttribute('aria-hidden', 'false');
         document.body.classList.add('modal-open');
-        // Set focus to the modal content for accessibility
-        faqModal.querySelector('.modal-content').focus();
-        // Trap focus within the modal
-        trapFocus(faqModal);
+
+        // Focus first interactive element (close button)
+        const closeButton = faqModal.querySelector('.modal-close');
+        if (closeButton) {
+            closeButton.focus();
+        }
+
+        // Trap focus within the modal - Escape enabled for FAQ
+        trapFocus(faqModal, true);
+
+        // Listen for custom close event from Escape key
+        faqModal.addEventListener('modal:close', () => closeFaqModal(), { once: true });
     }
 }
 
@@ -119,8 +141,9 @@ function closeFaqModal() {
     const faqModal = document.getElementById("faqModal");
     if (faqModal) {
         faqModal.style.display = "none";
+        faqModal.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('modal-open');
-        // Remove focus trap
+        // Remove focus trap and return focus to trigger
         removeTrapFocus(faqModal);
     }
 }

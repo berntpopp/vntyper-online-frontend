@@ -23,11 +23,10 @@
   font-size: 1rem;
 }
 
-/* Optional: Add focus styles for better accessibility */
-.region-select select:focus {
-  border-color: #80bdff;
-  outline: none;
-  box-shadow: 0 0 5px rgba(0,123,255,0.5);
+/* Focus styles for better accessibility - Universal focus system in base.css handles outline */
+.region-select select:focus-visible {
+  border-color: #0a9396;
+  box-shadow: 0 0 5px rgba(10, 147, 150, 0.5);
 }
 
 /* --- Button Group Styles --- */

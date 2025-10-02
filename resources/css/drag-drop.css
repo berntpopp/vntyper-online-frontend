@@ -29,12 +29,17 @@
 }
 
 .drag-drop-area:hover,
-.drag-drop-area:focus,
 .drag-drop-area.dragover {
   border-color: #0d6efd;
   background-color: #e7f1ff;
   color: #0d6efd;
-  outline: none;
+}
+
+/* Focus handled by universal focus system in base.css */
+.drag-drop-area:focus-visible {
+  border-color: #0a9396;
+  background-color: #e7f1ff;
+  color: #0d6efd;
 }
 
 .drag-drop-area p {
