@@ -36,6 +36,41 @@
   --color-gray-medium: #555;
   --color-gray-light: #ccc;
 
+  /* Success States */
+  --color-success: #3c763d;
+  --color-success-bg: #dff0d8;
+  --color-success-border: #d6e9c6;
+
+  /* Error States */
+  --color-error: #a94442;
+  --color-error-bg: #f8dede;
+  --color-error-border: #ebccd1;
+
+  /* Warning States */
+  --color-warning: #856404;
+  --color-warning-bg: #fff3cd;
+  --color-warning-border: #ffeeba;
+
+  /* Info States */
+  --color-info: #31708f;
+  --color-info-bg: #e7f3fe;
+  --color-info-border: #bce8f1;
+
+  /* Background & Surface */
+  --color-bg-page: #f9f9f9;
+  --color-bg-container: #ffffff;
+  --color-bg-output: #f4f4f4;
+
+  /* Text */
+  --color-text-primary: #333333;
+  --color-text-secondary: #6c757d;
+  --color-text-muted: #666666;
+
+  /* Borders */
+  --color-border-light: #e7e7e7;
+  --color-border-default: #ccc;
+  --color-border-medium: #ddd;
+
   /* Focus Indicator */
   --color-focus: #0a9396;
 }
