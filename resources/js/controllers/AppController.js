@@ -38,6 +38,15 @@ export class AppController extends BaseController {
         this.fileController = dependencies.fileController;
         this.extractionController = dependencies.extractionController;
         this.errorView = dependencies.errorView;
+
+        // Request guard flags (Performance: prevent duplicate submissions)
+        this.isSubmitting = false;
+        this.isExtracting = false;
+
+        // Button references (cached for performance)
+        this.submitBtn = null;
+        this.extractBtn = null;
+        this.resetBtn = null;
     }
 
     /**
@@ -107,22 +116,22 @@ export class AppController extends BaseController {
      * Initialize event listeners
      */
     initializeEventListeners() {
-        // Wire up submit button
-        const submitBtn = document.getElementById('submitBtn');
-        if (submitBtn) {
-            submitBtn.addEventListener('click', () => this.handleSubmitClick());
+        // Wire up submit button (cache reference for performance)
+        this.submitBtn = document.getElementById('submitBtn');
+        if (this.submitBtn) {
+            this.submitBtn.addEventListener('click', () => this.handleSubmitClick());
         }
 
-        // Wire up extract button
-        const extractBtn = document.getElementById('extractBtn');
-        if (extractBtn) {
-            extractBtn.addEventListener('click', () => this.handleExtractClick());
+        // Wire up extract button (cache reference for performance)
+        this.extractBtn = document.getElementById('extractBtn');
+        if (this.extractBtn) {
+            this.extractBtn.addEventListener('click', () => this.handleExtractClick());
         }
 
-        // Wire up reset button
-        const resetBtn = document.getElementById('resetFileSelectionBtn');
-        if (resetBtn) {
-            resetBtn.addEventListener('click', (e) => {
+        // Wire up reset button (cache reference for performance)
+        this.resetBtn = document.getElementById('resetFileSelectionBtn');
+        if (this.resetBtn) {
+            this.resetBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 this.handleResetClick();
             });
@@ -141,7 +150,23 @@ export class AppController extends BaseController {
      * Handle submit button click
      */
     async handleSubmitClick() {
+        // Guard against duplicate submissions (Performance: prevent double-clicks)
+        if (this.isSubmitting) {
+            this._log('Submit already in progress, ignoring click', 'warning');
+            return;
+        }
+
+        // Cache original button text
+        const originalText = this.submitBtn?.textContent || 'Submit Job';
+
         try {
+            // Set submitting state and disable button
+            this.isSubmitting = true;
+            if (this.submitBtn) {
+                this.submitBtn.disabled = true;
+                this.submitBtn.textContent = 'Submitting...';
+            }
+
             // Get selected files
             const selectedFiles = this.fileController.getSelectedFiles();
 
@@ -229,6 +254,13 @@ export class AppController extends BaseController {
 
         } catch (error) {
             this.handleError(error, 'Submit failed');
+        } finally {
+            // Always re-enable button and restore state
+            this.isSubmitting = false;
+            if (this.submitBtn) {
+                this.submitBtn.disabled = false;
+                this.submitBtn.textContent = originalText;
+            }
         }
     }
 
@@ -236,7 +268,23 @@ export class AppController extends BaseController {
      * Handle extract button click
      */
     async handleExtractClick() {
+        // Guard against duplicate extractions (Performance: prevent double-clicks)
+        if (this.isExtracting) {
+            this._log('Extract already in progress, ignoring click', 'warning');
+            return;
+        }
+
+        // Cache original button text
+        const originalText = this.extractBtn?.textContent || 'Extract Region';
+
         try {
+            // Set extracting state and disable button
+            this.isExtracting = true;
+            if (this.extractBtn) {
+                this.extractBtn.disabled = true;
+                this.extractBtn.textContent = 'Extracting...';
+            }
+
             this._log('Extract button clicked', 'info');
 
             // Get selected files
@@ -263,6 +311,13 @@ export class AppController extends BaseController {
 
         } catch (error) {
             this.handleError(error, 'Extract failed');
+        } finally {
+            // Always re-enable button and restore state
+            this.isExtracting = false;
+            if (this.extractBtn) {
+                this.extractBtn.disabled = false;
+                this.extractBtn.textContent = originalText;
+            }
         }
     }
 

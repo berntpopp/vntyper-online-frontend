@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.39.0'; // API networking improvements - timeout handling, retry logic, centralized error parsing (DRY)
+const frontendVersion = '0.40.0'; // Performance optimizations - lazy loading, debouncing, external images, disable-while-loading
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;

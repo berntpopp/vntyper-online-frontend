@@ -1,7 +1,6 @@
 // frontend/resources/js/controllers/ExtractionController.js
 
 import { BaseController } from './BaseController.js';
-import { initializeAioli, extractRegionAndIndex } from '../bamProcessing.js';
 
 /**
  * Extraction Controller - Handles BAM file region extraction
@@ -9,6 +8,7 @@ import { initializeAioli, extractRegionAndIndex } from '../bamProcessing.js';
  * Purpose: Manages BAM file extraction and indexing using Aioli/samtools.
  *
  * Responsibilities:
+ * - Lazy-loading bamProcessing module
  * - Aioli initialization
  * - BAM region extraction
  * - BAI index generation
@@ -18,6 +18,10 @@ import { initializeAioli, extractRegionAndIndex } from '../bamProcessing.js';
  * - Single Responsibility: Only handles extraction operations
  * - Open/Closed: Easy to extend with new extraction methods
  * - Dependency Inversion: Depends on abstractions
+ *
+ * Performance:
+ * - Lazy loads bamProcessing.js (~520 lines, ~18KB + 2MB WebAssembly)
+ * - Only loads when extraction is needed (<5% of users)
  *
  * @class ExtractionController
  * @extends BaseController
@@ -31,6 +35,7 @@ export class ExtractionController extends BaseController {
 
         this.errorView = dependencies.errorView;
         this.cli = null; // Aioli CLI instance
+        this.bamModule = null; // Lazy-loaded bamProcessing module
     }
 
     /**
@@ -43,6 +48,25 @@ export class ExtractionController extends BaseController {
     }
 
     /**
+     * Lazy load bamProcessing module
+     * @private
+     */
+    async _loadBamModule() {
+        if (this.bamModule) {
+            return this.bamModule;
+        }
+
+        this._log('Loading BAM processing tools (first time, ~2-3s)...', 'info');
+
+        // Dynamic import - loads on demand
+        this.bamModule = await import('../bamProcessing.js');
+
+        this._log('BAM processing module loaded successfully', 'success');
+
+        return this.bamModule;
+    }
+
+    /**
      * Handle Aioli initialization
      */
     async handleInitialize() {
@@ -52,9 +76,12 @@ export class ExtractionController extends BaseController {
                 return this.cli;
             }
 
+            // Lazy load bamProcessing module first
+            const module = await this._loadBamModule();
+
             this._log('Initializing Aioli', 'info');
 
-            this.cli = await initializeAioli();
+            this.cli = await module.initializeAioli();
 
             // Store in state
             this.setState('cli', this.cli);
@@ -95,13 +122,16 @@ export class ExtractionController extends BaseController {
         try {
             this._log('Extracting BAM region', 'info', { pair, region });
 
+            // Ensure bamProcessing module is loaded
+            const module = await this._loadBamModule();
+
             // Ensure Aioli is initialized
             if (!this.cli) {
                 await this.handleInitialize();
             }
 
             // Extract region and generate index
-            const result = await extractRegionAndIndex(this.cli, pair);
+            const result = await module.extractRegionAndIndex(this.cli, pair);
 
             this.emit('extraction:complete', {
                 pair,
@@ -169,6 +199,7 @@ export class ExtractionController extends BaseController {
     cleanup() {
         // Cleanup Aioli resources if needed
         this.cli = null;
+        this.bamModule = null;
         this.setState('cli', null);
 
         this._log('Cleanup complete', 'info');

@@ -9,6 +9,9 @@ export function initializeFileSelection(selectedFiles) {
     const bamFilesInput = document.getElementById('bamFiles');
     const fileList = document.getElementById('fileList');
 
+    // Debounce timer for file validation (Performance: smooth UX with 100+ files)
+    let validationTimeout = null;
+
     /**
      * Updates the UI to show the selected files.
      */
@@ -54,51 +57,63 @@ export function initializeFileSelection(selectedFiles) {
     }
 
     /**
+     * Processes file validation (called after debounce delay)
+     * @private
+     * @param {FileList|File[]} files - The files to validate
+     */
+    function processFileValidation(files) {
+        const filesArray = Array.from(files);
+        const { matchedPairs, invalidFiles } = validateFiles(filesArray, false);
+
+        // Add matched pairs to selectedFiles if not already present.
+        // For SAM files, use pair.sam; for BAM files, use pair.bam (and add bai if available).
+        matchedPairs.forEach((pair) => {
+            if (pair.sam) {
+                if (!selectedFiles.some((f) => f.name === pair.sam.name && f.size === pair.sam.size)) {
+                    selectedFiles.push(pair.sam);
+                }
+            } else if (pair.bam) {
+                if (!selectedFiles.some((f) => f.name === pair.bam.name && f.size === pair.bam.size)) {
+                    selectedFiles.push(pair.bam);
+                }
+                if (pair.bai &&
+                    !selectedFiles.some((f) => f.name === pair.bai.name && f.size === pair.bai.size)
+                ) {
+                    selectedFiles.push(pair.bai);
+                }
+            }
+        });
+
+        // Handle invalid files
+        if (invalidFiles.length > 0) {
+            displayError(`Some files were invalid and not added: ${invalidFiles.map((f) => f.name).join(', ')}`);
+        } else {
+            clearError();
+        }
+
+        displaySelectedFiles();
+        hideSpinner();
+    }
+
+    /**
      * Handles the file validation and UI updating when files are selected.
-     * Shows a spinner immediately and uses setTimeout to ensure the UI updates before processing.
-     * After processing completes, hides the spinner.
+     * Uses debouncing (300ms) for smooth UX with 100+ files.
+     * Shows immediate feedback, then validates after delay.
      * @param {FileList|File[]} files - The files selected or dropped by the user.
      */
     function handleFileSelection(files) {
-        // Show spinner immediately when file selection starts
+        // Clear any pending validation
+        clearTimeout(validationTimeout);
+
+        // Show immediate feedback
         showSpinner();
+        fileList.innerHTML = '<p>Processing files...</p>';
 
-        // Use setTimeout to allow the UI thread to update (show the spinner) before processing
-        setTimeout(() => {
-            const filesArray = Array.from(files);
-            const { matchedPairs, invalidFiles } = validateFiles(filesArray, false);
-
-            // Add matched pairs to selectedFiles if not already present.
-            // For SAM files, use pair.sam; for BAM files, use pair.bam (and add bai if available).
-            matchedPairs.forEach((pair) => {
-                if (pair.sam) {
-                    if (!selectedFiles.some((f) => f.name === pair.sam.name && f.size === pair.sam.size)) {
-                        selectedFiles.push(pair.sam);
-                    }
-                } else if (pair.bam) {
-                    if (!selectedFiles.some((f) => f.name === pair.bam.name && f.size === pair.bam.size)) {
-                        selectedFiles.push(pair.bam);
-                    }
-                    if (pair.bai &&
-                        !selectedFiles.some((f) => f.name === pair.bai.name && f.size === pair.bai.size)
-                    ) {
-                        selectedFiles.push(pair.bai);
-                    }
-                }
-            });
-
-            // Handle invalid files
-            if (invalidFiles.length > 0) {
-                displayError(`Some files were invalid and not added: ${invalidFiles.map((f) => f.name).join(', ')}`);
-            } else {
-                clearError();
-            }
-
-            displaySelectedFiles();
-
-            // Hide spinner after processing is complete
-            hideSpinner();
-        }, 0);
+        // Debounce validation (300ms delay)
+        // This prevents UI freezing when selecting many files
+        validationTimeout = setTimeout(() => {
+            processFileValidation(files);
+        }, 300);
     }
 
     // Drag & Drop events setup

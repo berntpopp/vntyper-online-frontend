@@ -30,12 +30,19 @@ function generateFooter() {
         link.rel = 'noopener noreferrer';
 
         const img = document.createElement('img');
-        img.src = inst.base64; // Use Base64 string from config
-        img.alt = `${inst.name} Logo`;
-        img.classList.add('institution-logo', 'me-3', 'mb-3'); // Added margin for better spacing
-        img.width = inst.width; // Set explicit width
-        img.height = inst.height; // Set explicit height
-        img.loading = 'lazy'; // Lazy load non-critical images
+
+        // Use external WebP file instead of base64
+        img.src = `/resources/assets/logos/${inst.logo}`;
+
+        img.alt = inst.alt || `${inst.name} Logo`;
+        img.classList.add('institution-logo', 'me-3', 'mb-3');
+
+        // Set explicit dimensions (prevents layout shift)
+        img.width = parseInt(inst.width);
+        img.height = parseInt(inst.height);
+
+        // Native lazy loading (browser-optimized)
+        img.loading = 'lazy';
 
         // Handle load event for smooth transition
         img.addEventListener('load', () => {
