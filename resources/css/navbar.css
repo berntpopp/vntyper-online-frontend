@@ -132,44 +132,169 @@
     color: #dc3545;
 }
 
-/* Hamburger Menu Styles */
+/* --- Hamburger Menu Styles --- */
 
 .navbar-toggle {
-    display: none; /* Hidden by default */
-    background: none;
+    display: none; /* Hidden on desktop */
+    background: transparent;
     border: none;
     font-size: 28px;
     cursor: pointer;
     color: #333;
+    padding: 12px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    z-index: 1001;
+    min-width: 48px; /* Touch target */
+    min-height: 48px;
 }
 
-/* Responsive Styles */
+.navbar-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.navbar-toggle:active {
+    transform: scale(0.95);
+}
+
+.navbar-toggle:focus-visible {
+    outline: 3px solid #0a9396;
+    outline-offset: 2px;
+}
+
+/* Hamburger icon animation */
+.hamburger-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    font-size: 28px;
+    line-height: 1;
+}
+
+.navbar-toggle[aria-expanded="true"] .hamburger-icon {
+    transform: rotate(90deg);
+}
+
+/* --- Mobile Navigation Styles --- */
 
 @media (max-width: 768px) {
     /* Show hamburger button */
     .navbar-toggle {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .navbar-toggle[aria-expanded="true"] {
+        position: fixed; /* Fix position when menu open */
+        right: 20px;
+        top: 20px;
+        transform: none;
+    }
+
+    /* Navbar container adjustment */
+    .navbar-container {
+        padding-right: 56px; /* Space for hamburger (48px button + 8px spacing) */
     }
 
     /* Hide navbar menu by default */
     .navbar-menu {
-        position: relative;
+        display: none;
+        position: fixed;
         top: 0;
         left: 0;
         right: 0;
-        background-color: #fff;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.95); /* Dark overlay */
         flex-direction: column;
-        align-items: flex-start;
-        padding: 10px 10px;
-    }
-
-    .navbar-menu li {
-        margin: 10px 0;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 20px 20px;
+        z-index: 1000;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        animation: fadeIn 0.3s ease;
     }
 
     /* Show navbar menu when active */
     .navbar-menu.active {
         display: flex;
+    }
+
+    .navbar-menu li {
+        width: 100%;
+        max-width: 400px;
+        margin: 8px 0;
+        list-style: none;
+    }
+
+    .navbar-link {
+        display: block;
+        padding: 16px 20px;
+        font-size: 1.3em;
+        color: #ffffff !important; /* White text on dark background */
+        text-align: center;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        border-radius: 8px;
+        text-decoration: none;
+    }
+
+    .navbar-link:hover,
+    .navbar-link:focus-visible {
+        background-color: rgba(10, 147, 150, 0.3);
+        transform: translateX(5px);
+        text-decoration: underline;
+    }
+
+    /* Server load indicator mobile optimization */
+    .server-load-indicator .navbar-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .server-load-indicator.load-blue .navbar-link,
+    .server-load-indicator.load-orange .navbar-link,
+    .server-load-indicator.load-red .navbar-link {
+        color: #ffffff !important;
+    }
+
+    .load-count {
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+
+    /* Disclaimer indicator mobile */
+    #disclaimerIndicator .navbar-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .status-icon {
+        font-size: 1.2em;
+    }
+
+    /* Header remains visible when menu open */
+    .header {
+        pointer-events: all;
+        z-index: 1;
+    }
+}
+
+/* --- Animations --- */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
     }
 }
 

@@ -56,6 +56,7 @@
   <script type="module" src="resources/js/apiInteractions.js" defer></script>
   <script type="module" src="resources/js/main.js" defer></script>
   <script type="module" src="resources/js/modal.js" defer></script>
+  <script type="module" src="resources/js/mobileNav.js" defer></script>
   <script type="module" src="resources/js/populateRegions.js" defer></script>
   <script type="module" src="resources/js/uiUtils.js" defer></script>
   <script type="module" src="resources/js/usageStats.js" defer></script>
@@ -105,15 +106,26 @@
 
   <div class="container" id="home">
     <!-- Navigation Bar -->
-    <nav class="navbar">
+    <nav class="navbar" aria-label="Main navigation">
       <div class="navbar-container">
         <div class="header" id="resetHeader" role="button" aria-label="Reset Page">
           <img src="resources/assets/logo/vntyperonline_logo_80px.png" alt="vntyper-online Logo" class="logo">
           <h2>vntyper-online</h2>
         </div>
 
+        <!-- Hamburger Menu Button -->
+        <button
+          class="navbar-toggle"
+          aria-label="Toggle navigation menu"
+          aria-expanded="false"
+          aria-controls="navbar-menu"
+        >
+          <span class="hamburger-icon" aria-hidden="true">☰</span>
+          <span class="sr-only">Menu</span>
+        </button>
+
         <!-- Navigation Links Container -->
-        <ul class="navbar-menu" id="navbar-menu">
+        <ul class="navbar-menu" id="navbar-menu" role="list">
           <li><a href="#" class="navbar-link" data-modal="faqModal" data-tooltip="View Frequently Asked Questions">FAQ</a></li>
           <li><a href="/adtkd_diagnostics.html" class="navbar-link" data-tooltip="ADTKD diagnostics">ADTKD</a></li>
           <li><a href="#" id="startTutorialBtn" class="navbar-link" data-tooltip="Start the interactive tutorial">Tutorial</a></li>
