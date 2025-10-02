@@ -96,8 +96,7 @@ export class ErrorHandler {
         const errorDiv = document.getElementById('error');
         if (errorDiv) {
             errorDiv.textContent = '';
-            errorDiv.classList.add('hidden');
-            errorDiv.className = 'error'; // Reset to base class
+            errorDiv.className = 'error hidden'; // Reset to base class with hidden
         }
     }
 

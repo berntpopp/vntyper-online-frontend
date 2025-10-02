@@ -80,6 +80,9 @@ body {
   margin: 0.75rem auto;
   display: none;
   text-align: center;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* Show error when not hidden */
