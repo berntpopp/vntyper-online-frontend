@@ -56,6 +56,106 @@
     color: #a8dadc;
 }
 
+/* Filter and Actions Section */
+.log-filters-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background-color: #14213d; /* Darker than container */
+    border-bottom: 1px solid #457b9d;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.log-filters {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.log-filter-btn {
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background-color: transparent;
+    color: #a8dadc;
+    border: 1px solid #457b9d;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 44px; /* Touch target */
+    min-height: 32px;
+}
+
+.log-filter-btn:hover {
+    color: #096162;
+    background-color: rgba(9, 97, 98, 0.1);
+}
+
+.log-filter-btn.active {
+    background-color: #0a9396;
+    color: #ffffff;
+    border-color: #0a9396;
+    font-weight: 600;
+}
+
+.log-filter-btn:focus-visible {
+    outline: 2px solid #0a9396;
+    outline-offset: 2px;
+}
+
+.log-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.log-action-btn {
+    padding: 4px 8px;
+    font-size: 1rem;
+    background-color: transparent;
+    color: #a8dadc;
+    border: 1px solid #457b9d;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 32px;
+    min-height: 32px;
+}
+
+.log-action-btn:hover {
+    color: #096162;
+    background-color: rgba(9, 97, 98, 0.1);
+}
+
+.log-action-btn:focus-visible {
+    outline: 2px solid #0a9396;
+    outline-offset: 2px;
+}
+
+/* Download Group with Format Selector */
+.log-download-group {
+    display: flex;
+    gap: 2px;
+}
+
+.log-format-select {
+    padding: 4px;
+    font-size: 0.8rem;
+    background-color: #14213d;
+    color: #a8dadc;
+    border: 1px solid #457b9d;
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    min-height: 32px;
+}
+
+.log-download-group #downloadLogsBtn {
+    border-radius: 4px 0 0 4px;
+}
+
 /* Logging Panel Content */
 #logContent {
     padding: 5px;
@@ -81,9 +181,21 @@
 }
 
 /* Log Levels */
+.log-debug {
+    background-color: #6c757d; /* Gray */
+    color: #ffffff;
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
 .log-info {
     background-color: #a8dadc;
     color: #1d3557;
+}
+
+.log-success {
+    background-color: #2a9d8f;
+    color: #f1faee;
 }
 
 .log-warning {
@@ -93,11 +205,6 @@
 
 .log-error {
     background-color: #e63946;
-    color: #f1faee;
-}
-
-.log-success {
-    background-color: #2a9d8f;
     color: #f1faee;
 }
 

@@ -417,8 +417,43 @@
         <div class="log-header">
             <h2>Logs</h2>
             <div>
-                <button class="clear-log-btn" aria-label="Clear Logs">🗑️</button>
                 <button class="close-log-btn" aria-label="Close Logs">✖️</button>
+            </div>
+        </div>
+        <div class="log-filters-actions">
+            <div class="log-filters">
+                <button class="log-filter-btn active" data-level="all" aria-pressed="true" data-tooltip="Show all log entries">
+                    All
+                </button>
+                <button class="log-filter-btn" data-level="debug" aria-pressed="false" data-tooltip="Show debug messages only">
+                    Debug
+                </button>
+                <button class="log-filter-btn" data-level="info" aria-pressed="false" data-tooltip="Show info messages only">
+                    Info
+                </button>
+                <button class="log-filter-btn" data-level="success" aria-pressed="false" data-tooltip="Show success messages only">
+                    ✓
+                </button>
+                <button class="log-filter-btn" data-level="warning" aria-pressed="false" data-tooltip="Show warning messages only">
+                    ⚠
+                </button>
+                <button class="log-filter-btn" data-level="error" aria-pressed="false" data-tooltip="Show error messages only">
+                    ✕
+                </button>
+            </div>
+            <div class="log-actions">
+                <div class="log-download-group">
+                    <button id="downloadLogsBtn" class="log-action-btn" data-tooltip="Download logs">
+                        ⬇
+                    </button>
+                    <select id="downloadFormatSelect" class="log-format-select" data-tooltip="Select export format">
+                        <option value="txt">TXT</option>
+                        <option value="json">JSON</option>
+                    </select>
+                </div>
+                <button class="clear-log-btn log-action-btn" aria-label="Clear Logs" data-tooltip="Clear all logs">
+                    🗑️
+                </button>
             </div>
         </div>
         <div class="log-content" id="logContent" role="log" aria-live="polite" aria-atomic="false">
