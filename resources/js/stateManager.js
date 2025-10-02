@@ -196,6 +196,165 @@ export class StateManager {
     }
 
     /**
+     * Update job status (convenience method)
+     * @param {string} jobId - Job ID
+     * @param {string} status - New status
+     */
+    updateJobStatus(jobId, status) {
+        this.updateJob(jobId, { status });
+    }
+
+    /**
+     * Get a specific job
+     * @param {string} jobId - Job ID
+     * @returns {Object|null} - Job data or null
+     */
+    getJob(jobId) {
+        return this.state.jobs.get(jobId) || null;
+    }
+
+    /**
+     * Get all jobs
+     * @returns {Array} - Array of job data objects
+     */
+    getJobs() {
+        return Array.from(this.state.jobs.values());
+    }
+
+    /**
+     * Set job polling stop function
+     * @param {string} jobId - Job ID
+     * @param {Function} stopFn - Stop polling function
+     */
+    setJobPolling(jobId, stopFn) {
+        const job = this.state.jobs.get(jobId);
+        if (job) {
+            job.pollStop = stopFn;
+        }
+    }
+
+    /**
+     * Get job polling stop function
+     * @param {string} jobId - Job ID
+     * @returns {Function|null} - Stop function or null
+     */
+    getJobPolling(jobId) {
+        const job = this.state.jobs.get(jobId);
+        return job?.pollStop || null;
+    }
+
+    /**
+     * Add a cohort to tracking
+     * @param {string} cohortId - Cohort ID
+     * @param {Object} data - Cohort data
+     */
+    addCohort(cohortId, data) {
+        this.state.cohorts.set(cohortId, {
+            ...data,
+            jobIds: data.jobIds || [],
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        });
+
+        this.addToHistory({
+            type: 'cohort.added',
+            cohortId,
+            data
+        });
+
+        this.emit('cohort.added', cohortId, data);
+        this.emit('cohorts.changed');
+    }
+
+    /**
+     * Get a specific cohort
+     * @param {string} cohortId - Cohort ID
+     * @returns {Object|null} - Cohort data or null
+     */
+    getCohort(cohortId) {
+        return this.state.cohorts.get(cohortId) || null;
+    }
+
+    /**
+     * Get all cohorts
+     * @returns {Array} - Array of cohort data objects
+     */
+    getCohorts() {
+        return Array.from(this.state.cohorts.values());
+    }
+
+    /**
+     * Add a job to a cohort
+     * @param {string} cohortId - Cohort ID
+     * @param {string} jobId - Job ID
+     */
+    addJobToCohort(cohortId, jobId) {
+        const cohort = this.state.cohorts.get(cohortId);
+        if (cohort && !cohort.jobIds.includes(jobId)) {
+            cohort.jobIds.push(jobId);
+            cohort.updatedAt = Date.now();
+
+            // Also track cohort in job
+            const job = this.state.jobs.get(jobId);
+            if (job) {
+                job.cohortId = cohortId;
+            }
+
+            this.emit('cohort.job.added', cohortId, jobId);
+            this.emit('cohorts.changed');
+        }
+    }
+
+    /**
+     * Get cohort job count
+     * @param {string} cohortId - Cohort ID
+     * @returns {number} - Number of jobs in cohort
+     */
+    getCohortJobCount(cohortId) {
+        const cohort = this.state.cohorts.get(cohortId);
+        return cohort?.jobIds?.length || 0;
+    }
+
+    /**
+     * Get cohort ID for a job
+     * @param {string} jobId - Job ID
+     * @returns {string|null} - Cohort ID or null
+     */
+    getJobCohort(jobId) {
+        const job = this.state.jobs.get(jobId);
+        return job?.cohortId || null;
+    }
+
+    /**
+     * Check if all cohort jobs are complete
+     * @param {string} cohortId - Cohort ID
+     * @returns {boolean} - True if all jobs complete
+     */
+    areCohortJobsComplete(cohortId) {
+        const cohort = this.state.cohorts.get(cohortId);
+        if (!cohort || !cohort.jobIds || cohort.jobIds.length === 0) {
+            return false;
+        }
+
+        return cohort.jobIds.every(jobId => {
+            const job = this.state.jobs.get(jobId);
+            return job?.status === 'completed';
+        });
+    }
+
+    /**
+     * Set cohort polling stop function
+     * @param {string} cohortId - Cohort ID
+     * @param {Function} stopFn - Stop polling function
+     */
+    setCohortPolling(cohortId, stopFn) {
+        const cohort = this.state.cohorts.get(cohortId);
+        if (cohort) {
+            cohort.pollStop = stopFn;
+        }
+    }
+
+    /**
      * Start countdown timer (ensures only one instance)
      * @param {string} jobId - Optional job ID this countdown is for
      */

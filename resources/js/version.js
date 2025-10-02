@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.36.0'; // State management refactor: BlobManager, StateManager, PollingManager
+const frontendVersion = '0.38.0'; // Architecture refactor complete - SOLID principles, StateManager, PollingManager, Controllers/Services/Views
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;
