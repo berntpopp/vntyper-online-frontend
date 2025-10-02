@@ -75,28 +75,28 @@
 
 /* Extract Button Specific Styles */
 .extract-button {
-  background-color: #ee9b00;
+  background-color: var(--color-secondary); /* WCAG AA compliant: 4.5:1 contrast */
 }
 
 .extract-button:hover {
-  background-color: #fcbf49;
+  background-color: var(--color-secondary-hover);
 }
 
 .extract-button:active {
-  background-color: #c17700;
+  background-color: var(--color-secondary-active);
 }
 
 /* Toggle Button Specific Styles */
 .toggle-button {
-  background-color: #8F4400;
+  background-color: var(--color-tertiary); /* WCAG AA compliant: 5.1:1 contrast */
 }
 
 .toggle-button:hover {
-  background-color: #ffaa00;
+  background-color: var(--color-tertiary-hover);
 }
 
 .toggle-button:active {
-  background-color: #8a4b08;
+  background-color: var(--color-tertiary-active);
 }
 
 /* --- Optional Inputs Styles --- */

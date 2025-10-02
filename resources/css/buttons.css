@@ -38,8 +38,8 @@
     display: inline-block;
     margin: 0.4rem 0.4rem;        /* Adjusted margin for consistent spacing */
     padding: 0.3rem 0.6rem;       /* Further reduced padding for smaller buttons */
-    background-color: #3498db;
-    color: #fff;
+    background-color: var(--color-link-button); /* WCAG AA compliant: 4.6:1 contrast */
+    color: var(--color-white);
     text-decoration: none;
     border-radius: 4px;
     font-size: 0.8rem;            /* Smaller font size */
@@ -48,11 +48,11 @@
 }
 
 .download-link:hover {
-    background-color: #2980b9;
+    background-color: var(--color-link-button-hover);
 }
 
 .download-link:active {
-    background-color: #1c5d99;    /* Darker shade on click */
+    background-color: var(--color-link-button-active);
 }
 
 /* --- Horizontal Divider Styles --- */

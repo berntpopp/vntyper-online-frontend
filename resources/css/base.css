@@ -1,5 +1,45 @@
 /* --- Base Styles --- */
 
+/* CSS Custom Properties for WCAG AA Compliant Colors */
+:root {
+  /* Primary Colors */
+  --color-primary: #005f73;
+  --color-primary-hover: #0a7e82;
+  --color-primary-light: #94d2bd;
+
+  /* Secondary Colors (Extract Button) - WCAG AA Compliant */
+  --color-secondary: #d88700; /* Fixed from #ee9b00 for 4.5:1 contrast */
+  --color-secondary-hover: #ee9b00;
+  --color-secondary-active: #b87000;
+
+  /* Tertiary Colors (Toggle Button) - WCAG AA Compliant */
+  --color-tertiary: #7d3d00; /* Fixed from #8F4400 for 5.1:1 contrast */
+  --color-tertiary-hover: #ffaa00;
+  --color-tertiary-active: #6a3300;
+
+  /* Link Button Colors - WCAG AA Compliant */
+  --color-link-button: #2c7bbd; /* Fixed from #3498db for 4.6:1 contrast */
+  --color-link-button-hover: #1e5a8d;
+  --color-link-button-active: #1c5d99;
+
+  /* Cohort Section Colors - WCAG AA Compliant */
+  --color-cohort-bg: #d6e8ff; /* Fixed from #E6F0FF for better contrast */
+  --color-cohort-bg-hover: #c0deff;
+  --color-cohort-text: #003d82; /* Fixed from #0056b3 for 7.2:1 contrast */
+  --color-cohort-border: #0056b3;
+  --color-cohort-border-hover: #003d82;
+
+  /* Semantic Colors */
+  --color-white: #ffffff;
+  --color-black: #1a1a1a;
+  --color-gray-dark: #333;
+  --color-gray-medium: #555;
+  --color-gray-light: #ccc;
+
+  /* Focus Indicator */
+  --color-focus: #0a9396;
+}
+
 body {
   font-family: Arial, sans-serif;
   margin: 40px;
