@@ -183,21 +183,21 @@
         align-items: center;
         justify-content: center;
         position: absolute;
-        right: 0;
+        right: 20px;
         top: 50%;
         transform: translateY(-50%);
     }
 
     .navbar-toggle[aria-expanded="true"] {
         position: fixed; /* Fix position when menu open */
-        right: 20px;
+        right: 10px;
         top: 20px;
         transform: none;
     }
 
     /* Navbar container adjustment */
     .navbar-container {
-        padding-right: 56px; /* Space for hamburger (48px button + 8px spacing) */
+        padding-right: 48px; /* Space for hamburger button */
     }
 
     /* Hide navbar menu by default */
