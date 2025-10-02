@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.45.0'; // Mobile navigation hamburger menu implementation
+const frontendVersion = '0.48.0'; // Enhanced error states - inline validation with visual feedback
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;
