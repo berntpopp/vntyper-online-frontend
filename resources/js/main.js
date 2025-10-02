@@ -20,6 +20,8 @@ import { initializeUsageStats } from './usageStats.js';
 import { regions } from './regionsConfig.js';
 import { displayError, clearError, errorHandler, ErrorLevel } from './errorHandling.js';
 import { createLabelValue, replaceLabelValue, safeGetElementById } from './domHelpers.js';
+import { blobManager } from './blobManager.js';
+import { stateManager } from './stateManager.js';
 import { validateJobId, validateCohortId } from './validators.js';
 import {
     showSpinner,
@@ -484,13 +486,15 @@ async function initializeApp() {
 
                                 // Display Download and Copy Buttons When Job is Completed
                                 if (status === 'completed') {
+                                    logMessage(`🎉 Job ${jobId} status changed to completed. Calling displayDownloadLink...`, 'success');
                                     displayDownloadLink(jobId, {
                                         hidePlaceholderMessage,
                                         jobStatusDiv: jobStatusDivElement,
-                                        logMessage,
                                         clearCountdown,
                                     });
+                                    logMessage(`Calling displayShareableLink...`, 'info');
                                     displayShareableLink(jobId, jobStatusDivElement.parentElement); // Pass the job container as targetContainer
+                                    logMessage(`displayShareableLink completed.`, 'info');
                                 } else if (status === 'failed') {
                                     const errorMessage = 'Job failed.'; // Customize as needed
                                     displayError(errorMessage);
@@ -609,12 +613,22 @@ async function initializeApp() {
                 }
 
                 // Provide download links for the subsetted BAM and BAI files
+                const createdUrls = [];
                 subsetBamAndBaiBlobs.forEach((subset) => {
                     const { subsetBamBlob, subsetBaiBlob, subsetName } = subset;
                     const subsetBaiName = `${subsetName}.bai`;
 
-                    const downloadBamUrl = URL.createObjectURL(subsetBamBlob);
-                    const downloadBaiUrl = URL.createObjectURL(subsetBaiBlob);
+                    // Use blobManager to track URLs for automatic cleanup
+                    const downloadBamUrl = blobManager.create(subsetBamBlob, {
+                        filename: subsetName,
+                        type: 'BAM'
+                    });
+                    const downloadBaiUrl = blobManager.create(subsetBaiBlob, {
+                        filename: subsetBaiName,
+                        type: 'BAI'
+                    });
+
+                    createdUrls.push(downloadBamUrl, downloadBaiUrl);
 
                     // Download Link for BAM
                     const downloadBamLink = document.createElement('a');
@@ -650,13 +664,12 @@ async function initializeApp() {
                 });
             }
 
-            // Optionally: Revoke the Object URLs after some time to free memory
+            // Revoke blob URLs after user has had time to download (5 minutes)
+            // blobManager will also auto-cleanup old URLs periodically
             setTimeout(() => {
-                document.querySelectorAll('#regionOutput a').forEach((link) => {
-                    URL.revokeObjectURL(link.href);
-                    logMessage(`Object URL revoked for ${link.download}.`, 'info');
-                });
-            }, 60000); // Revoke after 60 seconds
+                const revokedCount = blobManager.revokeMultiple(createdUrls);
+                logMessage(`Revoked ${revokedCount} Blob URLs from region extraction`, 'info');
+            }, 300000); // 5 minutes
 
             hideSpinner(); // Hide spinner after extraction is complete
             clearCountdown();

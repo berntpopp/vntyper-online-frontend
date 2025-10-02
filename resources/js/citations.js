@@ -1,5 +1,7 @@
 // frontend/resources/js/citations.js
 
+import { blobManager } from './blobManager.js';
+
 /**
  * Initializes the Citations section by adding event listeners to download buttons.
  */
@@ -25,12 +27,18 @@ export function initializeCitations() {
  */
 function downloadBibTeX(bibtex) {
     const blob = new Blob([bibtex], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
+    const url = blobManager.create(blob, {
+        filename: 'citation.bib',
+        type: 'BibTeX'
+    });
+
     const a = document.createElement('a');
     a.href = url;
     a.download = 'citation.bib';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+
+    // Revoke immediately after download initiated
+    blobManager.revoke(url);
 }

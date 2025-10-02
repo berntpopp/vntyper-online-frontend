@@ -1,9 +1,7 @@
 // frontend/resources/js/uiUtils.js
 
-import { logMessage } from './log.js'; // Import the logMessage function
-
-let countdownInterval = null;
-let timeLeft = 20; // Countdown time in seconds
+import { logMessage } from './log.js';
+import { stateManager } from './stateManager.js';
 
 /**
  * Shows the placeholder message in the output area.
@@ -39,8 +37,21 @@ export function hidePlaceholderMessage() {
  * @param {string} type - The type of message ('info', 'error', 'success').
  */
 export function displayMessage(message, type = 'info') {
-    hidePlaceholderMessage(); // Hide placeholder when displaying a message
     const messageDiv = document.getElementById('message');
+
+    // Validate message is not empty
+    if (!message || (typeof message === 'string' && message.trim() === '')) {
+        logMessage(`⚠️ displayMessage called with empty message (type: ${type}). Current stack:`, 'warning');
+        console.trace('Empty message trace');
+        // Clear message div if it exists
+        if (messageDiv) {
+            clearMessage();
+        }
+        return;
+    }
+
+    hidePlaceholderMessage(); // Hide placeholder when displaying a message
+
     if (messageDiv) {
         // XSS-safe: Use textContent instead of innerHTML
         messageDiv.textContent = message;
@@ -58,6 +69,12 @@ export function displayMessage(message, type = 'info') {
  * @param {string} message - The warning message to append.
  */
 export function appendWarningMessage(message) {
+    // Validate message is not empty
+    if (!message || (typeof message === 'string' && message.trim() === '')) {
+        logMessage('appendWarningMessage called with empty message. Skipping append.', 'warning');
+        return;
+    }
+
     hidePlaceholderMessage(); // Hide placeholder when displaying a message
     const messageDiv = document.getElementById('message');
     if (messageDiv) {
@@ -68,7 +85,7 @@ export function appendWarningMessage(message) {
             messageDiv.appendChild(document.createElement('br'));
         }
         messageDiv.appendChild(document.createTextNode(message));
-        
+
         // Ensure warning class is applied (keep existing classes but ensure warning is included)
         if (!messageDiv.classList.contains('message-warning')) {
             messageDiv.classList.add('message-warning');
@@ -86,10 +103,11 @@ export function appendWarningMessage(message) {
 export function clearMessage() {
     const messageDiv = document.getElementById('message');
     if (messageDiv) {
+        logMessage(`clearMessage called. Before: classes="${messageDiv.className}", content="${messageDiv.textContent}"`, 'info');
         messageDiv.innerHTML = '';
         messageDiv.className = ''; // Reset classes
         messageDiv.classList.add('message', 'hidden');
-        logMessage('Cleared message display.', 'info');
+        logMessage(`clearMessage complete. After: classes="${messageDiv.className}", hidden=${messageDiv.classList.contains('hidden')}`, 'info');
     }
     showPlaceholderMessage(); // Show placeholder when message is cleared
 }
@@ -196,7 +214,10 @@ export function displayShareableLink(id, targetContainer, type = 'job') {
  * @param {object} context - An object containing necessary DOM elements and state.
  */
 export function displayDownloadLink(jobId, context) {
-    const { hidePlaceholderMessage, jobStatusDiv, logMessage, clearCountdown } = context;
+    logMessage(`✅ displayDownloadLink called for Job ID: ${jobId}`, 'info');
+    logMessage(`Context keys: ${Object.keys(context).join(', ')}`, 'info');
+
+    const { hidePlaceholderMessage, jobStatusDiv, clearCountdown } = context;
 
     hidePlaceholderMessage(); // Hide placeholder when displaying download link
 
@@ -208,6 +229,7 @@ export function displayDownloadLink(jobId, context) {
 
     if (!(jobStatusDiv instanceof HTMLElement)) {
         logMessage('jobStatusDiv provided to displayDownloadLink is not a valid DOM element.', 'error');
+        logMessage(`jobStatusDiv type: ${typeof jobStatusDiv}, value: ${jobStatusDiv}`, 'error');
         return;
     }
 
@@ -215,10 +237,14 @@ export function displayDownloadLink(jobId, context) {
     const existingDownloadLink = document.getElementById(`download-${jobId}`);
     const existingCopyButton = document.getElementById(`copy-${jobId}`);
 
+    logMessage(`Checking for existing elements: download=${!!existingDownloadLink}, copy=${!!existingCopyButton}`, 'info');
+
     if (existingDownloadLink && existingCopyButton) {
-        logMessage(`Download and Copy Link buttons already exist for Job ID ${jobId}. Skipping creation.`, 'info');
+        logMessage(`⚠️ Download and Copy Link buttons already exist for Job ID ${jobId}. Skipping creation.`, 'warning');
         return; // Exit the function to prevent duplication
     }
+
+    logMessage(`✨ Creating download and copy buttons for Job ID ${jobId}...`, 'info');
 
     // Create Download Link
     const downloadLink = document.createElement('a');
@@ -254,99 +280,59 @@ export function displayDownloadLink(jobId, context) {
     jobStatusDiv.appendChild(downloadLink);
     jobStatusDiv.appendChild(copyButton);
 
-    logMessage(`Download and Copy Link buttons generated for Job ID ${jobId}.`, 'info');
+    logMessage(`✅ Download and Copy Link buttons appended to DOM for Job ID ${jobId}.`, 'success');
+    logMessage(`Download link href: ${downloadLink.href}`, 'info');
+    logMessage(`jobStatusDiv now has ${jobStatusDiv.children.length} children`, 'info');
 
     // Clear the countdown and hide the spinner
     if (typeof clearCountdown === 'function') {
+        logMessage(`Calling clearCountdown...`, 'info');
         clearCountdown();
+        logMessage(`clearCountdown completed.`, 'info');
     } else {
-        logMessage('clearCountdown function not provided in context.', 'warning');
+        logMessage('⚠️ clearCountdown function not provided in context.', 'warning');
     }
 }
 
 /**
  * Displays the loading spinner in the UI.
+ * Uses StateManager for proper nesting support.
  */
 export function showSpinner() {
-    const spinner = document.getElementById('spinner');
-    if (spinner) {
-        spinner.classList.remove('hidden');
-        spinner.classList.add('visible');
-        logMessage('Spinner displayed.', 'info');
-    } else {
-        logMessage('Spinner element (#spinner) not found in the DOM.', 'warning');
-    }
+    stateManager.showSpinner();
 }
 
 /**
  * Hides the loading spinner in the UI.
+ * Uses StateManager for proper nesting support.
  */
 export function hideSpinner() {
-    const spinner = document.getElementById('spinner');
-    if (spinner) {
-        spinner.classList.remove('visible');
-        spinner.classList.add('hidden');
-        logMessage('Spinner hidden.', 'info');
-    } else {
-        logMessage('Spinner element (#spinner) not found in the DOM.', 'warning');
-    }
+    stateManager.hideSpinner();
 }
 
 /**
  * Starts a countdown timer that updates the UI every second.
+ * Uses StateManager to prevent race conditions.
+ * @param {string} jobId - Optional job ID this countdown is for
  */
-export function startCountdown() {
-    const countdownDiv = document.getElementById('countdown');
-    if (countdownDiv) {
-        countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
-        logMessage(`Countdown started with ${timeLeft} seconds.`, 'info');
-
-        countdownInterval = setInterval(() => {
-            timeLeft--;
-            if (timeLeft > 0) {
-                countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
-            } else {
-                timeLeft = 20;
-                countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
-                logMessage('Countdown reset to 20 seconds.', 'info');
-            }
-        }, 1000);
-    } else {
-        logMessage('Countdown element (#countdown) not found in the DOM.', 'warning');
-    }
+export function startCountdown(jobId = null) {
+    stateManager.startCountdown(jobId);
 }
 
 /**
  * Resets the countdown timer to the initial value.
+ * Uses StateManager for centralized state.
  */
 export function resetCountdown() {
-    timeLeft = 20;
-    const countdownDiv = document.getElementById('countdown');
-    if (countdownDiv) {
-        countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
-        logMessage('Countdown reset manually to 20 seconds.', 'info');
-    } else {
-        logMessage('Countdown element (#countdown) not found in the DOM.', 'warning');
-    }
+    stateManager.resetCountdown();
 }
 
 /**
  * Clears the countdown timer and removes its display from the UI.
+ * Uses StateManager for proper cleanup.
  */
 export function clearCountdown() {
-    const countdownDiv = document.getElementById('countdown');
-    if (countdownInterval) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-        logMessage('Countdown interval cleared.', 'info');
-    }
-
-    if (countdownDiv) {
-        countdownDiv.textContent = '';
-        logMessage('Countdown display cleared from UI.', 'info');
-    } else {
-        logMessage('Countdown element (#countdown) not found in the DOM.', 'warning');
-    }
+    stateManager.clearCountdown();
 }
 
 /* --- Toggle Optional Inputs Functionality --- */
@@ -405,12 +391,85 @@ export function initializePageReset() {
 /* --- Initialize All UI Utilities --- */
 
 /**
+ * Sets up StateManager event listeners for DOM updates
+ */
+function setupStateManagerListeners() {
+    // Countdown tick - update DOM
+    stateManager.on('countdown.tick', (timeLeft) => {
+        const countdownDiv = document.getElementById('countdown');
+        if (countdownDiv) {
+            countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+        }
+    });
+
+    // Countdown stopped - clear DOM
+    stateManager.on('countdown.stopped', () => {
+        const countdownDiv = document.getElementById('countdown');
+        if (countdownDiv) {
+            countdownDiv.textContent = '';
+            logMessage('Countdown display cleared from UI.', 'info');
+        }
+    });
+
+    // Countdown started - initial display
+    stateManager.on('countdown.started', (jobId) => {
+        const countdownDiv = document.getElementById('countdown');
+        if (countdownDiv) {
+            const timeLeft = stateManager.get('countdown.timeLeft');
+            countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+            logMessage(`Countdown started with ${timeLeft} seconds${jobId ? ` for job ${jobId}` : ''}.`, 'info');
+        } else {
+            logMessage('Countdown element (#countdown) not found in the DOM.', 'warning');
+        }
+    });
+
+    // Countdown reset - update DOM
+    stateManager.on('countdown.reset', () => {
+        const countdownDiv = document.getElementById('countdown');
+        if (countdownDiv) {
+            const timeLeft = stateManager.get('countdown.timeLeft');
+            countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+            logMessage('Countdown reset manually to 20 seconds.', 'info');
+        } else {
+            logMessage('Countdown element (#countdown) not found in the DOM.', 'warning');
+        }
+    });
+
+    // Spinner shown - update DOM
+    stateManager.on('spinner.shown', () => {
+        const spinner = document.getElementById('spinner');
+        if (spinner) {
+            spinner.classList.remove('hidden');
+            spinner.classList.add('visible');
+            logMessage('Spinner displayed.', 'info');
+        } else {
+            logMessage('Spinner element (#spinner) not found in the DOM.', 'warning');
+        }
+    });
+
+    // Spinner hidden - update DOM
+    stateManager.on('spinner.hidden', () => {
+        const spinner = document.getElementById('spinner');
+        if (spinner) {
+            spinner.classList.remove('visible');
+            spinner.classList.add('hidden');
+            logMessage('Spinner hidden.', 'info');
+        } else {
+            logMessage('Spinner element (#spinner) not found in the DOM.', 'warning');
+        }
+    });
+
+    logMessage('StateManager event listeners set up for DOM updates.', 'info');
+}
+
+/**
  * Initializes all UI utilities by calling their respective initialization functions.
  * This function should be called once the DOM is fully loaded.
  */
 export function initializeUIUtils() {
     logMessage('Initializing UI utilities...', 'info');
+    setupStateManagerListeners(); // Set up state listeners first
     initializeToggleOptionalInputs();
-    initializePageReset(); // Add the new functionality here
+    initializePageReset();
     logMessage('UI utilities initialized.', 'info');
 }
