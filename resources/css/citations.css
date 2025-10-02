@@ -33,3 +33,30 @@
     color: #6c757d;
     line-height: 1.6;
 }
+
+/* --- Citation Links (WCAG 1.4.1 Use of Color) --- */
+
+.citations-section a {
+    color: #0056b3; /* Darker blue for better contrast */
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    font-weight: 500; /* Slightly heavier for emphasis */
+    transition: all 0.3s ease;
+}
+
+.citations-section a:hover,
+.citations-section a:focus {
+    color: #003d82; /* Even darker on interaction */
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}
+
+.citations-section a:active {
+    color: #002654;
+}
+
+/* Visited links in citations (academic convention) */
+.citations-section a:visited {
+    color: #5a23c8; /* Standard visited link purple */
+}

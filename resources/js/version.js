@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.43.0'; // WCAG 2.4.7 focus indicator consistency
+const frontendVersion = '0.44.0'; // WCAG 1.4.1 link differentiation in body text
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;

@@ -69,3 +69,35 @@
 .faq-item h3:focus {
     box-shadow: 0 0 0 3px #007bff;
 }
+
+/* --- FAQ Links (WCAG 1.4.1 Use of Color) --- */
+
+.faq-item a {
+    color: #0056b3; /* Darker blue for better contrast */
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    transition: all 0.3s ease;
+}
+
+.faq-item a:hover,
+.faq-item a:focus {
+    color: #003d82; /* Even darker on interaction */
+    text-decoration-thickness: 2px;
+    background-color: rgba(0, 86, 179, 0.05); /* Subtle highlight */
+    padding: 0 2px;
+    margin: 0 -2px;
+    border-radius: 2px;
+}
+
+/* External link indicator in FAQ */
+.faq-item a[href^="http"]::after {
+    content: " ↗";
+    font-size: 0.85em;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+.faq-item a[href^="http"]:hover::after {
+    opacity: 1;
+}

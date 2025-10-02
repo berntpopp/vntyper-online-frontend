@@ -407,3 +407,33 @@ textarea:focus-visible {
   gap: 20px; /* Space between panels when both are visible */
   z-index: 1000; /* Ensure panels appear above other elements */
 }
+
+/* --- Print Styles (WCAG 1.4.1 Link Differentiation) --- */
+
+@media print {
+  /* Ensure all links are underlined and visible when printed */
+  a {
+    color: #000 !important;
+    text-decoration: underline !important;
+    text-decoration-thickness: 1px !important;
+  }
+
+  /* Show URLs for external links in citations and FAQ */
+  .citations-section a[href^="http"]::after,
+  .faq-item a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+    word-break: break-all;
+  }
+
+  /* Don't show URLs for anchor links */
+  a[href^="#"]::after {
+    content: "";
+  }
+
+  /* Don't duplicate external link icon in print */
+  .faq-item a[href^="http"]::after {
+    content: " (" attr(href) ")"; /* Override the arrow icon */
+  }
+}

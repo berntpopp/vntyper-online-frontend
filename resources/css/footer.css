@@ -49,19 +49,48 @@
 }
 
 .footer-links a {
-  color: #007bff;
-  text-decoration: none;
+  color: #0056b3; /* Changed from #007bff for better contrast */
+  text-decoration: underline; /* Always underlined (WCAG 1.4.1) */
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  transition: all 0.3s ease;
 }
 
 .footer-links a:hover,
 .footer-links a:focus {
-  text-decoration: underline;
+  color: #003d82;
+  text-decoration-thickness: 2px; /* Enhanced on interaction */
+  text-underline-offset: 3px;
+}
+
+.footer-links a:visited {
+  color: #4a2380; /* Purple for visited links */
 }
 
 .footer-bottom {
   text-align: center;
   font-size: 12px;
   color: #666;
+}
+
+/* Footer bottom links (Imprint, Contact, etc.) */
+.footer-bottom a {
+  color: #0056b3;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  transition: all 0.3s ease;
+}
+
+.footer-bottom a:hover,
+.footer-bottom a:focus {
+  color: #003d82;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.footer-bottom a:visited {
+  color: #4a2380;
 }
 
 /* Responsive Design for Footer */
