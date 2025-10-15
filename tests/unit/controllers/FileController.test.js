@@ -217,28 +217,34 @@ describe('FileController', () => {
 
   describe('handleFilesSelected() - Error handling', () => {
     it('should handle errors during file selection', () => {
-      // Arrange - make _log throw to trigger error handling
+      // Arrange - make _log throw only on first call (to avoid re-throwing in error handler)
       const error = new Error('File selection error')
-      vi.spyOn(fileController, '_log').mockImplementation(() => {
+      const logSpy = vi.spyOn(fileController, '_log')
+      logSpy.mockImplementationOnce(() => {
         throw error
       })
 
-      // Act
-      fileController.handleFilesSelected({ files: [] })
+      // Act - the error should be caught internally, not thrown to caller
+      expect(() => {
+        fileController.handleFilesSelected({ files: [] })
+      }).not.toThrow()
 
       // Assert
       expect(mockErrorView.show).toHaveBeenCalledWith(error, 'File Selection')
     })
 
     it('should log errors during file selection', () => {
-      // Arrange - make _log throw to trigger error handling
+      // Arrange - make _log throw only on first call (to avoid re-throwing in error handler)
       const error = new Error('Selection failed')
-      vi.spyOn(fileController, '_log').mockImplementation(() => {
+      const logSpy = vi.spyOn(fileController, '_log')
+      logSpy.mockImplementationOnce(() => {
         throw error
       })
 
-      // Act
-      fileController.handleFilesSelected({ files: [] })
+      // Act - the error should be caught internally, not thrown to caller
+      expect(() => {
+        fileController.handleFilesSelected({ files: [] })
+      }).not.toThrow()
 
       // Assert
       expect(mockLogger.logMessage).toHaveBeenCalledWith(

@@ -600,10 +600,9 @@ describe('ErrorHandler', () => {
       // Act
       const promise = handler.retryWithBackoff(fn, { maxRetries: 3, baseDelay: 1000 })
 
-      // Attach error handler to prevent unhandled rejection
-      promise.catch(() => {})
+      // Retry after 1000ms (2^0 * 1000) - first attempt happens immediately
+      await vi.advanceTimersByTimeAsync(1000)
 
-      await vi.runAllTimersAsync()
       const result = await promise
 
       // Assert
@@ -621,13 +620,10 @@ describe('ErrorHandler', () => {
       // Act
       const promise = handler.retryWithBackoff(fn, { maxRetries: 3, baseDelay: 1000 })
 
-      // First attempt fails immediately
-      await vi.advanceTimersByTimeAsync(0)
-
-      // Second attempt after 1000ms (2^0 * 1000)
+      // First retry after 1000ms (2^0 * 1000) - initial attempt happens immediately
       await vi.advanceTimersByTimeAsync(1000)
 
-      // Third attempt after 2000ms (2^1 * 1000)
+      // Second retry after 2000ms (2^1 * 1000)
       await vi.advanceTimersByTimeAsync(2000)
 
       const result = await promise
@@ -651,8 +647,7 @@ describe('ErrorHandler', () => {
         maxDelay: 1500 // Cap at 1.5s
       })
 
-      await vi.advanceTimersByTimeAsync(0)
-      await vi.advanceTimersByTimeAsync(1000) // First retry: 1000ms
+      await vi.advanceTimersByTimeAsync(1000) // First retry: 1000ms (initial attempt immediate)
       await vi.advanceTimersByTimeAsync(1500) // Second retry: capped at 1500ms instead of 2000ms
 
       const result = await promise
@@ -683,11 +678,11 @@ describe('ErrorHandler', () => {
       // Act
       const promise = handler.retryWithBackoff(fn, { maxRetries: 2, baseDelay: 100 })
 
-      // Attach error handler to prevent unhandled rejection
-      promise.catch(() => {})
+      // First retry after 100ms (2^0 * 100) - initial attempt immediate
+      await vi.advanceTimersByTimeAsync(100)
 
-      // Fast-forward through all timers
-      await vi.runAllTimersAsync()
+      // Second retry after 200ms (2^1 * 100)
+      await vi.advanceTimersByTimeAsync(200)
 
       // Assert
       await expect(promise).rejects.toThrow('Persistent failure')
@@ -708,7 +703,13 @@ describe('ErrorHandler', () => {
         baseDelay: 1000,
         onRetry
       })
-      await vi.runAllTimersAsync()
+
+      // First retry after 1000ms (initial attempt immediate)
+      await vi.advanceTimersByTimeAsync(1000)
+
+      // Second retry after 2000ms
+      await vi.advanceTimersByTimeAsync(2000)
+
       await promise
 
       // Assert
@@ -725,7 +726,10 @@ describe('ErrorHandler', () => {
 
       // Act
       const promise = handler.retryWithBackoff(fn, { maxRetries: 2, baseDelay: 1000 })
-      await vi.runAllTimersAsync()
+
+      // Retry after 1000ms succeeds (initial attempt immediate)
+      await vi.advanceTimersByTimeAsync(1000)
+
       await promise
 
       // Assert
@@ -742,11 +746,8 @@ describe('ErrorHandler', () => {
       // Act
       const promise = handler.retryWithBackoff(fn, { maxRetries: 1, baseDelay: 100 })
 
-      // Attach error handler to prevent unhandled rejection
-      promise.catch(() => {})
-
-      // Fast-forward through all timers
-      await vi.runAllTimersAsync()
+      // First (and only) retry after 100ms (2^0 * 100) - initial attempt immediate
+      await vi.advanceTimersByTimeAsync(100)
 
       // Wait for promise to reject
       try {
