@@ -49,21 +49,21 @@
   <script src="resources/js/config.js" defer></script>
   
   <!-- Link to JavaScript Modules -->
-  <script type="module" src="resources/js/inputWrangling.js?v=0.48.0" defer></script>
-  <script type="module" src="resources/js/regionsConfig.js?v=0.48.0" defer></script>
-  <script type="module" src="resources/js/assemblyConfigs.js?v=0.48.0" defer></script>
+  <script type="module" src="resources/js/inputWrangling.js?v=0.52.0" defer></script>
+  <script type="module" src="resources/js/regionsConfig.js?v=0.52.0" defer></script>
+  <script type="module" src="resources/js/assemblyConfigs.js?v=0.52.0" defer></script>
   <!-- bamProcessing.js is lazy-loaded in ExtractionController when needed -->
-  <script type="module" src="resources/js/apiInteractions.js?v=0.48.0" defer></script>
-  <script type="module" src="resources/js/inputValidation.js?v=0.48.0" defer></script>
-  <script type="module" src="resources/js/main.js?v=0.48.0" defer></script>
-  <script type="module" src="resources/js/modal.js?v=0.48.0" defer></script>
-  <script type="module" src="resources/js/mobileNav.js?v=0.48.0" defer></script>
-  <script type="module" src="resources/js/populateRegions.js?v=0.48.0" defer></script>
-  <script type="module" src="resources/js/uiUtils.js?v=0.48.0" defer></script>
-  <script type="module" src="resources/js/usageStats.js?v=0.48.0" defer></script>
+  <script type="module" src="resources/js/apiInteractions.js?v=0.52.0" defer></script>
+  <script type="module" src="resources/js/inputValidation.js?v=0.52.0" defer></script>
+  <script type="module" src="resources/js/main.js?v=0.52.0" defer></script>
+  <script type="module" src="resources/js/modal.js?v=0.52.0" defer></script>
+  <script type="module" src="resources/js/mobileNav.js?v=0.52.0" defer></script>
+  <script type="module" src="resources/js/populateRegions.js?v=0.52.0" defer></script>
+  <script type="module" src="resources/js/uiUtils.js?v=0.52.0" defer></script>
+  <script type="module" src="resources/js/usageStats.js?v=0.52.0" defer></script>
 
   <!-- Version and Current Year Script -->
-  <script type="module" src="resources/js/version.js?v=0.48.0" defer></script>
+  <script type="module" src="resources/js/version.js?v=0.52.0" defer></script>
   
   <!-- Schema.org JSON-LD -->
   <script type="application/ld+json">
@@ -280,16 +280,23 @@
         aria-label="Passphrase for cohort creation"
       >
 
-      <!-- NEW: Add a line break before the label and update the tooltip -->
+      <!-- adVNTR Mode checkbox with modern styling -->
       <br>
-      <label for="advntrMode">Perform adVNTR analysis:</label>
-      <input
-        type="checkbox"
-        id="advntrMode"
-        name="advntr_mode"
-        aria-label="Enable adVNTR analysis"
-        data-tooltip="Enable adVNTR analysis (this will take about 10 minutes)"
-      >
+      <label for="advntrMode">
+        <input
+          type="checkbox"
+          id="advntrMode"
+          name="advntr_mode"
+          aria-label="Enable adVNTR analysis (secondary algorithm)"
+          data-tooltip="adVNTR provides independent validation using a secondary algorithm. Increases processing time significantly (~10 minutes)."
+        >
+        adVNTR Mode (secondary algorithm)
+      </label>
+      <p class="help-text">
+        ℹ️ adVNTR mode runs an independent analysis using the adVNTR algorithm.
+        This provides additional validation and comprehensive genotyping but significantly increases processing time (approximately 15 minutes).
+        Recommended when you need secondary confirmation of results.
+      </p>
 
       <!-- ADDED: Normal Mode checkbox -->
       <br>

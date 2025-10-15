@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.48.0'; // Enhanced error states - inline validation with visual feedback
+const frontendVersion = '0.52.0'; // Refactored adVNTR UI to match Normal Mode design pattern
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;
