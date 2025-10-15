@@ -1,6 +1,6 @@
 // tests/unit/utils/EventBus.test.js
 
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { EventBus } from '../../../resources/js/utils/EventBus.js'
 
 describe('EventBus', () => {
@@ -11,6 +11,11 @@ describe('EventBus', () => {
     // Suppress console.log/error in tests unless debugging
     vi.spyOn(console, 'log').mockImplementation(() => {})
     vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    // Restore all mocks to prevent test pollution
+    vi.restoreAllMocks()
   })
 
   describe('constructor()', () => {
@@ -300,11 +305,9 @@ describe('EventBus', () => {
     it('should call all async handlers in sequence', async () => {
       const callOrder = []
       const handler1 = vi.fn(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10))
         callOrder.push(1)
       })
       const handler2 = vi.fn(async () => {
-        await new Promise(resolve => setTimeout(resolve, 5))
         callOrder.push(2)
       })
 

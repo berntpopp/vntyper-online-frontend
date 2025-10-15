@@ -8,6 +8,23 @@ export default defineConfig({
     // Global test APIs (describe, it, expect available everywhere)
     globals: true,
 
+    // Timeout configuration (prevents hanging tests)
+    testTimeout: 10000,        // 10s max per test
+    hookTimeout: 10000,        // 10s max per hook (beforeEach, afterEach)
+    teardownTimeout: 5000,     // 5s max for cleanup
+
+    // Pool configuration for better performance in WSL
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        singleThread: true     // Run tests in single thread (helps in WSL)
+      }
+    },
+
+    // Better reporting
+    silent: false,             // Show console output
+    reporters: ['default'],    // Use default reporter (faster than verbose)
+
     // Coverage configuration
     coverage: {
       provider: 'v8',  // Fast, native coverage
