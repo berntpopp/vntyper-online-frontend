@@ -193,3 +193,32 @@
       margin-top: 15px;
   }
 }
+
+/* ============================================
+   HELP TEXT STYLING (for normal mode description)
+   ============================================ */
+
+.help-text {
+    margin-top: 5px;
+    margin-bottom: 15px;
+    margin-left: 20px;
+    font-size: 0.9em;
+    color: #666;
+    font-style: italic;
+    line-height: 1.5;
+}
+
+/* Dark mode support for help text */
+@media (prefers-color-scheme: dark) {
+    .help-text {
+        color: #aaa;
+    }
+}
+
+/* Responsive: smaller font on mobile */
+@media (max-width: 768px) {
+    .help-text {
+        font-size: 0.85em;
+        margin-left: 10px;
+    }
+}

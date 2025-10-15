@@ -283,13 +283,32 @@
       <!-- NEW: Add a line break before the label and update the tooltip -->
       <br>
       <label for="advntrMode">Perform adVNTR analysis:</label>
-      <input 
-        type="checkbox" 
-        id="advntrMode" 
-        name="advntr_mode" 
-        aria-label="Enable adVNTR analysis" 
+      <input
+        type="checkbox"
+        id="advntrMode"
+        name="advntr_mode"
+        aria-label="Enable adVNTR analysis"
         data-tooltip="Enable adVNTR analysis (this will take about 10 minutes)"
       >
+
+      <!-- ADDED: Normal Mode checkbox -->
+      <br>
+      <label for="normalMode">
+        <input
+          type="checkbox"
+          id="normalMode"
+          name="normal_mode"
+          aria-label="Enable normal mode (include unmapped reads)"
+          data-tooltip="Normal mode extracts the MUC1 region AND all unmapped reads. Recommended for comprehensive analysis and files aligned with Dragen/CLC. Increases processing time by 2-3x."
+        >
+        Normal Mode (include unmapped reads)
+      </label>
+      <p class="help-text">
+        ℹ️ Normal mode includes all unmapped reads in addition to the MUC1 region.
+        This provides more comprehensive analysis but takes longer and uploads a larger file.
+        Recommended for Dragen/CLC alignments or when maximum sensitivity is needed.
+      </p>
+      <!-- END ADDED -->
     </div>
 
     <!-- Output and Error Containers -->

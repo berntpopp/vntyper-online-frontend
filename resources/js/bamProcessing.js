@@ -10,6 +10,9 @@ import { assemblies } from './assemblyConfigs.js';
 // Import regions
 import { regions } from './regionsConfig.js';
 
+// ADDED: Import unmapped reads extraction utilities
+import { extractUnmappedReads, mergeBamFiles, validateBamFile } from './unmappedExtraction.js';
+
 /**
  * Initializes Aioli with Samtools.
  * @returns {Promise<Aioli>} - The initialized Aioli CLI object.
@@ -297,8 +300,13 @@ export async function extractRegionAndIndex(CLI, pair) {
     const regionSelect = document.getElementById("region");
     const regionValue = regionSelect.value;
 
+    // ADDED: Read normal mode checkbox
+    const normalModeCheckbox = document.getElementById('normalMode');
+    const normalMode = normalModeCheckbox ? normalModeCheckbox.checked : false;
+
     logMessage("Extract Region and Index Function Triggered", 'info');
     logMessage(`Selected Region from dropdown: ${regionValue}`, 'info');
+    logMessage(`🔬 Normal Mode: ${normalMode ? 'ENABLED (will extract unmapped reads)' : 'DISABLED (fast mode)'}`, normalMode ? 'info' : 'debug');
 
     // Input Validation
     if (!regionValue) {
@@ -467,40 +475,125 @@ export async function extractRegionAndIndex(CLI, pair) {
             const subsetBamName = `subset_${pair.bam.name}`;
             await extractRegion(CLI, bamPath, region, subsetBamName);
 
-            // Index Subset BAM
-            await indexBam(CLI, subsetBamName);
+            // Variable to hold the final BAM path (either subset or merged)
+            let finalBamPath = subsetBamName;
+            let processingMode = 'fast';
 
-            // Create Blob for subset BAM
-            const subsetBam = await CLI.fs.readFile(subsetBamName);
-            const subsetBamBlob = new Blob([subsetBam], { type: 'application/octet-stream' });
-            if (subsetBamBlob.size === 0) {
-                logMessage(`Failed to create Blob from subset BAM file ${subsetBamName}.`, 'error');
-                throw new Error(`Failed to create Blob from subset BAM file ${subsetBamName}.`);
-            }
-            logMessage(`Created Blob for subset BAM: ${subsetBamName}`, 'info');
+            // ============================================================
+            // NORMAL MODE: Extract and merge unmapped reads
+            // ============================================================
+            if (normalMode) {
+                logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+                logMessage('🔬 NORMAL MODE ACTIVATED', 'info');
+                logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+                logMessage('This will extract unmapped reads and merge with the region subset.', 'info');
+                logMessage('Expected time: 2-3x longer than fast mode.', 'info');
+                logMessage('', 'info');
 
-            // Create Blob for subset BAI
-            const subsetBaiPath = `${subsetBamName}.bai`;
-            const subsetBai = await CLI.fs.readFile(subsetBaiPath);
-            const subsetBaiBlob = new Blob([subsetBai], { type: 'application/octet-stream' });
-            if (subsetBaiBlob.size === 0) {
-                logMessage(`Failed to create Blob from subset BAI file ${subsetBaiPath}.`, 'error');
-                throw new Error(`Failed to create Blob from subset BAI file ${subsetBaiPath}.`);
+                const unmappedBamName = `unmapped_${pair.bam.name}`;
+
+                try {
+                    // Step 1: Extract unmapped reads from original BAM
+                    logMessage('📋 Step 1/3: Extracting unmapped reads...', 'info');
+                    const unmappedResult = await extractUnmappedReads(CLI, bamPath, unmappedBamName);
+
+                    // Check if we have any unmapped reads
+                    if (unmappedResult.isEmpty || unmappedResult.size === 0) {
+                        logMessage('⚠️ No unmapped reads found in this BAM file.', 'warning');
+                        logMessage('Continuing with region subset only (equivalent to fast mode).', 'warning');
+                        processingMode = 'normal-no-unmapped';
+                        // Continue with finalBamPath = subsetBamName
+                    } else {
+                        logMessage(`✅ Found ${unmappedResult.count} unmapped reads (${unmappedResult.sizeFormatted})`, 'success');
+
+                        // Step 2: Merge region subset + unmapped reads
+                        logMessage('📋 Step 2/3: Merging region subset + unmapped reads...', 'info');
+                        const mergedBamName = `merged_${pair.bam.name}`;
+
+                        const mergeResult = await mergeBamFiles(
+                            CLI,
+                            [subsetBamName, unmappedBamName],
+                            mergedBamName
+                        );
+
+                        logMessage(`✅ Merge complete: ${mergeResult.sizeFormatted}`, 'success');
+
+                        // Use merged BAM as final output
+                        finalBamPath = mergedBamName;
+                        processingMode = 'normal-merged';
+
+                        logMessage('', 'info');
+                        logMessage('📊 NORMAL MODE SUMMARY:', 'success');
+                        logMessage(`  • Region reads: ${subsetBamName}`, 'info');
+                        logMessage(`  • Unmapped reads: ${unmappedResult.count} reads (${unmappedResult.sizeFormatted})`, 'info');
+                        logMessage(`  • Final merged: ${mergeResult.sizeFormatted}`, 'info');
+                        logMessage('', 'info');
+                    }
+
+                } catch (error) {
+                    // Non-fatal error: log warning and continue with region subset only
+                    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'warning');
+                    logMessage(`⚠️ WARNING: Normal mode processing failed: ${error.message}`, 'warning');
+                    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'warning');
+                    logMessage('Falling back to fast mode (region subset only).', 'warning');
+                    logMessage('Your analysis will continue but without unmapped reads.', 'warning');
+                    logMessage('', 'warning');
+
+                    processingMode = 'normal-failed';
+                    // Continue with finalBamPath = subsetBamName
+                }
+
+                logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
             }
-            logMessage(`Created Blob for subset BAI: ${subsetBaiPath}`, 'info');
+            // ============================================================
+            // END NORMAL MODE
+            // ============================================================
+
+            // Index Final BAM (works for both fast mode and normal mode)
+            logMessage(`📋 ${normalMode ? 'Step 3/3' : 'Step 2/2'}: Indexing final BAM...`, 'info');
+            await indexBam(CLI, finalBamPath);
+
+            // Create Blob for final BAM
+            const finalBam = await CLI.fs.readFile(finalBamPath);
+            const finalBamBlob = new Blob([finalBam], { type: 'application/octet-stream' });
+            if (finalBamBlob.size === 0) {
+                logMessage(`Failed to create Blob from BAM file ${finalBamPath}.`, 'error');
+                throw new Error(`Failed to create Blob from BAM file ${finalBamPath}.`);
+            }
+            const finalBamSizeMB = (finalBamBlob.size / 1024 / 1024).toFixed(2);
+            logMessage(`Created Blob for final BAM: ${finalBamPath} (${finalBamSizeMB} MB)`, 'info');
+
+            // Create Blob for final BAI
+            const finalBaiPath = `${finalBamPath}.bai`;
+            const finalBai = await CLI.fs.readFile(finalBaiPath);
+            const finalBaiBlob = new Blob([finalBai], { type: 'application/octet-stream' });
+            if (finalBaiBlob.size === 0) {
+                logMessage(`Failed to create Blob from BAI file ${finalBaiPath}.`, 'error');
+                throw new Error(`Failed to create Blob from BAI file ${finalBaiPath}.`);
+            }
+            const finalBaiSizeKB = (finalBaiBlob.size / 1024).toFixed(2);
+            logMessage(`Created Blob for final BAI: ${finalBaiPath} (${finalBaiSizeKB} KB)`, 'info');
 
             subsetBamAndBaiBlobs.push({
-                subsetBamBlob,
-                subsetBaiBlob,
-                subsetName: subsetBamName
+                subsetBamBlob: finalBamBlob,
+                subsetBaiBlob: finalBaiBlob,
+                subsetName: finalBamPath,
+                processingMode: processingMode  // ADDED: Track which mode was used
             });
 
-            logMessage(`Subset BAM and BAI for ${pair.bam.name} created successfully.`, 'success');
+            // Final success message
+            const modeDescription = normalMode
+                ? (processingMode === 'normal-merged' ? '(Region + Unmapped)' : '(Region only - no unmapped found)')
+                : '(Fast mode)';
+
+            logMessage(`✅ Processing complete for ${pair.bam.name} ${modeDescription}`, 'success');
+            logMessage('', 'info');
 
             return {
                 subsetBamAndBaiBlobs,
                 detectedAssembly,
-                region
+                region,
+                processingMode  // ADDED: Return mode info for debugging
             };
         }
     } catch (err) {
