@@ -45,6 +45,10 @@ export class AppController extends BaseController {
         this.isSubmitting = false;
         this.isExtracting = false;
 
+        // Extraction mode flag (determines if download buttons should be shown)
+        // true = "Extract Region" clicked, false = "Submit Jobs" clicked
+        this.showDownloadButtons = false;
+
         // Button references (cached for performance)
         this.submitBtn = null;
         this.extractBtn = null;
@@ -170,6 +174,16 @@ export class AppController extends BaseController {
                 this.submitBtn.textContent = 'Submitting...';
             }
 
+            // IMPORTANT: Don't show download buttons during job submission
+            // Extraction is only for preparing files to send to backend
+            this.showDownloadButtons = false;
+
+            // Clear any existing download buttons from regionOutput
+            const regionOutputDiv = document.getElementById('regionOutput');
+            if (regionOutputDiv) {
+                regionOutputDiv.innerHTML = '';
+            }
+
             // Get selected files
             const selectedFiles = this.fileController.getSelectedFiles();
 
@@ -288,6 +302,10 @@ export class AppController extends BaseController {
                 this.extractBtn.textContent = 'Extracting...';
             }
 
+            // IMPORTANT: Show download buttons for local extraction
+            // User wants to download the extracted region files locally
+            this.showDownloadButtons = true;
+
             this._log('Extract button clicked', 'info');
 
             // Get selected files
@@ -345,6 +363,15 @@ export class AppController extends BaseController {
         this.jobController.jobView.clearAll();
         this.cohortController.cohortView.clearAll();
 
+        // Clear download buttons area
+        const regionOutputDiv = document.getElementById('regionOutput');
+        if (regionOutputDiv) {
+            regionOutputDiv.innerHTML = '';
+        }
+
+        // Reset extraction mode flag
+        this.showDownloadButtons = false;
+
         // Clear form inputs
         const emailInput = document.getElementById('email');
         const cohortAliasInput = document.getElementById('cohortAlias');
@@ -378,7 +405,16 @@ export class AppController extends BaseController {
      * @param {string} eventData.region - Extracted region
      */
     handleExtractionComplete({ pair, result, subsetBamAndBaiBlobs, detectedAssembly, region }) {
-        this._log('Handling extraction complete - creating download UI', 'info');
+        this._log('Handling extraction complete', 'info', { showDownloadButtons: this.showDownloadButtons });
+
+        // CRITICAL: Only show download buttons when "Extract Region" was clicked
+        // When "Submit Jobs" is clicked, extraction happens internally but should not show download UI
+        if (!this.showDownloadButtons) {
+            this._log('Skipping download UI creation (job submission mode)', 'info');
+            return;
+        }
+
+        this._log('Creating download UI for local extraction', 'info');
 
         const regionOutputDiv = document.getElementById('regionOutput');
         if (!regionOutputDiv) {

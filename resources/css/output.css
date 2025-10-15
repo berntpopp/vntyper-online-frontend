@@ -8,16 +8,30 @@
     padding: 20px;
     border: 1px solid var(--color-border-medium, #ddd);
     border-radius: 8px; /* Consistent with container border-radius */
-    position: relative; /* To position spinner and countdown properly */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: relative; /* For absolute positioning of placeholder */
+    display: block;
     min-height: 58px; /* Match production height */
 }
 
 /* Region Output Styles */
 #regionOutput {
     margin-top: 20px;
+    /* NEW: Center region output with max-width */
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+/* Cohorts Container Styles */
+#cohortsContainer,
+.cohorts-container {
+    margin-top: 20px;
+    /* NEW: Center cohorts with max-width like production */
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
 }
 
 /* Job Output Styles */
@@ -26,6 +40,11 @@
     display: flex;
     flex-direction: column;
     gap: 16px; /* 8px spacing system - medium gap */
+    /* NEW: Center job cards with max-width like production */
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
 }
 
 /* Job Item - Card-Based Layout */
@@ -187,11 +206,16 @@
 
 /* Placeholder Message */
 .placeholder-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     text-align: center;
     color: var(--color-text-muted, #666);
     font-style: italic;
     margin: 0;
     padding: 0;
+    width: 100%;
 }
 
 /* Shareable Link Container (within job item) */
