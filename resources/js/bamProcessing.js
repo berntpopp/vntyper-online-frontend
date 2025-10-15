@@ -126,10 +126,10 @@ function detectPipelineAndWarn(header) {
 
     if (lowerHeader.includes("dragen")) {
         pipeline = "Dragen";
-        warningMessage = "<strong>⚠️ PIPELINE WARNING:</strong> The Dragen pipeline has known issues aligning reads in the MUC1 VNTR region. For best results, consider using the offline VNtyper CLI in normal mode.";
+        warningMessage = "⚠️  Pipeline Warning: The Dragen pipeline has known issues aligning reads in the MUC1 VNTR region. For best results, consider using the offline VNtyper CLI in normal mode.";
     } else if (lowerHeader.includes("clc") || lowerHeader.includes("clcbio")) {
         pipeline = "CLC";
-        warningMessage = "<strong>⚠️ PIPELINE WARNING:</strong> The CLC pipeline has not been fully tested and may have issues aligning reads in the MUC1 VNTR region. Please verify results carefully or use the offline VNtyper CLI.";
+        warningMessage = "⚠️  Pipeline Warning: The CLC pipeline has not been fully tested and may have issues aligning reads in the MUC1 VNTR region. Please verify results carefully or use the offline VNtyper CLI.";
     } else if (lowerHeader.includes("bwa")) {
         pipeline = "BWA";
     }
@@ -493,9 +493,14 @@ export async function extractRegionAndIndex(CLI, pair) {
                 const unmappedBamName = `unmapped_${pair.bam.name}`;
 
                 try {
-                    // Step 1: Extract unmapped reads from original BAM
-                    logMessage('📋 Step 1/3: Extracting unmapped reads...', 'info');
-                    const unmappedResult = await extractUnmappedReads(CLI, bamPath, unmappedBamName);
+                    // Step 1: Extract unmapped reads using BGZF offset seeking (FAST!)
+                    logMessage('📋 Step 1/3: Extracting unmapped reads (BGZF offset seeking)...', 'info');
+
+                    // ADDED: Check subset BAM before extraction
+                    const subsetStats = await CLI.fs.stat(subsetBamName);
+                    logMessage(`✓ Region subset BAM exists: ${subsetBamName} (${(subsetStats.size / 1024 / 1024).toFixed(2)} MB)`, 'info');
+
+                    const unmappedResult = await extractUnmappedReads(CLI, pair.bam, pair.bai, unmappedBamName);
 
                     // Check if we have any unmapped reads
                     if (unmappedResult.isEmpty || unmappedResult.size === 0) {
@@ -506,8 +511,19 @@ export async function extractRegionAndIndex(CLI, pair) {
                     } else {
                         logMessage(`✅ Found ${unmappedResult.count} unmapped reads (${unmappedResult.sizeFormatted})`, 'success');
 
+                        // ADDED: Verify unmapped BAM was written to virtual FS
+                        try {
+                            const unmappedStats = await CLI.fs.stat(unmappedBamName);
+                            logMessage(`✓ Unmapped BAM exists in virtual FS: ${unmappedBamName} (${(unmappedStats.size / 1024 / 1024).toFixed(2)} MB)`, 'info');
+                        } catch (e) {
+                            throw new Error(`Unmapped BAM file ${unmappedBamName} not found in virtual FS: ${e.message}`);
+                        }
+
                         // Step 2: Merge region subset + unmapped reads
                         logMessage('📋 Step 2/3: Merging region subset + unmapped reads...', 'info');
+                        logMessage(`  Input 1: ${subsetBamName} (${(subsetStats.size / 1024 / 1024).toFixed(2)} MB)`, 'info');
+                        logMessage(`  Input 2: ${unmappedBamName} (${unmappedResult.sizeFormatted})`, 'info');
+
                         const mergedBamName = `merged_${pair.bam.name}`;
 
                         const mergeResult = await mergeBamFiles(
@@ -518,15 +534,44 @@ export async function extractRegionAndIndex(CLI, pair) {
 
                         logMessage(`✅ Merge complete: ${mergeResult.sizeFormatted}`, 'success');
 
+                        // NOTE: Don't check file size - merged is compressed while inputs are uncompressed
+                        // So merged will be SMALLER than sum of inputs due to BGZF compression
+
+                        // ADDED: Count reads in each file for verification
+                        logMessage('Verifying read counts...', 'info');
+                        try {
+                            const subsetCount = await CLI.exec('samtools', ['view', '-c', subsetBamName]);
+                            const unmappedCount = await CLI.exec('samtools', ['view', '-c', unmappedBamName]);
+                            const mergedCount = await CLI.exec('samtools', ['view', '-c', mergedBamName]);
+
+                            logMessage(`  Region reads: ${subsetCount.trim()}`, 'info');
+                            logMessage(`  Unmapped reads: ${unmappedCount.trim()}`, 'info');
+                            logMessage(`  Merged total: ${mergedCount.trim()}`, 'info');
+
+                            const expectedTotal = parseInt(subsetCount.trim()) + parseInt(unmappedCount.trim());
+                            const actualTotal = parseInt(mergedCount.trim());
+
+                            if (actualTotal < expectedTotal * 0.9) {
+                                logMessage(`⚠️ WARNING: Merged file missing reads!`, 'error');
+                                logMessage(`  Expected: ${expectedTotal} reads`, 'error');
+                                logMessage(`  Got: ${actualTotal} reads`, 'error');
+                                logMessage(`  Missing: ${expectedTotal - actualTotal} reads`, 'error');
+                            } else {
+                                logMessage(`✓ Read count verification passed`, 'success');
+                            }
+                        } catch (countError) {
+                            logMessage(`Could not verify read counts: ${countError.message}`, 'warning');
+                        }
+
                         // Use merged BAM as final output
                         finalBamPath = mergedBamName;
                         processingMode = 'normal-merged';
 
                         logMessage('', 'info');
                         logMessage('📊 NORMAL MODE SUMMARY:', 'success');
-                        logMessage(`  • Region reads: ${subsetBamName}`, 'info');
-                        logMessage(`  • Unmapped reads: ${unmappedResult.count} reads (${unmappedResult.sizeFormatted})`, 'info');
-                        logMessage(`  • Final merged: ${mergeResult.sizeFormatted}`, 'info');
+                        logMessage(`  • Region BAM: ${subsetBamName} (${(subsetStats.size / 1024 / 1024).toFixed(2)} MB)`, 'info');
+                        logMessage(`  • Unmapped BAM: ${unmappedResult.count} reads (${unmappedResult.sizeFormatted})`, 'info');
+                        logMessage(`  • Merged BAM: ${mergedBamName} (${mergeResult.sizeFormatted})`, 'info');
                         logMessage('', 'info');
                     }
 

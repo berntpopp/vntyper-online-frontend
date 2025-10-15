@@ -4,6 +4,8 @@ import { BaseController } from './BaseController.js';
 import { errorHandler } from '../errorHandling.js';
 import { loadCohortFromURL } from '../jobManager.js';
 import { Job } from '../models/Job.js';
+import { blobManager } from '../blobManager.js';
+import { logMessage } from '../log.js';
 
 /**
  * App Controller - Main application lifecycle controller
@@ -144,6 +146,7 @@ export class AppController extends BaseController {
     bindEvents() {
         this.on('app:reset', this.handleReset);
         this.on('app:error', this.handleAppError);
+        this.on('extraction:complete', this.handleExtractionComplete);
     }
 
     /**
@@ -363,6 +366,89 @@ export class AppController extends BaseController {
     handleAppError(errorData) {
         this._log('Application error', 'error', errorData);
         // Could add centralized error reporting here
+    }
+
+    /**
+     * Handle extraction complete event - create download UI
+     * @param {Object} eventData - Event data from ExtractionController
+     * @param {Object} eventData.pair - The BAM/BAI file pair
+     * @param {Object} eventData.result - Full extraction result
+     * @param {Array} eventData.subsetBamAndBaiBlobs - Array of {subsetBamBlob, subsetBaiBlob, subsetName}
+     * @param {string} eventData.detectedAssembly - Detected assembly
+     * @param {string} eventData.region - Extracted region
+     */
+    handleExtractionComplete({ pair, result, subsetBamAndBaiBlobs, detectedAssembly, region }) {
+        this._log('Handling extraction complete - creating download UI', 'info');
+
+        const regionOutputDiv = document.getElementById('regionOutput');
+        if (!regionOutputDiv) {
+            this._log('regionOutput div not found', 'error');
+            return;
+        }
+
+        // Clear previous output
+        regionOutputDiv.innerHTML = '';
+
+        const createdUrls = [];
+
+        // Create download links for each subset
+        subsetBamAndBaiBlobs.forEach((subset) => {
+            const { subsetBamBlob, subsetBaiBlob, subsetName } = subset;
+            const subsetBaiName = `${subsetName}.bai`;
+
+            // Use blobManager to track URLs for automatic cleanup
+            const downloadBamUrl = blobManager.create(subsetBamBlob, {
+                filename: subsetName,
+                type: 'BAM'
+            });
+            const downloadBaiUrl = blobManager.create(subsetBaiBlob, {
+                filename: subsetBaiName,
+                type: 'BAI'
+            });
+
+            createdUrls.push(downloadBamUrl, downloadBaiUrl);
+
+            // Download Link for BAM
+            const downloadBamLink = document.createElement('a');
+            downloadBamLink.href = downloadBamUrl;
+            downloadBamLink.download = subsetName;
+            downloadBamLink.textContent = `Download ${subsetName}`;
+            downloadBamLink.classList.add('download-link', 'download-button');
+            downloadBamLink.setAttribute('aria-label', `Download subset BAM file ${subsetName}`);
+
+            // Download Link for BAI
+            const downloadBaiLink = document.createElement('a');
+            downloadBaiLink.href = downloadBaiUrl;
+            downloadBaiLink.download = subsetBaiName;
+            downloadBaiLink.textContent = `Download ${subsetBaiName}`;
+            downloadBaiLink.classList.add('download-link', 'download-button');
+            downloadBaiLink.setAttribute('aria-label', `Download subset BAI file ${subsetBaiName}`);
+
+            // Create a container for the download links
+            const linkContainer = document.createElement('div');
+            linkContainer.classList.add('download-container', 'mb-2');
+            linkContainer.appendChild(downloadBamLink);
+            linkContainer.appendChild(downloadBaiLink);
+
+            // Append the container to the regionOutput div
+            regionOutputDiv.appendChild(linkContainer);
+
+            // Create and append the horizontal divider after the container
+            const divider = document.createElement('hr');
+            divider.classList.add('separator');
+            regionOutputDiv.appendChild(divider);
+
+            logMessage(`Download links provided for ${subsetName} and ${subsetBaiName}.`, 'info');
+        });
+
+        // Revoke blob URLs after user has had time to download (5 minutes)
+        // blobManager will also auto-cleanup old URLs periodically
+        setTimeout(() => {
+            const revokedCount = blobManager.revokeMultiple(createdUrls);
+            logMessage(`Revoked ${revokedCount} Blob URLs from region extraction`, 'info');
+        }, 300000); // 5 minutes
+
+        this._log('Download UI created successfully', 'success');
     }
 
     /**

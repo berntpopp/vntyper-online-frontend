@@ -24,7 +24,7 @@ async function displayVersions() {
 
     // Fetch Tool Version from Backend
     try {
-        logMessage(`Fetching versions from API endpoint: ${versionEndpoint}`, 'info');
+        logMessage(`Fetching versions from API endpoint: ${versionEndpoint}`, 'debug');
         const response = await fetch(versionEndpoint);
         if (!response.ok) {
             throw new Error(`Failed to fetch versions: ${response.statusText}`);
@@ -52,19 +52,18 @@ async function displayVersions() {
 
         logMessage('Version information fetched and displayed successfully.', 'success');
     } catch (error) {
-        logMessage(`Error fetching versions: ${error.message}`, 'error');
-        
-        // Optionally display an error message to the user
+        // Silent failure for local development (backend not running)
+        logMessage(`Backend API not available (local mode): ${error.message}`, 'debug');
+
+        // Set to N/A silently
         const apiVersionElement = document.getElementById('apiVersion');
         if (apiVersionElement) {
             apiVersionElement.textContent = 'N/A';
-            logMessage('API version set to N/A due to fetch error.', 'warning');
         }
 
         const toolVersionElement = document.getElementById('toolVersion');
         if (toolVersionElement) {
             toolVersionElement.textContent = 'N/A';
-            logMessage('Tool version set to N/A due to fetch error.', 'warning');
         }
     }
 }

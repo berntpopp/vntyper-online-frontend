@@ -366,7 +366,7 @@ export function pollCohortStatusAPI(
  */
 export async function getJobQueueStatus(jobId) {
     try {
-        logMessage(`Fetching queue status${jobId ? ` for Job ID: ${jobId}` : ''}`, 'info');
+        logMessage(`Fetching queue status${jobId ? ` for Job ID: ${jobId}` : ''}`, 'debug');
 
         let url = `${window.CONFIG.API_URL}/job-queue/`;
         if (jobId) {
@@ -384,7 +384,7 @@ export async function getJobQueueStatus(jobId) {
     } catch (error) {
         logMessage(
             `Error in getJobQueueStatus${jobId ? ` for Job ID ${jobId}` : ''}: ${error.message}`,
-            'error'
+            'debug'
         );
         throw error;
     }

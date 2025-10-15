@@ -27,7 +27,7 @@ export function initializeServerLoad() {
      * Adjusts the polling interval based on the number of jobs in the queue.
      */
     async function updateServerLoad() {
-        logMessage('Fetching current server load status...', 'info');
+        logMessage('Fetching current server load status...', 'debug');
         try {
             const data = await getJobQueueStatus();
             const totalJobsInQueue = data.total_jobs_in_queue || 0;
@@ -56,7 +56,24 @@ export function initializeServerLoad() {
             adjustServerLoadUpdateInterval(totalJobsInQueue);
 
         } catch (error) {
-            logMessage(`Error updating server load: ${error.message}`, 'error');
+            // Silent failure for local development (backend not running)
+            logMessage(`Backend API not available (local mode): ${error.message}`, 'debug');
+
+            // Set to default/unknown state silently
+            if (totalJobsInQueueSpan) {
+                totalJobsInQueueSpan.textContent = '-';
+            }
+
+            if (serverLoadIndicator) {
+                serverLoadIndicator.classList.remove('load-orange', 'load-red', 'load-blue');
+                serverLoadIndicator.classList.add('load-blue'); // Default to blue (unknown/local)
+            }
+
+            // Don't keep polling if backend is down
+            if (serverLoadInterval) {
+                clearInterval(serverLoadInterval);
+                serverLoadInterval = null;
+            }
         }
     }
 
