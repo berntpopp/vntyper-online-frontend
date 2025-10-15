@@ -9,6 +9,10 @@
     border: 1px solid var(--color-border-medium, #ddd);
     border-radius: 8px; /* Consistent with container border-radius */
     position: relative; /* To position spinner and countdown properly */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 58px; /* Match production height */
 }
 
 /* Region Output Styles */
@@ -186,8 +190,8 @@
     text-align: center;
     color: var(--color-text-muted, #666);
     font-style: italic;
-    margin-top: 20px;
-    padding: 40px 20px;
+    margin: 0;
+    padding: 0;
 }
 
 /* Shareable Link Container (within job item) */
