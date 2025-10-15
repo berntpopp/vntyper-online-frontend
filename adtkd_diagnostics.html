@@ -22,12 +22,25 @@
   
   <!-- Link to CSS Files -->
   <link rel="stylesheet" href="resources/css/base.css">
+  <link rel="stylesheet" href="resources/css/navbar.css">
   <link rel="stylesheet" href="resources/css/footer.css">
 </head>
 <body>
 
   <div class="container">
-    <h1>ADTKD diagnostics</h1>
+    <!-- Header with Logo and Back Button -->
+    <nav class="navbar" aria-label="Main navigation">
+      <div class="navbar-container">
+        <a href="index.html" class="header" style="text-decoration: none; color: inherit; cursor: pointer;" aria-label="Back to Home">
+          <img src="resources/assets/logo/vntyperonline_logo_80px.png" alt="vntyper-online Logo" class="logo">
+          <h2>vntyper-online</h2>
+        </a>
+        <a href="index.html" class="back-link" aria-label="Back to Home">← Back to Home</a>
+      </div>
+    </nav>
+
+    <main>
+      <h1>ADTKD diagnostics</h1>
 
     <h2>Overview and genetic concepts</h2>
     <p>
@@ -120,11 +133,17 @@
       <!-- Pathway B arrow -->
       <line x1="550" y1="140" x2="550" y2="160" stroke="#000" stroke-width="2" marker-end="url(#arrow)"/>
     </svg>
+    </main>
   </div>
 
   <footer class="footer">
     <div class="footer-bottom">
       <p>&copy; <span id="currentYear"></span> vntyper-online. All rights reserved.</p>
+      <p>
+        <a href="impressum_en.html" aria-label="Imprint">Imprint</a> |
+        <a href="contact.html" aria-label="Contact">Contact</a> |
+        <a href="https://github.com/berntpopp/vntyper-online-backend" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">GitHub</a>
+      </p>
     </div>
   </footer>
   

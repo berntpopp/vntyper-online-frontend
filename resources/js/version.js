@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.53.0'; // Improved optional inputs UI with cleaner layout and visible helper text
+const frontendVersion = '0.54.0'; // Normalize subpage design with navigation, fix disclaimer modal X button, remove target="_blank" from internal links
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;

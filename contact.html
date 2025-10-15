@@ -3,27 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <title>Contact - vntyper-online</title>
+
+  <!-- Viewport Meta Tag -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Meta Description -->
+  <meta name="description" content="Contact vntyper-online for support and inquiries.">
+
+  <!-- Canonical Link -->
+  <link rel="canonical" href="https://vntyper.org/contact.html" />
+
+  <!-- Favicon Links -->
+  <link rel="icon" type="image/png" href="resources/assets/favicon/favicon-48x48.png" sizes="48x48" />
+  <link rel="icon" type="image/svg+xml" href="resources/assets/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="resources/assets/favicon/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="resources/assets/favicon/apple-touch-icon.png" />
+  <link rel="manifest" href="resources/assets/favicon/site.webmanifest" />
+
   <!-- Include CSS and any other head content -->
   <link rel="stylesheet" href="resources/css/base.css">
+  <link rel="stylesheet" href="resources/css/navbar.css">
   <link rel="stylesheet" href="resources/css/footer.css">
 </head>
 <body>
 
   <div class="container">
+    <!-- Header with Logo and Back Button -->
+    <nav class="navbar" aria-label="Main navigation">
+      <div class="navbar-container">
+        <a href="index.html" class="header" style="text-decoration: none; color: inherit; cursor: pointer;" aria-label="Back to Home">
+          <img src="resources/assets/logo/vntyperonline_logo_80px.png" alt="vntyper-online Logo" class="logo">
+          <h2>vntyper-online</h2>
+        </a>
+        <a href="index.html" class="back-link" aria-label="Back to Home">← Back to Home</a>
+      </div>
+    </nav>
 
-    <h1>Contact Us</h1>
+    <main>
+      <h1>Contact Us</h1>
 
-    <p>If you have any questions or need support, please reach out to us at:</p>
+      <p>If you have any questions or need support, please reach out to us at:</p>
 
-    <p>Email: <span id="emailLink">support [at] vntyper.org</span></p>
-
+      <p>Email: <span id="emailLink">support [at] vntyper.org</span></p>
+    </main>
   </div>
 
   <!-- Footer -->
   <footer class="footer">
-    <!-- ... footer content ... -->
     <div class="footer-bottom">
       <p>&copy; <span id="currentYear"></span> vntyper-online. All rights reserved.</p>
+      <p>
+        <a href="impressum_en.html" aria-label="Imprint">Imprint</a> |
+        <a href="contact.html" aria-label="Contact">Contact</a> |
+        <a href="https://github.com/berntpopp/vntyper-online-backend" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">GitHub</a>
+      </p>
     </div>
   </footer>
 

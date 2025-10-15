@@ -1,6 +1,6 @@
 {
   "name": "vntyper-frontend",
-  "version": "0.53.0",
+  "version": "0.54.0",
   "type": "module",
   "description": "VNtyper Online - Frontend testing infrastructure",
   "scripts": {

@@ -110,6 +110,31 @@
     text-decoration-thickness: 2px;
 }
 
+/* Back Link Styles (for subpages) */
+.back-link {
+    text-decoration: none;
+    color: #096162;
+    font-size: 1em;
+    font-weight: 500;
+    transition: color 0.3s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+.back-link:hover {
+    color: #005f60;
+    background-color: rgba(9, 97, 98, 0.05);
+    transform: translateX(-2px);
+}
+
+.back-link:focus-visible {
+    outline: 2px solid #0a9396;
+    outline-offset: 2px;
+    text-decoration: underline;
+}
+
 /* Server Load Indicator Styles */
 
 .server-load-indicator {

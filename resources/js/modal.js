@@ -158,6 +158,23 @@ export function initializeModal() {
         agreeBtn.addEventListener("click", handleAgree);
     }
 
+    // Handle Close Button in Disclaimer Modal (same as agree)
+    const disclaimerModal = document.getElementById("disclaimerModal");
+    const disclaimerCloseButton = disclaimerModal ? disclaimerModal.querySelector(".modal-close") : null;
+    if (disclaimerCloseButton) {
+        disclaimerCloseButton.addEventListener("click", () => {
+            handleAgree();
+        });
+    }
+
+    // Handle Overlay Click in Disclaimer Modal (same as agree)
+    const disclaimerOverlay = disclaimerModal ? disclaimerModal.querySelector(".modal-overlay") : null;
+    if (disclaimerOverlay) {
+        disclaimerOverlay.addEventListener("click", () => {
+            handleAgree();
+        });
+    }
+
     // Listen for the 'reopenDisclaimerModal' event to reopen the modal
     document.addEventListener('reopenDisclaimerModal', openDisclaimerModal);
 

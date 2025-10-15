@@ -22,13 +22,26 @@
   
   <!-- Link to CSS Files -->
   <link rel="stylesheet" href="resources/css/base.css">
+  <link rel="stylesheet" href="resources/css/navbar.css">
   <link rel="stylesheet" href="resources/css/footer.css">
-  
+
 </head>
 <body>
 
   <div class="container">
-    <h1>Imprint</h1>
+    <!-- Header with Logo and Back Button -->
+    <nav class="navbar" aria-label="Main navigation">
+      <div class="navbar-container">
+        <a href="index.html" class="header" style="text-decoration: none; color: inherit; cursor: pointer;" aria-label="Back to Home">
+          <img src="resources/assets/logo/vntyperonline_logo_80px.png" alt="vntyper-online Logo" class="logo">
+          <h2>vntyper-online</h2>
+        </a>
+        <a href="index.html" class="back-link" aria-label="Back to Home">← Back to Home</a>
+      </div>
+    </nav>
+
+    <main>
+      <h1>Imprint</h1>
     
     <p><strong>vntyper-online</strong></p>
     <p>
@@ -74,19 +87,25 @@
       <strong>Intellectual Property Violation:</strong> If you suspect that one of your intellectual property rights is being violated from this website, please immediately inform us by email so that prompt remedial action can be taken. Please note: Engaging a lawyer for the service provider's costly cease-and-desist notice does not correspond to our actual or presumed intention.
     </p>
     <p>
-      According to the judgment of May 12, 1998 - 312 O 85/98 - “Liability for Links,” the Hamburg Regional Court decided that by placing a link, you might be partly responsible for the content of the linked site. This can only be prevented by explicitly distancing yourself from these contents. ‘Hereby, we expressly distance ourselves from all contents of all linked sites on our website and do not adopt these contents as our own. This declaration applies to all links placed on our website.’
+      According to the judgment of May 12, 1998 - 312 O 85/98 - "Liability for Links," the Hamburg Regional Court decided that by placing a link, you might be partly responsible for the content of the linked site. This can only be prevented by explicitly distancing yourself from these contents. 'Hereby, we expressly distance ourselves from all contents of all linked sites on our website and do not adopt these contents as our own. This declaration applies to all links placed on our website.'
     </p>
+    </main>
   </div>
-  
+
   <!-- Footer -->
   <footer class="footer">
     <div class="footer-bottom">
       <p>&copy; <span id="currentYear"></span> vntyper-online. All rights reserved.</p>
       <p>
-        <a href="impressum_de.html">Deutsche Version</a>
+        <a href="impressum_de.html" aria-label="German Version">Deutsche Version</a> |
+        <a href="contact.html" aria-label="Contact">Contact</a> |
+        <a href="https://github.com/berntpopp/vntyper-online-backend" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">GitHub</a>
       </p>
     </div>
   </footer>
+
+  <!-- Include version.js to update dynamic elements like the current year -->
+  <script src="resources/js/version.js"></script>
 
 </body>
 </html>
