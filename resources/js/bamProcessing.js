@@ -144,7 +144,7 @@ function detectPipelineAndWarn(header) {
 // ===============================================================
 
 /**
- * Extracts potential assembly names from assembly hints.
+ * Extracts potential assembly names from assembly hints using context-aware scoring.
  * @param {string[]} assemblyHints - Array of strings extracted from @PG lines.
  * @returns {string|null} - Detected assembly name or null if not found.
  */
@@ -153,43 +153,229 @@ function extractAssemblyFromHints(assemblyHints) {
     const assemblyIdentifiers = {
         hg19: ['hg19'],
         hg38: ['hg38'],
-        GRCh37: ['GRCh37', 'hs37'],
-        GRCh38: ['GRCh38', 'hs38', 'hs38DH']
-        // Add more assemblies and identifiers if needed
+        GRCh37: ['GRCh37', 'hs37d5', 'hs37'],
+        GRCh38: ['GRCh38', 'hs38DH', 'hs38']
     };
 
-    // Combine all hints into a single string for easier searching
-    const hintsString = assemblyHints.join(' ').toLowerCase();
+    // Context patterns with their weights
+    // POSITIVE contexts (indicate this assembly IS being used)
+    const positiveContexts = [
+        { pattern: /--ref(?:erence)?[-=\s:]/i, weight: 10, name: '--reference' },
+        { pattern: /--ref-dir[-=\s:]/i, weight: 10, name: '--ref-dir' },
+        { pattern: /--ht-reference[-=\s:]/i, weight: 10, name: '--ht-reference' },
+        { pattern: /--build-hash-table.*--ht-reference/i, weight: 10, name: 'hash table reference' },
+        { pattern: /--output-directory\s+(\S+)/i, weight: 8, name: '--output-directory' },
+        { pattern: /\.fa(?:sta)?[\s"']/i, weight: 5, name: 'reference file' },
+        { pattern: /\/reference\//i, weight: 5, name: 'reference path' }
+    ];
+
+    // NEGATIVE contexts (indicate this assembly is being EXCLUDED/SKIPPED)
+    const negativeContexts = [
+        { pattern: /--skip[-_]?(?:vc-on-)?contigs?[-=\s:]/i, weight: -10, name: '--skip contigs' },
+        { pattern: /--exclude[-_]?contigs?[-=\s:]/i, weight: -10, name: '--exclude contigs' },
+        { pattern: /--decoy[-_]?contigs?[-=\s:]/i, weight: -8, name: '--decoy contigs' },
+        { pattern: /vc-decoy-contigs?[-=\s:]/i, weight: -8, name: 'variant caller decoys' },
+        { pattern: /--ignore[-=\s:]/i, weight: -10, name: '--ignore' }
+    ];
+
+    // Track all matches with their scores
+    const matchesFound = [];
 
     for (const [assembly, identifiers] of Object.entries(assemblyIdentifiers)) {
         for (const id of identifiers) {
-            if (hintsString.includes(id.toLowerCase())) {
-                logMessage(`Assembly detected from @PG lines: ${assembly}`, 'info');
-                return assembly;
-            }
+            const lowerCaseId = id.toLowerCase();
+            const regex = new RegExp(`\\b${lowerCaseId}\\b`, 'i');
+
+            // Find all contexts where this identifier appears
+            assemblyHints.forEach((hint) => {
+                if (regex.test(hint)) {
+                    // Find the position of the match
+                    const matchResult = hint.match(regex);
+                    if (!matchResult) return;
+
+                    const matchIndex = matchResult.index;
+                    const contextBefore = hint.substring(Math.max(0, matchIndex - 100), matchIndex);
+                    const contextAfter = hint.substring(matchIndex, Math.min(hint.length, matchIndex + 100));
+                    const fullContext = contextBefore + contextAfter;
+
+                    // Calculate score based on context
+                    let score = 1; // Base score for finding the identifier
+                    let matchedContexts = [];
+
+                    // Check positive contexts
+                    for (const ctx of positiveContexts) {
+                        if (ctx.pattern.test(contextBefore)) {
+                            score += ctx.weight;
+                            matchedContexts.push({ type: 'positive', name: ctx.name, weight: ctx.weight });
+                        }
+                    }
+
+                    // Check negative contexts
+                    for (const ctx of negativeContexts) {
+                        if (ctx.pattern.test(contextBefore)) {
+                            score += ctx.weight; // Note: weight is negative
+                            matchedContexts.push({ type: 'negative', name: ctx.name, weight: ctx.weight });
+                        }
+                    }
+
+                    matchesFound.push({
+                        assembly: assembly,
+                        identifier: id,
+                        context: fullContext,
+                        contextBefore: contextBefore,
+                        score: score,
+                        matchedContexts: matchedContexts,
+                        priority: identifiers.indexOf(id)
+                    });
+                }
+            });
         }
     }
 
-    logMessage('No assembly detected from @PG lines.', 'info');
-    return null; // Return null if no assembly is found
+    // Filter out negative-scored matches
+    const positiveMatches = matchesFound.filter(m => m.score > 0);
+
+    if (positiveMatches.length === 0 && matchesFound.length > 0) {
+        logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'warning');
+        logMessage('⚠️  WARNING: Found assembly identifiers, but all in negative contexts (skip/exclude)', 'warning');
+        matchesFound.forEach(match => {
+            logMessage(`  • ${match.assembly} '${match.identifier}' in: ${match.matchedContexts.map(c => c.name).join(', ')}`, 'warning');
+        });
+        logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'warning');
+        return null;
+    }
+
+    if (positiveMatches.length === 0) {
+        logMessage('No assembly detected from @PG lines.', 'info');
+        return null;
+    }
+
+    // Log all positive matches with their scores
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+    logMessage(`Found ${positiveMatches.length} assembly identifier(s) in @PG lines:`, 'info');
+    positiveMatches.forEach(match => {
+        const contextType = match.matchedContexts.length > 0 ?
+            match.matchedContexts.map(c => `${c.type}: ${c.name} (${c.weight > 0 ? '+' : ''}${c.weight})`).join(', ') :
+            'neutral context';
+        logMessage(`  • ${match.assembly} (matched '${match.identifier}') - Score: ${match.score}`, match.score > 5 ? 'info' : 'debug');
+        logMessage(`    Context: ${contextType}`, 'debug');
+        logMessage(`    Text: "...${match.context.substring(0, 80)}..."`, 'debug');
+    });
+
+    // Sort by score (highest first), then by assembly preference, then by priority
+    const assemblyOrder = ['GRCh38', 'GRCh37', 'hg38', 'hg19'];
+    positiveMatches.sort((a, b) => {
+        // First, sort by score (higher is better)
+        if (b.score !== a.score) {
+            return b.score - a.score;
+        }
+        // Then by assembly preference
+        const aOrder = assemblyOrder.indexOf(a.assembly);
+        const bOrder = assemblyOrder.indexOf(b.assembly);
+        if (aOrder !== bOrder) {
+            return aOrder - bOrder;
+        }
+        // Finally by identifier priority (more specific first)
+        return a.priority - b.priority;
+    });
+
+    const selectedMatch = positiveMatches[0];
+
+    // Check for conflicts with significantly different scores
+    const assemblyCandidates = {};
+    positiveMatches.forEach(match => {
+        if (!assemblyCandidates[match.assembly] || assemblyCandidates[match.assembly].score < match.score) {
+            assemblyCandidates[match.assembly] = match;
+        }
+    });
+
+    const uniqueAssemblies = Object.keys(assemblyCandidates);
+
+    if (uniqueAssemblies.length > 1) {
+        logMessage(`⚠️  Multiple assemblies detected:`, 'warning');
+        uniqueAssemblies.forEach(asm => {
+            const match = assemblyCandidates[asm];
+            logMessage(`    ${asm}: score=${match.score}, identifier='${match.identifier}'`, 'warning');
+        });
+        logMessage(`    Selecting ${selectedMatch.assembly} (highest score: ${selectedMatch.score})`, 'warning');
+        logMessage(`    If incorrect, please select assembly manually from dropdown.`, 'warning');
+    }
+
+    logMessage(`🎯 Selected assembly: ${selectedMatch.assembly} (score: ${selectedMatch.score}, based on '${selectedMatch.identifier}')`, 'success');
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+
+    return selectedMatch.assembly;
 }
 
 /**
- * Detects the reference genome assembly by comparing contig lengths and assembly hints.
+ * Detects the reference genome assembly using multi-method validation.
+ * ALWAYS checks ALL methods (@ PG context, chr1 length, full contig comparison)
+ * and cross-validates results before making final decision.
+ *
  * @param {Object[]} bamContigs - Contigs extracted from the BAM header.
  * @param {string[]} assemblyHints - Assembly hints extracted from @PG lines.
  * @returns {string|null} - The detected assembly name or null if uncertain.
  */
 function detectAssembly(bamContigs, assemblyHints) {
-    const threshold = 0.9; // At least 90% of contigs should match
-    let detectedAssembly = extractAssemblyFromHints(assemblyHints);
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+    logMessage('🔍 MULTI-METHOD ASSEMBLY DETECTION', 'info');
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
 
-    // If we found something from @PG lines, we can return early
-    if (detectedAssembly) {
-        return detectedAssembly;
+    // ==================================================================
+    // METHOD 1: @PG Context Analysis (with positive/negative scoring)
+    // ==================================================================
+    logMessage('📋 Method 1: Analyzing @PG header lines with context scoring...', 'info');
+    const detectedFromPG = extractAssemblyFromHints(assemblyHints);
+
+    // ==================================================================
+    // METHOD 2: Chromosome Length Analysis (most reliable!)
+    // ==================================================================
+    logMessage('', 'info');
+    logMessage('📏 Method 2: Analyzing chr1 length (most reliable marker)...', 'info');
+
+    const chr1Lengths = {
+        'GRCh37': 249250621,
+        'hg19': 249250621,
+        'GRCh38': 248956422,
+        'hg38': 248956422
+    };
+
+    let detectedFromChr1 = null;
+    const chr1 = bamContigs.find(c => c.name === 'chr1' || c.name === '1');
+
+    if (chr1) {
+        const chr1Length = chr1.length;
+        logMessage(`  Found chr1: ${chr1Length.toLocaleString()} bp`, 'info');
+
+        for (const [assembly, length] of Object.entries(chr1Lengths)) {
+            if (chr1Length === length) {
+                detectedFromChr1 = assembly;
+                logMessage(`  ✅ chr1 Length Match: ${assembly}`, 'success');
+                break;
+            }
+        }
+
+        if (!detectedFromChr1) {
+            logMessage(`  ⚠️  Unknown chr1 length: ${chr1Length.toLocaleString()} bp`, 'warning');
+            logMessage(`  Known lengths:`, 'info');
+            Object.entries(chr1Lengths).forEach(([asm, len]) => {
+                logMessage(`    ${asm}: ${len.toLocaleString()} bp`, 'info');
+            });
+        }
+    } else {
+        logMessage(`  ⚠️  chr1 not found (may use numeric names like '1')`, 'warning');
     }
 
-    // Otherwise, proceed with contig comparison
+    // ==================================================================
+    // METHOD 3: Full Contig Comparison (fallback)
+    // ==================================================================
+    logMessage('', 'info');
+    logMessage('📊 Method 3: Full contig comparison analysis...', 'info');
+
+    const threshold = 0.9;
+    let detectedFromContigs = null;
+    let bestMatch = { assembly: null, percentage: 0 };
+
     for (const assemblyKey in assemblies) {
         const assembly = assemblies[assemblyKey];
         const matchCount = bamContigs.reduce((count, bamContig) => {
@@ -200,21 +386,147 @@ function detectAssembly(bamContigs, assemblyHints) {
         }, 0);
 
         const matchPercentage = matchCount / assembly.contigs.length;
-        logMessage(`Assembly ${assembly.name} match: ${Math.round(matchPercentage * 100)}%`, 'info');
+        logMessage(`  ${assembly.name}: ${Math.round(matchPercentage * 100)}% match`, matchPercentage >= threshold ? 'info' : 'debug');
 
-        if (matchPercentage >= threshold) {
-            detectedAssembly = assembly.name;
-            break;
+        if (matchPercentage > bestMatch.percentage) {
+            bestMatch = { assembly: assembly.name, percentage: matchPercentage };
+        }
+
+        if (matchPercentage >= threshold && !detectedFromContigs) {
+            detectedFromContigs = assembly.name;
         }
     }
 
-    if (detectedAssembly) {
-        logMessage(`Detected Assembly: ${detectedAssembly}`, 'success');
+    if (detectedFromContigs) {
+        logMessage(`  ✅ Contig Comparison Result: ${detectedFromContigs} (${Math.round(bestMatch.percentage * 100)}%)`, 'success');
+    } else if (bestMatch.assembly) {
+        logMessage(`  ⚠️  Best match: ${bestMatch.assembly} (${Math.round(bestMatch.percentage * 100)}% - below ${threshold * 100}% threshold)`, 'warning');
     } else {
-        logMessage('Could not confidently detect the assembly based on contig comparison.', 'warning');
+        logMessage(`  ⚠️  Contig Comparison Result: No confident match`, 'warning');
     }
 
-    return detectedAssembly;
+    // ==================================================================
+    // CROSS-VALIDATION: Compare ALL methods and decide
+    // ==================================================================
+    logMessage('', 'info');
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+    logMessage('🔬 CROSS-VALIDATION & DECISION', 'info');
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+
+    logMessage('Method Results:', 'info');
+    logMessage(`  @PG Context:       ${detectedFromPG || 'Not detected'}`, detectedFromPG ? 'info' : 'warning');
+    logMessage(`  chr1 Length:       ${detectedFromChr1 || 'Not detected'}`, detectedFromChr1 ? 'info' : 'warning');
+    logMessage(`  Contig Comparison: ${detectedFromContigs || 'Not detected'}`, detectedFromContigs ? 'info' : 'warning');
+    logMessage('', 'info');
+
+    // Normalize assembly names (GRCh38 == hg38, GRCh37 == hg19)
+    const normalize = (asm) => {
+        if (!asm) return null;
+        if (asm === 'hg38' || asm === 'GRCh38') return 'GRCh38';
+        if (asm === 'hg19' || asm === 'GRCh37') return 'GRCh37';
+        return asm;
+    };
+
+    const normalizedPG = normalize(detectedFromPG);
+    const normalizedChr1 = normalize(detectedFromChr1);
+    const normalizedContigs = normalize(detectedFromContigs);
+
+    let finalAssembly = null;
+    let confidence = 'LOW';
+    let reasoning = '';
+
+    // DECISION LOGIC (Priority Order based on reliability)
+    //  1. All three agree → VERY HIGH confidence
+    //  2. chr1 + contigs agree → HIGH confidence (chr1 is most reliable)
+    //  3. chr1 + @PG agree → MEDIUM-HIGH confidence
+    //  4. Only chr1 → MEDIUM confidence (chr1 is reliable)
+    //  5. Only @PG → LOW-MEDIUM confidence (needs validation)
+    //  6. Only contigs → LOW confidence
+    //  7. Nothing → FAIL
+
+    if (normalizedPG && normalizedChr1 && normalizedContigs &&
+        normalizedPG === normalizedChr1 && normalizedChr1 === normalizedContigs) {
+        // Case 1: ALL THREE AGREE
+        finalAssembly = normalizedPG;
+        confidence = 'VERY HIGH';
+        reasoning = 'All three methods agree';
+        logMessage(`✅ CONSENSUS: All methods agree on ${finalAssembly}`, 'success');
+    }
+    else if (normalizedChr1 && normalizedContigs && normalizedChr1 === normalizedContigs) {
+        // Case 2: chr1 + contigs agree (HIGH CONFIDENCE)
+        finalAssembly = normalizedChr1;
+        confidence = 'HIGH';
+        reasoning = 'chr1 length and contig comparison agree';
+        if (normalizedPG && normalizedPG !== normalizedChr1) {
+            logMessage(`⚠️  CONFLICT RESOLVED: @PG says ${normalizedPG}, but chr1 + contigs both say ${normalizedChr1}`, 'warning');
+            logMessage(`   Trusting chromosome data (more reliable than @PG lines)`, 'warning');
+        } else {
+            logMessage(`✅ STRONG MATCH: chr1 length and contigs agree on ${finalAssembly}`, 'success');
+        }
+    }
+    else if (normalizedChr1 && normalizedPG && normalizedChr1 === normalizedPG) {
+        // Case 3: chr1 + @PG agree
+        finalAssembly = normalizedChr1;
+        confidence = 'MEDIUM-HIGH';
+        reasoning = 'chr1 length and @PG context agree';
+        logMessage(`✅ GOOD MATCH: chr1 and @PG agree on ${finalAssembly}`, 'success');
+        if (normalizedContigs && normalizedContigs !== normalizedChr1) {
+            logMessage(`   Note: Contig comparison suggested ${normalizedContigs} (may have custom contigs)`, 'info');
+        }
+    }
+    else if (normalizedChr1) {
+        // Case 4: Only chr1 detected
+        finalAssembly = normalizedChr1;
+        confidence = 'MEDIUM';
+        reasoning = 'Based on chr1 length only';
+        logMessage(`⚠️  Using chr1 length as primary evidence: ${finalAssembly}`, 'warning');
+        logMessage(`   chr1 is reliable, but other methods could not confirm`, 'warning');
+    }
+    else if (normalizedPG) {
+        // Case 5: Only @PG detected
+        finalAssembly = normalizedPG;
+        confidence = 'LOW-MEDIUM';
+        reasoning = 'Based on @PG context only (NOT validated by chr1 length)';
+        logMessage(`⚠️  WARNING: Using @PG context only: ${finalAssembly}`, 'warning');
+        logMessage(`   Could not validate against chromosome lengths!`, 'warning');
+        logMessage(`   Please verify this is correct manually!`, 'warning');
+    }
+    else if (normalizedContigs) {
+        // Case 6: Only contigs detected
+        finalAssembly = normalizedContigs;
+        confidence = 'LOW';
+        reasoning = 'Based on contig comparison only';
+        logMessage(`⚠️  WARNING: Using contig comparison only: ${finalAssembly}`, 'warning');
+        logMessage(`   Could not validate with @PG or chr1 length`, 'warning');
+    }
+    else {
+        // Case 7: NOTHING detected
+        logMessage(`❌ DETECTION FAILED: Could not detect assembly with any method`, 'error');
+        logMessage(`   Please select assembly manually from dropdown`, 'error');
+        logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+        return null;
+    }
+
+    // ==================================================================
+    // FINAL SUMMARY
+    // ==================================================================
+    logMessage('', 'info');
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+    logMessage('🎯 FINAL DECISION', 'info');
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+    logMessage(`Assembly:   ${finalAssembly}`, 'success');
+    logMessage(`Confidence: ${confidence}`, confidence.includes('HIGH') ? 'success' : confidence.includes('MEDIUM') ? 'info' : 'warning');
+    logMessage(`Reasoning:  ${reasoning}`, 'info');
+
+    if (confidence === 'LOW' || confidence === 'LOW-MEDIUM') {
+        logMessage('', 'warning');
+        logMessage('⚠️  LOW CONFIDENCE DETECTION', 'warning');
+        logMessage('   Recommendation: Verify assembly is correct or select manually from dropdown', 'warning');
+    }
+
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+
+    return finalAssembly;
 }
 
 /**

@@ -50,7 +50,7 @@ window.CONFIG = {
         },
         {
             name: "ADTKD-Net",
-            logo: "ADTKD-Net_60px.webp",
+            logo: "ADTKD-Net_horizontal_60px.webp",
             url: "https://www.gesundheitsforschung-bmbf.de/de/adtkd-net-netzwerk-fur-autosomal-dominante-tubulointerstitielle-nierenerkrankung-17889.php",
             height: "60px",
             width: "57px",
