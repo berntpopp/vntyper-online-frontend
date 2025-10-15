@@ -49,21 +49,21 @@
   <script src="resources/js/config.js" defer></script>
   
   <!-- Link to JavaScript Modules -->
-  <script type="module" src="resources/js/inputWrangling.js?v=0.52.0" defer></script>
-  <script type="module" src="resources/js/regionsConfig.js?v=0.52.0" defer></script>
-  <script type="module" src="resources/js/assemblyConfigs.js?v=0.52.0" defer></script>
+  <script type="module" src="resources/js/inputWrangling.js?v=0.53.0" defer></script>
+  <script type="module" src="resources/js/regionsConfig.js?v=0.53.0" defer></script>
+  <script type="module" src="resources/js/assemblyConfigs.js?v=0.53.0" defer></script>
   <!-- bamProcessing.js is lazy-loaded in ExtractionController when needed -->
-  <script type="module" src="resources/js/apiInteractions.js?v=0.52.0" defer></script>
-  <script type="module" src="resources/js/inputValidation.js?v=0.52.0" defer></script>
-  <script type="module" src="resources/js/main.js?v=0.52.0" defer></script>
-  <script type="module" src="resources/js/modal.js?v=0.52.0" defer></script>
-  <script type="module" src="resources/js/mobileNav.js?v=0.52.0" defer></script>
-  <script type="module" src="resources/js/populateRegions.js?v=0.52.0" defer></script>
-  <script type="module" src="resources/js/uiUtils.js?v=0.52.0" defer></script>
-  <script type="module" src="resources/js/usageStats.js?v=0.52.0" defer></script>
+  <script type="module" src="resources/js/apiInteractions.js?v=0.53.0" defer></script>
+  <script type="module" src="resources/js/inputValidation.js?v=0.53.0" defer></script>
+  <script type="module" src="resources/js/main.js?v=0.53.0" defer></script>
+  <script type="module" src="resources/js/modal.js?v=0.53.0" defer></script>
+  <script type="module" src="resources/js/mobileNav.js?v=0.53.0" defer></script>
+  <script type="module" src="resources/js/populateRegions.js?v=0.53.0" defer></script>
+  <script type="module" src="resources/js/uiUtils.js?v=0.53.0" defer></script>
+  <script type="module" src="resources/js/usageStats.js?v=0.53.0" defer></script>
 
   <!-- Version and Current Year Script -->
-  <script type="module" src="resources/js/version.js?v=0.52.0" defer></script>
+  <script type="module" src="resources/js/version.js?v=0.53.0" defer></script>
   
   <!-- Schema.org JSON-LD -->
   <script type="application/ld+json">
@@ -250,72 +250,60 @@
 
     <!-- Optional Inputs: Hidden by Default -->
     <div id="additionalInputs" class="additional-inputs hidden">
-      <label for="email">Email:</label>
-      <input 
-        type="email" 
-        id="email" 
-        name="email" 
-        class="form-input" 
-        placeholder="your.email@example.com" 
+      <label for="email">Email (optional):</label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        class="form-input"
+        placeholder="your.email@example.com"
         aria-label="Email for notifications"
       >
+      <span class="input-hint">Receive notifications when your job completes.</span>
 
-      <label for="cohortAlias">Cohort Alias:</label>
-      <input 
-        type="text" 
-        id="cohortAlias" 
-        name="cohortAlias" 
-        class="form-input" 
-        placeholder="My cohort" 
+      <label for="cohortAlias">Cohort Alias (optional):</label>
+      <input
+        type="text"
+        id="cohortAlias"
+        name="cohortAlias"
+        class="form-input"
+        placeholder="My cohort"
         aria-label="Cohort Alias"
       >
-      
-      <label for="passphrase">Passphrase:</label>
-      <input 
-        type="text" 
-        id="passphrase" 
-        name="passphrase" 
-        class="form-input" 
-        placeholder="Password" 
+      <span class="input-hint">Group multiple samples under one cohort name.</span>
+
+      <label for="passphrase">Passphrase (optional):</label>
+      <input
+        type="password"
+        id="passphrase"
+        name="passphrase"
+        class="form-input"
+        placeholder="Password"
         aria-label="Passphrase for cohort creation"
       >
+      <span class="input-hint">Secure your cohort with a passphrase.</span>
 
-      <!-- adVNTR Mode checkbox with modern styling -->
-      <br>
       <label for="advntrMode">
         <input
           type="checkbox"
           id="advntrMode"
           name="advntr_mode"
           aria-label="Enable adVNTR analysis (secondary algorithm)"
-          data-tooltip="adVNTR provides independent validation using a secondary algorithm. Increases processing time significantly (~10 minutes)."
         >
         adVNTR Mode (secondary algorithm)
       </label>
-      <p class="help-text">
-        ℹ️ adVNTR mode runs an independent analysis using the adVNTR algorithm.
-        This provides additional validation and comprehensive genotyping but significantly increases processing time (approximately 15 minutes).
-        Recommended when you need secondary confirmation of results.
-      </p>
+      <p class="help-text">Runs independent analysis using the adVNTR algorithm. Provides additional validation but increases processing time (~15 min).</p>
 
-      <!-- ADDED: Normal Mode checkbox -->
-      <br>
       <label for="normalMode">
         <input
           type="checkbox"
           id="normalMode"
           name="normal_mode"
           aria-label="Enable normal mode (include unmapped reads)"
-          data-tooltip="Normal mode extracts the MUC1 region AND all unmapped reads. Recommended for comprehensive analysis and files aligned with Dragen/CLC. Increases processing time by 2-3x."
         >
         Normal Mode (include unmapped reads)
       </label>
-      <p class="help-text">
-        ℹ️ Normal mode includes all unmapped reads in addition to the MUC1 region.
-        This provides more comprehensive analysis but takes longer and uploads a larger file.
-        Recommended for Dragen/CLC alignments or when maximum sensitivity is needed.
-      </p>
-      <!-- END ADDED -->
+      <p class="help-text">Includes all unmapped reads for comprehensive analysis. Takes longer and uploads a larger file.</p>
     </div>
 
     <!-- Output and Error Containers -->

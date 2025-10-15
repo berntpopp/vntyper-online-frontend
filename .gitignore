@@ -42,3 +42,6 @@ docs/
 
 # Planning files and prototypes
 plan/
+
+# Playwright MCP screenshots and artifacts
+.playwright-mcp/

@@ -186,10 +186,14 @@ body {
   transform: translateX(-50%);
   background-color: #333;
   color: #fff;
-  padding: 6px 8px;
+  padding: 8px 12px;
   border-radius: 4px;
-  white-space: nowrap;
-  font-size: 0.9rem;
+  white-space: normal; /* Allow text wrapping */
+  max-width: 300px; /* Limit width for readability */
+  width: max-content;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  text-align: left;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s;
