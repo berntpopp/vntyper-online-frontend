@@ -45,6 +45,7 @@ export class ExtractionController extends BaseController {
         this.on('extraction:initialize', this.handleInitialize);
         this.on('extraction:extract', this.handleExtract);
         this.on('files:validated', this.handleFilesValidated);
+        this.on('app:reset', this.handleReset);
     }
 
     /**
@@ -196,6 +197,19 @@ export class ExtractionController extends BaseController {
     /**
      * Cleanup resources
      */
+    /**
+     * Handle application reset
+     */
+    handleReset() {
+        this._log('Resetting extraction controller', 'info');
+
+        // Note: We don't cleanup Aioli/bamModule here because they can be reused
+        // They are expensive to initialize and stateless between extractions
+        // We only cleanup when the page unloads (via cleanup())
+
+        this._log('Extraction controller reset complete', 'info');
+    }
+
     cleanup() {
         // Cleanup Aioli resources if needed
         this.cli = null;

@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.55.0'; // Reduce results placeholder height to match production design
+const frontendVersion = '0.61.0'; // Fixed reset button to properly clear file selection and restore button states after extraction
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;

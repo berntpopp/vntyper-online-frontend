@@ -30,6 +30,7 @@ export class FileController extends BaseController {
 
         this.errorView = dependencies.errorView;
         this.selectedFiles = dependencies.selectedFiles || [];
+        this.fileSelection = dependencies.fileSelection;
     }
 
     /**
@@ -109,6 +110,11 @@ export class FileController extends BaseController {
 
         // Clear the array (shared reference)
         this.selectedFiles.length = 0;
+
+        // Update UI
+        if (this.fileSelection && this.fileSelection.displaySelectedFiles) {
+            this.fileSelection.displaySelectedFiles();
+        }
 
         // Emit clear event
         this.emit('files:cleared');

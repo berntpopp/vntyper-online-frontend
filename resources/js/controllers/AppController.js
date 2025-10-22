@@ -356,6 +356,24 @@ export class AppController extends BaseController {
     handleReset() {
         this._log('Resetting application', 'info');
 
+        // Reset guard flags
+        this.isSubmitting = false;
+        this.isExtracting = false;
+
+        // Reset extraction mode flag
+        this.showDownloadButtons = false;
+
+        // Re-enable and restore button states
+        if (this.submitBtn) {
+            this.submitBtn.disabled = false;
+            this.submitBtn.textContent = 'Submit Jobs';
+        }
+
+        if (this.extractBtn) {
+            this.extractBtn.disabled = false;
+            this.extractBtn.textContent = 'Extract Region';
+        }
+
         // Clear file selection
         this.fileController.handleClear();
 
@@ -368,9 +386,6 @@ export class AppController extends BaseController {
         if (regionOutputDiv) {
             regionOutputDiv.innerHTML = '';
         }
-
-        // Reset extraction mode flag
-        this.showDownloadButtons = false;
 
         // Clear form inputs
         const emailInput = document.getElementById('email');
