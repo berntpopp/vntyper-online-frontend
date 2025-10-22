@@ -295,11 +295,31 @@ export class AppController extends BaseController {
         const originalText = this.extractBtn?.textContent || 'Extract Region';
 
         try {
-            // Set extracting state and disable button
+            // Set extracting state and disable button with spinner
             this.isExtracting = true;
             if (this.extractBtn) {
                 this.extractBtn.disabled = true;
-                this.extractBtn.textContent = 'Extracting...';
+                this.extractBtn.innerHTML = `
+                    <svg class="spinner-icon" width="16" height="16" viewBox="0 0 16 16" style="display: inline-block; vertical-align: middle; margin-right: 8px; animation: spin 1s linear infinite;">
+                        <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="30" stroke-dashoffset="0" opacity="0.3"/>
+                        <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="30" stroke-dashoffset="15"/>
+                    </svg>
+                    Extracting...
+                `;
+            }
+
+            // Show loading spinner in output area
+            const placeholderMessage = document.getElementById('placeholderMessage');
+            if (placeholderMessage) {
+                placeholderMessage.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
+                        <svg width="40" height="40" viewBox="0 0 40 40" style="animation: spin 1s linear infinite;">
+                            <circle cx="20" cy="20" r="15" fill="none" stroke="#3498db" stroke-width="3" stroke-dasharray="75" stroke-dashoffset="0" opacity="0.3"/>
+                            <circle cx="20" cy="20" r="15" fill="none" stroke="#3498db" stroke-width="3" stroke-dasharray="75" stroke-dashoffset="37.5"/>
+                        </svg>
+                        <div style="color: #666; font-style: italic;">Processing BAM file extraction...</div>
+                    </div>
+                `;
             }
 
             // IMPORTANT: Show download buttons for local extraction
@@ -387,6 +407,13 @@ export class AppController extends BaseController {
             regionOutputDiv.innerHTML = '';
         }
 
+        // Show placeholder message again (restore original text)
+        const placeholderMessage = document.getElementById('placeholderMessage');
+        if (placeholderMessage) {
+            placeholderMessage.classList.remove('hidden');
+            placeholderMessage.textContent = 'Your results will appear here after job submission.';
+        }
+
         // Clear form inputs
         const emailInput = document.getElementById('email');
         const cohortAliasInput = document.getElementById('cohortAlias');
@@ -437,8 +464,47 @@ export class AppController extends BaseController {
             return;
         }
 
-        // Clear previous output
+        // Hide placeholder message (matches production behavior)
+        const placeholderMessage = document.getElementById('placeholderMessage');
+        if (placeholderMessage) {
+            placeholderMessage.classList.add('hidden');
+        }
+
+        // Clear previous extraction output
         regionOutputDiv.innerHTML = '';
+
+        // Show assembly detection message (matches production behavior)
+        if (detectedAssembly) {
+            const assemblyMessage = document.createElement('div');
+            assemblyMessage.className = 'assembly-info-message';
+            assemblyMessage.style.cssText = `
+                background-color: #e7f3fe;
+                color: #31708f;
+                border: 1px solid #bce8f1;
+                border-radius: 4px;
+                padding: 12px 16px;
+                margin-bottom: 16px;
+                font-size: 0.95rem;
+                text-align: center;
+            `;
+            assemblyMessage.textContent = `Detected reference assembly: ${detectedAssembly.toUpperCase()}. Please confirm or select manually.`;
+            regionOutputDiv.appendChild(assemblyMessage);
+
+            // Update assembly dropdown to detected assembly (matches production behavior)
+            const assemblySelect = document.getElementById('referenceAssembly');
+            if (assemblySelect) {
+                const normalizedAssembly = detectedAssembly.toLowerCase();
+                // Find matching option (exact match or contains match)
+                const option = Array.from(assemblySelect.options).find(opt =>
+                    opt.value.toLowerCase() === normalizedAssembly ||
+                    opt.value.toLowerCase().startsWith(normalizedAssembly)
+                );
+                if (option) {
+                    assemblySelect.value = option.value;
+                    this._log(`Updated assembly dropdown to: ${option.value}`, 'info');
+                }
+            }
+        }
 
         const createdUrls = [];
 
