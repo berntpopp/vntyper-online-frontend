@@ -4,8 +4,8 @@
 import { logMessage } from './log.js';
 import { displayMessage } from './uiUtils.js'; // Import displayMessage
 
-// Import assemblies
-import { assemblies } from './assemblyConfigs.js';
+// Import assemblies and NCBI accession helper
+import { assemblies, getNcbiAccession } from './assemblyConfigs.js';
 
 // Import regions
 import { regions } from './regionsConfig.js';
@@ -112,8 +112,145 @@ function parseHeader(header) {
     logMessage(JSON.stringify(assemblyHints, null, 2), 'info');    return { contigs, assemblyHints };
 }
 
+/**
+ * Detects the chromosome naming convention used in a BAM file.
+ *
+ * Analyzes contig names from @SQ header lines to determine which naming
+ * convention is predominantly used.
+ *
+ * Conventions:
+ * - UCSC: chr1, chr2, chrX, chrY, chrM (prefix with "chr")
+ * - ENSEMBL: 1, 2, X, Y, MT (simple numeric/letter)
+ * - NCBI: NC_000001.10, NC_000002.11 (RefSeq accessions)
+ *
+ * Requires at least 50% of contigs to match a pattern for confident detection.
+ *
+ * @param {Array<{name: string, length: number}>} contigs - Parsed @SQ contigs
+ * @returns {"ucsc"|"ensembl"|"ncbi"|"unknown"} Detected naming convention
+ *
+ * @example
+ * const contigs = [{name: "chr1", length: 248956422}, {name: "chr2", length: 242193529}];
+ * detectNamingConvention(contigs); // Returns "ucsc"
+ *
+ * @example
+ * const contigs = [{name: "NC_000001.11", length: 248956422}];
+ * detectNamingConvention(contigs); // Returns "ncbi"
+ */
+export function detectNamingConvention(contigs) {
+  if (!contigs || contigs.length === 0) {
+    logMessage('No contigs provided for convention detection', 'warning');
+    return "unknown";
+  }
+
+  // Define regex patterns for each convention
+  const patterns = {
+    ucsc: /^chr[0-9XYM]+$/i,           // chr1, chr2, chrX, chrY, chrM (case-insensitive)
+    ensembl: /^([0-9]+|X|Y|MT?)$/i,    // 1, 2, X, Y, MT or M (case-insensitive)
+    ncbi: /^NC_\d{6}\.\d+$/            // NC_000001.10, NC_000001.11, etc.
+  };
+
+  // Define main chromosome patterns (more specific - for prioritized checking)
+  const mainChromosomePatterns = {
+    ucsc: /^chr([0-9]{1,2}|X|Y|M)$/i,      // chr1-chr22, chrX, chrY, chrM
+    ensembl: /^([0-9]{1,2}|X|Y|MT?)$/i,    // 1-22, X, Y, MT or M
+    ncbi: /^NC_00000[012]\.(10|11)$/       // NC_000001.10/11 through NC_000024.9/10
+  };
+
+  // First pass: Check ONLY main chromosomes (1-22, X, Y, M)
+  // This avoids contamination from random/unplaced contigs
+  const mainContigs = contigs.filter(c => {
+    const name = c.name;
+    return mainChromosomePatterns.ucsc.test(name) ||
+           mainChromosomePatterns.ensembl.test(name) ||
+           mainChromosomePatterns.ncbi.test(name);
+  });
+
+  // Count matches in main chromosomes
+  const mainCounts = { ucsc: 0, ensembl: 0, ncbi: 0 };
+  for (const contig of mainContigs) {
+    const name = contig.name;
+    if (mainChromosomePatterns.ucsc.test(name)) mainCounts.ucsc++;
+    if (mainChromosomePatterns.ensembl.test(name)) mainCounts.ensembl++;
+    if (mainChromosomePatterns.ncbi.test(name)) mainCounts.ncbi++;
+  }
+
+  // Count matches in ALL contigs (for logging)
+  const allCounts = { ucsc: 0, ensembl: 0, ncbi: 0 };
+  for (const contig of contigs) {
+    const name = contig.name;
+    if (patterns.ucsc.test(name)) allCounts.ucsc++;
+    if (patterns.ensembl.test(name)) allCounts.ensembl++;
+    if (patterns.ncbi.test(name)) allCounts.ncbi++;
+  }
+
+  const total = contigs.length;
+  const mainTotal = mainContigs.length;
+  const threshold = 0.5;  // 50% of contigs must match
+
+  logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+  logMessage('🔍 NAMING CONVENTION DETECTION', 'info');
+  logMessage(`Total contigs: ${total}`, 'info');
+  logMessage(`Main chromosomes: ${mainTotal}`, 'info');
+  logMessage(`UCSC matches (all): ${allCounts.ucsc} (${Math.round(allCounts.ucsc / total * 100)}%)`, 'info');
+  logMessage(`UCSC matches (main): ${mainCounts.ucsc} (${mainTotal > 0 ? Math.round(mainCounts.ucsc / mainTotal * 100) : 0}%)`, 'info');
+  logMessage(`ENSEMBL matches (main): ${mainCounts.ensembl} (${mainTotal > 0 ? Math.round(mainCounts.ensembl / mainTotal * 100) : 0}%)`, 'info');
+  logMessage(`NCBI matches (main): ${mainCounts.ncbi} (${mainTotal > 0 ? Math.round(mainCounts.ncbi / mainTotal * 100) : 0}%)`, 'info');
+
+  // Decision logic: Prioritize main chromosomes if we have any
+  // Priority: NCBI > UCSC > ENSEMBL (NCBI is most specific)
+  if (mainTotal > 0) {
+    // We have main chromosomes - use them for detection (more reliable)
+    if (mainCounts.ncbi / mainTotal >= threshold) {
+      logMessage(`✅ Detected NCBI naming convention (from main chromosomes)`, 'success');
+      logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+      return "ncbi";
+    }
+
+    if (mainCounts.ucsc / mainTotal >= threshold) {
+      logMessage(`✅ Detected UCSC naming convention (from main chromosomes)`, 'success');
+      logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+      return "ucsc";
+    }
+
+    if (mainCounts.ensembl / mainTotal >= threshold) {
+      logMessage(`✅ Detected ENSEMBL naming convention (from main chromosomes)`, 'success');
+      logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+      return "ensembl";
+    }
+  }
+
+  // Fallback: Check all contigs if main chromosomes didn't give clear answer
+  if (allCounts.ncbi / total >= threshold) {
+    logMessage(`✅ Detected NCBI naming convention (from all contigs)`, 'success');
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+    return "ncbi";
+  }
+
+  if (allCounts.ucsc / total >= threshold) {
+    logMessage(`✅ Detected UCSC naming convention (from all contigs)`, 'success');
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+    return "ucsc";
+  }
+
+  if (allCounts.ensembl / total >= threshold) {
+    logMessage(`✅ Detected ENSEMBL naming convention (from all contigs)`, 'success');
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+    return "ensembl";
+  }
+
+  logMessage('⚠️  Could not confidently detect naming convention (mixed or uncommon format)', 'warning');
+  logMessage(`First 5 contigs: ${contigs.slice(0, 5).map(c => c.name).join(', ')}`, 'warning');
+  logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+
+  return "unknown";
+}
+
+/**
+ * Maps assembly names to their coordinate systems.
+ * Separates biological coordinates (GRCh37/GRCh38) from naming conventions.
+ */
 // ===============================================================
-// NEW FUNCTION TO DETECT PIPELINE AND WARN USER
+// PIPELINE DETECTION AND WARNING
 // ===============================================================
 /**
  * Detects the alignment pipeline from the BAM header and warns the user if it's potentially unsupported.
@@ -431,6 +568,15 @@ function detectAssembly(bamContigs, assemblyHints) {
     const normalizedChr1 = normalize(detectedFromChr1);
     const normalizedContigs = normalize(detectedFromContigs);
 
+    // DEBUG: Log normalized values for troubleshooting
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+    logMessage('🔍 NORMALIZATION DEBUG', 'info');
+    logMessage(`Original values:`, 'info');
+    logMessage(`  @PG: ${detectedFromPG} → Normalized: ${normalizedPG}`, 'info');
+    logMessage(`  chr1: ${detectedFromChr1} → Normalized: ${normalizedChr1}`, 'info');
+    logMessage(`  Contigs: ${detectedFromContigs} → Normalized: ${normalizedContigs}`, 'info');
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+
     let finalAssembly = null;
     let confidence = 'LOW';
     let reasoning = '';
@@ -447,21 +593,26 @@ function detectAssembly(bamContigs, assemblyHints) {
     if (normalizedPG && normalizedChr1 && normalizedContigs &&
         normalizedPG === normalizedChr1 && normalizedChr1 === normalizedContigs) {
         // Case 1: ALL THREE AGREE
-        finalAssembly = normalizedPG;
+        // Use contig result to preserve correct naming convention (hg38 vs GRCh38)
+        finalAssembly = detectedFromContigs;
         confidence = 'VERY HIGH';
         reasoning = 'All three methods agree';
-        logMessage(`✅ CONSENSUS: All methods agree on ${finalAssembly}`, 'success');
+        logMessage(`✅ CONSENSUS: All methods agree on ${normalizedPG} coordinate system`, 'success');
+        logMessage(`   Using contig comparison result: ${finalAssembly}`, 'info');
     }
     else if (normalizedChr1 && normalizedContigs && normalizedChr1 === normalizedContigs) {
         // Case 2: chr1 + contigs agree (HIGH CONFIDENCE)
-        finalAssembly = normalizedChr1;
+        // Use contig result to preserve correct naming convention (hg38 vs GRCh38)
+        finalAssembly = detectedFromContigs;
         confidence = 'HIGH';
         reasoning = 'chr1 length and contig comparison agree';
         if (normalizedPG && normalizedPG !== normalizedChr1) {
             logMessage(`⚠️  CONFLICT RESOLVED: @PG says ${normalizedPG}, but chr1 + contigs both say ${normalizedChr1}`, 'warning');
             logMessage(`   Trusting chromosome data (more reliable than @PG lines)`, 'warning');
+            logMessage(`   Using contig comparison result: ${finalAssembly}`, 'info');
         } else {
-            logMessage(`✅ STRONG MATCH: chr1 length and contigs agree on ${finalAssembly}`, 'success');
+            logMessage(`✅ STRONG MATCH: chr1 length and contigs agree on ${normalizedChr1}`, 'success');
+            logMessage(`   Using contig comparison result: ${finalAssembly}`, 'info');
         }
     }
     else if (normalizedChr1 && normalizedPG && normalizedChr1 === normalizedPG) {
@@ -508,6 +659,48 @@ function detectAssembly(bamContigs, assemblyHints) {
     }
 
     // ==================================================================
+    // MAP TO CORRECT ASSEMBLY BASED ON BAM NAMING CONVENTION
+    // ==================================================================
+    // We now have a coordinate system (GRCh37 or GRCh38)
+    // But we need to return the correct assembly name based on the BAM's naming convention
+    const detectedConvention = detectNamingConvention(bamContigs);
+    logMessage('', 'info');
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+    logMessage('🔤 NAMING CONVENTION MAPPING', 'info');
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+    logMessage(`Detected coordinate system: ${finalAssembly}`, 'info');
+    logMessage(`Detected naming convention: ${detectedConvention}`, 'info');
+
+    // Map coordinate system + naming convention to assembly name
+    let mappedAssembly = finalAssembly;
+    if (finalAssembly === 'GRCh38') {
+        if (detectedConvention === 'ucsc') {
+            mappedAssembly = 'hg38';
+            logMessage(`✅ Mapping GRCh38 + UCSC → hg38`, 'success');
+        } else if (detectedConvention === 'ncbi') {
+            mappedAssembly = 'hg38_ncbi';
+            logMessage(`✅ Mapping GRCh38 + NCBI → hg38_ncbi`, 'success');
+        } else {
+            // ENSEMBL or unknown - keep GRCh38
+            logMessage(`✅ Keeping GRCh38 (ENSEMBL numeric convention)`, 'success');
+        }
+    } else if (finalAssembly === 'GRCh37') {
+        if (detectedConvention === 'ucsc') {
+            mappedAssembly = 'hg19';
+            logMessage(`✅ Mapping GRCh37 + UCSC → hg19`, 'success');
+        } else if (detectedConvention === 'ncbi') {
+            mappedAssembly = 'hg19_ncbi';
+            logMessage(`✅ Mapping GRCh37 + NCBI → hg19_ncbi`, 'success');
+        } else {
+            // ENSEMBL or unknown - keep GRCh37
+            logMessage(`✅ Keeping GRCh37 (ENSEMBL numeric convention)`, 'success');
+        }
+    }
+
+    finalAssembly = mappedAssembly;
+    logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+
+    // ==================================================================
     // FINAL SUMMARY
     // ==================================================================
     logMessage('', 'info');
@@ -527,6 +720,48 @@ function detectAssembly(bamContigs, assemblyHints) {
     logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
 
     return finalAssembly;
+}
+
+/**
+ * Determines the assembly and genomic region to extract based on user selection or auto-detection.
+ * Consolidates logic shared between SAM and BAM processing branches (DRY principle).
+ *
+ * @param {Array} bamContigs - Array of contig objects from BAM header
+ * @param {Object} assemblyHints - Assembly hints from @PG header parsing
+ * @param {string} regionValue - User-selected region value from dropdown ('guess' or assembly name)
+ * @returns {Object} - Object containing {assembly: string, region: string}
+ * @throws {Error} - If no region is configured for the detected/selected assembly
+ */
+function determineAssemblyAndRegion(bamContigs, assemblyHints, regionValue) {
+    let detectedAssembly = null;
+
+    // Determine assembly (either auto-detect or use user selection)
+    if (regionValue === 'guess') {
+        detectedAssembly = detectAssembly(bamContigs, assemblyHints);
+        logMessage(`Auto-detected assembly: ${detectedAssembly || 'None'}`, "info");
+    } else {
+        detectedAssembly = regionValue;
+        logMessage(`User-selected assembly (skipping auto-detection): ${detectedAssembly}`, "info");
+    }
+
+    // Use detected or selected assembly for region lookup
+    const assemblyForRegion = detectedAssembly || regionValue;
+
+    // Look up region configuration using assembly name
+    const regionInfo = regions[assemblyForRegion];
+
+    if (!regionInfo) {
+        throw new Error(`No region configured for assembly: ${assemblyForRegion}. Available options: ${Object.keys(regions).join(', ')}`);
+    }
+
+    // Extract region string (already has correct chromosome naming from regionsConfig)
+    const region = regionInfo.region;
+    logMessage(`Region to extract: ${region}`, "info");
+
+    return {
+        assembly: detectedAssembly,
+        region: region
+    };
 }
 
 /**
@@ -691,27 +926,10 @@ export async function extractRegionAndIndex(CLI, pair) {
             
             const { contigs: bamContigs, assemblyHints } = parseHeader(header);
 
-            // Determine assembly
-            if (regionValue === 'guess') {
-                detectedAssembly = detectAssembly(bamContigs, assemblyHints);
-                logMessage(`Auto-detected assembly: ${detectedAssembly || 'None'}`, "info");            } else {
-                detectedAssembly = regionValue;
-                logMessage(`User-selected assembly (skipping auto-detection): ${detectedAssembly}`, "info");
-            }
-
-            // Determine Region
-            const assemblyForRegion = detectedAssembly || regionValue;
-            const regionInfo = regions[assemblyForRegion];
-
-            if (regionInfo) {
-                region = regionInfo.region;
-            } else {
-                if (assemblyForRegion === 'guess' || !assemblyForRegion) {
-                     throw new Error('Could not determine region. Please select an assembly manually.');
-                }
-                throw new Error(`No region configured for assembly: ${assemblyForRegion}`);
-            }
-            logMessage(`Region to extract: ${region}`, "info");
+            // Determine assembly and region using unified helper function (DRY)
+            const assemblyAndRegion = determineAssemblyAndRegion(bamContigs, assemblyHints, regionValue);
+            detectedAssembly = assemblyAndRegion.assembly;
+            region = assemblyAndRegion.region;
 
             // For SAM branch, directly prepare the blobs from the sorted BAM and its index.
             const sortedBamData = await CLI.fs.readFile(sortedBamName);
@@ -760,28 +978,10 @@ export async function extractRegionAndIndex(CLI, pair) {
             
             const { contigs: bamContigs, assemblyHints } = parseHeader(header);
 
-            // Determine assembly
-            if (regionValue === 'guess') {
-                detectedAssembly = detectAssembly(bamContigs, assemblyHints);
-                logMessage(`Auto-detected assembly: ${detectedAssembly || 'None'}`, 'info');            } else {
-                detectedAssembly = regionValue;
-                logMessage(`User-selected assembly (skipping auto-detection): ${detectedAssembly}`, 'info');
-            }
-
-            // Determine Region
-            const assemblyForRegion = detectedAssembly || regionValue;
-            const regionInfo = regions[assemblyForRegion];
-
-            if (regionInfo) {
-                region = regionInfo.region;
-            } else {
-                if (assemblyForRegion === 'guess' || !assemblyForRegion) {
-                     throw new Error('Could not determine region. Please select an assembly manually.');
-                }
-                throw new Error(`No region configured for assembly: ${assemblyForRegion}`);
-            }
-
-            logMessage(`Region to extract: ${region}`, 'info');
+            // Determine assembly and region using unified helper function (DRY)
+            const assemblyAndRegion = determineAssemblyAndRegion(bamContigs, assemblyHints, regionValue);
+            detectedAssembly = assemblyAndRegion.assembly;
+            region = assemblyAndRegion.region;
 
             // Extract Region
             const subsetBamName = `subset_${pair.bam.name}`;

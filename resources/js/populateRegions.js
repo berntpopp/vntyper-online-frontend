@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Populate the region select dropdown
   for (const [key, value] of Object.entries(regions)) {
     const option = document.createElement('option');
-    option.value = key; // Use the assembly key as the value
-    option.textContent = `${value.assembly} (${value.description}: ${value.region})`;
+    option.value = key;
+    option.textContent = value.description;
     regionSelect.appendChild(option);
   }
 });
