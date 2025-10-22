@@ -2,7 +2,7 @@
 
 // Import the logging and UI message functions
 import { logMessage } from './log.js';
-import { displayMessage } from './uiUtils.js'; // Import displayMessage
+import { displayMessage, createSpinnerHTML, ensureSpinAnimation } from './uiUtils.js';
 
 // Import assemblies and NCBI accession helper
 import { assemblies, getNcbiAccession } from './assemblyConfigs.js';
@@ -861,22 +861,16 @@ export async function extractRegionAndIndex(CLI, pair) {
         throw new Error("No region selected.");
     }
 
-    // Update UI to indicate processing with spinner
+    // Ensure spin animation CSS is loaded
+    ensureSpinAnimation();
+
+    // Update UI to indicate processing with spinner (DRY)
     const extractBtn = document.getElementById("extractBtn");
     extractBtn.disabled = true;
-    extractBtn.innerHTML = `
-        <svg class="spinner-icon" width="16" height="16" viewBox="0 0 16 16" style="display: inline-block; vertical-align: middle; margin-right: 8px; animation: spin 1s linear infinite;">
-            <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="30" stroke-dashoffset="0" opacity="0.3"/>
-            <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="30" stroke-dashoffset="15"/>
-        </svg>
-        Processing...
-        <style>
-            @keyframes spin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-            }
-        </style>
-    `;
+    extractBtn.innerHTML = createSpinnerHTML({
+        size: 16,
+        text: 'Processing...'
+    });
     logMessage("Extract button disabled and text updated to 'Processing...'", 'info');
 
     let detectedAssembly = null;

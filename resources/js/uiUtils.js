@@ -336,6 +336,101 @@ export function clearCountdown() {
     stateManager.clearCountdown();
 }
 
+/* --- Unified Spinner Creation (DRY) --- */
+
+/**
+ * Creates a standardized animated SVG spinner with consistent styling.
+ * Follows DRY, KISS, and SOLID principles by centralizing spinner HTML generation.
+ *
+ * @param {Object} options - Configuration options for the spinner
+ * @param {number} [options.size=16] - Size of the spinner in pixels (16 for buttons, 40 for output areas)
+ * @param {string} [options.color='currentColor'] - Color of the spinner (use 'currentColor' for buttons, '#3498db' for areas)
+ * @param {string} [options.text=''] - Optional text to display next to the spinner
+ * @param {boolean} [options.inline=true] - Whether the spinner is inline (for buttons) or block (for areas)
+ * @returns {string} HTML string containing the animated SVG spinner
+ *
+ * @example
+ * // Button spinner
+ * button.innerHTML = createSpinnerHTML({ size: 16, text: 'Processing...' });
+ *
+ * // Large centered spinner
+ * div.innerHTML = createSpinnerHTML({ size: 40, color: '#3498db', text: 'Loading...', inline: false });
+ */
+export function createSpinnerHTML({ size = 16, color = 'currentColor', text = '', inline = true } = {}) {
+    const radius = size * 0.375; // 6/16 for 16px, 15/40 for 40px
+    const strokeWidth = size * 0.125; // 2/16 for 16px, 3/40 for 40px (adjusted slightly)
+    const center = size / 2;
+    const circumference = 2 * Math.PI * radius;
+    const dashArray = circumference * 0.75; // 75% of circumference
+    const dashOffset = dashArray / 2; // Half dashArray for the moving part
+
+    const spinnerSVG = `
+        <svg class="spinner-icon" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display: ${inline ? 'inline-block; vertical-align: middle;' : 'block;'} ${text && inline ? 'margin-right: 8px;' : ''} animation: spin 1s linear infinite;">
+            <circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-dasharray="${dashArray}" stroke-dashoffset="0" opacity="0.3"/>
+            <circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-dasharray="${dashArray}" stroke-dashoffset="${dashOffset}"/>
+        </svg>
+    `;
+
+    if (inline && text) {
+        return `${spinnerSVG}${text}`;
+    } else if (!inline && text) {
+        return `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
+                ${spinnerSVG}
+                <div style="color: #666; font-style: italic;">${text}</div>
+            </div>
+        `;
+    } else {
+        return spinnerSVG;
+    }
+}
+
+/**
+ * Creates a standardized assembly detection message banner.
+ * Follows DRY principles by centralizing banner HTML and styling.
+ *
+ * @param {string} assembly - The detected assembly (e.g., 'hg19', 'hg38', 'GRCh37', 'GRCh38')
+ * @returns {string} HTML string containing the styled assembly message
+ *
+ * @example
+ * div.innerHTML = createAssemblyMessageHTML('hg19');
+ */
+export function createAssemblyMessageHTML(assembly) {
+    return `
+        <div class="assembly-info-message" style="
+            background-color: #e7f3fe;
+            color: #31708f;
+            border: 1px solid #bce8f1;
+            border-radius: 4px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+            text-align: center;
+        ">
+            Detected reference assembly: ${assembly.toUpperCase()}. Please confirm or select manually.
+        </div>
+    `;
+}
+
+/**
+ * Adds CSS keyframe animation for spinner rotation if not already present.
+ * This ensures the spin animation works even if it's not in the global CSS.
+ */
+export function ensureSpinAnimation() {
+    const styleId = 'spinner-animation-styles';
+    if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
 /* --- Toggle Optional Inputs Functionality --- */
 
 /**

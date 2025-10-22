@@ -6,6 +6,7 @@ import { loadCohortFromURL } from '../jobManager.js';
 import { Job } from '../models/Job.js';
 import { blobManager } from '../blobManager.js';
 import { logMessage } from '../log.js';
+import { createSpinnerHTML, createAssemblyMessageHTML, ensureSpinAnimation } from '../uiUtils.js';
 
 /**
  * App Controller - Main application lifecycle controller
@@ -167,11 +168,17 @@ export class AppController extends BaseController {
         const originalText = this.submitBtn?.textContent || 'Submit Job';
 
         try {
-            // Set submitting state and disable button
+            // Ensure spin animation CSS is loaded
+            ensureSpinAnimation();
+
+            // Set submitting state and disable button with spinner (DRY)
             this.isSubmitting = true;
             if (this.submitBtn) {
                 this.submitBtn.disabled = true;
-                this.submitBtn.textContent = 'Submitting...';
+                this.submitBtn.innerHTML = createSpinnerHTML({
+                    size: 16,
+                    text: 'Submitting...'
+                });
             }
 
             // IMPORTANT: Don't show download buttons during job submission
@@ -295,31 +302,28 @@ export class AppController extends BaseController {
         const originalText = this.extractBtn?.textContent || 'Extract Region';
 
         try {
-            // Set extracting state and disable button with spinner
+            // Ensure spin animation CSS is loaded
+            ensureSpinAnimation();
+
+            // Set extracting state and disable button with spinner (DRY)
             this.isExtracting = true;
             if (this.extractBtn) {
                 this.extractBtn.disabled = true;
-                this.extractBtn.innerHTML = `
-                    <svg class="spinner-icon" width="16" height="16" viewBox="0 0 16 16" style="display: inline-block; vertical-align: middle; margin-right: 8px; animation: spin 1s linear infinite;">
-                        <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="30" stroke-dashoffset="0" opacity="0.3"/>
-                        <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="30" stroke-dashoffset="15"/>
-                    </svg>
-                    Extracting...
-                `;
+                this.extractBtn.innerHTML = createSpinnerHTML({
+                    size: 16,
+                    text: 'Extracting...'
+                });
             }
 
-            // Show loading spinner in output area
+            // Show loading spinner in output area (DRY)
             const placeholderMessage = document.getElementById('placeholderMessage');
             if (placeholderMessage) {
-                placeholderMessage.innerHTML = `
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
-                        <svg width="40" height="40" viewBox="0 0 40 40" style="animation: spin 1s linear infinite;">
-                            <circle cx="20" cy="20" r="15" fill="none" stroke="#3498db" stroke-width="3" stroke-dasharray="75" stroke-dashoffset="0" opacity="0.3"/>
-                            <circle cx="20" cy="20" r="15" fill="none" stroke="#3498db" stroke-width="3" stroke-dasharray="75" stroke-dashoffset="37.5"/>
-                        </svg>
-                        <div style="color: #666; font-style: italic;">Processing BAM file extraction...</div>
-                    </div>
-                `;
+                placeholderMessage.innerHTML = createSpinnerHTML({
+                    size: 40,
+                    color: '#3498db',
+                    text: 'Processing BAM file extraction...',
+                    inline: false
+                });
             }
 
             // IMPORTANT: Show download buttons for local extraction
@@ -449,48 +453,25 @@ export class AppController extends BaseController {
     handleExtractionComplete({ pair, result, subsetBamAndBaiBlobs, detectedAssembly, region }) {
         this._log('Handling extraction complete', 'info', { showDownloadButtons: this.showDownloadButtons });
 
-        // CRITICAL: Only show download buttons when "Extract Region" was clicked
-        // When "Submit Jobs" is clicked, extraction happens internally but should not show download UI
-        if (!this.showDownloadButtons) {
-            this._log('Skipping download UI creation (job submission mode)', 'info');
-            return;
-        }
-
-        this._log('Creating download UI for local extraction', 'info');
-
         const regionOutputDiv = document.getElementById('regionOutput');
         if (!regionOutputDiv) {
             this._log('regionOutput div not found', 'error');
             return;
         }
 
-        // Hide placeholder message (matches production behavior)
-        const placeholderMessage = document.getElementById('placeholderMessage');
-        if (placeholderMessage) {
-            placeholderMessage.classList.add('hidden');
-        }
-
-        // Clear previous extraction output
-        regionOutputDiv.innerHTML = '';
-
-        // Show assembly detection message (matches production behavior)
+        // ALWAYS show assembly detection banner for both Extract Region and Submit Job flows
+        // This provides consistent UX and allows users to confirm the detected assembly
         if (detectedAssembly) {
-            const assemblyMessage = document.createElement('div');
-            assemblyMessage.className = 'assembly-info-message';
-            assemblyMessage.style.cssText = `
-                background-color: #e7f3fe;
-                color: #31708f;
-                border: 1px solid #bce8f1;
-                border-radius: 4px;
-                padding: 12px 16px;
-                margin-bottom: 16px;
-                font-size: 0.95rem;
-                text-align: center;
-            `;
-            assemblyMessage.textContent = `Detected reference assembly: ${detectedAssembly.toUpperCase()}. Please confirm or select manually.`;
-            regionOutputDiv.appendChild(assemblyMessage);
+            // Hide placeholder message when showing assembly info
+            const placeholderMessage = document.getElementById('placeholderMessage');
+            if (placeholderMessage) {
+                placeholderMessage.classList.add('hidden');
+            }
 
-            // Update assembly dropdown to detected assembly (matches production behavior)
+            // Clear previous content and show assembly banner (DRY)
+            regionOutputDiv.innerHTML = createAssemblyMessageHTML(detectedAssembly);
+
+            // Update assembly dropdown to detected assembly
             const assemblySelect = document.getElementById('referenceAssembly');
             if (assemblySelect) {
                 const normalizedAssembly = detectedAssembly.toLowerCase();
@@ -504,7 +485,18 @@ export class AppController extends BaseController {
                     this._log(`Updated assembly dropdown to: ${option.value}`, 'info');
                 }
             }
+
+            this._log('Assembly detection banner displayed', 'success', { assembly: detectedAssembly });
         }
+
+        // ONLY show download buttons when "Extract Region" was clicked
+        // When "Submit Jobs" is clicked, assembly banner shows but downloads are skipped
+        if (!this.showDownloadButtons) {
+            this._log('Assembly banner shown, skipping download UI (job submission mode)', 'info');
+            return;
+        }
+
+        this._log('Creating download UI for local extraction', 'info');
 
         const createdUrls = [];
 

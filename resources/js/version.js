@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.62.0'; // Fixed output div placeholder clearing, added assembly detection message with styling, and added loading spinners for better UX
+const frontendVersion = '0.63.0'; // Unified spinner styling (DRY), assembly detection banner now shows for both Extract Region and Submit Job flows for consistent UX
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;
