@@ -1,25 +1,19 @@
 /* frontend/resources/css/ui-components.css */
 
-/* --- Spinner Styles --- */
+/* --- Spinner Styles (Container Only - SVG injected dynamically) --- */
 
 .spinner {
-    border: 8px solid #f3f3f3; /* Light grey */
-    border-top: 8px solid #3498db; /* Blue */
-    border-radius: 50%;
-    width: 60px; /* Increased size to match production */
-    height: 60px; /* Increased size to match production */
-    animation: spin 2s linear infinite;
-    /* NEW: Perfect centering */
     margin: 20px auto;
-    display: none; /* Hidden by default */
+    display: none;
+    text-align: center;
 }
 
 .spinner.visible {
-    display: block; /* Show spinner when visible */
+    display: block;
 }
 
 .spinner.hidden {
-    display: none; /* Hide spinner */
+    display: none;
 }
 
 /* Spinner Animation */
