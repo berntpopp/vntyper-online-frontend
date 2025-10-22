@@ -302,6 +302,17 @@ export class AppController extends BaseController {
         const originalText = this.extractBtn?.textContent || 'Extract Region';
 
         try {
+            this._log('Extract button clicked', 'info');
+
+            // Get selected files FIRST before showing any UI feedback
+            const selectedFiles = this.fileController.getSelectedFiles();
+
+            if (!selectedFiles || selectedFiles.length === 0) {
+                this.errorView?.showValidation('No files selected. Please upload BAM and BAI files.');
+                this._log('No files selected', 'warning');
+                return;
+            }
+
             // Ensure spin animation CSS is loaded
             ensureSpinAnimation();
 
@@ -329,17 +340,6 @@ export class AppController extends BaseController {
             // IMPORTANT: Show download buttons for local extraction
             // User wants to download the extracted region files locally
             this.showDownloadButtons = true;
-
-            this._log('Extract button clicked', 'info');
-
-            // Get selected files
-            const selectedFiles = this.fileController.getSelectedFiles();
-
-            if (!selectedFiles || selectedFiles.length === 0) {
-                this.errorView?.showValidation('No files selected. Please upload BAM and BAI files.');
-                this._log('No files selected', 'warning');
-                return;
-            }
 
             // Validate files
             const { matchedPairs } = await this.fileController.handleValidation({
