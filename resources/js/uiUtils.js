@@ -365,9 +365,9 @@ export function createSpinnerHTML({ size = 16, color = 'currentColor', text = ''
     const dashOffset = dashArray / 2; // Half dashArray for the moving part
 
     const spinnerSVG = `
-        <svg class="spinner-icon" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display: ${inline ? 'inline-block; vertical-align: middle;' : 'block;'} ${text && inline ? 'margin-right: 8px;' : ''} animation: spin 1s linear infinite;">
-            <circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-dasharray="${dashArray}" stroke-dashoffset="0" opacity="0.3"/>
-            <circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-dasharray="${dashArray}" stroke-dashoffset="${dashOffset}"/>
+        <svg class="spinner-icon" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display: ${inline ? 'inline-block; vertical-align: middle;' : 'block;'} ${text && inline ? 'margin-right: 8px;' : ''} margin: 0 auto;">
+            <circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" opacity="0.25"/>
+            <circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-dasharray="${dashArray}" stroke-dashoffset="${dashOffset}" style="animation: spin 1s linear infinite; transform-origin: center;"/>
         </svg>
     `;
 
@@ -548,10 +548,11 @@ function setupStateManagerListeners() {
         }
     });
 
-    // Spinner shown - update DOM
+    // Spinner shown - inject SVG
     stateManager.on('spinner.shown', () => {
         const spinner = document.getElementById('spinner');
         if (spinner) {
+            spinner.innerHTML = createSpinnerHTML({ size: 40, color: '#3498db', text: '', inline: false });
             spinner.classList.remove('hidden');
             spinner.classList.add('visible');
             logMessage('Spinner displayed.', 'info');
@@ -560,10 +561,11 @@ function setupStateManagerListeners() {
         }
     });
 
-    // Spinner hidden - update DOM
+    // Spinner hidden - clear content
     stateManager.on('spinner.hidden', () => {
         const spinner = document.getElementById('spinner');
         if (spinner) {
+            spinner.innerHTML = '';
             spinner.classList.remove('visible');
             spinner.classList.add('hidden');
             logMessage('Spinner hidden.', 'info');
