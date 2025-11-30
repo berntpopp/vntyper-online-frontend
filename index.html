@@ -154,6 +154,9 @@
     <!-- Main Content Area - Skip link target -->
     <main id="main-content" tabindex="-1">
 
+    <!-- Upload Form - Contains all job submission inputs -->
+    <form id="uploadForm" action="#" method="post" autocomplete="on">
+
     <!-- Drag & Drop File Input Container -->
     <div
       class="drag-drop-container"
@@ -161,9 +164,10 @@
       data-step="1"
     >
       <!-- NEW RESET BUTTON -->
-      <button 
-        id="resetFileSelectionBtn" 
-        class="reset-file-selection-button" 
+      <button
+        type="button"
+        id="resetFileSelectionBtn"
+        class="reset-file-selection-button"
         aria-label="Reset File Selection"
         data-tooltip="Reset files"
       >
@@ -220,26 +224,29 @@
       data-intro="Submit your jobs, extract regions, or provide additional optional inputs." 
       data-step="3"
     >
-      <button 
-        id="submitBtn" 
-        class="submit-button button" 
+      <button
+        type="button"
+        id="submitBtn"
+        class="submit-button button"
         data-tooltip="Click here to submit your jobs for analysis."
         aria-label="Submit Jobs"
       >
         Submit Jobs
       </button>
-      <button 
-        id="extractBtn" 
-        class="extract-button button" 
+      <button
+        type="button"
+        id="extractBtn"
+        class="extract-button button"
         data-tooltip="Optional: Extract MUC1 regions from BAMs in your browser and save locally."
         aria-label="Extract Region"
       >
         Extract Region
       </button>
-      <button 
-        id="toggleOptionalInputs" 
-        class="toggle-button button" 
-        aria-expanded="false" 
+      <button
+        type="button"
+        id="toggleOptionalInputs"
+        class="toggle-button button"
+        aria-expanded="false"
         aria-controls="additionalInputs"
         data-tooltip="Show additional options for job submission."
         aria-label="Show Options"
@@ -305,6 +312,9 @@
       </label>
       <p class="help-text">Includes all unmapped reads for comprehensive analysis. Takes longer and uploads a larger file.</p>
     </div>
+
+    </form>
+    <!-- End Upload Form -->
 
     <!-- Output and Error Containers -->
     <div 
