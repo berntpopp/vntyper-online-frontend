@@ -7,6 +7,8 @@
  * @module domHelpers
  */
 
+import { logMessage } from './log.js';
+
 /**
  * Create a safe label+value element (XSS-proof)
  *
@@ -212,11 +214,11 @@ export function safeQuerySelector(selector, parent = document) {
   try {
     const element = parent.querySelector(selector);
     if (!element) {
-      console.warn(`[DOM] Element not found: ${selector}`);
+      logMessage(`[DOM] Element not found: ${selector}`, 'warning');
     }
     return element;
   } catch (error) {
-    console.error(`[DOM] Error querying selector '${selector}':`, error);
+    logMessage(`[DOM] Error querying selector '${selector}': ${error.message}`, 'error');
     return null;
   }
 }
@@ -238,11 +240,11 @@ export function safeGetElementById(id) {
   try {
     const element = document.getElementById(id);
     if (!element) {
-      console.warn(`[DOM] Element not found: #${id}`);
+      logMessage(`[DOM] Element not found: #${id}`, 'warning');
     }
     return element;
   } catch (error) {
-    console.error(`[DOM] Error getting element #${id}:`, error);
+    logMessage(`[DOM] Error getting element #${id}: ${error.message}`, 'error');
     return null;
   }
 }
@@ -264,7 +266,7 @@ export function requireElementById(id) {
   const element = document.getElementById(id);
   if (!element) {
     const error = new Error(`Required element not found: #${id}`);
-    console.error('[DOM]', error);
+    logMessage(`[DOM] ${error.message}`, 'error');
     throw error;
   }
   return element;
@@ -286,11 +288,11 @@ export function safeQuerySelectorAll(selector, parent = document) {
   try {
     const elements = Array.from(parent.querySelectorAll(selector));
     if (elements.length === 0) {
-      console.warn(`[DOM] No elements found: ${selector}`);
+      logMessage(`[DOM] No elements found: ${selector}`, 'warning');
     }
     return elements;
   } catch (error) {
-    console.error(`[DOM] Error querying selector '${selector}':`, error);
+    logMessage(`[DOM] Error querying selector '${selector}': ${error.message}`, 'error');
     return [];
   }
 }

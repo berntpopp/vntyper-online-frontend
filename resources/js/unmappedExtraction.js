@@ -21,22 +21,31 @@ import { logMessage } from './log.js';
 
 // Dynamically import pako (CDN)
 let pako = null;
+let pakoLoadPromise = null;
 
 /**
  * Load pako library dynamically from CDN
+ * Uses promise caching to prevent race conditions on concurrent calls
  */
 async function loadPako() {
   if (pako) return pako;
+  if (pakoLoadPromise) return pakoLoadPromise;
 
   logMessage('Loading pako library for BGZF decompression...', 'info');
-  try {
-    pako = await import('https://cdn.skypack.dev/pako@2.1.0');
-    logMessage('✓ Pako library loaded successfully', 'success');
-    return pako;
-  } catch (error) {
-    logMessage(`Failed to load pako: ${error.message}`, 'error');
-    throw new Error(`Failed to load pako library: ${error.message}`);
-  }
+  pakoLoadPromise = (async () => {
+    try {
+      const loaded = await import('https://cdn.skypack.dev/pako@2.1.0');
+      pako = loaded;
+      logMessage('✓ Pako library loaded successfully', 'success');
+      return pako;
+    } catch (error) {
+      pakoLoadPromise = null; // Reset on error to allow retry
+      logMessage(`Failed to load pako: ${error.message}`, 'error');
+      throw new Error(`Failed to load pako library: ${error.message}`);
+    }
+  })();
+
+  return pakoLoadPromise;
 }
 
 /**
@@ -298,7 +307,7 @@ class BAMParser {
       return null;
     }
 
-    const alignmentStart = this.offset;
+    const _alignmentStart = this.offset;
 
     // Read fixed fields
     this.readInt32(); // refID
@@ -534,7 +543,7 @@ export async function validateBamFile(CLI, bamPath) {
   try {
     const stats = await CLI.fs.stat(bamPath);
     return stats && stats.size > 0;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }

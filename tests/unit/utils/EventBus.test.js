@@ -3,14 +3,19 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { EventBus } from '../../../resources/js/utils/EventBus.js';
 
+// Mock log.js module
+vi.mock('../../../resources/js/log.js', () => ({
+  logMessage: vi.fn(),
+}));
+
+import { logMessage } from '../../../resources/js/log.js';
+
 describe('EventBus', () => {
   let eventBus;
 
   beforeEach(() => {
     eventBus = new EventBus();
-    // Suppress console.log/error in tests unless debugging
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -111,7 +116,7 @@ describe('EventBus', () => {
 
       eventBus.on('test:event', handler);
 
-      expect(console.log).toHaveBeenCalledWith(
+      expect(logMessage).toHaveBeenCalledWith(
         expect.stringContaining('Subscribed to "test:event"'),
         expect.objectContaining({ listeners: 1, once: undefined })
       );
@@ -200,7 +205,7 @@ describe('EventBus', () => {
 
       eventBus.off('test:event', handler);
 
-      expect(console.log).toHaveBeenCalledWith(
+      expect(logMessage).toHaveBeenCalledWith(
         expect.stringContaining('Unsubscribed from "test:event"'),
         expect.objectContaining({ remainingListeners: 0 })
       );
@@ -253,7 +258,7 @@ describe('EventBus', () => {
       expect(handler2).toHaveBeenCalled();
       expect(handler3).toHaveBeenCalled();
       expect(count).toBe(2); // Only handler2 and handler3 succeeded
-      expect(console.error).toHaveBeenCalledWith(
+      expect(logMessage).toHaveBeenCalledWith(
         expect.stringContaining('Error in listener for "test:event"'),
         expect.any(Error)
       );
@@ -279,7 +284,7 @@ describe('EventBus', () => {
 
       eventBus.emit('test:event', { data: 'test' });
 
-      expect(console.log).toHaveBeenCalledWith(
+      expect(logMessage).toHaveBeenCalledWith(
         expect.stringContaining('Emitted "test:event"'),
         expect.objectContaining({
           args: [{ data: 'test' }],
@@ -348,7 +353,7 @@ describe('EventBus', () => {
       expect(handler1).toHaveBeenCalled();
       expect(handler2).toHaveBeenCalled();
       expect(count).toBe(1); // Only handler2 succeeded
-      expect(console.error).toHaveBeenCalledWith(
+      expect(logMessage).toHaveBeenCalledWith(
         expect.stringContaining('Error in async listener for "test:event"'),
         expect.any(Error)
       );
@@ -398,7 +403,7 @@ describe('EventBus', () => {
 
       eventBus.clear();
 
-      expect(console.log).toHaveBeenCalledWith(
+      expect(logMessage).toHaveBeenCalledWith(
         expect.stringContaining('Cleared all 2 event listeners')
       );
     });
@@ -506,17 +511,17 @@ describe('EventBus', () => {
       eventBus.setDebug(true);
 
       expect(eventBus.debug).toBe(true);
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Debug mode enabled'));
+      expect(logMessage).toHaveBeenCalledWith(expect.stringContaining('Debug mode enabled'));
     });
 
     it('should disable debug mode', () => {
       eventBus.setDebug(true);
-      console.log.mockClear();
+      logMessage.mockClear();
 
       eventBus.setDebug(false);
 
       expect(eventBus.debug).toBe(false);
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Debug mode disabled'));
+      expect(logMessage).toHaveBeenCalledWith(expect.stringContaining('Debug mode disabled'));
     });
   });
 

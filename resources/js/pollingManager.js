@@ -134,7 +134,6 @@ export class PollingManager {
           `Polling error for ${id}: ${error.message} (retry ${retries}/${maxRetries})`,
           'error'
         );
-        console.error(`[PollingManager] Poll ${id} error:`, error);
 
         // Notify error callback
         if (onError) {
@@ -202,7 +201,7 @@ export class PollingManager {
   stopAll() {
     const count = this.activePolls.size;
 
-    for (const [id, poll] of this.activePolls.entries()) {
+    for (const [_id, poll] of this.activePolls.entries()) {
       poll.stop();
     }
 

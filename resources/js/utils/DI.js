@@ -1,5 +1,7 @@
 // frontend/resources/js/utils/DI.js
 
+import { logMessage } from '../log.js';
+
 /**
  * Dependency Injection Container
  *
@@ -71,7 +73,7 @@ export class DIContainer {
     });
 
     if (this.debug) {
-      console.log(`[DI] Registered "${name}"`, { singleton, factory });
+      logMessage(`[DI] Registered "${name}"`, { singleton, factory });
     }
   }
 
@@ -108,7 +110,7 @@ export class DIContainer {
     // Check if singleton instance exists
     if (this.singletons.has(name)) {
       if (this.debug) {
-        console.log(`[DI] Resolved singleton "${name}"`);
+        logMessage(`[DI] Resolved singleton "${name}"`);
       }
       return this.singletons.get(name);
     }
@@ -139,7 +141,7 @@ export class DIContainer {
       }
 
       if (this.debug) {
-        console.log(`[DI] Resolved "${name}"`, { singleton: dep.singleton });
+        logMessage(`[DI] Resolved "${name}"`, { singleton: dep.singleton });
       }
 
       return instance;
@@ -181,7 +183,7 @@ export class DIContainer {
     this.dependencyGraph.delete(name);
 
     if (this.debug) {
-      console.log(`[DI] Unregistered "${name}"`);
+      logMessage(`[DI] Unregistered "${name}"`);
     }
   }
 
@@ -196,7 +198,7 @@ export class DIContainer {
     this.resolving.clear();
 
     if (this.debug) {
-      console.log(`[DI] Cleared ${count} dependencies`);
+      logMessage(`[DI] Cleared ${count} dependencies`);
     }
   }
 
@@ -242,7 +244,7 @@ export class DIContainer {
     // Resolve dependencies
     const resolvedDeps = {};
     for (const depName of deps) {
-      if (manualDeps.hasOwnProperty(depName)) {
+      if (Object.prototype.hasOwnProperty.call(manualDeps, depName)) {
         resolvedDeps[depName] = manualDeps[depName];
       } else {
         resolvedDeps[depName] = this.resolve(depName);
@@ -276,7 +278,7 @@ export class DIContainer {
    */
   setDebug(enabled) {
     this.debug = enabled;
-    console.log(`[DI] Debug mode ${enabled ? 'enabled' : 'disabled'}`);
+    logMessage(`[DI] Debug mode ${enabled ? 'enabled' : 'disabled'}`);
   }
 
   /**

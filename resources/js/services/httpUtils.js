@@ -110,7 +110,7 @@ export async function parseErrorResponse(response) {
         errorMessage = data.message;
       }
     }
-  } catch (e) {
+  } catch (_e) {
     // Response not JSON or parsing failed - use status text
     errorMessage = response.statusText || errorMessage;
   }
@@ -189,7 +189,9 @@ export async function retryRequest(fn, maxAttempts = 3, baseDelay = 1000) {
       );
 
       // Wait before retrying
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise(resolve => {
+        setTimeout(resolve, delay);
+      });
     }
   }
 

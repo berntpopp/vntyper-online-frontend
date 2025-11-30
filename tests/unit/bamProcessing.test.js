@@ -1,6 +1,6 @@
 // tests/unit/bamProcessing.test.js
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 /**
  * Test suite for assembly detection in BAM processing

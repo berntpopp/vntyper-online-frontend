@@ -8,6 +8,8 @@ vi.mock('../../../resources/js/log.js', () => ({
   logMessage: vi.fn(),
 }));
 
+import { logMessage } from '../../../resources/js/log.js';
+
 describe('StateManager', () => {
   let stateManager;
 
@@ -172,12 +174,11 @@ describe('StateManager', () => {
       });
 
       it('should warn if job not found', () => {
-        vi.spyOn(console, 'warn').mockImplementation(() => {});
-
         stateManager.updateJob('nonexistent', { status: 'completed' });
 
-        expect(console.warn).toHaveBeenCalledWith(
-          expect.stringContaining('Job not found: nonexistent')
+        expect(logMessage).toHaveBeenCalledWith(
+          expect.stringContaining('Job not found: nonexistent'),
+          'warning'
         );
       });
 
@@ -695,7 +696,10 @@ describe('StateManager', () => {
 
         expect(listener1).toHaveBeenCalled();
         expect(listener2).toHaveBeenCalled();
-        expect(console.error).toHaveBeenCalled();
+        expect(logMessage).toHaveBeenCalledWith(
+          expect.stringContaining('Error in listener'),
+          'error'
+        );
       });
     });
 

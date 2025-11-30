@@ -22,7 +22,7 @@ describe('BaseController', () => {
 
     // Mock StateManager
     mockStateManager = {
-      get: vi.fn(path => 'mock-value'),
+      get: vi.fn(_path => 'mock-value'),
       set: vi.fn(),
     };
 

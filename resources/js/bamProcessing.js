@@ -5,13 +5,13 @@ import { logMessage } from './log.js';
 import { displayMessage, createSpinnerHTML, ensureSpinAnimation } from './uiUtils.js';
 
 // Import assemblies and NCBI accession helper
-import { assemblies, getNcbiAccession } from './assemblyConfigs.js';
+import { assemblies } from './assemblyConfigs.js';
 
 // Import regions
 import { regions } from './regionsConfig.js';
 
 // ADDED: Import unmapped reads extraction utilities
-import { extractUnmappedReads, mergeBamFiles, validateBamFile } from './unmappedExtraction.js';
+import { extractUnmappedReads, mergeBamFiles } from './unmappedExtraction.js';
 
 /**
  * Initializes Aioli with Samtools.

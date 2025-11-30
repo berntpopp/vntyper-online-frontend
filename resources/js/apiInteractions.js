@@ -243,7 +243,7 @@ export function pollJobStatusAPI(
     interval: 5000, // 5 seconds
     maxRetries: 20, // More retries for job polling
     maxDuration: 3600000, // 1 hour max
-    onUpdate: data => {
+    onUpdate: _data => {
       // Already handled in pollFn
     },
     onComplete: data => {
@@ -326,7 +326,7 @@ export function pollCohortStatusAPI(
     interval: 5000, // 5 seconds
     maxRetries: 20, // More retries for cohort polling
     maxDuration: 3600000, // 1 hour max
-    onUpdate: data => {
+    onUpdate: _data => {
       // Already handled in pollFn
     },
     onComplete: data => {

@@ -122,7 +122,7 @@ export class JobController extends BaseController {
       const stopPolling = this.pollingManager.start(
         jobId,
         async () => {
-          return await this.apiService.getJobStatus(jobId);
+          return this.apiService.getJobStatus(jobId);
         },
         {
           interval: 5000,

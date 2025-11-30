@@ -1,11 +1,6 @@
 // frontend/resources/js/jobManager.js
 
-import {
-  getCohortStatus,
-  getJobStatus,
-  pollCohortStatusAPI,
-  pollJobStatusAPI,
-} from './apiInteractions.js';
+import { getCohortStatus } from './apiInteractions.js';
 import { displayError } from './errorHandling.js';
 import {
   hideSpinner,
@@ -32,7 +27,7 @@ function capitalizeFirstLetter(string) {
  * @param {Object} context - An object containing necessary DOM elements and state.
  */
 function updateCohortUI(cohortStatus, context) {
-  const { cohort_id, alias, jobs } = cohortStatus;
+  const { cohort_id, jobs } = cohortStatus;
   const cohortSection = document.getElementById(`cohort-${cohort_id}`);
   if (!cohortSection) {
     logMessage(`Cohort section #cohort-${cohort_id} not found in the DOM.`, 'warning');
@@ -128,15 +123,6 @@ function updateCohortUI(cohortStatus, context) {
  * @param {Object} context - An object containing necessary DOM elements and state.
  */
 export async function fetchAndUpdateJobStatus(cohortId, cohortStatus, context) {
-  const {
-    hidePlaceholderMessage,
-    logMessage,
-    clearCountdown,
-    stopPolling,
-    passphrase,
-    displayedCohorts,
-  } = context;
-
   try {
     // We no longer create a new cohort section if it doesn't exist.
     // The creation of the cohort section is handled elsewhere (main.js),
@@ -167,11 +153,9 @@ export async function loadCohortFromURL(cohortId, context) {
     regionOutputDiv,
     pollCohortStatusAPI,
     fetchAndUpdateJobStatus,
-    resetCountdown,
     logMessage,
     serverLoad,
     displayedCohorts,
-    cohortsContainer,
     passphrase,
   } = context;
 
@@ -275,13 +259,8 @@ export async function loadJobFromURL(jobId, context) {
     regionOutputDiv,
     displayShareableLink,
     pollJobStatusAPI,
-    fetchAndUpdateJobStatus,
-    resetCountdown,
     logMessage,
     serverLoad,
-    displayedCohorts,
-    cohortsContainer,
-    passphrase,
   } = context;
 
   // Validate jobId

@@ -10,6 +10,7 @@ import {
 } from '../apiInteractions.js';
 import { Job } from '../models/Job.js';
 import { Cohort } from '../models/Cohort.js';
+import { logMessage } from '../log.js';
 
 /**
  * API Service - Wraps API interactions with clean interface
@@ -147,10 +148,11 @@ export class APIService {
    */
   _handleError(method, error) {
     const message = `[APIService.${method}] ${error.message}`;
+    // Use injected logger if it has logMessage method, otherwise use global logMessage
     if (this.logger && typeof this.logger.logMessage === 'function') {
       this.logger.logMessage(message, 'error');
     } else {
-      console.error(message, error);
+      logMessage(message, 'error');
     }
   }
 }

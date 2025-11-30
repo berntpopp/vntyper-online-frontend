@@ -78,7 +78,6 @@ async function initializeApp() {
 
     logMessage('Application initialized successfully', 'success');
   } catch (error) {
-    console.error('Failed to initialize application:', error);
     logMessage(`Application initialization failed: ${error.message}`, 'error');
   }
 }

@@ -160,7 +160,7 @@ export class StateManager {
   updateJob(jobId, updates) {
     const job = this.state.jobs.get(jobId);
     if (!job) {
-      console.warn(`[StateManager] Job not found: ${jobId}`);
+      logMessage(`[StateManager] Job not found: ${jobId}`, 'warning');
       return;
     }
 
@@ -461,7 +461,7 @@ export class StateManager {
     }
 
     // Stop all job polls
-    for (const [jobId, job] of this.state.jobs.entries()) {
+    for (const [_jobId, job] of this.state.jobs.entries()) {
       if (job.pollStop && typeof job.pollStop === 'function') {
         job.pollStop();
       }
@@ -528,7 +528,7 @@ export class StateManager {
         try {
           callback(...args);
         } catch (error) {
-          console.error(`[StateManager] Error in listener for '${event}':`, error);
+          logMessage(`[StateManager] Error in listener for '${event}': ${error.message}`, 'error');
         }
       }
     }
@@ -609,6 +609,6 @@ window.addEventListener('beforeunload', () => {
 // Log state changes in development
 if (window.location.port === '3000') {
   stateManager.on('state.changed', ({ path, value, oldValue }) => {
-    console.log(`[State] ${path}:`, oldValue, '->', value);
+    logMessage(`[State] ${path}: ${JSON.stringify(oldValue)} -> ${JSON.stringify(value)}`, 'debug');
   });
 }

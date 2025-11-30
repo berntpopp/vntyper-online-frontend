@@ -171,7 +171,7 @@ export class CohortController extends BaseController {
       const stopPolling = this.pollingManager.start(
         `cohort-${cohortId}`,
         async () => {
-          return await this.apiService.getCohortStatus(cohortId, passphrase);
+          return this.apiService.getCohortStatus(cohortId, passphrase);
         },
         {
           interval: 5000,

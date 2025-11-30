@@ -1,6 +1,6 @@
 // frontend/resources/js/views/JobView.js
 
-import { createLabelValue, createTextElement, safeGetElementById } from '../domHelpers.js';
+import { createLabelValue, safeGetElementById } from '../domHelpers.js';
 import { displayShareableLink, hidePlaceholderMessage } from '../uiUtils.js';
 
 /**

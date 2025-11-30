@@ -3,12 +3,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { DIContainer } from '../../../resources/js/utils/DI.js';
 
+// Mock log.js module
+vi.mock('../../../resources/js/log.js', () => ({
+  logMessage: vi.fn(),
+}));
+
+import { logMessage } from '../../../resources/js/log.js';
+
 describe('DIContainer', () => {
   let container;
 
   beforeEach(() => {
     container = new DIContainer();
-    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -113,7 +120,7 @@ describe('DIContainer', () => {
       container.register('service', {}, { singleton: true });
 
       // Assert
-      expect(console.log).toHaveBeenCalledWith('[DI] Registered "service"', {
+      expect(logMessage).toHaveBeenCalledWith('[DI] Registered "service"', {
         singleton: true,
         factory: false,
       });
@@ -393,7 +400,7 @@ describe('DIContainer', () => {
       container.unregister('service');
 
       // Assert
-      expect(console.log).toHaveBeenCalledWith('[DI] Unregistered "service"');
+      expect(logMessage).toHaveBeenCalledWith('[DI] Unregistered "service"');
     });
   });
 
@@ -429,7 +436,7 @@ describe('DIContainer', () => {
       container.clear();
 
       // Assert
-      expect(console.log).toHaveBeenCalledWith('[DI] Cleared 2 dependencies');
+      expect(logMessage).toHaveBeenCalledWith('[DI] Cleared 2 dependencies');
     });
   });
 
@@ -571,7 +578,7 @@ describe('DIContainer', () => {
 
       // Assert
       expect(container.debug).toBe(true);
-      expect(console.log).toHaveBeenCalledWith('[DI] Debug mode enabled');
+      expect(logMessage).toHaveBeenCalledWith('[DI] Debug mode enabled');
     });
 
     it('should disable debug mode', () => {
@@ -583,7 +590,7 @@ describe('DIContainer', () => {
 
       // Assert
       expect(container.debug).toBe(false);
-      expect(console.log).toHaveBeenCalledWith('[DI] Debug mode disabled');
+      expect(logMessage).toHaveBeenCalledWith('[DI] Debug mode disabled');
     });
   });
 

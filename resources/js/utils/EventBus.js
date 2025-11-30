@@ -1,5 +1,7 @@
 // frontend/resources/js/utils/EventBus.js
 
+import { logMessage } from '../log.js';
+
 /**
  * EventBus - Central event communication system
  *
@@ -66,7 +68,7 @@ export class EventBus {
     listeners.add(wrappedCallback);
 
     if (this.debug) {
-      console.log(`[EventBus] Subscribed to "${event}"`, {
+      logMessage(`[EventBus] Subscribed to "${event}"`, {
         listeners: listeners.size,
         once: options.once,
       });
@@ -102,7 +104,7 @@ export class EventBus {
       }
 
       if (this.debug) {
-        console.log(`[EventBus] Unsubscribed from "${event}"`, {
+        logMessage(`[EventBus] Unsubscribed from "${event}"`, {
           remainingListeners: listeners.size,
         });
       }
@@ -128,7 +130,7 @@ export class EventBus {
           callback(...args);
           notifiedCount++;
         } catch (error) {
-          console.error(`[EventBus] Error in listener for "${event}":`, error);
+          logMessage(`[EventBus] Error in listener for "${event}":`, error);
           // Don't stop execution if one listener fails
         }
       }
@@ -138,7 +140,7 @@ export class EventBus {
     this._recordEvent(event, args, notifiedCount);
 
     if (this.debug) {
-      console.log(`[EventBus] Emitted "${event}"`, {
+      logMessage(`[EventBus] Emitted "${event}"`, {
         args,
         listeners: notifiedCount,
       });
@@ -165,7 +167,7 @@ export class EventBus {
           await callback(...args);
           notifiedCount++;
         } catch (error) {
-          console.error(`[EventBus] Error in async listener for "${event}":`, error);
+          logMessage(`[EventBus] Error in async listener for "${event}":`, error);
         }
       }
     }
@@ -173,7 +175,7 @@ export class EventBus {
     this._recordEvent(event, args, notifiedCount);
 
     if (this.debug) {
-      console.log(`[EventBus] Emitted async "${event}"`, {
+      logMessage(`[EventBus] Emitted async "${event}"`, {
         args,
         listeners: notifiedCount,
       });
@@ -190,13 +192,13 @@ export class EventBus {
     if (event) {
       this.listeners.delete(event);
       if (this.debug) {
-        console.log(`[EventBus] Cleared all listeners for "${event}"`);
+        logMessage(`[EventBus] Cleared all listeners for "${event}"`);
       }
     } else {
       const count = this.listeners.size;
       this.listeners.clear();
       if (this.debug) {
-        console.log(`[EventBus] Cleared all ${count} event listeners`);
+        logMessage(`[EventBus] Cleared all ${count} event listeners`);
       }
     }
   }
@@ -255,7 +257,7 @@ export class EventBus {
    */
   setDebug(enabled) {
     this.debug = enabled;
-    console.log(`[EventBus] Debug mode ${enabled ? 'enabled' : 'disabled'}`);
+    logMessage(`[EventBus] Debug mode ${enabled ? 'enabled' : 'disabled'}`);
   }
 }
 

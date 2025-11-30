@@ -351,9 +351,9 @@ describe('ErrorHandler', () => {
         handler.displayError('Error');
       }).not.toThrow();
 
-      expect(console.warn).toHaveBeenCalledWith(
+      expect(logMessage).toHaveBeenCalledWith(
         expect.stringContaining('Error display element #error not found'),
-        'Error'
+        'warning'
       );
     });
 
@@ -888,9 +888,9 @@ describe('ErrorHandler', () => {
         handler.handleError(new Error('Test'));
       }).not.toThrow();
 
-      expect(console.error).toHaveBeenCalledWith(
+      expect(logMessage).toHaveBeenCalledWith(
         expect.stringContaining("Error in callback 'bad-callback'"),
-        expect.any(Error)
+        'error'
       );
     });
   });

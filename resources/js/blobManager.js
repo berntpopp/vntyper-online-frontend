@@ -61,7 +61,7 @@ export class BlobURLManager {
    */
   revoke(url) {
     if (!this.urls.has(url)) {
-      console.warn(`[BlobURLManager] URL not tracked: ${url}`);
+      logMessage(`[BlobURLManager] URL not tracked: ${url}`, 'warning');
       return false;
     }
 

@@ -15,6 +15,13 @@ vi.mock('../../../resources/js/apiInteractions.js', () => ({
   pollCohortStatusAPI: vi.fn(),
 }));
 
+// Mock log.js module
+vi.mock('../../../resources/js/log.js', () => ({
+  logMessage: vi.fn(),
+}));
+
+import { logMessage } from '../../../resources/js/log.js';
+
 // Import mocked functions
 import {
   submitJobToAPI,
@@ -426,20 +433,19 @@ describe('APIService', () => {
       );
     });
 
-    it('should use console.error if logger.logMessage is not available', () => {
+    it('should use global logMessage if logger.logMessage is not available', () => {
       // Arrange
       const service = new APIService({
         config: mockConfig,
         logger: { error: vi.fn() }, // Logger without logMessage method
       });
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const error = new Error('Test error');
 
       // Act
       service._handleError('testMethod', error);
 
-      // Assert
-      expect(consoleSpy).toHaveBeenCalledWith('[APIService.testMethod] Test error', error);
+      // Assert - falls back to global logMessage
+      expect(logMessage).toHaveBeenCalledWith('[APIService.testMethod] Test error', 'error');
     });
   });
 });

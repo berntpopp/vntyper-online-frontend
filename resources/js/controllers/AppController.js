@@ -203,7 +203,7 @@ export class AppController extends BaseController {
       this._log('Submit button clicked', 'info', { fileCount: selectedFiles.length });
 
       // Validate files
-      const { matchedPairs, invalidFiles } = await this.fileController.handleValidation({
+      const { matchedPairs } = await this.fileController.handleValidation({
         files: selectedFiles,
         showErrors: true,
       });
@@ -448,7 +448,7 @@ export class AppController extends BaseController {
    * @param {string} eventData.detectedAssembly - Detected assembly
    * @param {string} eventData.region - Extracted region
    */
-  handleExtractionComplete({ pair, result, subsetBamAndBaiBlobs, detectedAssembly, region }) {
+  handleExtractionComplete({ subsetBamAndBaiBlobs, detectedAssembly }) {
     this._log('Handling extraction complete', 'info', {
       showDownloadButtons: this.showDownloadButtons,
     });

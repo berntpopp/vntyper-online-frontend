@@ -52,6 +52,7 @@ export class ErrorHandler {
     // Console logging with appropriate level
     const consoleMethod =
       level === ErrorLevel.CRITICAL ? 'error' : level === ErrorLevel.WARNING ? 'warn' : 'log';
+    // eslint-disable-next-line no-console
     console[consoleMethod]('[ErrorHandler]', errorEntry);
 
     // Log to user-visible log panel with context
@@ -83,7 +84,10 @@ export class ErrorHandler {
     const errorDiv = document.getElementById('error');
 
     if (!errorDiv) {
-      console.warn('[ErrorHandler] Error display element #error not found. Message:', message);
+      logMessage(
+        `[ErrorHandler] Error display element #error not found. Message: ${message}`,
+        'warning'
+      );
       return;
     }
 
@@ -195,7 +199,9 @@ export class ErrorHandler {
             'warning'
           );
 
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise(resolve => {
+            setTimeout(resolve, delay);
+          });
         } else {
           // Final attempt failed
           this.handleError(
@@ -253,7 +259,7 @@ export class ErrorHandler {
       try {
         callback(errorEntry);
       } catch (error) {
-        console.error(`[ErrorHandler] Error in callback '${id}':`, error);
+        logMessage(`[ErrorHandler] Error in callback '${id}': ${error.message}`, 'error');
       }
     }
   }

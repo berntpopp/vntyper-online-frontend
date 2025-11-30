@@ -69,7 +69,7 @@ export function validateFiles(selectedFiles, logWarnings = true) {
   });
 
   // Any remaining BAI files without corresponding BAM files are invalid
-  baiMap.forEach((bai, baseName) => {
+  baiMap.forEach((bai, _baseName) => {
     invalidFiles.push(bai.originalFile);
     if (logWarnings) {
       logMessage(

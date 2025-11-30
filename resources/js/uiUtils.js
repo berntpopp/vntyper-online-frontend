@@ -42,11 +42,7 @@ export function displayMessage(message, type = 'info') {
 
   // Validate message is not empty
   if (!message || (typeof message === 'string' && message.trim() === '')) {
-    logMessage(
-      `⚠️ displayMessage called with empty message (type: ${type}). Current stack:`,
-      'warning'
-    );
-    console.trace('Empty message trace');
+    logMessage(`displayMessage called with empty message (type: ${type})`, 'warning');
     // Clear message div if it exists
     if (messageDiv) {
       clearMessage();
@@ -500,7 +496,6 @@ function initializeToggleOptionalInputs() {
         logMessage('Validation initialized successfully', 'success');
       } catch (error) {
         logMessage(`Error initializing validation: ${error.message}`, 'error');
-        console.error('Validation initialization error:', error);
       }
     } else {
       // Hide optional inputs
