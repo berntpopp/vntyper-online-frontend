@@ -5,5 +5,5 @@
  * Currently, no interactivity is implemented, but this can be expanded as needed.
  */
 export function initializeUserGuide() {
-    // Placeholder for future interactivity enhancements
+  // Placeholder for future interactivity enhancements
 }

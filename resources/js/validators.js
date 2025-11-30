@@ -7,6 +7,8 @@
  * @module validators
  */
 
+import { logMessage } from './log.js';
+
 /**
  * Validate job ID format
  *
@@ -25,32 +27,32 @@
  * }
  */
 export function validateJobId(id) {
-    // Type check
-    if (!id || typeof id !== 'string') {
-        return null;
-    }
+  // Type check
+  if (!id || typeof id !== 'string') {
+    return null;
+  }
 
-    // Length check (8-64 chars)
-    if (id.length < 8 || id.length > 64) {
-        console.warn(`Invalid job ID length: ${id.length} (expected 8-64)`);
-        return null;
-    }
+  // Length check (8-64 chars)
+  if (id.length < 8 || id.length > 64) {
+    logMessage(`Invalid job ID length: ${id.length} (expected 8-64)`, 'warning');
+    return null;
+  }
 
-    // Format check: alphanumeric and hyphens only (UUID-like or base62)
-    const validPattern = /^[a-zA-Z0-9-]+$/;
+  // Format check: alphanumeric and hyphens only (UUID-like or base62)
+  const validPattern = /^[a-zA-Z0-9-]+$/;
 
-    if (!validPattern.test(id)) {
-        console.warn(`Invalid job ID format: ${id}`);
-        return null;
-    }
+  if (!validPattern.test(id)) {
+    logMessage(`Invalid job ID format: ${id}`, 'warning');
+    return null;
+  }
 
-    // Path traversal check
-    if (id.includes('..') || id.includes('/') || id.includes('\\')) {
-        console.error(`Path traversal attempt in job ID: ${id}`);
-        return null;
-    }
+  // Path traversal check
+  if (id.includes('..') || id.includes('/') || id.includes('\\')) {
+    logMessage(`Path traversal attempt in job ID: ${id}`, 'error');
+    return null;
+  }
 
-    return id;
+  return id;
 }
 
 /**
@@ -68,8 +70,8 @@ export function validateJobId(id) {
  * }
  */
 export function validateCohortId(id) {
-    // Same validation as job ID
-    return validateJobId(id);
+  // Same validation as job ID
+  return validateJobId(id);
 }
 
 /**
@@ -87,19 +89,20 @@ export function validateCohortId(id) {
  * }
  */
 export function validateEmail(email) {
-    if (!email || typeof email !== 'string') {
-        return null;
-    }
+  if (!email || typeof email !== 'string') {
+    return null;
+  }
 
-    // RFC 5322 compliant (simplified)
-    const emailPattern = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  // RFC 5322 compliant (simplified)
+  const emailPattern =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
-    if (!emailPattern.test(email) || email.length > 254) {
-        console.warn(`Invalid email format: ${email}`);
-        return null;
-    }
+  if (!emailPattern.test(email) || email.length > 254) {
+    logMessage(`Invalid email format: ${email}`, 'warning');
+    return null;
+  }
 
-    return email;
+  return email;
 }
 
 /**
@@ -115,30 +118,30 @@ export function validateEmail(email) {
  * }
  */
 export function sanitizeFilename(filename) {
-    if (!filename || typeof filename !== 'string') {
-        return null;
-    }
+  if (!filename || typeof filename !== 'string') {
+    return null;
+  }
 
-    // Remove path components
-    filename = filename.replace(/^.*[\\\/]/, '');
+  // Remove path components
+  filename = filename.replace(/^.*[\\/]/, '');
 
-    // Remove null bytes
-    filename = filename.replace(/\0/g, '');
+  // Remove null bytes
+  filename = filename.replace(/\0/g, '');
 
-    // Check for valid filename pattern
-    const validFilename = /^[a-zA-Z0-9._-]+$/;
-    if (!validFilename.test(filename)) {
-        console.warn(`Invalid filename: ${filename}`);
-        return null;
-    }
+  // Check for valid filename pattern
+  const validFilename = /^[a-zA-Z0-9._-]+$/;
+  if (!validFilename.test(filename)) {
+    logMessage(`Invalid filename: ${filename}`, 'warning');
+    return null;
+  }
 
-    // Max length check
-    if (filename.length > 255) {
-        console.warn(`Filename too long: ${filename.length} characters`);
-        return null;
-    }
+  // Max length check
+  if (filename.length > 255) {
+    logMessage(`Filename too long: ${filename.length} characters`, 'warning');
+    return null;
+  }
 
-    return filename;
+  return filename;
 }
 
 /**
@@ -157,25 +160,25 @@ export function sanitizeFilename(filename) {
  * }
  */
 export function validatePassphrase(passphrase) {
-    if (!passphrase || typeof passphrase !== 'string') {
-        return null;
-    }
+  if (!passphrase || typeof passphrase !== 'string') {
+    return null;
+  }
 
-    const trimmed = passphrase.trim();
+  const trimmed = passphrase.trim();
 
-    // Minimum length check
-    if (trimmed.length < 8) {
-        console.warn('Passphrase too short (minimum 8 characters)');
-        return null;
-    }
+  // Minimum length check
+  if (trimmed.length < 8) {
+    logMessage('Passphrase too short (minimum 8 characters)', 'warning');
+    return null;
+  }
 
-    // Maximum length check (prevent DOS)
-    if (trimmed.length > 128) {
-        console.warn('Passphrase too long (maximum 128 characters)');
-        return null;
-    }
+  // Maximum length check (prevent DOS)
+  if (trimmed.length > 128) {
+    logMessage('Passphrase too long (maximum 128 characters)', 'warning');
+    return null;
+  }
 
-    return trimmed;
+  return trimmed;
 }
 
 /**
@@ -191,24 +194,24 @@ export function validatePassphrase(passphrase) {
  * }
  */
 export function validateCohortAlias(alias) {
-    if (!alias || typeof alias !== 'string') {
-        return null;
-    }
+  if (!alias || typeof alias !== 'string') {
+    return null;
+  }
 
-    const trimmed = alias.trim();
+  const trimmed = alias.trim();
 
-    // Length check (3-64 chars)
-    if (trimmed.length < 3 || trimmed.length > 64) {
-        console.warn(`Invalid cohort alias length: ${trimmed.length} (expected 3-64)`);
-        return null;
-    }
+  // Length check (3-64 chars)
+  if (trimmed.length < 3 || trimmed.length > 64) {
+    logMessage(`Invalid cohort alias length: ${trimmed.length} (expected 3-64)`, 'warning');
+    return null;
+  }
 
-    // Allow alphanumeric, spaces, hyphens, underscores
-    const validPattern = /^[a-zA-Z0-9 _-]+$/;
-    if (!validPattern.test(trimmed)) {
-        console.warn(`Invalid cohort alias format: ${trimmed}`);
-        return null;
-    }
+  // Allow alphanumeric, spaces, hyphens, underscores
+  const validPattern = /^[a-zA-Z0-9 _-]+$/;
+  if (!validPattern.test(trimmed)) {
+    logMessage(`Invalid cohort alias format: ${trimmed}`, 'warning');
+    return null;
+  }
 
-    return trimmed;
+  return trimmed;
 }

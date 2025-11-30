@@ -97,16 +97,16 @@
 
 @media (min-width: 600px) {
   .footer-content {
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .institution-logos {
-      margin-bottom: 0;
+    margin-bottom: 0;
   }
 
   .footer-links {
-      margin-bottom: 0;
+    margin-bottom: 0;
   }
 }

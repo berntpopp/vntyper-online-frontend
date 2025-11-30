@@ -20,26 +20,26 @@ import { fetchWithTimeout, parseErrorResponse, retryRequest } from './services/h
  * @throws {Error} Parsed error with metadata
  */
 async function apiRequest(url, options = {}, shouldRetry = false) {
-    const performRequest = async () => {
-        // Fetch with 30s timeout
-        const response = await fetchWithTimeout(url, options, 30000);
+  const performRequest = async () => {
+    // Fetch with 30s timeout
+    const response = await fetchWithTimeout(url, options, 30000);
 
-        // Parse error if request failed
-        if (!response.ok) {
-            throw await parseErrorResponse(response);
-        }
-
-        // Return parsed JSON
-        return response.json();
-    };
-
-    // Retry for one-shot requests (submit, create)
-    // Polling requests use PollingManager's retry (avoid duplication)
-    if (shouldRetry) {
-        return retryRequest(performRequest, 3, 1000);
+    // Parse error if request failed
+    if (!response.ok) {
+      throw await parseErrorResponse(response);
     }
 
-    return performRequest();
+    // Return parsed JSON
+    return response.json();
+  };
+
+  // Retry for one-shot requests (submit, create)
+  // Polling requests use PollingManager's retry (avoid duplication)
+  if (shouldRetry) {
+    return retryRequest(performRequest, 3, 1000);
+  }
+
+  return performRequest();
 }
 
 /**
@@ -54,42 +54,42 @@ async function apiRequest(url, options = {}, shouldRetry = false) {
  * @throws {Error} If the submission fails after retries
  */
 export async function submitJobToAPI(formData, cohortId = null, passphrase = null) {
-    try {
-        logMessage('Submitting job(s) to the API...', 'info');
+  try {
+    logMessage('Submitting job(s) to the API...', 'info');
 
-        // Validate cohortId if provided
-        if (cohortId) {
-            if (typeof cohortId !== 'string' || cohortId.trim() === '') {
-                logMessage('Invalid Cohort ID provided to submitJobToAPI.', 'error');
-                throw new Error('Invalid Cohort ID provided.');
-            }
-            formData.append('cohort_id', cohortId);
-            logMessage(`Associating jobs with Cohort ID: ${cohortId}`, 'info');
+    // Validate cohortId if provided
+    if (cohortId) {
+      if (typeof cohortId !== 'string' || cohortId.trim() === '') {
+        logMessage('Invalid Cohort ID provided to submitJobToAPI.', 'error');
+        throw new Error('Invalid Cohort ID provided.');
+      }
+      formData.append('cohort_id', cohortId);
+      logMessage(`Associating jobs with Cohort ID: ${cohortId}`, 'info');
 
-            // Validate passphrase if provided
-            if (passphrase) {
-                if (typeof passphrase !== 'string') {
-                    logMessage('Passphrase must be a string in submitJobToAPI.', 'error');
-                    throw new Error('Passphrase must be a string.');
-                }
-                formData.append('passphrase', passphrase);
-                logMessage('Passphrase included in job submission.', 'info');
-            }
+      // Validate passphrase if provided
+      if (passphrase) {
+        if (typeof passphrase !== 'string') {
+          logMessage('Passphrase must be a string in submitJobToAPI.', 'error');
+          throw new Error('Passphrase must be a string.');
         }
-
-        // Submit with retry (one-shot request)
-        const data = await apiRequest(
-            `${window.CONFIG.API_URL}/run-job/`,
-            { method: 'POST', body: formData },
-            true // shouldRetry = true
-        );
-
-        logMessage(`Job(s) submitted successfully! Job ID(s): ${data.job_id}`, 'success');
-        return data;
-    } catch (error) {
-        logMessage(`Error in submitJobToAPI: ${error.message}`, 'error');
-        throw error;
+        formData.append('passphrase', passphrase);
+        logMessage('Passphrase included in job submission.', 'info');
+      }
     }
+
+    // Submit with retry (one-shot request)
+    const data = await apiRequest(
+      `${window.CONFIG.API_URL}/run-job/`,
+      { method: 'POST', body: formData },
+      true // shouldRetry = true
+    );
+
+    logMessage(`Job(s) submitted successfully! Job ID(s): ${data.job_id}`, 'success');
+    return data;
+  } catch (error) {
+    logMessage(`Error in submitJobToAPI: ${error.message}`, 'error');
+    throw error;
+  }
 }
 
 /**
@@ -102,28 +102,28 @@ export async function submitJobToAPI(formData, cohortId = null, passphrase = nul
  * @throws {Error} If the request fails or jobId is invalid
  */
 export async function getJobStatus(jobId) {
-    // Validate jobId
-    if (typeof jobId !== 'string' || jobId.trim() === '') {
-        logMessage('getJobStatus called with invalid Job ID.', 'error');
-        throw new Error('Invalid Job ID provided.');
-    }
+  // Validate jobId
+  if (typeof jobId !== 'string' || jobId.trim() === '') {
+    logMessage('getJobStatus called with invalid Job ID.', 'error');
+    throw new Error('Invalid Job ID provided.');
+  }
 
-    try {
-        logMessage(`Fetching status for Job ID: ${jobId}`, 'info');
+  try {
+    logMessage(`Fetching status for Job ID: ${jobId}`, 'info');
 
-        // No retry - PollingManager handles retry
-        const data = await apiRequest(
-            `${window.CONFIG.API_URL}/job-status/${encodeURIComponent(jobId)}/`,
-            {},
-            false // shouldRetry = false
-        );
+    // No retry - PollingManager handles retry
+    const data = await apiRequest(
+      `${window.CONFIG.API_URL}/job-status/${encodeURIComponent(jobId)}/`,
+      {},
+      false // shouldRetry = false
+    );
 
-        logMessage(`Status fetched for Job ID ${jobId}: ${data.status}`, 'info');
-        return data;
-    } catch (error) {
-        logMessage(`Error in getJobStatus for Job ID ${jobId}: ${error.message}`, 'error');
-        throw error;
-    }
+    logMessage(`Status fetched for Job ID ${jobId}: ${data.status}`, 'info');
+    return data;
+  } catch (error) {
+    logMessage(`Error in getJobStatus for Job ID ${jobId}: ${error.message}`, 'error');
+    throw error;
+  }
 }
 
 /**
@@ -138,45 +138,45 @@ export async function getJobStatus(jobId) {
  * @throws {Error} If the request fails or cohortId is invalid
  */
 export async function getCohortStatus(cohortId, passphrase = null, alias = null) {
-    // Validate cohortId
-    if (typeof cohortId !== 'string' || cohortId.trim() === '') {
-        logMessage('getCohortStatus called with invalid Cohort ID.', 'error');
-        throw new Error('Invalid Cohort ID provided.');
+  // Validate cohortId
+  if (typeof cohortId !== 'string' || cohortId.trim() === '') {
+    logMessage('getCohortStatus called with invalid Cohort ID.', 'error');
+    throw new Error('Invalid Cohort ID provided.');
+  }
+
+  try {
+    logMessage(`Fetching status for Cohort ID: ${cohortId}`, 'info');
+
+    // Construct URL with optional passphrase and alias
+    let url = `${window.CONFIG.API_URL}/cohort-status/?cohort_id=${encodeURIComponent(cohortId)}`;
+
+    if (passphrase) {
+      if (typeof passphrase !== 'string') {
+        logMessage('Passphrase must be a string in getCohortStatus.', 'error');
+        throw new Error('Passphrase must be a string.');
+      }
+      url += `&passphrase=${encodeURIComponent(passphrase)}`;
+      logMessage('Passphrase included in cohort status request.', 'info');
     }
 
-    try {
-        logMessage(`Fetching status for Cohort ID: ${cohortId}`, 'info');
-
-        // Construct URL with optional passphrase and alias
-        let url = `${window.CONFIG.API_URL}/cohort-status/?cohort_id=${encodeURIComponent(cohortId)}`;
-
-        if (passphrase) {
-            if (typeof passphrase !== 'string') {
-                logMessage('Passphrase must be a string in getCohortStatus.', 'error');
-                throw new Error('Passphrase must be a string.');
-            }
-            url += `&passphrase=${encodeURIComponent(passphrase)}`;
-            logMessage('Passphrase included in cohort status request.', 'info');
-        }
-
-        if (alias) {
-            if (typeof alias !== 'string') {
-                logMessage('Alias must be a string in getCohortStatus.', 'error');
-                throw new Error('Alias must be a string.');
-            }
-            url += `&alias=${encodeURIComponent(alias)}`;
-            logMessage('Alias included in cohort status request.', 'info');
-        }
-
-        // No retry - PollingManager handles retry
-        const data = await apiRequest(url, {}, false);
-
-        logMessage(`Status fetched for Cohort ID ${cohortId}: ${data.status}`, 'info');
-        return data;
-    } catch (error) {
-        logMessage(`Error in getCohortStatus for Cohort ID ${cohortId}: ${error.message}`, 'error');
-        throw error;
+    if (alias) {
+      if (typeof alias !== 'string') {
+        logMessage('Alias must be a string in getCohortStatus.', 'error');
+        throw new Error('Alias must be a string.');
+      }
+      url += `&alias=${encodeURIComponent(alias)}`;
+      logMessage('Alias included in cohort status request.', 'info');
     }
+
+    // No retry - PollingManager handles retry
+    const data = await apiRequest(url, {}, false);
+
+    logMessage(`Status fetched for Cohort ID ${cohortId}: ${data.status}`, 'info');
+    return data;
+  } catch (error) {
+    logMessage(`Error in getCohortStatus for Cohort ID ${cohortId}: ${error.message}`, 'error');
+    throw error;
+  }
 }
 
 /**
@@ -195,81 +195,78 @@ export async function getCohortStatus(cohortId, passphrase = null, alias = null)
  * @returns {Function} A function to stop the polling
  */
 export function pollJobStatusAPI(
-    jobId,
-    onStatusUpdate,
-    onComplete,
-    onError,
-    onPoll = null,
-    onQueueUpdate = null
+  jobId,
+  onStatusUpdate,
+  onComplete,
+  onError,
+  onPoll = null,
+  onQueueUpdate = null
 ) {
-    // Poll function that fetches and processes job status
-    const pollFn = async () => {
-        if (onPoll && typeof onPoll === 'function') {
-            onPoll();
-        }
+  // Poll function that fetches and processes job status
+  const pollFn = async () => {
+    if (onPoll && typeof onPoll === 'function') {
+      onPoll();
+    }
 
-        // Fetch current job status
-        const data = await getJobStatus(jobId);
+    // Fetch current job status
+    const data = await getJobStatus(jobId);
 
-        // Update status using the provided callback
-        onStatusUpdate(data.status);
-        logMessage(`Job ID ${jobId} status updated to: ${data.status}`, 'info');
+    // Update status using the provided callback
+    onStatusUpdate(data.status);
+    logMessage(`Job ID ${jobId} status updated to: ${data.status}`, 'info');
 
-        // Handle additional job details if available
-        if (data.details) {
-            logMessage(`Job ID ${jobId} details: ${JSON.stringify(data.details)}`, 'info');
-        }
+    // Handle additional job details if available
+    if (data.details) {
+      logMessage(`Job ID ${jobId} details: ${JSON.stringify(data.details)}`, 'info');
+    }
 
-        // Fetch job queue position if applicable
-        if (onQueueUpdate && typeof onQueueUpdate === 'function') {
-            try {
-                const queueData = await getJobQueueStatus(jobId);
-                onQueueUpdate(queueData);
-                logMessage(
-                    `Queue data updated for Job ID ${jobId}: ${JSON.stringify(queueData)}`,
-                    'info'
-                );
-            } catch (queueError) {
-                logMessage(
-                    `Error fetching job queue status for Job ID ${jobId}: ${queueError.message}`,
-                    'error'
-                );
-            }
-        }
+    // Fetch job queue position if applicable
+    if (onQueueUpdate && typeof onQueueUpdate === 'function') {
+      try {
+        const queueData = await getJobQueueStatus(jobId);
+        onQueueUpdate(queueData);
+        logMessage(`Queue data updated for Job ID ${jobId}: ${JSON.stringify(queueData)}`, 'info');
+      } catch (queueError) {
+        logMessage(
+          `Error fetching job queue status for Job ID ${jobId}: ${queueError.message}`,
+          'error'
+        );
+      }
+    }
 
-        // Return the data with status for PollingManager to check
-        return data;
-    };
+    // Return the data with status for PollingManager to check
+    return data;
+  };
 
-    // Start polling using PollingManager
-    const stopPolling = pollingManager.start(`job-${jobId}`, pollFn, {
-        interval: 5000,  // 5 seconds
-        maxRetries: 20,  // More retries for job polling
-        maxDuration: 3600000,  // 1 hour max
-        onUpdate: (data) => {
-            // Already handled in pollFn
-        },
-        onComplete: (data) => {
-            logMessage(`PollingManager onComplete callback triggered for Job ID ${jobId}. Data:`, 'info');
-            logMessage(JSON.stringify(data), 'info');
+  // Start polling using PollingManager
+  const stopPolling = pollingManager.start(`job-${jobId}`, pollFn, {
+    interval: 5000, // 5 seconds
+    maxRetries: 20, // More retries for job polling
+    maxDuration: 3600000, // 1 hour max
+    onUpdate: _data => {
+      // Already handled in pollFn
+    },
+    onComplete: data => {
+      logMessage(`PollingManager onComplete callback triggered for Job ID ${jobId}. Data:`, 'info');
+      logMessage(JSON.stringify(data), 'info');
 
-            if (data.status === 'completed') {
-                logMessage(`Job ID ${jobId} has been completed. Calling onComplete callback...`, 'success');
-                onComplete();
-                logMessage(`onComplete callback executed for Job ID ${jobId}.`, 'success');
-            } else if (data.status === 'failed') {
-                const errorMsg = data.error || 'Job failed.';
-                logMessage(`Job ID ${jobId} failed with error: ${errorMsg}`, 'error');
-                onError(errorMsg);
-            }
-        },
-        onError: (error) => {
-            logMessage(`Error polling status for Job ID ${jobId}: ${error.message}`, 'error');
-            onError(error.message);
-        }
-    });
+      if (data.status === 'completed') {
+        logMessage(`Job ID ${jobId} has been completed. Calling onComplete callback...`, 'success');
+        onComplete();
+        logMessage(`onComplete callback executed for Job ID ${jobId}.`, 'success');
+      } else if (data.status === 'failed') {
+        const errorMsg = data.error || 'Job failed.';
+        logMessage(`Job ID ${jobId} failed with error: ${errorMsg}`, 'error');
+        onError(errorMsg);
+      }
+    },
+    onError: error => {
+      logMessage(`Error polling status for Job ID ${jobId}: ${error.message}`, 'error');
+      onError(error.message);
+    },
+  });
 
-    return stopPolling;
+  return stopPolling;
 }
 
 /**
@@ -288,71 +285,71 @@ export function pollJobStatusAPI(
  * @returns {Function} A function to stop the polling
  */
 export function pollCohortStatusAPI(
-    cohortId,
-    onStatusUpdate,
-    onComplete,
-    onError,
-    onPoll = null,
-    passphrase = null
+  cohortId,
+  onStatusUpdate,
+  onComplete,
+  onError,
+  onPoll = null,
+  passphrase = null
 ) {
-    // Poll function that fetches and processes cohort status
-    const pollFn = async () => {
-        if (onPoll && typeof onPoll === 'function') {
-            onPoll();
-            logMessage(`Polling initiated for Cohort ID: ${cohortId}`, 'info');
-        }
+  // Poll function that fetches and processes cohort status
+  const pollFn = async () => {
+    if (onPoll && typeof onPoll === 'function') {
+      onPoll();
+      logMessage(`Polling initiated for Cohort ID: ${cohortId}`, 'info');
+    }
 
-        // Fetch current cohort status
-        const data = await getCohortStatus(cohortId, passphrase);
+    // Fetch current cohort status
+    const data = await getCohortStatus(cohortId, passphrase);
 
-        // Update status using the provided callback
-        onStatusUpdate(data);
+    // Update status using the provided callback
+    onStatusUpdate(data);
 
-        // Validate cohort data
-        if (!data.jobs || !Array.isArray(data.jobs)) {
-            logMessage(`Invalid cohort status data for Cohort ID ${cohortId}.`, 'error');
-            throw new Error('Invalid cohort status data.');
-        }
+    // Validate cohort data
+    if (!data.jobs || !Array.isArray(data.jobs)) {
+      logMessage(`Invalid cohort status data for Cohort ID ${cohortId}.`, 'error');
+      throw new Error('Invalid cohort status data.');
+    }
 
-        // Check if all jobs completed
+    // Check if all jobs completed
+    const allCompleted = data.jobs.every(job => job.status === 'completed');
+
+    // Return data with synthetic status for PollingManager
+    return {
+      ...data,
+      status: allCompleted ? 'completed' : data.status === 'failed' ? 'failed' : 'processing',
+    };
+  };
+
+  // Start polling using PollingManager
+  const stopPolling = pollingManager.start(`cohort-${cohortId}`, pollFn, {
+    interval: 5000, // 5 seconds
+    maxRetries: 20, // More retries for cohort polling
+    maxDuration: 3600000, // 1 hour max
+    onUpdate: _data => {
+      // Already handled in pollFn
+    },
+    onComplete: data => {
+      if (data.jobs && Array.isArray(data.jobs)) {
         const allCompleted = data.jobs.every(job => job.status === 'completed');
 
-        // Return data with synthetic status for PollingManager
-        return {
-            ...data,
-            status: allCompleted ? 'completed' : (data.status === 'failed' ? 'failed' : 'processing')
-        };
-    };
-
-    // Start polling using PollingManager
-    const stopPolling = pollingManager.start(`cohort-${cohortId}`, pollFn, {
-        interval: 5000,  // 5 seconds
-        maxRetries: 20,  // More retries for cohort polling
-        maxDuration: 3600000,  // 1 hour max
-        onUpdate: (data) => {
-            // Already handled in pollFn
-        },
-        onComplete: (data) => {
-            if (data.jobs && Array.isArray(data.jobs)) {
-                const allCompleted = data.jobs.every(job => job.status === 'completed');
-
-                if (allCompleted) {
-                    logMessage(`All jobs in Cohort ID ${cohortId} have been completed.`, 'success');
-                    onComplete();
-                } else if (data.status === 'failed') {
-                    const errorMsg = data.error || 'Cohort processing failed.';
-                    logMessage(`Cohort ID ${cohortId} failed with error: ${errorMsg}`, 'error');
-                    onError(errorMsg);
-                }
-            }
-        },
-        onError: (error) => {
-            logMessage(`Error polling status for Cohort ID ${cohortId}: ${error.message}`, 'error');
-            onError(error.message);
+        if (allCompleted) {
+          logMessage(`All jobs in Cohort ID ${cohortId} have been completed.`, 'success');
+          onComplete();
+        } else if (data.status === 'failed') {
+          const errorMsg = data.error || 'Cohort processing failed.';
+          logMessage(`Cohort ID ${cohortId} failed with error: ${errorMsg}`, 'error');
+          onError(errorMsg);
         }
-    });
+      }
+    },
+    onError: error => {
+      logMessage(`Error polling status for Cohort ID ${cohortId}: ${error.message}`, 'error');
+      onError(error.message);
+    },
+  });
 
-    return stopPolling;
+  return stopPolling;
 }
 
 /**
@@ -365,29 +362,29 @@ export function pollCohortStatusAPI(
  * @throws {Error} If the request fails
  */
 export async function getJobQueueStatus(jobId) {
-    try {
-        logMessage(`Fetching queue status${jobId ? ` for Job ID: ${jobId}` : ''}`, 'debug');
+  try {
+    logMessage(`Fetching queue status${jobId ? ` for Job ID: ${jobId}` : ''}`, 'debug');
 
-        let url = `${window.CONFIG.API_URL}/job-queue/`;
-        if (jobId) {
-            url += `?job_id=${encodeURIComponent(jobId)}`;
-        }
-
-        // No retry - quick status check
-        const data = await apiRequest(url, {}, false);
-
-        logMessage(
-            `Queue status fetched${jobId ? ` for Job ID ${jobId}` : ''}: ${JSON.stringify(data)}`,
-            'info'
-        );
-        return data;
-    } catch (error) {
-        logMessage(
-            `Error in getJobQueueStatus${jobId ? ` for Job ID ${jobId}` : ''}: ${error.message}`,
-            'debug'
-        );
-        throw error;
+    let url = `${window.CONFIG.API_URL}/job-queue/`;
+    if (jobId) {
+      url += `?job_id=${encodeURIComponent(jobId)}`;
     }
+
+    // No retry - quick status check
+    const data = await apiRequest(url, {}, false);
+
+    logMessage(
+      `Queue status fetched${jobId ? ` for Job ID ${jobId}` : ''}: ${JSON.stringify(data)}`,
+      'info'
+    );
+    return data;
+  } catch (error) {
+    logMessage(
+      `Error in getJobQueueStatus${jobId ? ` for Job ID ${jobId}` : ''}: ${error.message}`,
+      'debug'
+    );
+    throw error;
+  }
 }
 
 /**
@@ -401,43 +398,43 @@ export async function getJobQueueStatus(jobId) {
  * @throws {Error} If the cohort creation fails after retries or input is invalid
  */
 export async function createCohort(alias, passphrase = null) {
-    // Validate alias
-    if (typeof alias !== 'string' || alias.trim() === '') {
-        logMessage('createCohort called with invalid alias.', 'error');
-        throw new Error('Invalid alias provided.');
-    }
+  // Validate alias
+  if (typeof alias !== 'string' || alias.trim() === '') {
+    logMessage('createCohort called with invalid alias.', 'error');
+    throw new Error('Invalid alias provided.');
+  }
 
-    // Validate passphrase if provided
-    if (passphrase !== null && typeof passphrase !== 'string') {
-        logMessage('Passphrase must be a string in createCohort.', 'error');
-        throw new Error('Passphrase must be a string.');
-    }
+  // Validate passphrase if provided
+  if (passphrase !== null && typeof passphrase !== 'string') {
+    logMessage('Passphrase must be a string in createCohort.', 'error');
+    throw new Error('Passphrase must be a string.');
+  }
 
-    try {
-        logMessage(`Creating cohort with alias: ${alias}`, 'info');
+  try {
+    logMessage(`Creating cohort with alias: ${alias}`, 'info');
 
-        // Construct URL-encoded payload
-        const params = new URLSearchParams();
-        params.append('alias', alias);
-        if (passphrase) params.append('passphrase', passphrase);
+    // Construct URL-encoded payload
+    const params = new URLSearchParams();
+    params.append('alias', alias);
+    if (passphrase) params.append('passphrase', passphrase);
 
-        // Create with retry (one-shot request)
-        const data = await apiRequest(
-            `${window.CONFIG.API_URL}/create-cohort/`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: params.toString()
-            },
-            true // shouldRetry = true
-        );
+    // Create with retry (one-shot request)
+    const data = await apiRequest(
+      `${window.CONFIG.API_URL}/create-cohort/`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString(),
+      },
+      true // shouldRetry = true
+    );
 
-        logMessage(`Cohort created successfully! Cohort ID: ${data.cohort_id}`, 'success');
-        return data;
-    } catch (error) {
-        logMessage(`Error in createCohort: ${error.message}`, 'error');
-        throw error;
-    }
+    logMessage(`Cohort created successfully! Cohort ID: ${data.cohort_id}`, 'success');
+    return data;
+  } catch (error) {
+    logMessage(`Error in createCohort: ${error.message}`, 'error');
+    throw error;
+  }
 }

@@ -1,10 +1,6 @@
 // frontend/resources/js/inputValidation.js
 
-import {
-    validateEmail,
-    validateCohortAlias,
-    validatePassphrase
-} from './validators.js';
+import { validateEmail, validateCohortAlias, validatePassphrase } from './validators.js';
 import { logMessage } from './log.js';
 
 /**
@@ -33,24 +29,25 @@ import { logMessage } from './log.js';
  * Maps input fields to their validation functions and error messages
  */
 const VALIDATION_RULES = {
-    email: {
-        validator: validateEmail,
-        errorMessage: 'Please enter a valid email address (e.g., user@example.com)',
-        successMessage: 'Valid email address',
-        optional: true
-    },
-    cohortAlias: {
-        validator: validateCohortAlias,
-        errorMessage: 'Cohort alias must be 3-64 characters (letters, numbers, spaces, hyphens, underscores)',
-        successMessage: 'Valid cohort alias',
-        optional: true
-    },
-    passphrase: {
-        validator: validatePassphrase,
-        errorMessage: 'Passphrase must be 8-128 characters long',
-        successMessage: 'Valid passphrase',
-        optional: true
-    }
+  email: {
+    validator: validateEmail,
+    errorMessage: 'Please enter a valid email address (e.g., user@example.com)',
+    successMessage: 'Valid email address',
+    optional: true,
+  },
+  cohortAlias: {
+    validator: validateCohortAlias,
+    errorMessage:
+      'Cohort alias must be 3-64 characters (letters, numbers, spaces, hyphens, underscores)',
+    successMessage: 'Valid cohort alias',
+    optional: true,
+  },
+  passphrase: {
+    validator: validatePassphrase,
+    errorMessage: 'Passphrase must be 8-128 characters long',
+    successMessage: 'Valid passphrase',
+    optional: true,
+  },
 };
 
 /**
@@ -60,33 +57,33 @@ const VALIDATION_RULES = {
  * @param {string} message - Error message to display
  */
 export function showError(inputElement, message) {
-    if (!inputElement) return;
+  if (!inputElement) return;
 
-    // Remove any existing states
-    inputElement.classList.remove('success');
-    inputElement.classList.add('error');
+  // Remove any existing states
+  inputElement.classList.remove('success');
+  inputElement.classList.add('error');
 
-    // Remove existing message if any
-    removeMessage(inputElement);
+  // Remove existing message if any
+  removeMessage(inputElement);
 
-    // Create and insert error message
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message';
-    errorDiv.setAttribute('role', 'alert');
-    errorDiv.setAttribute('aria-live', 'polite');
+  // Create and insert error message
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'error-message';
+  errorDiv.setAttribute('role', 'alert');
+  errorDiv.setAttribute('aria-live', 'polite');
 
-    // Text content (emoji added via CSS ::before)
-    const messageText = document.createTextNode(message);
-    errorDiv.appendChild(messageText);
+  // Text content (emoji added via CSS ::before)
+  const messageText = document.createTextNode(message);
+  errorDiv.appendChild(messageText);
 
-    // Insert after the input
-    inputElement.parentNode.insertBefore(errorDiv, inputElement.nextSibling);
+  // Insert after the input
+  inputElement.parentNode.insertBefore(errorDiv, inputElement.nextSibling);
 
-    // Update aria-invalid
-    inputElement.setAttribute('aria-invalid', 'true');
-    inputElement.setAttribute('aria-describedby', errorDiv.id || 'error-message');
+  // Update aria-invalid
+  inputElement.setAttribute('aria-invalid', 'true');
+  inputElement.setAttribute('aria-describedby', errorDiv.id || 'error-message');
 
-    logMessage(`Validation error shown for ${inputElement.id}: ${message}`, 'debug');
+  logMessage(`Validation error shown for ${inputElement.id}: ${message}`, 'debug');
 }
 
 /**
@@ -96,33 +93,33 @@ export function showError(inputElement, message) {
  * @param {string} [message] - Optional success message to display
  */
 export function showSuccess(inputElement, message = null) {
-    if (!inputElement) return;
+  if (!inputElement) return;
 
-    // Remove error state
-    inputElement.classList.remove('error');
-    inputElement.classList.add('success');
+  // Remove error state
+  inputElement.classList.remove('error');
+  inputElement.classList.add('success');
 
-    // Remove existing message
-    removeMessage(inputElement);
+  // Remove existing message
+  removeMessage(inputElement);
 
-    // Optionally show success message (subtle, can be disabled)
-    if (message) {
-        const successDiv = document.createElement('div');
-        successDiv.className = 'success-message';
-        successDiv.setAttribute('role', 'status');
-        successDiv.setAttribute('aria-live', 'polite');
+  // Optionally show success message (subtle, can be disabled)
+  if (message) {
+    const successDiv = document.createElement('div');
+    successDiv.className = 'success-message';
+    successDiv.setAttribute('role', 'status');
+    successDiv.setAttribute('aria-live', 'polite');
 
-        const messageText = document.createTextNode(message);
-        successDiv.appendChild(messageText);
+    const messageText = document.createTextNode(message);
+    successDiv.appendChild(messageText);
 
-        inputElement.parentNode.insertBefore(successDiv, inputElement.nextSibling);
-    }
+    inputElement.parentNode.insertBefore(successDiv, inputElement.nextSibling);
+  }
 
-    // Update aria-invalid
-    inputElement.setAttribute('aria-invalid', 'false');
-    inputElement.removeAttribute('aria-describedby');
+  // Update aria-invalid
+  inputElement.setAttribute('aria-invalid', 'false');
+  inputElement.removeAttribute('aria-describedby');
 
-    logMessage(`Validation success shown for ${inputElement.id}`, 'debug');
+  logMessage(`Validation success shown for ${inputElement.id}`, 'debug');
 }
 
 /**
@@ -131,12 +128,12 @@ export function showSuccess(inputElement, message = null) {
  * @param {HTMLInputElement} inputElement - The input element
  */
 export function clearValidation(inputElement) {
-    if (!inputElement) return;
+  if (!inputElement) return;
 
-    inputElement.classList.remove('error', 'success');
-    removeMessage(inputElement);
-    inputElement.removeAttribute('aria-invalid');
-    inputElement.removeAttribute('aria-describedby');
+  inputElement.classList.remove('error', 'success');
+  removeMessage(inputElement);
+  inputElement.removeAttribute('aria-invalid');
+  inputElement.removeAttribute('aria-describedby');
 }
 
 /**
@@ -146,11 +143,14 @@ export function clearValidation(inputElement) {
  * @private
  */
 function removeMessage(inputElement) {
-    // Remove error message
-    const errorMsg = inputElement.nextElementSibling;
-    if (errorMsg && (errorMsg.classList.contains('error-message') || errorMsg.classList.contains('success-message'))) {
-        errorMsg.remove();
-    }
+  // Remove error message
+  const errorMsg = inputElement.nextElementSibling;
+  if (
+    errorMsg &&
+    (errorMsg.classList.contains('error-message') || errorMsg.classList.contains('success-message'))
+  ) {
+    errorMsg.remove();
+  }
 }
 
 /**
@@ -161,36 +161,36 @@ function removeMessage(inputElement) {
  * @returns {boolean} - True if valid, false otherwise
  */
 export function validateInput(inputId, value) {
-    const inputElement = document.getElementById(inputId);
-    if (!inputElement) {
-        logMessage(`Input element not found: ${inputId}`, 'warn');
-        return false;
-    }
+  const inputElement = document.getElementById(inputId);
+  if (!inputElement) {
+    logMessage(`Input element not found: ${inputId}`, 'warn');
+    return false;
+  }
 
-    const rule = VALIDATION_RULES[inputId];
-    if (!rule) {
-        logMessage(`No validation rule found for: ${inputId}`, 'warn');
-        return true; // No rule = considered valid
-    }
+  const rule = VALIDATION_RULES[inputId];
+  if (!rule) {
+    logMessage(`No validation rule found for: ${inputId}`, 'warn');
+    return true; // No rule = considered valid
+  }
 
-    // Handle optional fields
-    if (rule.optional && (!value || value.trim() === '')) {
-        clearValidation(inputElement);
-        return true;
-    }
+  // Handle optional fields
+  if (rule.optional && (!value || value.trim() === '')) {
+    clearValidation(inputElement);
+    return true;
+  }
 
-    // Run validator
-    const validatedValue = rule.validator(value);
-    const isValid = validatedValue !== null;
+  // Run validator
+  const validatedValue = rule.validator(value);
+  const isValid = validatedValue !== null;
 
-    if (!isValid) {
-        showError(inputElement, rule.errorMessage);
-        return false;
-    } else {
-        // Show success (without message for cleaner UI)
-        showSuccess(inputElement);
-        return true;
-    }
+  if (!isValid) {
+    showError(inputElement, rule.errorMessage);
+    return false;
+  } else {
+    // Show success (without message for cleaner UI)
+    showSuccess(inputElement);
+    return true;
+  }
 }
 
 /**
@@ -199,39 +199,39 @@ export function validateInput(inputId, value) {
  * @param {string} inputId - ID of the input element
  */
 export function setupValidation(inputId) {
-    const inputElement = document.getElementById(inputId);
-    if (!inputElement) {
-        logMessage(`Cannot setup validation: input not found - ${inputId}`, 'warn');
-        return;
+  const inputElement = document.getElementById(inputId);
+  if (!inputElement) {
+    logMessage(`Cannot setup validation: input not found - ${inputId}`, 'warn');
+    return;
+  }
+
+  // Validate on blur
+  inputElement.addEventListener('blur', e => {
+    validateInput(inputId, e.target.value);
+  });
+
+  // Clear error on focus (give user a fresh start)
+  inputElement.addEventListener('focus', e => {
+    if (e.target.classList.contains('error')) {
+      removeMessage(e.target);
+      // Keep error class until they fix it, just remove the message
     }
+  });
 
-    // Validate on blur
-    inputElement.addEventListener('blur', (e) => {
+  // Optional: Real-time validation while typing (debounced)
+  let debounceTimer;
+  inputElement.addEventListener('input', e => {
+    clearTimeout(debounceTimer);
+
+    // Only validate if there's already an error (help them fix it)
+    if (e.target.classList.contains('error')) {
+      debounceTimer = setTimeout(() => {
         validateInput(inputId, e.target.value);
-    });
+      }, 500); // 500ms debounce
+    }
+  });
 
-    // Clear error on focus (give user a fresh start)
-    inputElement.addEventListener('focus', (e) => {
-        if (e.target.classList.contains('error')) {
-            removeMessage(e.target);
-            // Keep error class until they fix it, just remove the message
-        }
-    });
-
-    // Optional: Real-time validation while typing (debounced)
-    let debounceTimer;
-    inputElement.addEventListener('input', (e) => {
-        clearTimeout(debounceTimer);
-
-        // Only validate if there's already an error (help them fix it)
-        if (e.target.classList.contains('error')) {
-            debounceTimer = setTimeout(() => {
-                validateInput(inputId, e.target.value);
-            }, 500); // 500ms debounce
-        }
-    });
-
-    logMessage(`Validation setup completed for: ${inputId}`, 'info');
+  logMessage(`Validation setup completed for: ${inputId}`, 'info');
 }
 
 /**
@@ -240,13 +240,13 @@ export function setupValidation(inputId) {
  * @param {string[]} inputIds - Array of input IDs to validate
  */
 export function initializeValidation(inputIds = ['email', 'cohortAlias', 'passphrase']) {
-    logMessage('Initializing input validation...', 'info');
+  logMessage('Initializing input validation...', 'info');
 
-    inputIds.forEach(inputId => {
-        setupValidation(inputId);
-    });
+  inputIds.forEach(inputId => {
+    setupValidation(inputId);
+  });
 
-    logMessage(`Validation initialized for ${inputIds.length} inputs`, 'success');
+  logMessage(`Validation initialized for ${inputIds.length} inputs`, 'success');
 }
 
 /**
@@ -256,19 +256,19 @@ export function initializeValidation(inputIds = ['email', 'cohortAlias', 'passph
  * @returns {boolean} - True if all valid, false if any invalid
  */
 export function validateAll(inputIds = ['email', 'cohortAlias', 'passphrase']) {
-    let allValid = true;
+  let allValid = true;
 
-    inputIds.forEach(inputId => {
-        const inputElement = document.getElementById(inputId);
-        if (inputElement) {
-            const isValid = validateInput(inputId, inputElement.value);
-            if (!isValid) {
-                allValid = false;
-            }
-        }
-    });
+  inputIds.forEach(inputId => {
+    const inputElement = document.getElementById(inputId);
+    if (inputElement) {
+      const isValid = validateInput(inputId, inputElement.value);
+      if (!isValid) {
+        allValid = false;
+      }
+    }
+  });
 
-    return allValid;
+  return allValid;
 }
 
 /**
@@ -277,12 +277,12 @@ export function validateAll(inputIds = ['email', 'cohortAlias', 'passphrase']) {
  * @param {string[]} inputIds - Array of input IDs to clear
  */
 export function clearAllValidation(inputIds = ['email', 'cohortAlias', 'passphrase']) {
-    inputIds.forEach(inputId => {
-        const inputElement = document.getElementById(inputId);
-        if (inputElement) {
-            clearValidation(inputElement);
-        }
-    });
+  inputIds.forEach(inputId => {
+    const inputElement = document.getElementById(inputId);
+    if (inputElement) {
+      clearValidation(inputElement);
+    }
+  });
 
-    logMessage('All validation states cleared', 'info');
+  logMessage('All validation states cleared', 'info');
 }

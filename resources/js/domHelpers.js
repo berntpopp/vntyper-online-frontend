@@ -7,6 +7,8 @@
  * @module domHelpers
  */
 
+import { logMessage } from './log.js';
+
 /**
  * Create a safe label+value element (XSS-proof)
  *
@@ -24,27 +26,27 @@
  * const element = createLabelValue('Job ID: ', jobId);
  */
 export function createLabelValue(label, value, options = {}) {
-    const container = document.createElement('div');
+  const container = document.createElement('div');
 
-    if (options.containerClass) {
-        container.className = options.containerClass;
-    }
+  if (options.containerClass) {
+    container.className = options.containerClass;
+  }
 
-    // Label as text node (safe)
-    container.appendChild(document.createTextNode(label));
+  // Label as text node (safe)
+  container.appendChild(document.createTextNode(label));
 
-    // Value in specified tag (default: strong)
-    const valueTag = options.valueTag || 'strong';
-    const valueElement = document.createElement(valueTag);
-    valueElement.textContent = value; // Safe! No HTML parsing
+  // Value in specified tag (default: strong)
+  const valueTag = options.valueTag || 'strong';
+  const valueElement = document.createElement(valueTag);
+  valueElement.textContent = value; // Safe! No HTML parsing
 
-    if (options.valueClass) {
-        valueElement.className = options.valueClass;
-    }
+  if (options.valueClass) {
+    valueElement.className = options.valueClass;
+  }
 
-    container.appendChild(valueElement);
+  container.appendChild(valueElement);
 
-    return container;
+  return container;
 }
 
 /**
@@ -61,20 +63,20 @@ export function createLabelValue(label, value, options = {}) {
  * const div = createTextElement('div', userInput, { className: 'message' });
  */
 export function createTextElement(tag, content, options = {}) {
-    const element = document.createElement(tag);
-    element.textContent = content; // Safe! No HTML parsing
+  const element = document.createElement(tag);
+  element.textContent = content; // Safe! No HTML parsing
 
-    if (options.className) {
-        element.className = options.className;
-    }
+  if (options.className) {
+    element.className = options.className;
+  }
 
-    if (options.attributes) {
-        Object.entries(options.attributes).forEach(([key, value]) => {
-            element.setAttribute(key, value);
-        });
-    }
+  if (options.attributes) {
+    Object.entries(options.attributes).forEach(([key, value]) => {
+      element.setAttribute(key, value);
+    });
+  }
 
-    return element;
+  return element;
 }
 
 /**
@@ -92,23 +94,23 @@ export function createTextElement(tag, content, options = {}) {
  * const link = createLink('Download', fileUrl, { className: 'btn' });
  */
 export function createLink(text, href, options = {}) {
-    const link = document.createElement('a');
-    link.textContent = text; // Safe! No HTML parsing
-    link.href = href;
+  const link = document.createElement('a');
+  link.textContent = text; // Safe! No HTML parsing
+  link.href = href;
 
-    if (options.className) {
-        link.className = options.className;
+  if (options.className) {
+    link.className = options.className;
+  }
+
+  if (options.target) {
+    link.target = options.target;
+    // Automatically add security attributes for external links
+    if (options.target === '_blank') {
+      link.rel = options.rel || 'noopener noreferrer';
     }
+  }
 
-    if (options.target) {
-        link.target = options.target;
-        // Automatically add security attributes for external links
-        if (options.target === '_blank') {
-            link.rel = options.rel || 'noopener noreferrer';
-        }
-    }
-
-    return link;
+  return link;
 }
 
 /**
@@ -125,16 +127,16 @@ export function createLink(text, href, options = {}) {
  * replaceLabelValue(element, 'Status: ', status);
  */
 export function replaceLabelValue(element, label, value, options = {}) {
-    // Clear existing content
-    element.innerHTML = '';
+  // Clear existing content
+  element.innerHTML = '';
 
-    // Create safe content
-    const content = createLabelValue(label, value, options);
+  // Create safe content
+  const content = createLabelValue(label, value, options);
 
-    // Move children from temp container to target element
-    while (content.firstChild) {
-        element.appendChild(content.firstChild);
-    }
+  // Move children from temp container to target element
+  while (content.firstChild) {
+    element.appendChild(content.firstChild);
+  }
 }
 
 /**
@@ -150,13 +152,13 @@ export function replaceLabelValue(element, label, value, options = {}) {
  * );
  */
 export function appendChildren(parent, ...children) {
-    children.forEach(child => {
-        if (typeof child === 'string') {
-            parent.appendChild(document.createTextNode(child));
-        } else if (child instanceof HTMLElement) {
-            parent.appendChild(child);
-        }
-    });
+  children.forEach(child => {
+    if (typeof child === 'string') {
+      parent.appendChild(document.createTextNode(child));
+    } else if (child instanceof HTMLElement) {
+      parent.appendChild(child);
+    }
+  });
 }
 
 /**
@@ -173,25 +175,25 @@ export function appendChildren(parent, ...children) {
  * const list = createList(['Item 1', 'Item 2'], { listType: 'ul' });
  */
 export function createList(items, options = {}) {
-    const listType = options.listType || 'ul';
-    const list = document.createElement(listType);
+  const listType = options.listType || 'ul';
+  const list = document.createElement(listType);
 
-    if (options.listClass) {
-        list.className = options.listClass;
+  if (options.listClass) {
+    list.className = options.listClass;
+  }
+
+  items.forEach(itemText => {
+    const li = document.createElement('li');
+    li.textContent = itemText; // Safe! No HTML parsing
+
+    if (options.itemClass) {
+      li.className = options.itemClass;
     }
 
-    items.forEach(itemText => {
-        const li = document.createElement('li');
-        li.textContent = itemText; // Safe! No HTML parsing
+    list.appendChild(li);
+  });
 
-        if (options.itemClass) {
-            li.className = options.itemClass;
-        }
-
-        list.appendChild(li);
-    });
-
-    return list;
+  return list;
 }
 
 /**
@@ -209,16 +211,16 @@ export function createList(items, options = {}) {
  * }
  */
 export function safeQuerySelector(selector, parent = document) {
-    try {
-        const element = parent.querySelector(selector);
-        if (!element) {
-            console.warn(`[DOM] Element not found: ${selector}`);
-        }
-        return element;
-    } catch (error) {
-        console.error(`[DOM] Error querying selector '${selector}':`, error);
-        return null;
+  try {
+    const element = parent.querySelector(selector);
+    if (!element) {
+      logMessage(`[DOM] Element not found: ${selector}`, 'warning');
     }
+    return element;
+  } catch (error) {
+    logMessage(`[DOM] Error querying selector '${selector}': ${error.message}`, 'error');
+    return null;
+  }
 }
 
 /**
@@ -235,16 +237,16 @@ export function safeQuerySelector(selector, parent = document) {
  * }
  */
 export function safeGetElementById(id) {
-    try {
-        const element = document.getElementById(id);
-        if (!element) {
-            console.warn(`[DOM] Element not found: #${id}`);
-        }
-        return element;
-    } catch (error) {
-        console.error(`[DOM] Error getting element #${id}:`, error);
-        return null;
+  try {
+    const element = document.getElementById(id);
+    if (!element) {
+      logMessage(`[DOM] Element not found: #${id}`, 'warning');
     }
+    return element;
+  } catch (error) {
+    logMessage(`[DOM] Error getting element #${id}: ${error.message}`, 'error');
+    return null;
+  }
 }
 
 /**
@@ -261,13 +263,13 @@ export function safeGetElementById(id) {
  * errorDiv.textContent = 'App initialized';
  */
 export function requireElementById(id) {
-    const element = document.getElementById(id);
-    if (!element) {
-        const error = new Error(`Required element not found: #${id}`);
-        console.error('[DOM]', error);
-        throw error;
-    }
-    return element;
+  const element = document.getElementById(id);
+  if (!element) {
+    const error = new Error(`Required element not found: #${id}`);
+    logMessage(`[DOM] ${error.message}`, 'error');
+    throw error;
+  }
+  return element;
 }
 
 /**
@@ -283,14 +285,14 @@ export function requireElementById(id) {
  * buttons.forEach(btn => btn.disabled = true);
  */
 export function safeQuerySelectorAll(selector, parent = document) {
-    try {
-        const elements = Array.from(parent.querySelectorAll(selector));
-        if (elements.length === 0) {
-            console.warn(`[DOM] No elements found: ${selector}`);
-        }
-        return elements;
-    } catch (error) {
-        console.error(`[DOM] Error querying selector '${selector}':`, error);
-        return [];
+  try {
+    const elements = Array.from(parent.querySelectorAll(selector));
+    if (elements.length === 0) {
+      logMessage(`[DOM] No elements found: ${selector}`, 'warning');
     }
+    return elements;
+  } catch (error) {
+    logMessage(`[DOM] Error querying selector '${selector}': ${error.message}`, 'error');
+    return [];
+  }
 }

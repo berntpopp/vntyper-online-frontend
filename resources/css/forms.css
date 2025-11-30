@@ -55,7 +55,9 @@
   margin-top: 20px;
   display: none;
   flex-direction: column;
-  transition: max-height 0.3s ease, opacity 0.3s ease;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease;
   overflow: hidden;
   max-height: 0;
   opacity: 0;
@@ -108,8 +110,8 @@
 }
 
 /* Checkbox labels */
-.additional-inputs label[for="advntrMode"],
-.additional-inputs label[for="normalMode"] {
+.additional-inputs label[for='advntrMode'],
+.additional-inputs label[for='normalMode'] {
   display: inline-block;
   margin-top: 20px;
   font-weight: normal;
@@ -117,11 +119,11 @@
   font-size: 1rem;
 }
 
-.additional-inputs label[for="advntrMode"] {
+.additional-inputs label[for='advntrMode'] {
   margin-top: 25px;
 }
 
-.additional-inputs input[type="checkbox"] {
+.additional-inputs input[type='checkbox'] {
   margin-right: 8px;
   cursor: pointer;
   vertical-align: middle;
@@ -177,7 +179,7 @@
 }
 
 .error-message::before {
-  content: "⚠️";
+  content: '⚠️';
   font-size: 1rem;
   flex-shrink: 0;
 }
@@ -195,7 +197,7 @@
 }
 
 .success-message::before {
-  content: "✓";
+  content: '✓';
   font-size: 1rem;
   font-weight: bold;
   flex-shrink: 0;
@@ -236,22 +238,21 @@
 
 @media (max-width: 600px) {
   .button-group {
-      flex-direction: column;     /* Stacks buttons vertically on small screens */
-      align-items: stretch;
+    flex-direction: column; /* Stacks buttons vertically on small screens */
+    align-items: stretch;
   }
 
   .button {
-      width: 100%;                /* Buttons take full width on small screens */
-      text-align: center;         /* Centers text within buttons */
+    width: 100%; /* Buttons take full width on small screens */
+    text-align: center; /* Centers text within buttons */
   }
 
   .additional-inputs-container {
-      margin-top: 15px;
+    margin-top: 15px;
   }
 
   /* Mobile adjustments for optional inputs */
   .additional-inputs .form-input {
-      font-size: 16px;            /* Prevents zoom on iOS */
+    font-size: 16px; /* Prevents zoom on iOS */
   }
 }
-

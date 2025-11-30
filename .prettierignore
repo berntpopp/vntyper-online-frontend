@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build output
+coverage/
+dist/
+build/
+
+# Generated files
+package-lock.json
+*.min.js
+*.min.css
+
+# Development artifacts
+.playwright-mcp/
+plan/
+
+# IDE and editor config
+.vscode/
+.idea/
+
+# Git
+.git/
+
+# HTML files - preserve existing formatting
+*.html

@@ -9,67 +9,82 @@ import { logMessage } from './log.js'; // Import the logMessage function
  * @returns {Object} - Contains matchedPairs and invalidFiles arrays.
  */
 export function validateFiles(selectedFiles, logWarnings = true) {
-    logMessage('Starting file validation process...', 'info');
+  logMessage('Starting file validation process...', 'info');
 
-    // Convert all file names to lowercase for case-insensitive matching
-    const lowerCaseFiles = selectedFiles.map(file => ({
-        originalFile: file,
-        lowerCaseName: file.name.toLowerCase()
-    }));
+  // Convert all file names to lowercase for case-insensitive matching
+  const lowerCaseFiles = selectedFiles.map(file => ({
+    originalFile: file,
+    lowerCaseName: file.name.toLowerCase(),
+  }));
 
-    // Filter BAM, SAM, and BAI files
-    const bamFiles = lowerCaseFiles.filter(file => file.lowerCaseName.endsWith(".bam"));
-    const samFiles = lowerCaseFiles.filter(file => file.lowerCaseName.endsWith(".sam"));
-    const baiFiles = lowerCaseFiles.filter(file => file.lowerCaseName.endsWith(".bai"));
+  // Filter BAM, SAM, and BAI files
+  const bamFiles = lowerCaseFiles.filter(file => file.lowerCaseName.endsWith('.bam'));
+  const samFiles = lowerCaseFiles.filter(file => file.lowerCaseName.endsWith('.sam'));
+  const baiFiles = lowerCaseFiles.filter(file => file.lowerCaseName.endsWith('.bai'));
 
-    logMessage(`Found ${bamFiles.length} BAM file(s), ${samFiles.length} SAM file(s), and ${baiFiles.length} BAI file(s).`, 'info');
+  logMessage(
+    `Found ${bamFiles.length} BAM file(s), ${samFiles.length} SAM file(s), and ${baiFiles.length} BAI file(s).`,
+    'info'
+  );
 
-    // Initialize arrays to hold matched pairs and invalid files
-    const matchedPairs = [];
-    const invalidFiles = [];
+  // Initialize arrays to hold matched pairs and invalid files
+  const matchedPairs = [];
+  const invalidFiles = [];
 
-    // Map to track BAI files for quick lookup
-    const baiMap = new Map();
-    baiFiles.forEach(bai => {
-        const baseName = getBaseName(bai.lowerCaseName, 'bai');
-        baiMap.set(baseName, bai);
-    });
+  // Map to track BAI files for quick lookup
+  const baiMap = new Map();
+  baiFiles.forEach(bai => {
+    const baseName = getBaseName(bai.lowerCaseName, 'bai');
+    baiMap.set(baseName, bai);
+  });
 
-    logMessage(`Mapped ${baiMap.size} BAI file(s) for matching.`, 'info');
+  logMessage(`Mapped ${baiMap.size} BAI file(s) for matching.`, 'info');
 
-    // Iterate through BAM files to find corresponding BAI files
-    bamFiles.forEach(bam => {
-        const baseName = getBaseName(bam.lowerCaseName, 'bam');
-        const bai = baiMap.get(baseName);
-        if (bai) {
-            matchedPairs.push({ bam: bam.originalFile, bai: bai.originalFile });
-            baiMap.delete(baseName); // Remove from map once matched
-            logMessage(`Matched BAM file "${bam.originalFile.name}" with BAI file "${bai.originalFile.name}".`, 'success');
-        } else {
-            invalidFiles.push(bam.originalFile);
-            if (logWarnings) {
-                logMessage(`Corresponding BAI file not found for BAM file: ${bam.originalFile.name}`, 'warning');
-            }
-        }
-    });
+  // Iterate through BAM files to find corresponding BAI files
+  bamFiles.forEach(bam => {
+    const baseName = getBaseName(bam.lowerCaseName, 'bam');
+    const bai = baiMap.get(baseName);
+    if (bai) {
+      matchedPairs.push({ bam: bam.originalFile, bai: bai.originalFile });
+      baiMap.delete(baseName); // Remove from map once matched
+      logMessage(
+        `Matched BAM file "${bam.originalFile.name}" with BAI file "${bai.originalFile.name}".`,
+        'success'
+      );
+    } else {
+      invalidFiles.push(bam.originalFile);
+      if (logWarnings) {
+        logMessage(
+          `Corresponding BAI file not found for BAM file: ${bam.originalFile.name}`,
+          'warning'
+        );
+      }
+    }
+  });
 
-    // Process SAM files (which do not require a BAI)
-    samFiles.forEach(sam => {
-        matchedPairs.push({ sam: sam.originalFile });
-        logMessage(`SAM file "${sam.originalFile.name}" added for conversion.`, 'success');
-    });
+  // Process SAM files (which do not require a BAI)
+  samFiles.forEach(sam => {
+    matchedPairs.push({ sam: sam.originalFile });
+    logMessage(`SAM file "${sam.originalFile.name}" added for conversion.`, 'success');
+  });
 
-    // Any remaining BAI files without corresponding BAM files are invalid
-    baiMap.forEach((bai, baseName) => {
-        invalidFiles.push(bai.originalFile);
-        if (logWarnings) {
-            logMessage(`Corresponding BAM file not found for BAI file: ${bai.originalFile.name}`, 'warning');
-        }
-    });
+  // Any remaining BAI files without corresponding BAM files are invalid
+  baiMap.forEach((bai, _baseName) => {
+    invalidFiles.push(bai.originalFile);
+    if (logWarnings) {
+      logMessage(
+        `Corresponding BAM file not found for BAI file: ${bai.originalFile.name}`,
+        'warning'
+      );
+    }
+  });
 
-    logMessage(`File validation completed. ${matchedPairs.length} matched pair(s) and ${invalidFiles.length} invalid file(s) found.`, 'info');
+  logMessage(
+    `File validation completed. ${matchedPairs.length} matched pair(s) and ${invalidFiles.length} invalid file(s) found.`,
+    'info'
+  );
 
-    return { matchedPairs, invalidFiles };
+  return { matchedPairs, invalidFiles };
 }
 
 /**
@@ -80,12 +95,12 @@ export function validateFiles(selectedFiles, logWarnings = true) {
  * @returns {string} - The base name of the file.
  */
 function getBaseName(fileName, fileType) {
-    if (fileType === 'bai') {
-        // Handles both `.bam.bai` and `.bai` at the end of the string
-        return fileName.replace(/\.bam\.bai$/i, '').replace(/\.bai$/i, '');
-    } else if (fileType === 'bam') {
-        // Handles `.bam` at the end of the string
-        return fileName.replace(/\.bam$/i, '');
-    }
-    return fileName;
+  if (fileType === 'bai') {
+    // Handles both `.bam.bai` and `.bai` at the end of the string
+    return fileName.replace(/\.bam\.bai$/i, '').replace(/\.bai$/i, '');
+  } else if (fileType === 'bam') {
+    // Handles `.bam` at the end of the string
+    return fileName.replace(/\.bam$/i, '');
+  }
+  return fileName;
 }

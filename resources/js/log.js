@@ -15,7 +15,7 @@ const LOG_LEVELS = {
   INFO: 'info',
   SUCCESS: 'success',
   WARNING: 'warning',
-  ERROR: 'error'
+  ERROR: 'error',
 };
 
 const MAX_LOG_ENTRIES = 100;
@@ -128,7 +128,7 @@ function createLogEntry(message, level) {
   strong.textContent = `[${timestamp}] [${levelLabel}]`;
 
   logEntry.appendChild(strong);
-  logEntry.appendChild(document.createTextNode(' ' + message));
+  logEntry.appendChild(document.createTextNode(` ${message}`));
 
   return logEntry;
 }
@@ -163,7 +163,7 @@ function enforceMaxLogEntries(logContent) {
 function scrollToBottom(logContent) {
   logContent.scrollTo({
     top: logContent.scrollHeight,
-    behavior: 'smooth'
+    behavior: 'smooth',
   });
 }
 
@@ -227,14 +227,14 @@ function prepareDownloadData(entries, format) {
     return {
       content: JSON.stringify(formatEntriesAsJSON(entries), null, 2),
       mimeType: 'application/json',
-      filename: `vntyper-logs-${timestamp}.json`
+      filename: `vntyper-logs-${timestamp}.json`,
     };
   }
 
   return {
     content: formatEntriesAsText(entries),
     mimeType: 'text/plain',
-    filename: `vntyper-logs-${timestamp}.txt`
+    filename: `vntyper-logs-${timestamp}.txt`,
   };
 }
 
@@ -247,7 +247,7 @@ function formatEntriesAsJSON(entries) {
   return entries.map(entry => ({
     timestamp: entry.dataset.timestamp,
     level: entry.dataset.level,
-    message: extractMessage(entry.textContent)
+    message: extractMessage(entry.textContent),
   }));
 }
 

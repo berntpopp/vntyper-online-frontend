@@ -1,8 +1,14 @@
 // frontend/resources/js/jobManager.js
 
-import { getCohortStatus, getJobStatus, pollCohortStatusAPI, pollJobStatusAPI } from './apiInteractions.js';
+import { getCohortStatus } from './apiInteractions.js';
 import { displayError } from './errorHandling.js';
-import { hideSpinner, clearCountdown, displayShareableLink, hidePlaceholderMessage, displayDownloadLink } from './uiUtils.js';
+import {
+  hideSpinner,
+  clearCountdown,
+  displayShareableLink,
+  hidePlaceholderMessage,
+  displayDownloadLink,
+} from './uiUtils.js';
 import { logMessage } from './log.js';
 
 /**
@@ -11,8 +17,8 @@ import { logMessage } from './log.js';
  * @returns {string} - The capitalized string.
  */
 function capitalizeFirstLetter(string) {
-    if (!string) return '';
-    return string.charAt(0).toUpperCase() + string.slice(1);
+  if (!string) return '';
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 /**
@@ -21,93 +27,93 @@ function capitalizeFirstLetter(string) {
  * @param {Object} context - An object containing necessary DOM elements and state.
  */
 function updateCohortUI(cohortStatus, context) {
-    const { cohort_id, alias, jobs } = cohortStatus;
-    const cohortSection = document.getElementById(`cohort-${cohort_id}`);
-    if (!cohortSection) {
-        logMessage(`Cohort section #cohort-${cohort_id} not found in the DOM.`, 'warning');
-        return;
+  const { cohort_id, jobs } = cohortStatus;
+  const cohortSection = document.getElementById(`cohort-${cohort_id}`);
+  if (!cohortSection) {
+    logMessage(`Cohort section #cohort-${cohort_id} not found in the DOM.`, 'warning');
+    return;
+  }
+
+  const jobsContainer = document.getElementById(`jobs-container-${cohort_id}`);
+  if (!jobsContainer) {
+    logMessage(`Jobs container #jobs-container-${cohort_id} not found in the DOM.`, 'warning');
+    return;
+  }
+
+  // Clear existing job statuses to prevent duplicates
+  jobsContainer.innerHTML = '';
+
+  let allCompleted = true; // Flag to check if all jobs are completed
+
+  jobs.forEach(job => {
+    const { job_id, status, error } = job;
+
+    if (!job_id || typeof job_id !== 'string' || job_id.trim() === '') {
+      logMessage(`Invalid or missing job_id in job: ${JSON.stringify(job)}`, 'error');
+      return; // Skip jobs without a valid job_id
     }
 
-    const jobsContainer = document.getElementById(`jobs-container-${cohort_id}`);
-    if (!jobsContainer) {
-        logMessage(`Jobs container #jobs-container-${cohort_id} not found in the DOM.`, 'warning');
-        return;
+    // Create job info element (XSS-safe)
+    const jobInfo = document.createElement('div');
+    jobInfo.classList.add('job-info');
+    jobInfo.appendChild(document.createTextNode('Job ID: '));
+    const jobIdStrong = document.createElement('strong');
+    jobIdStrong.textContent = job_id;
+    jobInfo.appendChild(jobIdStrong);
+
+    // Create job status element (XSS-safe)
+    const jobStatus = document.createElement('div');
+    jobStatus.id = `status-${job_id}`;
+    jobStatus.classList.add('job-status');
+    jobStatus.appendChild(document.createTextNode('Status: '));
+    const statusStrong = document.createElement('strong');
+    statusStrong.textContent = capitalizeFirstLetter(status);
+    jobStatus.appendChild(statusStrong);
+
+    jobsContainer.appendChild(jobInfo);
+    jobsContainer.appendChild(jobStatus);
+
+    // Display shareable link with type 'job'
+    displayShareableLink(job_id, jobsContainer, 'job');
+
+    if (status === 'completed') {
+      // Display download links if job is completed
+      displayDownloadLink(job_id, {
+        hidePlaceholderMessage,
+        jobStatusDiv: jobStatus,
+        logMessage: context.logMessage,
+        clearCountdown: context.clearCountdown,
+      });
     }
 
-    // Clear existing job statuses to prevent duplicates
-    jobsContainer.innerHTML = '';
-
-    let allCompleted = true; // Flag to check if all jobs are completed
-
-    jobs.forEach((job) => {
-        const { job_id, status, error } = job;
-
-        if (!job_id || typeof job_id !== 'string' || job_id.trim() === '') {
-            logMessage(`Invalid or missing job_id in job: ${JSON.stringify(job)}`, 'error');
-            return; // Skip jobs without a valid job_id
-        }
-
-        // Create job info element (XSS-safe)
-        const jobInfo = document.createElement('div');
-        jobInfo.classList.add('job-info');
-        jobInfo.appendChild(document.createTextNode('Job ID: '));
-        const jobIdStrong = document.createElement('strong');
-        jobIdStrong.textContent = job_id;
-        jobInfo.appendChild(jobIdStrong);
-
-        // Create job status element (XSS-safe)
-        const jobStatus = document.createElement('div');
-        jobStatus.id = `status-${job_id}`;
-        jobStatus.classList.add('job-status');
-        jobStatus.appendChild(document.createTextNode('Status: '));
-        const statusStrong = document.createElement('strong');
-        statusStrong.textContent = capitalizeFirstLetter(status);
-        jobStatus.appendChild(statusStrong);
-
-        jobsContainer.appendChild(jobInfo);
-        jobsContainer.appendChild(jobStatus);
-
-        // Display shareable link with type 'job'
-        displayShareableLink(job_id, jobsContainer, 'job');
-
-        if (status === 'completed') {
-            // Display download links if job is completed
-            displayDownloadLink(job_id, {
-                hidePlaceholderMessage,
-                jobStatusDiv: jobStatus,
-                logMessage: context.logMessage,
-                clearCountdown: context.clearCountdown,
-            });
-        }
-
-        if (status === 'failed') {
-            const errorMessage = error || 'Job failed.';
-            displayError(errorMessage);
-            logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
-            allCompleted = false;
-        } else if (status !== 'completed') {
-            allCompleted = false;
-        }
-    });
-
-    logMessage(`Cohort ID ${cohort_id} status updated.`, 'info');
-
-    // If all jobs are completed, stop polling
-    if (allCompleted) {
-        if (context.stopPolling && typeof context.stopPolling === 'function') {
-            context.stopPolling();
-        } else {
-            logMessage('stopPolling function not provided or is not a function in context.', 'warning');
-        }
-        hideSpinner();
-        clearCountdown();
-        logMessage(`All jobs in Cohort ID ${cohort_id} have been completed.`, 'success');
+    if (status === 'failed') {
+      const errorMessage = error || 'Job failed.';
+      displayError(errorMessage);
+      logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
+      allCompleted = false;
+    } else if (status !== 'completed') {
+      allCompleted = false;
     }
+  });
+
+  logMessage(`Cohort ID ${cohort_id} status updated.`, 'info');
+
+  // If all jobs are completed, stop polling
+  if (allCompleted) {
+    if (context.stopPolling && typeof context.stopPolling === 'function') {
+      context.stopPolling();
+    } else {
+      logMessage('stopPolling function not provided or is not a function in context.', 'warning');
+    }
+    hideSpinner();
+    clearCountdown();
+    logMessage(`All jobs in Cohort ID ${cohort_id} have been completed.`, 'success');
+  }
 }
 
 /**
  * Fetches and updates job status within a cohort.
- * 
+ *
  * **Bug Fix**: Removed code that duplicates cohort header elements.
  * Now we rely solely on initial cohort creation logic (in main.js) and do not
  * recreate the cohort section here. The existing code only updates the UI.
@@ -117,27 +123,18 @@ function updateCohortUI(cohortStatus, context) {
  * @param {Object} context - An object containing necessary DOM elements and state.
  */
 export async function fetchAndUpdateJobStatus(cohortId, cohortStatus, context) {
-    const {
-        hidePlaceholderMessage,
-        logMessage,
-        clearCountdown,
-        stopPolling,
-        passphrase,
-        displayedCohorts,
-    } = context;
+  try {
+    // We no longer create a new cohort section if it doesn't exist.
+    // The creation of the cohort section is handled elsewhere (main.js),
+    // preventing duplicate headers from appearing at the bottom of the output.
 
-    try {
-        // We no longer create a new cohort section if it doesn't exist.
-        // The creation of the cohort section is handled elsewhere (main.js),
-        // preventing duplicate headers from appearing at the bottom of the output.
-        
-        // Simply update the UI for the existing cohort.
-        updateCohortUI(cohortStatus, context);
-    } catch (error) {
-        logMessage(`Error fetching cohort status for Cohort ID ${cohortId}: ${error.message}`, 'error');
-        hideSpinner();
-        clearCountdown();
-    }
+    // Simply update the UI for the existing cohort.
+    updateCohortUI(cohortStatus, context);
+  } catch (error) {
+    logMessage(`Error fetching cohort status for Cohort ID ${cohortId}: ${error.message}`, 'error');
+    hideSpinner();
+    clearCountdown();
+  }
 }
 
 /**
@@ -147,105 +144,103 @@ export async function fetchAndUpdateJobStatus(cohortId, cohortStatus, context) {
  * @param {object} context - An object containing necessary DOM elements and state.
  */
 export async function loadCohortFromURL(cohortId, context) {
-    const {
-        showSpinner,
-        hideSpinner,
-        clearError,
-        clearMessage,
-        jobInfoDiv,
-        regionOutputDiv,
-        pollCohortStatusAPI,
-        fetchAndUpdateJobStatus,
-        resetCountdown,
-        logMessage,
-        serverLoad,
-        displayedCohorts,
-        cohortsContainer,
-        passphrase,
-    } = context;
+  const {
+    showSpinner,
+    hideSpinner,
+    clearError,
+    clearMessage,
+    jobInfoDiv,
+    regionOutputDiv,
+    pollCohortStatusAPI,
+    fetchAndUpdateJobStatus,
+    logMessage,
+    serverLoad,
+    displayedCohorts,
+    passphrase,
+  } = context;
 
-    // Validate cohortId
-    if (!cohortId || typeof cohortId !== 'string' || cohortId.trim() === '') {
-        logMessage('Invalid Cohort ID provided to loadCohortFromURL.', 'error');
-        displayError('Invalid Cohort ID provided.');
+  // Validate cohortId
+  if (!cohortId || typeof cohortId !== 'string' || cohortId.trim() === '') {
+    logMessage('Invalid Cohort ID provided to loadCohortFromURL.', 'error');
+    displayError('Invalid Cohort ID provided.');
+    hideSpinner();
+    clearCountdown();
+    return;
+  }
+
+  logMessage(`Starting to load Cohort ID: ${cohortId}`, 'info');
+
+  try {
+    showSpinner();
+    clearError();
+    clearMessage();
+    jobInfoDiv.innerHTML = '';
+    regionOutputDiv.innerHTML = '';
+
+    // Display initial cohort information (XSS-safe)
+    const cohortInfo = document.createElement('div');
+    cohortInfo.appendChild(document.createTextNode('Loading cohort details for Cohort ID: '));
+    const cohortIdStrong = document.createElement('strong');
+    cohortIdStrong.textContent = cohortId;
+    cohortInfo.appendChild(cohortIdStrong);
+    jobInfoDiv.appendChild(cohortInfo);
+    logMessage(`Loading details for Cohort ID ${cohortId}.`, 'info');
+
+    // Create a status element for the cohort and append it to jobInfoDiv
+    const statusElement = document.createElement('div');
+    statusElement.id = `status-${cohortId}`;
+    statusElement.classList.add('job-status');
+    // XSS-safe: Use DOM API even for static strings
+    statusElement.appendChild(document.createTextNode('Status: '));
+    const loadingStrong = document.createElement('strong');
+    loadingStrong.textContent = 'Loading...';
+    statusElement.appendChild(loadingStrong);
+    jobInfoDiv.appendChild(statusElement); // Append directly to jobInfoDiv
+
+    // Add to displayed cohorts if not already there (no duplication here)
+    displayedCohorts.add(cohortId);
+
+    // Start polling cohort status and capture stopPolling
+    const stopPolling = pollCohortStatusAPI(
+      cohortId,
+      async () => {
+        const cohortStatus = await getCohortStatus(cohortId, passphrase);
+        fetchAndUpdateJobStatus(cohortId, cohortStatus, {
+          hidePlaceholderMessage,
+          logMessage,
+          clearCountdown,
+          stopPolling,
+          passphrase,
+          displayedCohorts,
+        });
+      },
+      () => {
+        // On Complete
         hideSpinner();
         clearCountdown();
-        return;
-    }
-
-    logMessage(`Starting to load Cohort ID: ${cohortId}`, 'info');
-
-    try {
-        showSpinner();
-        clearError();
-        clearMessage();
-        jobInfoDiv.innerHTML = '';
-        regionOutputDiv.innerHTML = '';
-
-        // Display initial cohort information (XSS-safe)
-        const cohortInfo = document.createElement('div');
-        cohortInfo.appendChild(document.createTextNode('Loading cohort details for Cohort ID: '));
-        const cohortIdStrong = document.createElement('strong');
-        cohortIdStrong.textContent = cohortId;
-        cohortInfo.appendChild(cohortIdStrong);
-        jobInfoDiv.appendChild(cohortInfo);
-        logMessage(`Loading details for Cohort ID ${cohortId}.`, 'info');
-
-        // Create a status element for the cohort and append it to jobInfoDiv
-        const statusElement = document.createElement('div');
-        statusElement.id = `status-${cohortId}`;
-        statusElement.classList.add('job-status');
-        // XSS-safe: Use DOM API even for static strings
-        statusElement.appendChild(document.createTextNode('Status: '));
-        const loadingStrong = document.createElement('strong');
-        loadingStrong.textContent = 'Loading...';
-        statusElement.appendChild(loadingStrong);
-        jobInfoDiv.appendChild(statusElement); // Append directly to jobInfoDiv
-
-        // Add to displayed cohorts if not already there (no duplication here)
-        displayedCohorts.add(cohortId);
-
-        // Start polling cohort status and capture stopPolling
-        const stopPolling = pollCohortStatusAPI(
-            cohortId,
-            async () => {
-                const cohortStatus = await getCohortStatus(cohortId, passphrase);
-                fetchAndUpdateJobStatus(cohortId, cohortStatus, {
-                    hidePlaceholderMessage,
-                    logMessage,
-                    clearCountdown,
-                    stopPolling,
-                    passphrase,
-                    displayedCohorts,
-                });
-            },
-            () => {
-                // On Complete
-                hideSpinner();
-                clearCountdown();
-                logMessage(`Cohort ID ${cohortId} polling completed.`, 'success');
-                serverLoad.updateServerLoad(cohortId); // Pass cohortId here
-                displayedCohorts.delete(cohortId); // Clean up after completion
-            },
-            (errorMessage) => {
-                // On Error
-                displayError(errorMessage);
-                logMessage(`Cohort ID ${cohortId} encountered an error: ${errorMessage}`, 'error');
-                hideSpinner();
-                clearCountdown();
-                serverLoad.updateServerLoad(cohortId);
-                displayedCohorts.delete(cohortId);
-            },
-            null,
-            passphrase
-        );
-
-        hideSpinner();
-    } catch (error) {
-        logMessage(`Error loading Cohort ID ${cohortId}: ${error.message}`, 'error');
+        logMessage(`Cohort ID ${cohortId} polling completed.`, 'success');
+        serverLoad.updateServerLoad(cohortId); // Pass cohortId here
+        displayedCohorts.delete(cohortId); // Clean up after completion
+      },
+      errorMessage => {
+        // On Error
+        displayError(errorMessage);
+        logMessage(`Cohort ID ${cohortId} encountered an error: ${errorMessage}`, 'error');
         hideSpinner();
         clearCountdown();
-    }
+        serverLoad.updateServerLoad(cohortId);
+        displayedCohorts.delete(cohortId);
+      },
+      null,
+      passphrase
+    );
+
+    hideSpinner();
+  } catch (error) {
+    logMessage(`Error loading Cohort ID ${cohortId}: ${error.message}`, 'error');
+    hideSpinner();
+    clearCountdown();
+  }
 }
 
 /**
@@ -255,118 +250,113 @@ export async function loadCohortFromURL(cohortId, context) {
  * @param {object} context - An object containing necessary DOM elements and state.
  */
 export async function loadJobFromURL(jobId, context) {
-    const {
-        showSpinner,
-        hideSpinner,
-        clearError,
-        clearMessage,
-        jobInfoDiv,
-        regionOutputDiv,
-        displayShareableLink,
-        pollJobStatusAPI,
-        fetchAndUpdateJobStatus,
-        resetCountdown,
-        logMessage,
-        serverLoad,
-        displayedCohorts,
-        cohortsContainer,
-        passphrase,
-    } = context;
+  const {
+    showSpinner,
+    hideSpinner,
+    clearError,
+    clearMessage,
+    jobInfoDiv,
+    regionOutputDiv,
+    displayShareableLink,
+    pollJobStatusAPI,
+    logMessage,
+    serverLoad,
+  } = context;
 
-    // Validate jobId
-    if (!jobId || typeof jobId !== 'string' || jobId.trim() === '') {
-        logMessage('Invalid Job ID provided to loadJobFromURL.', 'error');
-        displayError('Invalid Job ID provided.');
+  // Validate jobId
+  if (!jobId || typeof jobId !== 'string' || jobId.trim() === '') {
+    logMessage('Invalid Job ID provided to loadJobFromURL.', 'error');
+    displayError('Invalid Job ID provided.');
+    hideSpinner();
+    clearCountdown();
+    return;
+  }
+
+  logMessage(`Starting to load Job ID: ${jobId}`, 'info');
+
+  try {
+    showSpinner();
+    clearError();
+    clearMessage();
+    jobInfoDiv.innerHTML = '';
+    regionOutputDiv.innerHTML = '';
+
+    // Display initial job information (XSS-safe)
+    const jobInfo = document.createElement('div');
+    jobInfo.appendChild(document.createTextNode('Loading job details for Job ID: '));
+    const jobIdStrong = document.createElement('strong');
+    jobIdStrong.textContent = jobId;
+    jobInfo.appendChild(jobIdStrong);
+    jobInfoDiv.appendChild(jobInfo);
+    logMessage(`Loading details for Job ID ${jobId}.`, 'info');
+
+    // Generate and display the shareable link with type 'job'
+    displayShareableLink(jobId, jobInfoDiv, 'job');
+
+    // Create a status element for this job and append it to jobInfoDiv
+    const statusElement = document.createElement('div');
+    statusElement.id = `status-${jobId}`;
+    statusElement.classList.add('job-status');
+    // XSS-safe: Use DOM API even for static strings
+    statusElement.appendChild(document.createTextNode('Status: '));
+    const loadingStrong = document.createElement('strong');
+    loadingStrong.textContent = 'Loading...';
+    statusElement.appendChild(loadingStrong);
+    jobInfoDiv.appendChild(statusElement);
+
+    // Start polling job status
+    pollJobStatusAPI(
+      jobId,
+      async status => {
+        // Update job status in the UI (XSS-safe)
+        const jobStatusDivElement = document.getElementById(`status-${jobId}`);
+        if (jobStatusDivElement) {
+          jobStatusDivElement.textContent = '';
+          jobStatusDivElement.appendChild(document.createTextNode('Status: '));
+          const statusStrong = document.createElement('strong');
+          statusStrong.textContent = capitalizeFirstLetter(status);
+          jobStatusDivElement.appendChild(statusStrong);
+        }
+
+        // Display Download and Copy Buttons when completed
+        if (status === 'completed') {
+          displayDownloadLink(jobId, {
+            hidePlaceholderMessage,
+            jobStatusDiv: jobStatusDivElement,
+            logMessage,
+            clearCountdown,
+          });
+        } else if (status === 'failed') {
+          const errorMessage = 'Job failed.';
+          displayError(errorMessage);
+          logMessage(`Job ID ${jobId} failed with error: ${errorMessage}`, 'error');
+        } else {
+          logMessage(`Job ID ${jobId} is currently ${status}.`, 'info');
+        }
+      },
+      () => {
+        // On Complete
         hideSpinner();
         clearCountdown();
-        return;
-    }
-
-    logMessage(`Starting to load Job ID: ${jobId}`, 'info');
-
-    try {
-        showSpinner();
-        clearError();
-        clearMessage();
-        jobInfoDiv.innerHTML = '';
-        regionOutputDiv.innerHTML = '';
-
-        // Display initial job information (XSS-safe)
-        const jobInfo = document.createElement('div');
-        jobInfo.appendChild(document.createTextNode('Loading job details for Job ID: '));
-        const jobIdStrong = document.createElement('strong');
-        jobIdStrong.textContent = jobId;
-        jobInfo.appendChild(jobIdStrong);
-        jobInfoDiv.appendChild(jobInfo);
-        logMessage(`Loading details for Job ID ${jobId}.`, 'info');
-
-        // Generate and display the shareable link with type 'job'
-        displayShareableLink(jobId, jobInfoDiv, 'job');
-
-        // Create a status element for this job and append it to jobInfoDiv
-        const statusElement = document.createElement('div');
-        statusElement.id = `status-${jobId}`;
-        statusElement.classList.add('job-status');
-        // XSS-safe: Use DOM API even for static strings
-        statusElement.appendChild(document.createTextNode('Status: '));
-        const loadingStrong = document.createElement('strong');
-        loadingStrong.textContent = 'Loading...';
-        statusElement.appendChild(loadingStrong);
-        jobInfoDiv.appendChild(statusElement);
-
-        // Start polling job status
-        pollJobStatusAPI(
-            jobId,
-            async (status) => {
-                // Update job status in the UI (XSS-safe)
-                const jobStatusDivElement = document.getElementById(`status-${jobId}`);
-                if (jobStatusDivElement) {
-                    jobStatusDivElement.textContent = '';
-                    jobStatusDivElement.appendChild(document.createTextNode('Status: '));
-                    const statusStrong = document.createElement('strong');
-                    statusStrong.textContent = capitalizeFirstLetter(status);
-                    jobStatusDivElement.appendChild(statusStrong);
-                }
-
-                // Display Download and Copy Buttons when completed
-                if (status === 'completed') {
-                    displayDownloadLink(jobId, {
-                        hidePlaceholderMessage,
-                        jobStatusDiv: jobStatusDivElement,
-                        logMessage,
-                        clearCountdown,
-                    });
-                } else if (status === 'failed') {
-                    const errorMessage = 'Job failed.';
-                    displayError(errorMessage);
-                    logMessage(`Job ID ${jobId} failed with error: ${errorMessage}`, 'error');
-                } else {
-                    logMessage(`Job ID ${jobId} is currently ${status}.`, 'info');
-                }
-            },
-            () => {
-                // On Complete
-                hideSpinner();
-                clearCountdown();
-                logMessage(`Job ID ${jobId} polling completed.`, 'success');
-                serverLoad.updateServerLoad(jobId);
-            },
-            (errorMessage) => {
-                // On Error
-                displayError(errorMessage);
-                logMessage(`Job ID ${jobId} encountered an error: ${errorMessage}`, 'error');
-                hideSpinner();
-                clearCountdown();
-                serverLoad.updateServerLoad(jobId);
-            },
-            null,
-            null
-        );
-
-        hideSpinner();
-    } catch (error) {
-        logMessage(`Error loading Job ID ${jobId}: ${error.message}`, 'error');
+        logMessage(`Job ID ${jobId} polling completed.`, 'success');
+        serverLoad.updateServerLoad(jobId);
+      },
+      errorMessage => {
+        // On Error
+        displayError(errorMessage);
+        logMessage(`Job ID ${jobId} encountered an error: ${errorMessage}`, 'error');
         hideSpinner();
         clearCountdown();
-    }
+        serverLoad.updateServerLoad(jobId);
+      },
+      null,
+      null
+    );
+
+    hideSpinner();
+  } catch (error) {
+    logMessage(`Error loading Job ID ${jobId}: ${error.message}`, 'error');
+    hideSpinner();
+    clearCountdown();
+  }
 }

@@ -87,12 +87,12 @@ body {
   background-color: #fff;
   padding: 30px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
 }
 
 .container:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Utility Classes */
@@ -168,7 +168,9 @@ body {
 /* Keyframes */
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* --- Tooltip Styles --- */
@@ -228,7 +230,8 @@ body {
 }
 
 /* Ensure the tooltip appears above other elements */
-.modal, .dropdown-menu {
+.modal,
+.dropdown-menu {
   z-index: 1000;
 }
 
@@ -347,7 +350,7 @@ body.menu-open {
   text-decoration: none;
   font-weight: 600;
   border-radius: 0 0 4px 0;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transition: left 0.3s ease;
 }
 
@@ -367,93 +370,94 @@ body.menu-open {
 
 @media (max-width: 600px) {
   .button-group {
-      flex-direction: column;     /* Stacks buttons vertically on small screens */
-      align-items: stretch;
+    flex-direction: column; /* Stacks buttons vertically on small screens */
+    align-items: stretch;
   }
 
   .button {
-      width: 100%;                /* Buttons take full width on small screens */
-      text-align: center;         /* Centers text within buttons */
+    width: 100%; /* Buttons take full width on small screens */
+    text-align: center; /* Centers text within buttons */
   }
 
   .additional-inputs-container {
-      margin-top: 15px;
+    margin-top: 15px;
   }
 
   /* Adjust container padding */
   .container {
-      padding: 20px;
-      margin: 20px;
+    padding: 20px;
+    margin: 20px;
   }
 
   /* Adjust font sizes for readability */
   body {
-      margin: 20px;
-      font-size: 16px; /* Increased base font size */
+    margin: 20px;
+    font-size: 16px; /* Increased base font size */
   }
 
   .header h2 {
-      font-size: 24px;
+    font-size: 24px;
   }
 
   .navbar-menu {
-      padding: 10px 15px;
+    padding: 10px 15px;
   }
 
   .navbar-link {
-      font-size: 1.1em;
-      padding: 8px 0;
-      width: 100%;
-      display: block;
+    font-size: 1.1em;
+    padding: 8px 0;
+    width: 100%;
+    display: block;
   }
 
   /* Adjust logo size */
   .logo {
-      width: 60px;
-      height: 60px;
-      margin-right: 15px;
+    width: 60px;
+    height: 60px;
+    margin-right: 15px;
   }
 
   /* Adjust button sizes */
   button {
-      padding: 10px 15px;
-      font-size: 1em;
+    padding: 10px 15px;
+    font-size: 1em;
   }
 
   /* Adjust input fields */
-  .form-input, .form-select {
-      width: 100%;
-      padding: 10px;
-      font-size: 1em;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+  .form-input,
+  .form-select {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
   }
 
   /* Adjust spinner size */
   .spinner {
-      width: 40px;
-      height: 40px;
+    width: 40px;
+    height: 40px;
   }
 
   /* Adjust modal content */
   .modal-content {
-      padding: 20px;
+    padding: 20px;
   }
 
   /* Adjust citations section font size */
   .citations-section {
-      padding: 10px;
+    padding: 10px;
   }
 
   .citation-item p {
-      font-size: 0.95em;
+    font-size: 0.95em;
   }
 
   /* Adjust footer links */
   .footer-links a {
-      display: block;
-      margin: 5px 0;
+    display: block;
+    margin: 5px 0;
   }
 }
 
@@ -480,21 +484,21 @@ body.menu-open {
   }
 
   /* Show URLs for external links in citations and FAQ */
-  .citations-section a[href^="http"]::after,
-  .faq-item a[href^="http"]::after {
-    content: " (" attr(href) ")";
+  .citations-section a[href^='http']::after,
+  .faq-item a[href^='http']::after {
+    content: ' (' attr(href) ')';
     font-size: 0.8em;
     color: #666;
     word-break: break-all;
   }
 
   /* Don't show URLs for anchor links */
-  a[href^="#"]::after {
-    content: "";
+  a[href^='#']::after {
+    content: '';
   }
 
   /* Don't duplicate external link icon in print */
-  .faq-item a[href^="http"]::after {
-    content: " (" attr(href) ")"; /* Override the arrow icon */
+  .faq-item a[href^='http']::after {
+    content: ' (' attr(href) ')'; /* Override the arrow icon */
   }
 }

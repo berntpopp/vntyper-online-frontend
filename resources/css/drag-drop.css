@@ -11,17 +11,20 @@
   display: block;
   margin-bottom: 0.25rem;
   font-weight: bold;
-  font-size: 1.0rem;
+  font-size: 1rem;
 }
 
 /* Drag & Drop Area */
 .drag-drop-area {
   border: 2px dashed #6c757d;
   border-radius: 0.4rem;
-  padding: 1.0rem;
+  padding: 1rem;
   text-align: center;
   color: #6c757d;
-  transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+  transition:
+    background-color 0.3s,
+    border-color 0.3s,
+    color 0.3s;
   cursor: pointer;
   position: relative;
   height: 120px;
@@ -94,7 +97,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 4px; /* Improve visual target area */
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .file-list .remove-file:hover {
@@ -130,7 +135,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 4px; /* Improve visual target area */
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .reset-file-selection-button:hover {
