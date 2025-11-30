@@ -2,8 +2,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    // Use happy-dom for fast DOM simulation (alternative: jsdom)
-    environment: 'happy-dom',
+    // Use jsdom for stable DOM simulation (switched from happy-dom due to v20 async issues)
+    environment: 'jsdom',
 
     // Global test APIs (describe, it, expect available everywhere)
     globals: true,

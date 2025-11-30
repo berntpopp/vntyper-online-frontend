@@ -568,13 +568,8 @@ describe('ErrorHandler', () => {
   // ============================================================================
 
   describe('retryWithBackoff() - Successful execution', () => {
-    beforeEach(() => {
-      vi.useFakeTimers();
-    });
-
-    afterEach(() => {
-      vi.useRealTimers();
-    });
+    // Note: Tests use real timers with minimal delays to avoid unhandled
+    // rejection issues that occur with fake timers + async rejections
 
     it('should return result on first successful attempt', async () => {
       // Arrange
@@ -589,19 +584,23 @@ describe('ErrorHandler', () => {
     });
 
     it('should retry on failure and succeed', async () => {
-      // Arrange
-      const fn = vi
-        .fn()
-        .mockRejectedValueOnce(new Error('Attempt 1 failed'))
-        .mockResolvedValue('success');
+      // Arrange - use implementation instead of mockRejectedValueOnce to avoid
+      // unhandled rejection warnings from vitest's promise tracking
+      let callCount = 0;
+      const fn = vi.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return Promise.reject(new Error('Attempt 1 failed'));
+        }
+        return Promise.resolve('success');
+      });
 
-      // Act
-      const promise = handler.retryWithBackoff(fn, { maxRetries: 3, baseDelay: 1000 });
-
-      // Retry after 1000ms (2^0 * 1000) - first attempt happens immediately
-      await vi.advanceTimersByTimeAsync(1000);
-
-      const result = await promise;
+      // Act - use minimal delays with real timers
+      const result = await handler.retryWithBackoff(fn, {
+        maxRetries: 3,
+        baseDelay: 1,
+        maxDelay: 1,
+      });
 
       // Assert
       expect(result).toBe('success');
@@ -609,51 +608,58 @@ describe('ErrorHandler', () => {
     });
 
     it('should use exponential backoff delays', async () => {
-      // Arrange
-      const fn = vi
-        .fn()
-        .mockRejectedValueOnce(new Error('Fail 1'))
-        .mockRejectedValueOnce(new Error('Fail 2'))
-        .mockResolvedValue('success');
+      // Arrange - track actual delays via onRetry
+      const delays = [];
+      const onRetry = (_attempt, delay) => delays.push(delay);
+      let callCount = 0;
+      const fn = vi.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount <= 2) {
+          return Promise.reject(new Error(`Fail ${callCount}`));
+        }
+        return Promise.resolve('success');
+      });
 
-      // Act
-      const promise = handler.retryWithBackoff(fn, { maxRetries: 3, baseDelay: 1000 });
+      // Act - use small baseDelay to verify exponential pattern
+      const result = await handler.retryWithBackoff(fn, {
+        maxRetries: 3,
+        baseDelay: 10,
+        maxDelay: 100,
+        onRetry,
+      });
 
-      // First retry after 1000ms (2^0 * 1000) - initial attempt happens immediately
-      await vi.advanceTimersByTimeAsync(1000);
-
-      // Second retry after 2000ms (2^1 * 1000)
-      await vi.advanceTimersByTimeAsync(2000);
-
-      const result = await promise;
-
-      // Assert
+      // Assert - delays should follow exponential pattern: 10, 20 (2^0*10, 2^1*10)
       expect(result).toBe('success');
       expect(fn).toHaveBeenCalledTimes(3);
+      expect(delays[0]).toBe(10); // 2^0 * 10
+      expect(delays[1]).toBe(20); // 2^1 * 10
     });
 
     it('should cap delay at maxDelay', async () => {
-      // Arrange
-      const fn = vi
-        .fn()
-        .mockRejectedValueOnce(new Error('Fail 1'))
-        .mockRejectedValueOnce(new Error('Fail 2'))
-        .mockResolvedValue('success');
-
-      // Act
-      const promise = handler.retryWithBackoff(fn, {
-        maxRetries: 3,
-        baseDelay: 1000,
-        maxDelay: 1500, // Cap at 1.5s
+      // Arrange - track actual delays via onRetry
+      const delays = [];
+      const onRetry = (_attempt, delay) => delays.push(delay);
+      let callCount = 0;
+      const fn = vi.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount <= 2) {
+          return Promise.reject(new Error(`Fail ${callCount}`));
+        }
+        return Promise.resolve('success');
       });
 
-      await vi.advanceTimersByTimeAsync(1000); // First retry: 1000ms (initial attempt immediate)
-      await vi.advanceTimersByTimeAsync(1500); // Second retry: capped at 1500ms instead of 2000ms
+      // Act - use small delays to verify capping
+      const result = await handler.retryWithBackoff(fn, {
+        maxRetries: 3,
+        baseDelay: 10,
+        maxDelay: 15, // Cap at 15ms
+        onRetry,
+      });
 
-      const result = await promise;
-
-      // Assert
+      // Assert - second delay should be capped
       expect(result).toBe('success');
+      expect(delays[0]).toBe(10); // 2^0 * 10 = 10
+      expect(delays[1]).toBe(15); // 2^1 * 10 = 20, but capped at 15
     });
   });
 
@@ -662,81 +668,67 @@ describe('ErrorHandler', () => {
   // ============================================================================
 
   describe('retryWithBackoff() - Failure and callbacks', () => {
-    beforeEach(() => {
-      vi.useFakeTimers();
-    });
-
-    afterEach(() => {
-      vi.useRealTimers();
-    });
+    // Note: These tests use real timers with minimal delays to avoid
+    // unhandled rejection issues that occur with fake timers + async rejections
 
     it('should throw error after all retries exhausted', async () => {
       // Arrange
       const error = new Error('Persistent failure');
       const fn = vi.fn().mockRejectedValue(error);
 
-      // Act
-      const promise = handler.retryWithBackoff(fn, { maxRetries: 2, baseDelay: 100 });
-
-      // First retry after 100ms (2^0 * 100) - initial attempt immediate
-      await vi.advanceTimersByTimeAsync(100);
-
-      // Second retry after 200ms (2^1 * 100)
-      await vi.advanceTimersByTimeAsync(200);
+      // Act - use minimal delays with real timers
+      await expect(
+        handler.retryWithBackoff(fn, { maxRetries: 2, baseDelay: 1, maxDelay: 1 })
+      ).rejects.toThrow('Persistent failure');
 
       // Assert
-      await expect(promise).rejects.toThrow('Persistent failure');
       expect(fn).toHaveBeenCalledTimes(3); // Initial + 2 retries
     });
 
     it('should call onRetry callback on each retry', async () => {
-      // Arrange
+      // Arrange - use mockImplementation to avoid unhandled rejection warnings
       const onRetry = vi.fn();
-      const fn = vi
-        .fn()
-        .mockRejectedValueOnce(new Error('Fail 1'))
-        .mockRejectedValueOnce(new Error('Fail 2'))
-        .mockResolvedValue('success');
+      let callCount = 0;
+      const fn = vi.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount <= 2) {
+          return Promise.reject(new Error(`Fail ${callCount}`));
+        }
+        return Promise.resolve('success');
+      });
 
-      // Act
-      const promise = handler.retryWithBackoff(fn, {
+      // Act - use minimal delays with real timers
+      const result = await handler.retryWithBackoff(fn, {
         maxRetries: 3,
-        baseDelay: 1000,
+        baseDelay: 1,
+        maxDelay: 1,
         onRetry,
       });
 
-      // First retry after 1000ms (initial attempt immediate)
-      await vi.advanceTimersByTimeAsync(1000);
-
-      // Second retry after 2000ms
-      await vi.advanceTimersByTimeAsync(2000);
-
-      await promise;
-
       // Assert
+      expect(result).toBe('success');
       expect(onRetry).toHaveBeenCalledTimes(2);
-      expect(onRetry).toHaveBeenNthCalledWith(1, 1, 1000, expect.any(Error));
-      expect(onRetry).toHaveBeenNthCalledWith(2, 2, 2000, expect.any(Error));
+      expect(onRetry).toHaveBeenNthCalledWith(1, 1, 1, expect.any(Error));
+      expect(onRetry).toHaveBeenNthCalledWith(2, 2, 1, expect.any(Error));
     });
 
     it('should log retry attempts', async () => {
-      // Arrange
-      const fn = vi
-        .fn()
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValue('success');
+      // Arrange - use mockImplementation to avoid unhandled rejection warnings
+      let callCount = 0;
+      const fn = vi.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return Promise.reject(new Error('Network error'));
+        }
+        return Promise.resolve('success');
+      });
 
-      // Act
-      const promise = handler.retryWithBackoff(fn, { maxRetries: 2, baseDelay: 1000 });
-
-      // Retry after 1000ms succeeds (initial attempt immediate)
-      await vi.advanceTimersByTimeAsync(1000);
-
-      await promise;
+      // Act - use minimal delays with real timers
+      await handler.retryWithBackoff(fn, { maxRetries: 2, baseDelay: 1, maxDelay: 1 });
 
       // Assert
       expect(logMessage).toHaveBeenCalledWith(
-        expect.stringContaining('Retry 1/2 after 1000ms: Network error'),
+        expect.stringContaining('Retry 1/2 after 1ms: Network error'),
         'warning'
       );
     });
@@ -745,18 +737,10 @@ describe('ErrorHandler', () => {
       // Arrange
       const fn = vi.fn().mockRejectedValue(new Error('Failed'));
 
-      // Act
-      const promise = handler.retryWithBackoff(fn, { maxRetries: 1, baseDelay: 100 });
-
-      // First (and only) retry after 100ms (2^0 * 100) - initial attempt immediate
-      await vi.advanceTimersByTimeAsync(100);
-
-      // Wait for promise to reject
-      try {
-        await promise;
-      } catch (e) {
-        // Expected to throw
-      }
+      // Act - use minimal delays with real timers
+      await expect(
+        handler.retryWithBackoff(fn, { maxRetries: 1, baseDelay: 1, maxDelay: 1 })
+      ).rejects.toThrow('Failed');
 
       // Assert
       expect(handler.errorHistory.length).toBe(1);
