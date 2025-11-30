@@ -601,14 +601,19 @@ export class StateManager {
 // Create singleton instance
 export const stateManager = new StateManager();
 
-// Cleanup on page unload
-window.addEventListener('beforeunload', () => {
-  stateManager.cleanup();
-});
-
-// Log state changes in development
-if (window.location.port === '3000') {
-  stateManager.on('state.changed', ({ path, value, oldValue }) => {
-    logMessage(`[State] ${path}: ${JSON.stringify(oldValue)} -> ${JSON.stringify(value)}`, 'debug');
+// Cleanup on page unload (guard for test environments)
+if (typeof window !== 'undefined' && window.addEventListener) {
+  window.addEventListener('beforeunload', () => {
+    stateManager.cleanup();
   });
+
+  // Log state changes in development
+  if (window.location && window.location.port === '3000') {
+    stateManager.on('state.changed', ({ path, value, oldValue }) => {
+      logMessage(
+        `[State] ${path}: ${JSON.stringify(oldValue)} -> ${JSON.stringify(value)}`,
+        'debug'
+      );
+    });
+  }
 }

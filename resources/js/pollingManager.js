@@ -268,7 +268,9 @@ export class PollingManager {
 // Create singleton instance
 export const pollingManager = new PollingManager();
 
-// Cleanup on page unload
-window.addEventListener('beforeunload', () => {
-  pollingManager.cleanup();
-});
+// Cleanup on page unload (guard for test environments)
+if (typeof window !== 'undefined' && window.addEventListener) {
+  window.addEventListener('beforeunload', () => {
+    pollingManager.cleanup();
+  });
+}
