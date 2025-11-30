@@ -30,30 +30,30 @@ import { logMessage } from '../log.js';
  * // Later: controller.abort();
  */
 export async function fetchWithTimeout(url, options = {}, timeout = 30000) {
-    // Create AbortController for timeout management
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
+  // Create AbortController for timeout management
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-    try {
-        // Fetch with combined signal (allows external + timeout cancellation)
-        const response = await fetch(url, {
-            ...options,
-            signal: options.signal || controller.signal
-        });
+  try {
+    // Fetch with combined signal (allows external + timeout cancellation)
+    const response = await fetch(url, {
+      ...options,
+      signal: options.signal || controller.signal,
+    });
 
-        return response;
-    } catch (error) {
-        // Distinguish between timeout abort and other errors
-        if (error.name === 'AbortError') {
-            const timeoutError = new Error(`Request timeout after ${timeout}ms`);
-            timeoutError.name = 'TimeoutError';
-            throw timeoutError;
-        }
-        throw error;
-    } finally {
-        // Always clear timeout to prevent memory leaks
-        clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    // Distinguish between timeout abort and other errors
+    if (error.name === 'AbortError') {
+      const timeoutError = new Error(`Request timeout after ${timeout}ms`);
+      timeoutError.name = 'TimeoutError';
+      throw timeoutError;
     }
+    throw error;
+  } finally {
+    // Always clear timeout to prevent memory leaks
+    clearTimeout(timeoutId);
+  }
 }
 
 /**
@@ -81,49 +81,47 @@ export async function fetchWithTimeout(url, options = {}, timeout = 30000) {
  * // Result: Error("Request failed with status 500")
  */
 export async function parseErrorResponse(response) {
-    let errorMessage = `Request failed with status ${response.status}`;
+  let errorMessage = `Request failed with status ${response.status}`;
 
-    try {
-        // Attempt to parse JSON error response
-        const data = await response.json();
+  try {
+    // Attempt to parse JSON error response
+    const data = await response.json();
 
-        if (data.detail) {
-            if (Array.isArray(data.detail)) {
-                // FastAPI validation errors: array of { msg, type, loc }
-                const parsedDetail = data.detail
-                    .map(err => err.msg || err)
-                    .join(', ');
-                // Only use parsed detail if not empty (edge case: empty array)
-                if (parsedDetail) {
-                    errorMessage = parsedDetail;
-                }
-            } else if (typeof data.detail === 'string') {
-                // Simple error message (only if not empty)
-                if (data.detail.trim()) {
-                    errorMessage = data.detail;
-                }
-            } else if (typeof data.detail === 'object') {
-                // Object detail - stringify
-                errorMessage = JSON.stringify(data.detail);
-            }
-        } else if (data.message) {
-            // Alternative error format (only if not empty)
-            if (typeof data.message === 'string' && data.message.trim()) {
-                errorMessage = data.message;
-            }
+    if (data.detail) {
+      if (Array.isArray(data.detail)) {
+        // FastAPI validation errors: array of { msg, type, loc }
+        const parsedDetail = data.detail.map(err => err.msg || err).join(', ');
+        // Only use parsed detail if not empty (edge case: empty array)
+        if (parsedDetail) {
+          errorMessage = parsedDetail;
         }
-    } catch (e) {
-        // Response not JSON or parsing failed - use status text
-        errorMessage = response.statusText || errorMessage;
+      } else if (typeof data.detail === 'string') {
+        // Simple error message (only if not empty)
+        if (data.detail.trim()) {
+          errorMessage = data.detail;
+        }
+      } else if (typeof data.detail === 'object') {
+        // Object detail - stringify
+        errorMessage = JSON.stringify(data.detail);
+      }
+    } else if (data.message) {
+      // Alternative error format (only if not empty)
+      if (typeof data.message === 'string' && data.message.trim()) {
+        errorMessage = data.message;
+      }
     }
+  } catch (e) {
+    // Response not JSON or parsing failed - use status text
+    errorMessage = response.statusText || errorMessage;
+  }
 
-    // Create error with metadata
-    const error = new Error(errorMessage);
-    error.status = response.status;
-    error.response = response;
-    error.statusText = response.statusText;
+  // Create error with metadata
+  const error = new Error(errorMessage);
+  error.status = response.status;
+  error.response = response;
+  error.statusText = response.statusText;
 
-    return error;
+  return error;
 }
 
 /**
@@ -160,47 +158,41 @@ export async function parseErrorResponse(response) {
  * // Delays: 2s, 4s, 8s, 16s
  */
 export async function retryRequest(fn, maxAttempts = 3, baseDelay = 1000) {
-    let lastError;
+  let lastError;
 
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        try {
-            // Execute function
-            return await fn();
-        } catch (error) {
-            lastError = error;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      // Execute function
+      return await fn();
+    } catch (error) {
+      lastError = error;
 
-            // Don't retry on client errors (4xx) - these won't succeed
-            // 400: Bad Request, 401: Unauthorized, 403: Forbidden, 404: Not Found
-            if (error.status >= 400 && error.status < 500) {
-                logMessage(
-                    `Client error (${error.status}): ${error.message} - not retrying`,
-                    'error'
-                );
-                throw error;
-            }
+      // Don't retry on client errors (4xx) - these won't succeed
+      // 400: Bad Request, 401: Unauthorized, 403: Forbidden, 404: Not Found
+      if (error.status >= 400 && error.status < 500) {
+        logMessage(`Client error (${error.status}): ${error.message} - not retrying`, 'error');
+        throw error;
+      }
 
-            // Don't retry if this was the last attempt
-            if (attempt >= maxAttempts) {
-                logMessage(
-                    `Request failed after ${maxAttempts} attempts: ${error.message}`,
-                    'error'
-                );
-                throw error;
-            }
+      // Don't retry if this was the last attempt
+      if (attempt >= maxAttempts) {
+        logMessage(`Request failed after ${maxAttempts} attempts: ${error.message}`, 'error');
+        throw error;
+      }
 
-            // Exponential backoff: 1s, 2s, 4s, 8s, 16s...
-            const delay = baseDelay * Math.pow(2, attempt - 1);
+      // Exponential backoff: 1s, 2s, 4s, 8s, 16s...
+      const delay = baseDelay * Math.pow(2, attempt - 1);
 
-            logMessage(
-                `Retry attempt ${attempt}/${maxAttempts} after ${delay}ms (error: ${error.message})`,
-                'warning'
-            );
+      logMessage(
+        `Retry attempt ${attempt}/${maxAttempts} after ${delay}ms (error: ${error.message})`,
+        'warning'
+      );
 
-            // Wait before retrying
-            await new Promise(resolve => setTimeout(resolve, delay));
-        }
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
+  }
 
-    // This should never be reached, but TypeScript/flow analysis requires it
-    throw lastError;
+  // This should never be reached, but TypeScript/flow analysis requires it
+  throw lastError;
 }

@@ -118,6 +118,7 @@ tests/
 ### Writing Tests
 
 Tests follow these principles:
+
 - **Pure Vanilla JS** - No TypeScript, no build step required
 - **ES6 modules** - Native import/export
 - **Vitest matchers** - `vi.fn()`, `vi.spyOn()`, `vi.useFakeTimers()`
@@ -140,6 +141,7 @@ describe('myFunction()', () => {
 ### Configuration
 
 Test configuration in `vitest.config.js`:
+
 - Environment: `happy-dom` (fast DOM simulation)
 - Coverage provider: `v8` (native, fast)
 - Globals: `true` (describe, it, expect available everywhere)
@@ -147,7 +149,6 @@ Test configuration in `vitest.config.js`:
 ## Usage
 
 1. **Select BAM and BAI Files:**
-   
    - Click on the **"Select BAM and BAI Files"** button.
    - In the file selection dialog, navigate to the directory containing your BAM and BAI files.
    - Select the desired BAM files along with their corresponding BAI files.
@@ -156,23 +157,19 @@ Test configuration in `vitest.config.js`:
    - Click **"Open"** to upload the selected files.
 
 2. **Select Genomic Region:**
-   
    - From the **"Select Region"** dropdown, choose the desired genomic region.
    - The dropdown defaults to the **hg38** MUC1 locus. You can switch to **hg19** if needed.
 
 3. **Extract Region:**
-   
    - Click the **"Extract Region"** button.
    - The button will display **"Processing..."** while the extraction is underway.
    - A loading spinner indicates that processing is in progress.
 
 4. **Download Extracted BAM Files:**
-   
    - Once processing is complete, download links for the subset BAM files will appear under the **"output"** section.
-   - Click on the **"Download subset_*.bam"** links to download the extracted regions.
+   - Click on the **"Download subset\_\*.bam"** links to download the extracted regions.
 
 5. **Verify Downloaded Files:**
-   
    - Ensure that the downloaded BAM files are of the expected size and contain the reads from the specified region.
 
 ## File Naming Conventions

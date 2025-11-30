@@ -3,127 +3,135 @@
 /* --- Spinner Styles (Container Only - SVG injected dynamically) --- */
 
 .spinner {
-    margin: 20px auto;
-    display: none;
-    text-align: center;
+  margin: 20px auto;
+  display: none;
+  text-align: center;
 }
 
 .spinner.visible {
-    display: block;
+  display: block;
 }
 
 .spinner.hidden {
-    display: none;
+  display: none;
 }
 
 /* Spinner Animation */
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* --- Countdown Styles --- */
 
 .countdown {
-    text-align: center;
-    font-size: 14px;
-    color: #555;
-    /* NEW: Better spacing and centering */
-    margin: 10px auto;
-    max-width: 900px; /* Match jobOutput max-width */
-    display: block;
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  /* NEW: Better spacing and centering */
+  margin: 10px auto;
+  max-width: 900px; /* Match jobOutput max-width */
+  display: block;
 }
 
 /* --- Shareable Link Styles --- */
 
 .share-container {
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
 }
 
 .share-link-input {
-    flex: 1;
-    padding: 8px;
-    margin-right: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
+  flex: 1;
+  padding: 8px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
 }
 
 .copy-button {
-    background-color: #4CAF50; /* Green */
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px; /* Adjusted for better visibility */
-    transition: background-color 0.3s ease, transform 0.1s ease;
-    /* Touch target sizing - WCAG 2.5.5 Level AAA */
-    min-width: 44px;
-    min-height: 44px;
-    padding: 12px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  background-color: #4caf50; /* Green */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px; /* Adjusted for better visibility */
+  transition:
+    background-color 0.3s ease,
+    transform 0.1s ease;
+  /* Touch target sizing - WCAG 2.5.5 Level AAA */
+  min-width: 44px;
+  min-height: 44px;
+  padding: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .copy-button:hover {
-    background-color: #45a049; /* Darker green on hover */
-    transform: translateY(-1px);
+  background-color: #45a049; /* Darker green on hover */
+  transform: translateY(-1px);
 }
 
 .copy-button:active {
-    transform: translateY(0);
+  transform: translateY(0);
 }
 
 .copy-button:focus-visible {
-    outline: 2px solid var(--color-focus);
-    outline-offset: 2px;
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 /* --- Cohort Section Styles --- */
 
 .cohort-section {
-    border: 2px solid var(--color-cohort-border); /* Blue border */
-    padding: 15px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    background-color: var(--color-cohort-bg); /* WCAG AA compliant background */
-    transition: background-color 0.3s ease, border-color 0.3s ease;
+  border: 2px solid var(--color-cohort-border); /* Blue border */
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  background-color: var(--color-cohort-bg); /* WCAG AA compliant background */
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .cohort-section:hover {
-    background-color: var(--color-cohort-bg-hover); /* Slightly darker blue on hover */
-    border-color: var(--color-cohort-border-hover); /* Darker blue border on hover */
+  background-color: var(--color-cohort-bg-hover); /* Slightly darker blue on hover */
+  border-color: var(--color-cohort-border-hover); /* Darker blue border on hover */
 }
 
 .cohort-info {
-    font-size: 1.2em;
-    margin-bottom: 10px;
-    color: var(--color-cohort-text); /* WCAG AA compliant: 7.2:1 contrast */
+  font-size: 1.2em;
+  margin-bottom: 10px;
+  color: var(--color-cohort-text); /* WCAG AA compliant: 7.2:1 contrast */
 }
 
 .job-info {
-    padding-left: 20px;
-    margin-bottom: 5px;
-    font-size: 1em;
-    color: #333; /* Dark grey text */
+  padding-left: 20px;
+  margin-bottom: 5px;
+  font-size: 1em;
+  color: #333; /* Dark grey text */
 }
 
 .job-status {
-    padding-left: 20px;
-    margin-bottom: 10px;
-    color: #28a745; /* Green text for success */
+  padding-left: 20px;
+  margin-bottom: 10px;
+  color: #28a745; /* Green text for success */
 }
 
 /* --- Additional Enhancements (Optional) --- */
 
 /* Styling for Shareable Link Input - removed duplicate .copy-button definition */
 .share-link-input {
-    width: 70%;
-    padding: 5px;
-    margin-right: 10px;
+  width: 70%;
+  padding: 5px;
+  margin-right: 10px;
 }
 
 /* Ensuring the spinner is centered and accessible - REMOVED duplicate */
@@ -131,14 +139,14 @@
 
 /* Optional: Add some spacing to the share-container */
 .share-container {
-    margin-top: 10px;
+  margin-top: 10px;
 }
 
 /* Optional: Add styles for job-info and job-status within cohort sections */
 .cohort-section .job-info {
-    margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 
 .cohort-section .job-status {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }

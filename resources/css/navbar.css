@@ -1,338 +1,380 @@
 /* --- Navigation Bar Styles --- */
 
 .navbar {
-    max-width: 900px;
-    margin: auto;
-    padding: 10px 10px;
-    margin-bottom: 30px;
+  max-width: 900px;
+  margin: auto;
+  padding: 10px 10px;
+  margin-bottom: 30px;
 }
 
 .navbar-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0;
-    width: 100%;
-    position: relative; /* Ensure positioning context for absolute elements */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  width: 100%;
+  position: relative; /* Ensure positioning context for absolute elements */
 }
 
 .header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0px;
-    cursor: pointer;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0px;
+  cursor: pointer;
 }
 
 .logo {
-    width: 80px;
-    height: 80px;
-    margin-right: 20px;
-    animation: logoPulse 3s ease-in-out infinite; /* Applies the pulse animation */
-    transform-origin: center;
+  width: 80px;
+  height: 80px;
+  margin-right: 20px;
+  animation: logoPulse 3s ease-in-out infinite; /* Applies the pulse animation */
+  transform-origin: center;
 }
 
 .header h2 {
-    font-size: 32px;
-    margin: 0;
-    color: #333;
-    opacity: 0; /* Start invisible */
-    animation: appNameFadeInSlideIn 1.5s ease-out forwards; /* Applies fade-in and slide-in */
-    animation-delay: 0.5s; /* Delays animation for sequential effect */
+  font-size: 32px;
+  margin: 0;
+  color: #333;
+  opacity: 0; /* Start invisible */
+  animation: appNameFadeInSlideIn 1.5s ease-out forwards; /* Applies fade-in and slide-in */
+  animation-delay: 0.5s; /* Delays animation for sequential effect */
 }
 
 /* --- Keyframe Animations --- */
 
 /* Logo Pulse Animation */
 @keyframes logoPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* App Name Fade-In and Slide-In Animation */
 @keyframes appNameFadeInSlideIn {
-    0% { opacity: 0; transform: translateX(-20px); }
-    100% { opacity: 1; transform: translateX(0); }
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Optional: Vendor Prefixes for Better Compatibility */
 @-webkit-keyframes logoPulse {
-    0% { -webkit-transform: scale(1); }
-    50% { -webkit-transform: scale(1.05); }
-    100% { -webkit-transform: scale(1); }
+  0% {
+    -webkit-transform: scale(1);
+  }
+  50% {
+    -webkit-transform: scale(1.05);
+  }
+  100% {
+    -webkit-transform: scale(1);
+  }
 }
 
 @-webkit-keyframes appNameFadeInSlideIn {
-    0% { opacity: 0; -webkit-transform: translateX(-20px); }
-    100% { opacity: 1; -webkit-transform: translateX(0); }
+  0% {
+    opacity: 0;
+    -webkit-transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    -webkit-transform: translateX(0);
+  }
 }
 
 .logo {
-    -webkit-animation: logoPulse 3s ease-in-out infinite;
-    animation: logoPulse 3s ease-in-out infinite;
+  -webkit-animation: logoPulse 3s ease-in-out infinite;
+  animation: logoPulse 3s ease-in-out infinite;
 }
 
 .header h2 {
-    -webkit-animation: appNameFadeInSlideIn 1.5s ease-out forwards;
-    animation: appNameFadeInSlideIn 1.5s ease-out forwards;
+  -webkit-animation: appNameFadeInSlideIn 1.5s ease-out forwards;
+  animation: appNameFadeInSlideIn 1.5s ease-out forwards;
 }
 
 /* --- Navigation Menu Styles --- */
 
 .navbar-menu {
-    list-style: none;
-    display: flex;
-    align-items: center;
-    margin: 0;
-    padding: 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
 }
 
 .navbar-menu li {
-    margin-left: 20px;
+  margin-left: 20px;
 }
 
 .navbar-link {
-    text-decoration: none;
-    color: #333333;
-    font-size: 1em;
-    transition: color 0.3s ease;
-    position: relative;
+  text-decoration: none;
+  color: #333333;
+  font-size: 1em;
+  transition: color 0.3s ease;
+  position: relative;
 }
 
 .navbar-link:hover {
-    color: #096162;
+  color: #096162;
 }
 
 /* Keyboard focus indicator - universal outline from base.css, specific color here */
 .navbar-link:focus-visible {
-    color: #096162;
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
+  color: #096162;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
 }
 
 /* Back Link Styles (for subpages) */
 .back-link {
-    text-decoration: none;
-    color: #096162;
-    font-size: 1em;
-    font-weight: 500;
-    transition: color 0.3s ease, transform 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    padding: 8px 12px;
-    border-radius: 4px;
+  text-decoration: none;
+  color: #096162;
+  font-size: 1em;
+  font-weight: 500;
+  transition:
+    color 0.3s ease,
+    transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 4px;
 }
 
 .back-link:hover {
-    color: #005f60;
-    background-color: rgba(9, 97, 98, 0.05);
-    transform: translateX(-2px);
+  color: #005f60;
+  background-color: rgba(9, 97, 98, 0.05);
+  transform: translateX(-2px);
 }
 
 .back-link:focus-visible {
-    outline: 2px solid #0a9396;
-    outline-offset: 2px;
-    text-decoration: underline;
+  outline: 2px solid #0a9396;
+  outline-offset: 2px;
+  text-decoration: underline;
 }
 
 /* Server Load Indicator Styles */
 
 .server-load-indicator {
-    position: relative;
+  position: relative;
 }
 
 .server-load-indicator .load-count {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .server-load-indicator.load-blue a {
-    color: #007bff;
+  color: #007bff;
 }
 
 .server-load-indicator.load-orange a {
-    color: #fd7e14;
+  color: #fd7e14;
 }
 
 .server-load-indicator.load-red a {
-    color: #dc3545;
+  color: #dc3545;
 }
 
 /* --- Hamburger Menu Styles --- */
 
 .navbar-toggle {
-    display: none; /* Hidden on desktop */
-    background: transparent;
-    border: none;
-    font-size: 28px;
-    cursor: pointer;
-    color: #333;
-    padding: 12px;
-    border-radius: 4px;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-    z-index: 1001;
-    min-width: 48px; /* Touch target */
-    min-height: 48px;
+  display: none; /* Hidden on desktop */
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #333;
+  padding: 12px;
+  border-radius: 4px;
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease;
+  z-index: 1001;
+  min-width: 48px; /* Touch target */
+  min-height: 48px;
 }
 
 .navbar-toggle:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .navbar-toggle:active {
-    transform: scale(0.95);
+  transform: scale(0.95);
 }
 
 .navbar-toggle:focus-visible {
-    outline: 3px solid #0a9396;
-    outline-offset: 2px;
+  outline: 3px solid #0a9396;
+  outline-offset: 2px;
 }
 
 /* Hamburger icon animation */
 .hamburger-icon {
-    display: inline-block;
-    transition: transform 0.3s ease;
-    font-size: 28px;
-    line-height: 1;
+  display: inline-block;
+  transition: transform 0.3s ease;
+  font-size: 28px;
+  line-height: 1;
 }
 
-.navbar-toggle[aria-expanded="true"] .hamburger-icon {
-    transform: rotate(90deg);
+.navbar-toggle[aria-expanded='true'] .hamburger-icon {
+  transform: rotate(90deg);
 }
 
 /* --- Mobile Navigation Styles --- */
 
 @media (max-width: 768px) {
-    /* Show hamburger button */
-    .navbar-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: absolute;
-        right: 20px;
-        top: 50%;
-        transform: translateY(-50%);
-    }
+  /* Show hamburger button */
+  .navbar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
 
-    .navbar-toggle[aria-expanded="true"] {
-        position: fixed; /* Fix position when menu open */
-        right: 10px;
-        top: 20px;
-        transform: none;
-    }
+  .navbar-toggle[aria-expanded='true'] {
+    position: fixed; /* Fix position when menu open */
+    right: 10px;
+    top: 20px;
+    transform: none;
+  }
 
-    /* Navbar container adjustment */
-    .navbar-container {
-        padding-right: 48px; /* Space for hamburger button */
-    }
+  /* Navbar container adjustment */
+  .navbar-container {
+    padding-right: 48px; /* Space for hamburger button */
+  }
 
-    /* Hide navbar menu by default */
-    .navbar-menu {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.95); /* Dark overlay */
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 80px 20px 20px;
-        z-index: 1000;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-        animation: fadeIn 0.3s ease;
-    }
+  /* Hide navbar menu by default */
+  .navbar-menu {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.95); /* Dark overlay */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px 20px;
+    z-index: 1000;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    animation: fadeIn 0.3s ease;
+  }
 
-    /* Show navbar menu when active */
-    .navbar-menu.active {
-        display: flex;
-    }
+  /* Show navbar menu when active */
+  .navbar-menu.active {
+    display: flex;
+  }
 
-    .navbar-menu li {
-        width: 100%;
-        max-width: 400px;
-        margin: 8px 0;
-        list-style: none;
-    }
+  .navbar-menu li {
+    width: 100%;
+    max-width: 400px;
+    margin: 8px 0;
+    list-style: none;
+  }
 
-    .navbar-link {
-        display: block;
-        padding: 16px 20px;
-        font-size: 1.3em;
-        color: #ffffff !important; /* White text on dark background */
-        text-align: center;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-        border-radius: 8px;
-        text-decoration: none;
-    }
+  .navbar-link {
+    display: block;
+    padding: 16px 20px;
+    font-size: 1.3em;
+    color: #ffffff !important; /* White text on dark background */
+    text-align: center;
+    transition:
+      background-color 0.3s ease,
+      transform 0.2s ease;
+    border-radius: 8px;
+    text-decoration: none;
+  }
 
-    .navbar-link:hover,
-    .navbar-link:focus-visible {
-        background-color: rgba(10, 147, 150, 0.3);
-        transform: translateX(5px);
-        text-decoration: underline;
-    }
+  .navbar-link:hover,
+  .navbar-link:focus-visible {
+    background-color: rgba(10, 147, 150, 0.3);
+    transform: translateX(5px);
+    text-decoration: underline;
+  }
 
-    /* Server load indicator mobile optimization */
-    .server-load-indicator .navbar-link {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-    }
+  /* Server load indicator mobile optimization */
+  .server-load-indicator .navbar-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
 
-    .server-load-indicator.load-blue .navbar-link,
-    .server-load-indicator.load-orange .navbar-link,
-    .server-load-indicator.load-red .navbar-link {
-        color: #ffffff !important;
-    }
+  .server-load-indicator.load-blue .navbar-link,
+  .server-load-indicator.load-orange .navbar-link,
+  .server-load-indicator.load-red .navbar-link {
+    color: #ffffff !important;
+  }
 
-    .load-count {
-        font-size: 1.2em;
-        font-weight: bold;
-    }
+  .load-count {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
 
-    /* Disclaimer indicator mobile */
-    #disclaimerIndicator .navbar-link {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-    }
+  /* Disclaimer indicator mobile */
+  #disclaimerIndicator .navbar-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
 
-    .status-icon {
-        font-size: 1.2em;
-    }
+  .status-icon {
+    font-size: 1.2em;
+  }
 
-    /* Header remains visible when menu open */
-    .header {
-        pointer-events: all;
-        z-index: 1;
-    }
+  /* Header remains visible when menu open */
+  .header {
+    pointer-events: all;
+    z-index: 1;
+  }
 }
 
 /* --- Animations --- */
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* --- Keyframe Animations Continuation --- */
 
 /* Ensuring the animations are defined before being used */
 @keyframes logoPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes appNameFadeInSlideIn {
-    0% { opacity: 0; transform: translateX(-20px); }
-    100% { opacity: 1; transform: translateX(0); }
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }

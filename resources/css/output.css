@@ -3,247 +3,253 @@
 /* --- Output Styles --- */
 
 #output {
-    margin-top: 20px;
-    background-color: var(--color-bg-output, #f4f4f4);
-    padding: 20px;
-    border: 1px solid var(--color-border-medium, #ddd);
-    border-radius: 8px; /* Consistent with container border-radius */
-    position: relative; /* For absolute positioning of placeholder */
-    display: block;
-    min-height: 58px; /* Match production height */
+  margin-top: 20px;
+  background-color: var(--color-bg-output, #f4f4f4);
+  padding: 20px;
+  border: 1px solid var(--color-border-medium, #ddd);
+  border-radius: 8px; /* Consistent with container border-radius */
+  position: relative; /* For absolute positioning of placeholder */
+  display: block;
+  min-height: 58px; /* Match production height */
 }
 
 /* Region Output Styles */
 #regionOutput {
-    margin-top: 20px;
-    /* NEW: Center region output with max-width */
-    max-width: 900px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 100%;
+  margin-top: 20px;
+  /* NEW: Center region output with max-width */
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 }
 
 /* Cohorts Container Styles */
 #cohortsContainer,
 .cohorts-container {
-    margin-top: 20px;
-    /* NEW: Center cohorts with max-width like production */
-    max-width: 900px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 100%;
+  margin-top: 20px;
+  /* NEW: Center cohorts with max-width like production */
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 }
 
 /* Job Output Styles */
 #jobOutput {
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px; /* 8px spacing system - medium gap */
-    /* NEW: Center job cards with max-width like production */
-    max-width: 900px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 100%;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* 8px spacing system - medium gap */
+  /* NEW: Center job cards with max-width like production */
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 }
 
 /* Job Item - Card-Based Layout */
 .job-item {
-    background-color: var(--color-bg-container, #ffffff);
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid var(--color-border-light, #e7e7e7);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease, transform 0.1s ease;
+  background-color: var(--color-bg-container, #ffffff);
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-light, #e7e7e7);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.1s ease;
 }
 
 .job-item:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 /* Job Header - Visual Hierarchy */
 .job-header {
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--color-border-light, #e7e7e7);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--color-border-light, #e7e7e7);
 }
 
 .job-header .job-id {
-    font-family: 'Courier New', monospace;
-    font-size: 0.95rem;
-    color: var(--color-text-secondary, #6c757d);
-    word-break: break-all;
+  font-family: 'Courier New', monospace;
+  font-size: 0.95rem;
+  color: var(--color-text-secondary, #6c757d);
+  word-break: break-all;
 }
 
 /* Job File Name */
 .job-file {
-    margin-bottom: 12px;
-    font-size: 0.95rem;
-    color: var(--color-text-primary, #333);
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  color: var(--color-text-primary, #333);
 }
 
 .job-file .file-name {
-    font-weight: 600;
-    color: var(--color-text-primary, #333);
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
 }
 
 /* Job Status Container */
 .job-status-container {
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1rem;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
 }
 
 /* Job Status - Semantic Color System */
 .job-status {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-weight: 600;
-    font-size: 0.95rem;
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .job-status.status-completed {
-    background-color: var(--color-success-bg, #dff0d8);
-    color: var(--color-success, #3c763d);
-    border: 1px solid var(--color-success-border, #d6e9c6);
+  background-color: var(--color-success-bg, #dff0d8);
+  color: var(--color-success, #3c763d);
+  border: 1px solid var(--color-success-border, #d6e9c6);
 }
 
 .job-status.status-pending,
 .job-status.status-queued {
-    background-color: var(--color-info-bg, #e7f3fe);
-    color: var(--color-info, #31708f);
-    border: 1px solid var(--color-info-border, #bce8f1);
+  background-color: var(--color-info-bg, #e7f3fe);
+  color: var(--color-info, #31708f);
+  border: 1px solid var(--color-info-border, #bce8f1);
 }
 
 .job-status.status-started,
 .job-status.status-processing {
-    background-color: var(--color-warning-bg, #fff3cd);
-    color: var(--color-warning, #856404);
-    border: 1px solid var(--color-warning-border, #ffeeba);
+  background-color: var(--color-warning-bg, #fff3cd);
+  color: var(--color-warning, #856404);
+  border: 1px solid var(--color-warning-border, #ffeeba);
 }
 
 .job-status.status-failed,
 .job-status.status-cancelled {
-    background-color: var(--color-error-bg, #f8dede);
-    color: var(--color-error, #a94442);
-    border: 1px solid var(--color-error-border, #ebccd1);
+  background-color: var(--color-error-bg, #f8dede);
+  color: var(--color-error, #a94442);
+  border: 1px solid var(--color-error-border, #ebccd1);
 }
 
 /* Job Download Section */
 .job-download {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid var(--color-border-light, #e7e7e7);
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border-light, #e7e7e7);
 }
 
 .job-download .download-link {
-    /* Inherits from buttons.css download-link but ensures button-like appearance */
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 150px;
+  /* Inherits from buttons.css download-link but ensures button-like appearance */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 150px;
 }
 
 /* Job Error Display */
 .job-error {
-    margin-top: 12px;
-    padding: 12px 16px;
-    background-color: var(--color-error-bg, #f8dede);
-    color: var(--color-error, #a94442);
-    border: 1px solid var(--color-error-border, #ebccd1);
-    border-left: 4px solid var(--color-error, #a94442);
-    border-radius: 4px;
-    font-size: 0.95rem;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background-color: var(--color-error-bg, #f8dede);
+  color: var(--color-error, #a94442);
+  border: 1px solid var(--color-error-border, #ebccd1);
+  border-left: 4px solid var(--color-error, #a94442);
+  border-radius: 4px;
+  font-size: 0.95rem;
 }
 
 /* Progress Bar Styles */
 .job-progress-container {
-    margin: 16px 0;
+  margin: 16px 0;
 }
 
 .progress-bar {
-    width: 100%;
-    height: 24px;
-    background-color: var(--color-border-light, #e7e7e7);
-    border-radius: 12px;
-    overflow: hidden;
-    position: relative;
+  width: 100%;
+  height: 24px;
+  background-color: var(--color-border-light, #e7e7e7);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
 }
 
 .job-progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, var(--color-primary, #005f73), var(--color-primary-hover, #0a9396));
-    border-radius: 12px;
-    transition: width 0.3s ease;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary, #005f73),
+    var(--color-primary-hover, #0a9396)
+  );
+  border-radius: 12px;
+  transition: width 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .job-progress-text {
-    display: block;
-    margin-top: 8px;
-    text-align: center;
-    font-size: 0.9rem;
-    color: var(--color-text-secondary, #6c757d);
-    font-weight: 600;
+  display: block;
+  margin-top: 8px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary, #6c757d);
+  font-weight: 600;
 }
 
 /* Additional Styles for Legacy Job Info and Status */
 #jobInfo,
 #jobStatus,
 #jobQueuePosition {
-    margin-bottom: 10px;
-    font-size: 1rem;
+  margin-bottom: 10px;
+  font-size: 1rem;
 }
 
 #jobInfo strong,
 #jobStatus strong {
-    color: #333;
+  color: #333;
 }
 
 /* Placeholder Message */
 .placeholder-message {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: var(--color-text-muted, #666);
-    font-style: italic;
-    margin: 0;
-    padding: 0;
-    width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: var(--color-text-muted, #666);
+  font-style: italic;
+  margin: 0;
+  padding: 0;
+  width: 100%;
 }
 
 /* Shareable Link Container (within job item) */
 .job-item .share-container {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid var(--color-border-light, #e7e7e7);
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border-light, #e7e7e7);
 }
 
 .job-item .share-container label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: var(--color-text-primary, #333);
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-text-primary, #333);
 }
 
 /* Responsive Adjustments */
 @media (max-width: 600px) {
-    .job-item {
-        padding: 16px;
-    }
+  .job-item {
+    padding: 16px;
+  }
 
-    .job-header .job-id {
-        font-size: 0.85rem;
-    }
+  .job-header .job-id {
+    font-size: 0.85rem;
+  }
 
-    .job-download .download-link {
-        width: 100%;
-    }
+  .job-download .download-link {
+    width: 100%;
+  }
 }

@@ -3,60 +3,60 @@
 /* --- Citations Section Styles --- */
 
 .citations-section {
-    padding: 10px 10px;
-    background-color: #f8f9fa;
-    max-width: 800px;
-    margin: 10px auto;
-    border-radius: 8px;
+  padding: 10px 10px;
+  background-color: #f8f9fa;
+  max-width: 800px;
+  margin: 10px auto;
+  border-radius: 8px;
 }
 
 .citations-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .citation-item {
-    background-color: #ffffff;
-    border: 1px solid #dee2e6;
-    padding: 10px;
-    border-radius: 5px;
-    position: relative;
-    transition: box-shadow 0.3s ease;
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  padding: 10px;
+  border-radius: 5px;
+  position: relative;
+  transition: box-shadow 0.3s ease;
 }
 
 .citation-item:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .citation-item p {
-    color: #6c757d;
-    line-height: 1.6;
+  color: #6c757d;
+  line-height: 1.6;
 }
 
 /* --- Citation Links (WCAG 1.4.1 Use of Color) --- */
 
 .citations-section a {
-    color: #0056b3; /* Darker blue for better contrast */
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 2px;
-    font-weight: 500; /* Slightly heavier for emphasis */
-    transition: all 0.3s ease;
+  color: #0056b3; /* Darker blue for better contrast */
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  font-weight: 500; /* Slightly heavier for emphasis */
+  transition: all 0.3s ease;
 }
 
 .citations-section a:hover,
 .citations-section a:focus {
-    color: #003d82; /* Even darker on interaction */
-    text-decoration-thickness: 2px;
-    text-underline-offset: 3px;
+  color: #003d82; /* Even darker on interaction */
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 .citations-section a:active {
-    color: #002654;
+  color: #002654;
 }
 
 /* Visited links in citations (academic convention) */
 .citations-section a:visited {
-    color: #5a23c8; /* Standard visited link purple */
+  color: #5a23c8; /* Standard visited link purple */
 }

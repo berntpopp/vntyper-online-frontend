@@ -1,29 +1,29 @@
 // tests/unit/utils/errorHandling.test.js
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   ErrorHandler,
   ErrorLevel,
   errorHandler,
   displayError,
-  clearError
-} from '../../../resources/js/errorHandling.js'
+  clearError,
+} from '../../../resources/js/errorHandling.js';
 
 // Mock log.js module
 vi.mock('../../../resources/js/log.js', () => ({
-  logMessage: vi.fn()
-}))
+  logMessage: vi.fn(),
+}));
 
 // Import mocked function
-import { logMessage } from '../../../resources/js/log.js'
+import { logMessage } from '../../../resources/js/log.js';
 
 describe('ErrorHandler', () => {
-  let handler
-  let mockErrorElement
+  let handler;
+  let mockErrorElement;
 
   beforeEach(() => {
     // Create fresh ErrorHandler instance for each test
-    handler = new ErrorHandler()
+    handler = new ErrorHandler();
 
     // Mock DOM error element
     mockErrorElement = {
@@ -31,32 +31,32 @@ describe('ErrorHandler', () => {
       className: '',
       classList: {
         add: vi.fn(),
-        remove: vi.fn()
-      }
-    }
-    vi.spyOn(document, 'getElementById').mockReturnValue(mockErrorElement)
+        remove: vi.fn(),
+      },
+    };
+    vi.spyOn(document, 'getElementById').mockReturnValue(mockErrorElement);
 
     // Mock window.location and navigator for error context
     vi.stubGlobal('window', {
       location: { href: 'http://localhost:3000/test' },
-      addEventListener: vi.fn()
-    })
+      addEventListener: vi.fn(),
+    });
     vi.stubGlobal('navigator', {
-      userAgent: 'Mozilla/5.0 (Test)'
-    })
+      userAgent: 'Mozilla/5.0 (Test)',
+    });
 
     // Mock console methods
-    vi.spyOn(console, 'log').mockImplementation(() => {})
-    vi.spyOn(console, 'warn').mockImplementation(() => {})
-    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // Clear all mocks
-    vi.clearAllMocks()
-  })
+    vi.clearAllMocks();
+  });
 
   afterEach(() => {
-    vi.restoreAllMocks()
-  })
+    vi.restoreAllMocks();
+  });
 
   // ============================================================================
   // Constructor
@@ -64,18 +64,18 @@ describe('ErrorHandler', () => {
 
   describe('constructor()', () => {
     it('should initialize with empty error history', () => {
-      expect(handler.errorHistory).toEqual([])
-    })
+      expect(handler.errorHistory).toEqual([]);
+    });
 
     it('should set maxHistorySize to 100', () => {
-      expect(handler.maxHistorySize).toBe(100)
-    })
+      expect(handler.maxHistorySize).toBe(100);
+    });
 
     it('should initialize errorCallbacks Map', () => {
-      expect(handler.errorCallbacks).toBeInstanceOf(Map)
-      expect(handler.errorCallbacks.size).toBe(0)
-    })
-  })
+      expect(handler.errorCallbacks).toBeInstanceOf(Map);
+      expect(handler.errorCallbacks.size).toBe(0);
+    });
+  });
 
   // ============================================================================
   // handleError() - Basic functionality
@@ -84,82 +84,82 @@ describe('ErrorHandler', () => {
   describe('handleError() - Basic functionality', () => {
     it('should handle Error object', () => {
       // Arrange
-      const error = new Error('Test error')
+      const error = new Error('Test error');
 
       // Act
-      const result = handler.handleError(error)
+      const result = handler.handleError(error);
 
       // Assert
-      expect(result.message).toBe('Test error')
-      expect(result.stack).toBeDefined()
-      expect(result.level).toBe(ErrorLevel.ERROR)
-    })
+      expect(result.message).toBe('Test error');
+      expect(result.stack).toBeDefined();
+      expect(result.level).toBe(ErrorLevel.ERROR);
+    });
 
     it('should handle string error', () => {
       // Arrange
-      const error = 'String error message'
+      const error = 'String error message';
 
       // Act
-      const result = handler.handleError(error)
+      const result = handler.handleError(error);
 
       // Assert
-      expect(result.message).toBe('String error message')
-      expect(result.level).toBe(ErrorLevel.ERROR)
-    })
+      expect(result.message).toBe('String error message');
+      expect(result.level).toBe(ErrorLevel.ERROR);
+    });
 
     it('should include timestamp in ISO format', () => {
       // Act
-      const result = handler.handleError(new Error('Test'))
+      const result = handler.handleError(new Error('Test'));
 
       // Assert
-      expect(result.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/)
-    })
+      expect(result.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    });
 
     it('should include current URL', () => {
       // Act
-      const result = handler.handleError(new Error('Test'))
+      const result = handler.handleError(new Error('Test'));
 
       // Assert
-      expect(result.url).toBeDefined()
-      expect(typeof result.url).toBe('string')
-    })
+      expect(result.url).toBeDefined();
+      expect(typeof result.url).toBe('string');
+    });
 
     it('should include user agent', () => {
       // Act
-      const result = handler.handleError(new Error('Test'))
+      const result = handler.handleError(new Error('Test'));
 
       // Assert
-      expect(result.userAgent).toBeDefined()
-      expect(typeof result.userAgent).toBe('string')
-    })
+      expect(result.userAgent).toBeDefined();
+      expect(typeof result.userAgent).toBe('string');
+    });
 
     it('should add error to history', () => {
       // Act
-      handler.handleError(new Error('Error 1'))
-      handler.handleError(new Error('Error 2'))
+      handler.handleError(new Error('Error 1'));
+      handler.handleError(new Error('Error 2'));
 
       // Assert
-      expect(handler.errorHistory.length).toBe(2)
-      expect(handler.errorHistory[0].message).toBe('Error 1')
-      expect(handler.errorHistory[1].message).toBe('Error 2')
-    })
+      expect(handler.errorHistory.length).toBe(2);
+      expect(handler.errorHistory[0].message).toBe('Error 1');
+      expect(handler.errorHistory[1].message).toBe('Error 2');
+    });
 
     it('should limit history to maxHistorySize', () => {
       // Arrange
-      handler.maxHistorySize = 3
+      handler.maxHistorySize = 3;
 
       // Act
-      handler.handleError(new Error('Error 1'))
-      handler.handleError(new Error('Error 2'))
-      handler.handleError(new Error('Error 3'))
-      handler.handleError(new Error('Error 4'))
+      handler.handleError(new Error('Error 1'));
+      handler.handleError(new Error('Error 2'));
+      handler.handleError(new Error('Error 3'));
+      handler.handleError(new Error('Error 4'));
 
       // Assert
-      expect(handler.errorHistory.length).toBe(3)
-      expect(handler.errorHistory[0].message).toBe('Error 2')
-      expect(handler.errorHistory[2].message).toBe('Error 4')
-    })
-  })
+      expect(handler.errorHistory.length).toBe(3);
+      expect(handler.errorHistory[0].message).toBe('Error 2');
+      expect(handler.errorHistory[2].message).toBe('Error 4');
+    });
+  });
 
   // ============================================================================
   // handleError() - Context and severity
@@ -171,48 +171,48 @@ describe('ErrorHandler', () => {
       const context = {
         function: 'submitJob',
         jobId: '123',
-        userId: 'user-456'
-      }
+        userId: 'user-456',
+      };
 
       // Act
-      const result = handler.handleError(new Error('Test'), context)
+      const result = handler.handleError(new Error('Test'), context);
 
       // Assert
-      expect(result.context).toEqual(context)
-    })
+      expect(result.context).toEqual(context);
+    });
 
     it('should use ERROR level by default', () => {
       // Act
-      const result = handler.handleError(new Error('Test'))
+      const result = handler.handleError(new Error('Test'));
 
       // Assert
-      expect(result.level).toBe(ErrorLevel.ERROR)
-    })
+      expect(result.level).toBe(ErrorLevel.ERROR);
+    });
 
     it('should respect custom error level', () => {
       // Act
-      const result = handler.handleError(new Error('Test'), {}, ErrorLevel.WARNING)
+      const result = handler.handleError(new Error('Test'), {}, ErrorLevel.WARNING);
 
       // Assert
-      expect(result.level).toBe(ErrorLevel.WARNING)
-    })
+      expect(result.level).toBe(ErrorLevel.WARNING);
+    });
 
     it('should handle INFO level', () => {
       // Act
-      const result = handler.handleError('Info message', {}, ErrorLevel.INFO)
+      const result = handler.handleError('Info message', {}, ErrorLevel.INFO);
 
       // Assert
-      expect(result.level).toBe(ErrorLevel.INFO)
-    })
+      expect(result.level).toBe(ErrorLevel.INFO);
+    });
 
     it('should handle CRITICAL level', () => {
       // Act
-      const result = handler.handleError(new Error('Critical'), {}, ErrorLevel.CRITICAL)
+      const result = handler.handleError(new Error('Critical'), {}, ErrorLevel.CRITICAL);
 
       // Assert
-      expect(result.level).toBe(ErrorLevel.CRITICAL)
-    })
-  })
+      expect(result.level).toBe(ErrorLevel.CRITICAL);
+    });
+  });
 
   // ============================================================================
   // handleError() - Logging
@@ -221,59 +221,56 @@ describe('ErrorHandler', () => {
   describe('handleError() - Logging', () => {
     it('should log error to console with ERROR level', () => {
       // Act
-      handler.handleError(new Error('Test error'))
+      handler.handleError(new Error('Test error'));
 
       // Assert
       expect(console.log).toHaveBeenCalledWith(
         '[ErrorHandler]',
         expect.objectContaining({ message: 'Test error' })
-      )
-    })
+      );
+    });
 
     it('should use console.warn for WARNING level', () => {
       // Act
-      handler.handleError('Warning', {}, ErrorLevel.WARNING)
+      handler.handleError('Warning', {}, ErrorLevel.WARNING);
 
       // Assert
       expect(console.warn).toHaveBeenCalledWith(
         '[ErrorHandler]',
         expect.objectContaining({ level: ErrorLevel.WARNING })
-      )
-    })
+      );
+    });
 
     it('should use console.error for CRITICAL level', () => {
       // Act
-      handler.handleError(new Error('Critical'), {}, ErrorLevel.CRITICAL)
+      handler.handleError(new Error('Critical'), {}, ErrorLevel.CRITICAL);
 
       // Assert
       expect(console.error).toHaveBeenCalledWith(
         '[ErrorHandler]',
         expect.objectContaining({ level: ErrorLevel.CRITICAL })
-      )
-    })
+      );
+    });
 
     it('should log to logMessage with context', () => {
       // Arrange
-      const context = { function: 'test', id: '123' }
+      const context = { function: 'test', id: '123' };
 
       // Act
-      handler.handleError(new Error('Test'), context, ErrorLevel.ERROR)
+      handler.handleError(new Error('Test'), context, ErrorLevel.ERROR);
 
       // Assert
-      expect(logMessage).toHaveBeenCalledWith(
-        'Test [function:test, id:123]',
-        'error'
-      )
-    })
+      expect(logMessage).toHaveBeenCalledWith('Test [function:test, id:123]', 'error');
+    });
 
     it('should log without context string when empty', () => {
       // Act
-      handler.handleError('Simple error')
+      handler.handleError('Simple error');
 
       // Assert
-      expect(logMessage).toHaveBeenCalledWith('Simple error', 'error')
-    })
-  })
+      expect(logMessage).toHaveBeenCalledWith('Simple error', 'error');
+    });
+  });
 
   // ============================================================================
   // handleError() - Callbacks
@@ -282,31 +279,31 @@ describe('ErrorHandler', () => {
   describe('handleError() - Callbacks', () => {
     it('should trigger registered callbacks', () => {
       // Arrange
-      const callback = vi.fn()
-      handler.onError('test-callback', callback)
+      const callback = vi.fn();
+      handler.onError('test-callback', callback);
 
       // Act
-      const errorEntry = handler.handleError(new Error('Test'))
+      const errorEntry = handler.handleError(new Error('Test'));
 
       // Assert
-      expect(callback).toHaveBeenCalledWith(errorEntry)
-    })
+      expect(callback).toHaveBeenCalledWith(errorEntry);
+    });
 
     it('should trigger multiple callbacks', () => {
       // Arrange
-      const callback1 = vi.fn()
-      const callback2 = vi.fn()
-      handler.onError('callback1', callback1)
-      handler.onError('callback2', callback2)
+      const callback1 = vi.fn();
+      const callback2 = vi.fn();
+      handler.onError('callback1', callback1);
+      handler.onError('callback2', callback2);
 
       // Act
-      handler.handleError(new Error('Test'))
+      handler.handleError(new Error('Test'));
 
       // Assert
-      expect(callback1).toHaveBeenCalled()
-      expect(callback2).toHaveBeenCalled()
-    })
-  })
+      expect(callback1).toHaveBeenCalled();
+      expect(callback2).toHaveBeenCalled();
+    });
+  });
 
   // ============================================================================
   // displayError()
@@ -315,60 +312,60 @@ describe('ErrorHandler', () => {
   describe('displayError()', () => {
     it('should set error message in DOM element', () => {
       // Act
-      handler.displayError('Error message')
+      handler.displayError('Error message');
 
       // Assert
-      expect(mockErrorElement.textContent).toBe('Error message')
-    })
+      expect(mockErrorElement.textContent).toBe('Error message');
+    });
 
     it('should set error class with level', () => {
       // Act
-      handler.displayError('Error', ErrorLevel.WARNING)
+      handler.displayError('Error', ErrorLevel.WARNING);
 
       // Assert
-      expect(mockErrorElement.className).toBe('error error-warning')
-    })
+      expect(mockErrorElement.className).toBe('error error-warning');
+    });
 
     it('should remove hidden class', () => {
       // Act
-      handler.displayError('Error')
+      handler.displayError('Error');
 
       // Assert
-      expect(mockErrorElement.classList.remove).toHaveBeenCalledWith('hidden')
-    })
+      expect(mockErrorElement.classList.remove).toHaveBeenCalledWith('hidden');
+    });
 
     it('should use ERROR level by default', () => {
       // Act
-      handler.displayError('Error')
+      handler.displayError('Error');
 
       // Assert
-      expect(mockErrorElement.className).toBe('error error-error')
-    })
+      expect(mockErrorElement.className).toBe('error error-error');
+    });
 
     it('should handle missing error element gracefully', () => {
       // Arrange
-      document.getElementById.mockReturnValue(null)
+      document.getElementById.mockReturnValue(null);
 
       // Act & Assert - Should not throw
       expect(() => {
-        handler.displayError('Error')
-      }).not.toThrow()
+        handler.displayError('Error');
+      }).not.toThrow();
 
       expect(console.warn).toHaveBeenCalledWith(
         expect.stringContaining('Error display element #error not found'),
         'Error'
-      )
-    })
+      );
+    });
 
     it('should handle different severity levels', () => {
       // Act
-      handler.displayError('Info', ErrorLevel.INFO)
-      expect(mockErrorElement.className).toBe('error error-info')
+      handler.displayError('Info', ErrorLevel.INFO);
+      expect(mockErrorElement.className).toBe('error error-info');
 
-      handler.displayError('Critical', ErrorLevel.CRITICAL)
-      expect(mockErrorElement.className).toBe('error error-critical')
-    })
-  })
+      handler.displayError('Critical', ErrorLevel.CRITICAL);
+      expect(mockErrorElement.className).toBe('error error-critical');
+    });
+  });
 
   // ============================================================================
   // clearError()
@@ -377,36 +374,36 @@ describe('ErrorHandler', () => {
   describe('clearError()', () => {
     it('should clear error message', () => {
       // Arrange
-      mockErrorElement.textContent = 'Previous error'
+      mockErrorElement.textContent = 'Previous error';
 
       // Act
-      handler.clearError()
+      handler.clearError();
 
       // Assert
-      expect(mockErrorElement.textContent).toBe('')
-    })
+      expect(mockErrorElement.textContent).toBe('');
+    });
 
     it('should reset error class to hidden', () => {
       // Arrange
-      mockErrorElement.className = 'error error-critical'
+      mockErrorElement.className = 'error error-critical';
 
       // Act
-      handler.clearError()
+      handler.clearError();
 
       // Assert
-      expect(mockErrorElement.className).toBe('error hidden')
-    })
+      expect(mockErrorElement.className).toBe('error hidden');
+    });
 
     it('should handle missing error element gracefully', () => {
       // Arrange
-      document.getElementById.mockReturnValue(null)
+      document.getElementById.mockReturnValue(null);
 
       // Act & Assert - Should not throw
       expect(() => {
-        handler.clearError()
-      }).not.toThrow()
-    })
-  })
+        handler.clearError();
+      }).not.toThrow();
+    });
+  });
 
   // ============================================================================
   // registerGlobalHandlers()
@@ -415,88 +412,88 @@ describe('ErrorHandler', () => {
   describe('registerGlobalHandlers()', () => {
     it('should register window error handler', () => {
       // Arrange
-      const addEventListenerSpy = vi.spyOn(window, 'addEventListener')
+      const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
 
       // Act
-      handler.registerGlobalHandlers()
+      handler.registerGlobalHandlers();
 
       // Assert
-      expect(addEventListenerSpy).toHaveBeenCalledWith('error', expect.any(Function))
-    })
+      expect(addEventListenerSpy).toHaveBeenCalledWith('error', expect.any(Function));
+    });
 
     it('should register unhandledrejection handler', () => {
       // Arrange
-      const addEventListenerSpy = vi.spyOn(window, 'addEventListener')
+      const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
 
       // Act
-      handler.registerGlobalHandlers()
+      handler.registerGlobalHandlers();
 
       // Assert
-      expect(addEventListenerSpy).toHaveBeenCalledWith('unhandledrejection', expect.any(Function))
-    })
+      expect(addEventListenerSpy).toHaveBeenCalledWith('unhandledrejection', expect.any(Function));
+    });
 
     it('should handle uncaught errors', () => {
       // Arrange
-      let errorCallback
+      let errorCallback;
       vi.spyOn(window, 'addEventListener').mockImplementation((event, callback) => {
         if (event === 'error') {
-          errorCallback = callback
+          errorCallback = callback;
         }
-      })
-      handler.registerGlobalHandlers()
+      });
+      handler.registerGlobalHandlers();
 
       const mockEvent = {
         error: new Error('Uncaught error'),
         filename: 'test.js',
         lineno: 42,
         colno: 10,
-        preventDefault: vi.fn()
-      }
+        preventDefault: vi.fn(),
+      };
 
       // Act
-      errorCallback(mockEvent)
+      errorCallback(mockEvent);
 
       // Assert
-      expect(handler.errorHistory.length).toBe(1)
-      expect(handler.errorHistory[0].message).toBe('Uncaught error')
-      expect(handler.errorHistory[0].level).toBe(ErrorLevel.CRITICAL)
-      expect(mockEvent.preventDefault).toHaveBeenCalled()
-    })
+      expect(handler.errorHistory.length).toBe(1);
+      expect(handler.errorHistory[0].message).toBe('Uncaught error');
+      expect(handler.errorHistory[0].level).toBe(ErrorLevel.CRITICAL);
+      expect(mockEvent.preventDefault).toHaveBeenCalled();
+    });
 
     it('should handle unhandled promise rejections', () => {
       // Arrange
-      let rejectionCallback
+      let rejectionCallback;
       vi.spyOn(window, 'addEventListener').mockImplementation((event, callback) => {
         if (event === 'unhandledrejection') {
-          rejectionCallback = callback
+          rejectionCallback = callback;
         }
-      })
-      handler.registerGlobalHandlers()
+      });
+      handler.registerGlobalHandlers();
 
       const mockEvent = {
         reason: new Error('Promise rejection'),
         promise: Promise.reject(),
-        preventDefault: vi.fn()
-      }
+        preventDefault: vi.fn(),
+      };
 
       // Act
-      rejectionCallback(mockEvent)
+      rejectionCallback(mockEvent);
 
       // Assert
-      expect(handler.errorHistory.length).toBe(1)
-      expect(handler.errorHistory[0].message).toBe('Promise rejection')
-      expect(handler.errorHistory[0].level).toBe(ErrorLevel.CRITICAL)
-      expect(mockEvent.preventDefault).toHaveBeenCalled()
-    })
+      expect(handler.errorHistory.length).toBe(1);
+      expect(handler.errorHistory[0].message).toBe('Promise rejection');
+      expect(handler.errorHistory[0].level).toBe(ErrorLevel.CRITICAL);
+      expect(mockEvent.preventDefault).toHaveBeenCalled();
+    });
 
     it('should log registration success', () => {
       // Act
-      handler.registerGlobalHandlers()
+      handler.registerGlobalHandlers();
 
       // Assert
-      expect(logMessage).toHaveBeenCalledWith('Global error handlers registered', 'info')
-    })
-  })
+      expect(logMessage).toHaveBeenCalledWith('Global error handlers registered', 'info');
+    });
+  });
 
   // ============================================================================
   // wrapAsync()
@@ -505,66 +502,66 @@ describe('ErrorHandler', () => {
   describe('wrapAsync()', () => {
     it('should wrap async function successfully', async () => {
       // Arrange
-      const asyncFn = vi.fn(async () => 'success')
-      const wrapped = handler.wrapAsync(asyncFn)
+      const asyncFn = vi.fn(async () => 'success');
+      const wrapped = handler.wrapAsync(asyncFn);
 
       // Act
-      const result = await wrapped()
+      const result = await wrapped();
 
       // Assert
-      expect(result).toBe('success')
-      expect(asyncFn).toHaveBeenCalled()
-    })
+      expect(result).toBe('success');
+      expect(asyncFn).toHaveBeenCalled();
+    });
 
     it('should handle errors in wrapped function', async () => {
       // Arrange
-      const error = new Error('Async error')
+      const error = new Error('Async error');
       const asyncFn = vi.fn(async () => {
-        throw error
-      })
-      const wrapped = handler.wrapAsync(asyncFn, { function: 'test' })
+        throw error;
+      });
+      const wrapped = handler.wrapAsync(asyncFn, { function: 'test' });
 
       // Act & Assert
-      await expect(wrapped('arg1', 'arg2')).rejects.toThrow('Async error')
+      await expect(wrapped('arg1', 'arg2')).rejects.toThrow('Async error');
 
-      expect(handler.errorHistory.length).toBe(1)
-      expect(handler.errorHistory[0].message).toBe('Async error')
+      expect(handler.errorHistory.length).toBe(1);
+      expect(handler.errorHistory[0].message).toBe('Async error');
       expect(handler.errorHistory[0].context).toMatchObject({
         function: 'test',
-        args: ['arg1', 'arg2']
-      })
-    })
+        args: ['arg1', 'arg2'],
+      });
+    });
 
     it('should pass arguments to wrapped function', async () => {
       // Arrange
-      const asyncFn = vi.fn(async (a, b) => a + b)
-      const wrapped = handler.wrapAsync(asyncFn)
+      const asyncFn = vi.fn(async (a, b) => a + b);
+      const wrapped = handler.wrapAsync(asyncFn);
 
       // Act
-      const result = await wrapped(5, 10)
+      const result = await wrapped(5, 10);
 
       // Assert
-      expect(result).toBe(15)
-      expect(asyncFn).toHaveBeenCalledWith(5, 10)
-    })
+      expect(result).toBe(15);
+      expect(asyncFn).toHaveBeenCalledWith(5, 10);
+    });
 
     it('should include context in error handling', async () => {
       // Arrange
       const asyncFn = async () => {
-        throw new Error('Test error')
-      }
-      const context = { operation: 'testOp', id: 'abc' }
-      const wrapped = handler.wrapAsync(asyncFn, context)
+        throw new Error('Test error');
+      };
+      const context = { operation: 'testOp', id: 'abc' };
+      const wrapped = handler.wrapAsync(asyncFn, context);
 
       // Act & Assert
-      await expect(wrapped()).rejects.toThrow()
+      await expect(wrapped()).rejects.toThrow();
 
       expect(handler.errorHistory[0].context).toMatchObject({
         operation: 'testOp',
-        id: 'abc'
-      })
-    })
-  })
+        id: 'abc',
+      });
+    });
+  });
 
   // ============================================================================
   // retryWithBackoff() - Successful execution
@@ -572,90 +569,93 @@ describe('ErrorHandler', () => {
 
   describe('retryWithBackoff() - Successful execution', () => {
     beforeEach(() => {
-      vi.useFakeTimers()
-    })
+      vi.useFakeTimers();
+    });
 
     afterEach(() => {
-      vi.useRealTimers()
-    })
+      vi.useRealTimers();
+    });
 
     it('should return result on first successful attempt', async () => {
       // Arrange
-      const fn = vi.fn(async () => 'success')
+      const fn = vi.fn(async () => 'success');
 
       // Act
-      const result = await handler.retryWithBackoff(fn)
+      const result = await handler.retryWithBackoff(fn);
 
       // Assert
-      expect(result).toBe('success')
-      expect(fn).toHaveBeenCalledTimes(1)
-    })
+      expect(result).toBe('success');
+      expect(fn).toHaveBeenCalledTimes(1);
+    });
 
     it('should retry on failure and succeed', async () => {
       // Arrange
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Attempt 1 failed'))
-        .mockResolvedValue('success')
+        .mockResolvedValue('success');
 
       // Act
-      const promise = handler.retryWithBackoff(fn, { maxRetries: 3, baseDelay: 1000 })
+      const promise = handler.retryWithBackoff(fn, { maxRetries: 3, baseDelay: 1000 });
 
       // Retry after 1000ms (2^0 * 1000) - first attempt happens immediately
-      await vi.advanceTimersByTimeAsync(1000)
+      await vi.advanceTimersByTimeAsync(1000);
 
-      const result = await promise
+      const result = await promise;
 
       // Assert
-      expect(result).toBe('success')
-      expect(fn).toHaveBeenCalledTimes(2)
-    })
+      expect(result).toBe('success');
+      expect(fn).toHaveBeenCalledTimes(2);
+    });
 
     it('should use exponential backoff delays', async () => {
       // Arrange
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Fail 1'))
         .mockRejectedValueOnce(new Error('Fail 2'))
-        .mockResolvedValue('success')
+        .mockResolvedValue('success');
 
       // Act
-      const promise = handler.retryWithBackoff(fn, { maxRetries: 3, baseDelay: 1000 })
+      const promise = handler.retryWithBackoff(fn, { maxRetries: 3, baseDelay: 1000 });
 
       // First retry after 1000ms (2^0 * 1000) - initial attempt happens immediately
-      await vi.advanceTimersByTimeAsync(1000)
+      await vi.advanceTimersByTimeAsync(1000);
 
       // Second retry after 2000ms (2^1 * 1000)
-      await vi.advanceTimersByTimeAsync(2000)
+      await vi.advanceTimersByTimeAsync(2000);
 
-      const result = await promise
+      const result = await promise;
 
       // Assert
-      expect(result).toBe('success')
-      expect(fn).toHaveBeenCalledTimes(3)
-    })
+      expect(result).toBe('success');
+      expect(fn).toHaveBeenCalledTimes(3);
+    });
 
     it('should cap delay at maxDelay', async () => {
       // Arrange
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Fail 1'))
         .mockRejectedValueOnce(new Error('Fail 2'))
-        .mockResolvedValue('success')
+        .mockResolvedValue('success');
 
       // Act
       const promise = handler.retryWithBackoff(fn, {
         maxRetries: 3,
         baseDelay: 1000,
-        maxDelay: 1500 // Cap at 1.5s
-      })
+        maxDelay: 1500, // Cap at 1.5s
+      });
 
-      await vi.advanceTimersByTimeAsync(1000) // First retry: 1000ms (initial attempt immediate)
-      await vi.advanceTimersByTimeAsync(1500) // Second retry: capped at 1500ms instead of 2000ms
+      await vi.advanceTimersByTimeAsync(1000); // First retry: 1000ms (initial attempt immediate)
+      await vi.advanceTimersByTimeAsync(1500); // Second retry: capped at 1500ms instead of 2000ms
 
-      const result = await promise
+      const result = await promise;
 
       // Assert
-      expect(result).toBe('success')
-    })
-  })
+      expect(result).toBe('success');
+    });
+  });
 
   // ============================================================================
   // retryWithBackoff() - Failure and callbacks
@@ -663,105 +663,107 @@ describe('ErrorHandler', () => {
 
   describe('retryWithBackoff() - Failure and callbacks', () => {
     beforeEach(() => {
-      vi.useFakeTimers()
-    })
+      vi.useFakeTimers();
+    });
 
     afterEach(() => {
-      vi.useRealTimers()
-    })
+      vi.useRealTimers();
+    });
 
     it('should throw error after all retries exhausted', async () => {
       // Arrange
-      const error = new Error('Persistent failure')
-      const fn = vi.fn().mockRejectedValue(error)
+      const error = new Error('Persistent failure');
+      const fn = vi.fn().mockRejectedValue(error);
 
       // Act
-      const promise = handler.retryWithBackoff(fn, { maxRetries: 2, baseDelay: 100 })
+      const promise = handler.retryWithBackoff(fn, { maxRetries: 2, baseDelay: 100 });
 
       // First retry after 100ms (2^0 * 100) - initial attempt immediate
-      await vi.advanceTimersByTimeAsync(100)
+      await vi.advanceTimersByTimeAsync(100);
 
       // Second retry after 200ms (2^1 * 100)
-      await vi.advanceTimersByTimeAsync(200)
+      await vi.advanceTimersByTimeAsync(200);
 
       // Assert
-      await expect(promise).rejects.toThrow('Persistent failure')
-      expect(fn).toHaveBeenCalledTimes(3) // Initial + 2 retries
-    })
+      await expect(promise).rejects.toThrow('Persistent failure');
+      expect(fn).toHaveBeenCalledTimes(3); // Initial + 2 retries
+    });
 
     it('should call onRetry callback on each retry', async () => {
       // Arrange
-      const onRetry = vi.fn()
-      const fn = vi.fn()
+      const onRetry = vi.fn();
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Fail 1'))
         .mockRejectedValueOnce(new Error('Fail 2'))
-        .mockResolvedValue('success')
+        .mockResolvedValue('success');
 
       // Act
       const promise = handler.retryWithBackoff(fn, {
         maxRetries: 3,
         baseDelay: 1000,
-        onRetry
-      })
+        onRetry,
+      });
 
       // First retry after 1000ms (initial attempt immediate)
-      await vi.advanceTimersByTimeAsync(1000)
+      await vi.advanceTimersByTimeAsync(1000);
 
       // Second retry after 2000ms
-      await vi.advanceTimersByTimeAsync(2000)
+      await vi.advanceTimersByTimeAsync(2000);
 
-      await promise
+      await promise;
 
       // Assert
-      expect(onRetry).toHaveBeenCalledTimes(2)
-      expect(onRetry).toHaveBeenNthCalledWith(1, 1, 1000, expect.any(Error))
-      expect(onRetry).toHaveBeenNthCalledWith(2, 2, 2000, expect.any(Error))
-    })
+      expect(onRetry).toHaveBeenCalledTimes(2);
+      expect(onRetry).toHaveBeenNthCalledWith(1, 1, 1000, expect.any(Error));
+      expect(onRetry).toHaveBeenNthCalledWith(2, 2, 2000, expect.any(Error));
+    });
 
     it('should log retry attempts', async () => {
       // Arrange
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValue('success')
+        .mockResolvedValue('success');
 
       // Act
-      const promise = handler.retryWithBackoff(fn, { maxRetries: 2, baseDelay: 1000 })
+      const promise = handler.retryWithBackoff(fn, { maxRetries: 2, baseDelay: 1000 });
 
       // Retry after 1000ms succeeds (initial attempt immediate)
-      await vi.advanceTimersByTimeAsync(1000)
+      await vi.advanceTimersByTimeAsync(1000);
 
-      await promise
+      await promise;
 
       // Assert
       expect(logMessage).toHaveBeenCalledWith(
         expect.stringContaining('Retry 1/2 after 1000ms: Network error'),
         'warning'
-      )
-    })
+      );
+    });
 
     it('should add final error to history after all retries', async () => {
       // Arrange
-      const fn = vi.fn().mockRejectedValue(new Error('Failed'))
+      const fn = vi.fn().mockRejectedValue(new Error('Failed'));
 
       // Act
-      const promise = handler.retryWithBackoff(fn, { maxRetries: 1, baseDelay: 100 })
+      const promise = handler.retryWithBackoff(fn, { maxRetries: 1, baseDelay: 100 });
 
       // First (and only) retry after 100ms (2^0 * 100) - initial attempt immediate
-      await vi.advanceTimersByTimeAsync(100)
+      await vi.advanceTimersByTimeAsync(100);
 
       // Wait for promise to reject
       try {
-        await promise
+        await promise;
       } catch (e) {
         // Expected to throw
       }
 
       // Assert
-      expect(handler.errorHistory.length).toBe(1)
-      expect(handler.errorHistory[0].message).toBe('Failed')
-      expect(handler.errorHistory[0].context.retries).toBe(1)
-    })
-  })
+      expect(handler.errorHistory.length).toBe(1);
+      expect(handler.errorHistory[0].message).toBe('Failed');
+      expect(handler.errorHistory[0].context.retries).toBe(1);
+    });
+  });
 
   // ============================================================================
   // getHistory()
@@ -770,68 +772,68 @@ describe('ErrorHandler', () => {
   describe('getHistory()', () => {
     it('should return all error history', () => {
       // Arrange
-      handler.handleError(new Error('Error 1'))
-      handler.handleError(new Error('Error 2'), {}, ErrorLevel.WARNING)
-      handler.handleError(new Error('Error 3'), {}, ErrorLevel.CRITICAL)
+      handler.handleError(new Error('Error 1'));
+      handler.handleError(new Error('Error 2'), {}, ErrorLevel.WARNING);
+      handler.handleError(new Error('Error 3'), {}, ErrorLevel.CRITICAL);
 
       // Act
-      const history = handler.getHistory()
+      const history = handler.getHistory();
 
       // Assert
-      expect(history.length).toBe(3)
-    })
+      expect(history.length).toBe(3);
+    });
 
     it('should filter by error level', () => {
       // Arrange
-      handler.handleError(new Error('Error 1'), {}, ErrorLevel.ERROR)
-      handler.handleError(new Error('Warning 1'), {}, ErrorLevel.WARNING)
-      handler.handleError(new Error('Error 2'), {}, ErrorLevel.ERROR)
+      handler.handleError(new Error('Error 1'), {}, ErrorLevel.ERROR);
+      handler.handleError(new Error('Warning 1'), {}, ErrorLevel.WARNING);
+      handler.handleError(new Error('Error 2'), {}, ErrorLevel.ERROR);
 
       // Act
-      const errors = handler.getHistory(ErrorLevel.ERROR)
+      const errors = handler.getHistory(ErrorLevel.ERROR);
 
       // Assert
-      expect(errors.length).toBe(2)
-      expect(errors[0].message).toBe('Error 1')
-      expect(errors[1].message).toBe('Error 2')
-    })
+      expect(errors.length).toBe(2);
+      expect(errors[0].message).toBe('Error 1');
+      expect(errors[1].message).toBe('Error 2');
+    });
 
     it('should return copy of history array', () => {
       // Arrange
-      handler.handleError(new Error('Test'))
+      handler.handleError(new Error('Test'));
 
       // Act
-      const history = handler.getHistory()
-      history.push({ message: 'Fake entry' })
+      const history = handler.getHistory();
+      history.push({ message: 'Fake entry' });
 
       // Assert
-      expect(handler.errorHistory.length).toBe(1)
-    })
+      expect(handler.errorHistory.length).toBe(1);
+    });
 
     it('should return empty array when no errors', () => {
       // Act
-      const history = handler.getHistory()
+      const history = handler.getHistory();
 
       // Assert
-      expect(history).toEqual([])
-    })
+      expect(history).toEqual([]);
+    });
 
     it('should filter CRITICAL errors only', () => {
       // Arrange
-      handler.handleError('Error', {}, ErrorLevel.ERROR)
-      handler.handleError('Critical 1', {}, ErrorLevel.CRITICAL)
-      handler.handleError('Warning', {}, ErrorLevel.WARNING)
-      handler.handleError('Critical 2', {}, ErrorLevel.CRITICAL)
+      handler.handleError('Error', {}, ErrorLevel.ERROR);
+      handler.handleError('Critical 1', {}, ErrorLevel.CRITICAL);
+      handler.handleError('Warning', {}, ErrorLevel.WARNING);
+      handler.handleError('Critical 2', {}, ErrorLevel.CRITICAL);
 
       // Act
-      const critical = handler.getHistory(ErrorLevel.CRITICAL)
+      const critical = handler.getHistory(ErrorLevel.CRITICAL);
 
       // Assert
-      expect(critical.length).toBe(2)
-      expect(critical[0].message).toBe('Critical 1')
-      expect(critical[1].message).toBe('Critical 2')
-    })
-  })
+      expect(critical.length).toBe(2);
+      expect(critical[0].message).toBe('Critical 1');
+      expect(critical[1].message).toBe('Critical 2');
+    });
+  });
 
   // ============================================================================
   // onError() and offError()
@@ -840,58 +842,58 @@ describe('ErrorHandler', () => {
   describe('onError() and offError()', () => {
     it('should register error callback', () => {
       // Arrange
-      const callback = vi.fn()
+      const callback = vi.fn();
 
       // Act
-      handler.onError('test-callback', callback)
+      handler.onError('test-callback', callback);
 
       // Assert
-      expect(handler.errorCallbacks.has('test-callback')).toBe(true)
-    })
+      expect(handler.errorCallbacks.has('test-callback')).toBe(true);
+    });
 
     it('should unregister error callback', () => {
       // Arrange
-      const callback = vi.fn()
-      handler.onError('test-callback', callback)
+      const callback = vi.fn();
+      handler.onError('test-callback', callback);
 
       // Act
-      handler.offError('test-callback')
+      handler.offError('test-callback');
 
       // Assert
-      expect(handler.errorCallbacks.has('test-callback')).toBe(false)
-    })
+      expect(handler.errorCallbacks.has('test-callback')).toBe(false);
+    });
 
     it('should not trigger unregistered callbacks', () => {
       // Arrange
-      const callback = vi.fn()
-      handler.onError('test-callback', callback)
-      handler.offError('test-callback')
+      const callback = vi.fn();
+      handler.onError('test-callback', callback);
+      handler.offError('test-callback');
 
       // Act
-      handler.handleError(new Error('Test'))
+      handler.handleError(new Error('Test'));
 
       // Assert
-      expect(callback).not.toHaveBeenCalled()
-    })
+      expect(callback).not.toHaveBeenCalled();
+    });
 
     it('should handle callback errors gracefully', () => {
       // Arrange
       const badCallback = vi.fn(() => {
-        throw new Error('Callback error')
-      })
-      handler.onError('bad-callback', badCallback)
+        throw new Error('Callback error');
+      });
+      handler.onError('bad-callback', badCallback);
 
       // Act & Assert - Should not throw
       expect(() => {
-        handler.handleError(new Error('Test'))
-      }).not.toThrow()
+        handler.handleError(new Error('Test'));
+      }).not.toThrow();
 
       expect(console.error).toHaveBeenCalledWith(
         expect.stringContaining("Error in callback 'bad-callback'"),
         expect.any(Error)
-      )
-    })
-  })
+      );
+    });
+  });
 
   // ============================================================================
   // clearHistory()
@@ -900,30 +902,30 @@ describe('ErrorHandler', () => {
   describe('clearHistory()', () => {
     it('should clear all error history', () => {
       // Arrange
-      handler.handleError(new Error('Error 1'))
-      handler.handleError(new Error('Error 2'))
-      expect(handler.errorHistory.length).toBe(2)
+      handler.handleError(new Error('Error 1'));
+      handler.handleError(new Error('Error 2'));
+      expect(handler.errorHistory.length).toBe(2);
 
       // Act
-      handler.clearHistory()
+      handler.clearHistory();
 
       // Assert
-      expect(handler.errorHistory).toEqual([])
-    })
+      expect(handler.errorHistory).toEqual([]);
+    });
 
     it('should allow new errors after clearing', () => {
       // Arrange
-      handler.handleError(new Error('Old error'))
-      handler.clearHistory()
+      handler.handleError(new Error('Old error'));
+      handler.clearHistory();
 
       // Act
-      handler.handleError(new Error('New error'))
+      handler.handleError(new Error('New error'));
 
       // Assert
-      expect(handler.errorHistory.length).toBe(1)
-      expect(handler.errorHistory[0].message).toBe('New error')
-    })
-  })
+      expect(handler.errorHistory.length).toBe(1);
+      expect(handler.errorHistory[0].message).toBe('New error');
+    });
+  });
 
   // ============================================================================
   // ErrorLevel enum
@@ -931,19 +933,19 @@ describe('ErrorHandler', () => {
 
   describe('ErrorLevel enum', () => {
     it('should have all severity levels', () => {
-      expect(ErrorLevel.INFO).toBe('info')
-      expect(ErrorLevel.WARNING).toBe('warning')
-      expect(ErrorLevel.ERROR).toBe('error')
-      expect(ErrorLevel.CRITICAL).toBe('critical')
-    })
+      expect(ErrorLevel.INFO).toBe('info');
+      expect(ErrorLevel.WARNING).toBe('warning');
+      expect(ErrorLevel.ERROR).toBe('error');
+      expect(ErrorLevel.CRITICAL).toBe('critical');
+    });
 
     it('should be frozen (immutable)', () => {
       // Act & Assert
       expect(() => {
-        ErrorLevel.NEW_LEVEL = 'new'
-      }).toThrow()
-    })
-  })
+        ErrorLevel.NEW_LEVEL = 'new';
+      }).toThrow();
+    });
+  });
 
   // ============================================================================
   // Singleton instance
@@ -951,14 +953,14 @@ describe('ErrorHandler', () => {
 
   describe('errorHandler singleton', () => {
     it('should export singleton instance', () => {
-      expect(errorHandler).toBeInstanceOf(ErrorHandler)
-    })
+      expect(errorHandler).toBeInstanceOf(ErrorHandler);
+    });
 
     it('should have initialized properties', () => {
-      expect(errorHandler.errorHistory).toBeDefined()
-      expect(errorHandler.errorCallbacks).toBeDefined()
-    })
-  })
+      expect(errorHandler.errorHistory).toBeDefined();
+      expect(errorHandler.errorCallbacks).toBeDefined();
+    });
+  });
 
   // ============================================================================
   // Legacy exports
@@ -967,24 +969,24 @@ describe('ErrorHandler', () => {
   describe('Legacy exports', () => {
     it('displayError should call errorHandler.displayError', () => {
       // Arrange
-      vi.spyOn(errorHandler, 'displayError')
+      vi.spyOn(errorHandler, 'displayError');
 
       // Act
-      displayError('Legacy error')
+      displayError('Legacy error');
 
       // Assert
-      expect(errorHandler.displayError).toHaveBeenCalledWith('Legacy error', ErrorLevel.ERROR)
-    })
+      expect(errorHandler.displayError).toHaveBeenCalledWith('Legacy error', ErrorLevel.ERROR);
+    });
 
     it('clearError should call errorHandler.clearError', () => {
       // Arrange
-      vi.spyOn(errorHandler, 'clearError')
+      vi.spyOn(errorHandler, 'clearError');
 
       // Act
-      clearError()
+      clearError();
 
       // Assert
-      expect(errorHandler.clearError).toHaveBeenCalled()
-    })
-  })
-})
+      expect(errorHandler.clearError).toHaveBeenCalled();
+    });
+  });
+});
