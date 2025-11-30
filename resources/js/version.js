@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.64.0'; // Complete spinner unification: SVG-based polling spinner, validation-before-spinner fix, removed CSS border spinner
+const frontendVersion = '0.65.0'; // Add ESLint, Prettier, CI workflows, security scanning, and Dependabot
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;
