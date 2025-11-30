@@ -10,13 +10,19 @@ export function openDisclaimerModal() {
   const disclaimerModal = document.getElementById('disclaimerModal');
   const agreeBtn = document.getElementById('agreeBtn');
   if (disclaimerModal && agreeBtn) {
-    disclaimerModal.style.display = 'block';
+    // Set aria-hidden FIRST before any display/focus operations
     disclaimerModal.setAttribute('aria-hidden', 'false');
+    disclaimerModal.style.display = 'block';
     document.body.classList.add('modal-open');
-    // Set focus to the "I Agree" button for accessibility
-    agreeBtn.focus();
-    // Trap focus within the modal - Escape disabled for disclaimer
-    trapFocus(disclaimerModal, false);
+
+    // Use requestAnimationFrame to ensure DOM updates are complete before focusing
+    // This prevents the "aria-hidden on focused element" accessibility warning
+    requestAnimationFrame(() => {
+      // Set focus to the "I Agree" button for accessibility
+      agreeBtn.focus();
+      // Trap focus within the modal - Escape disabled for disclaimer
+      trapFocus(disclaimerModal, false);
+    });
   }
 }
 
@@ -120,21 +126,25 @@ function removeTrapFocus(element) {
 function openFaqModal() {
   const faqModal = document.getElementById('faqModal');
   if (faqModal) {
-    faqModal.style.display = 'block';
+    // Set aria-hidden FIRST before any display/focus operations
     faqModal.setAttribute('aria-hidden', 'false');
+    faqModal.style.display = 'block';
     document.body.classList.add('modal-open');
 
-    // Focus first interactive element (close button)
-    const closeButton = faqModal.querySelector('.modal-close');
-    if (closeButton) {
-      closeButton.focus();
-    }
+    // Use requestAnimationFrame to ensure DOM updates are complete before focusing
+    // This prevents the "aria-hidden on focused element" accessibility warning
+    requestAnimationFrame(() => {
+      const closeButton = faqModal.querySelector('.modal-close');
+      if (closeButton) {
+        closeButton.focus();
+      }
 
-    // Trap focus within the modal - Escape enabled for FAQ
-    trapFocus(faqModal, true);
+      // Trap focus within the modal - Escape enabled for FAQ
+      trapFocus(faqModal, true);
 
-    // Listen for custom close event from Escape key
-    faqModal.addEventListener('modal:close', () => closeFaqModal(), { once: true });
+      // Listen for custom close event from Escape key
+      faqModal.addEventListener('modal:close', () => closeFaqModal(), { once: true });
+    });
   }
 }
 
