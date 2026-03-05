@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.65.1'; // Fix modal a11y and version.js module errors
+const frontendVersion = '0.66.0'; // Bump deps: nginx, vitest 4, dev-dependencies
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;
