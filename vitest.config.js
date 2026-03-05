@@ -15,11 +15,7 @@ export default defineConfig({
 
     // Pool configuration for better performance in WSL
     pool: 'threads',
-    poolOptions: {
-      threads: {
-        singleThread: true, // Run tests in single thread (helps in WSL)
-      },
-    },
+    maxWorkers: 1, // Run tests in single worker (helps in WSL)
 
     // Better reporting
     silent: false, // Show console output
