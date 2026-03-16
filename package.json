@@ -20,7 +20,7 @@
     "check": "npm run lint:check && npm run format:check"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^10.0.1",
     "@html-eslint/eslint-plugin": "^0.54.2",
     "@html-eslint/parser": "^0.54.0",
     "@vitest/browser": "^4.0.14",
