@@ -49,7 +49,13 @@ function generateFooter() {
       img.classList.add('logo-loaded');
     });
 
+    // Add sr-only text for SEO (links with only images need accessible text)
+    const srText = document.createElement('span');
+    srText.className = 'sr-only';
+    srText.textContent = `Visit ${inst.name}`;
+
     link.appendChild(img);
+    link.appendChild(srText);
     institutionLogosDiv.appendChild(link);
   });
 }

@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.66.0'; // Bump deps: nginx, vitest 4, dev-dependencies
+const frontendVersion = '0.67.0'; // SEO improvements: meta tags, OG/Twitter cards, Schema.org, content sections
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;

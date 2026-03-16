@@ -138,12 +138,12 @@
   font-weight: 500;
   min-width: 150px;
   background-color: var(--color-secondary);
-  color: var(--color-white);
+  color: #1a1a1a; /* Dark text for WCAG AA contrast (6.12:1 ratio vs #d88700) */
 }
 
 .extract-button:hover {
   background-color: var(--color-secondary-hover);
-}
+  color: #1a1a1a;
 
 .extract-button:active {
   background-color: var(--color-secondary-active);

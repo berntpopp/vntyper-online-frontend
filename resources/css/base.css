@@ -502,3 +502,55 @@ body.menu-open {
     content: ' (' attr(href) ')'; /* Override the arrow icon */
   }
 }
+
+/* --- Hero Section --- */
+.hero-section {
+  text-align: center;
+  padding: 1.5rem 1rem 0.5rem;
+}
+
+.hero-section h1 {
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.hero-section p {
+  font-size: 0.95rem;
+  color: #555;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* --- About Section --- */
+.about-section {
+  padding: 2rem 1rem;
+  margin-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.about-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.about-section h2 {
+  color: var(--color-primary);
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.about-section h3 {
+  color: var(--color-primary);
+  font-size: 1.1rem;
+  margin-top: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.about-section p {
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 0.8rem;
+}

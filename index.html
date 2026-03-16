@@ -2,13 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>vntyper-online</title>  
+  <title>VNtyper Online - MUC1 VNTR Genotyping | ADTKD Screening Tool</title>
   <!-- Viewport Meta Tag -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  
+
   <!-- Meta Description -->
-  <meta name="description" content="vntyper-online offers online MUC1 VNTR genotyping using the vntyper algorithm.">
-  
+  <meta name="description" content="VNtyper Online: Free browser-based MUC1 VNTR genotyping tool for ADTKD-MUC1 screening. Analyze BAM files with VNtyper 2.0 — no upload of full genome data required.">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://vntyper.org/">
+  <meta property="og:title" content="VNtyper Online - MUC1 VNTR Genotyping for ADTKD Diagnostics">
+  <meta property="og:description" content="Free online tool for MUC1 VNTR genotyping from BAM files. Screen for ADTKD-MUC1 mutations using VNtyper 2.0 directly in your browser.">
+  <meta property="og:image" content="https://vntyper.org/resources/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="VNtyper Online">
+
+  <!-- Twitter Card (no account needed — controls link previews when others share) -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="VNtyper Online - MUC1 VNTR Genotyping for ADTKD Diagnostics">
+  <meta name="twitter:description" content="Free online tool for MUC1 VNTR genotyping from BAM files. Screen for ADTKD-MUC1 mutations using VNtyper 2.0.">
+  <meta name="twitter:image" content="https://vntyper.org/resources/assets/og-image.png">
+
   <!-- Canonical Link -->
   <link rel="canonical" href="https://vntyper.org/" />
 
@@ -19,8 +35,16 @@
   <link rel="apple-touch-icon" sizes="180x180" href="resources/assets/favicon/apple-touch-icon.png" />
   <link rel="manifest" href="resources/assets/favicon/site.webmanifest" />
 
-  <!-- Intro.js CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0/introjs.min.css" integrity="sha512-631ugrjzlQYCOP9P8BOLEMFspr5ooQwY3rgt8SMUa+QqtVMbY/tniEUOcABHDGjK50VExB4CNc61g5oopGqCEw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Preconnect to CDN origins -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://biowasm.com" crossorigin>
+
+  <!-- Preload LCP image -->
+  <link rel="preload" as="image" href="resources/assets/logo/vntyperonline_logo_160px.png">
+
+  <!-- Intro.js CSS (deferred — only needed for tutorial) -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0/introjs.min.css" as="style" integrity="sha512-631ugrjzlQYCOP9P8BOLEMFspr5ooQwY3rgt8SMUa+QqtVMbY/tniEUOcABHDGjK50VExB4CNc61g5oopGqCEw==" crossorigin="anonymous" referrerpolicy="no-referrer" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0/introjs.min.css" integrity="sha512-631ugrjzlQYCOP9P8BOLEMFspr5ooQwY3rgt8SMUa+QqtVMbY/tniEUOcABHDGjK50VExB4CNc61g5oopGqCEw==" crossorigin="anonymous" referrerpolicy="no-referrer"></noscript>
 
   <!-- Link to CSS Files -->
   <link rel="stylesheet" href="resources/css/base.css">
@@ -49,52 +73,120 @@
   <script src="resources/js/config.js" defer></script>
   
   <!-- Link to JavaScript Modules -->
-  <script type="module" src="resources/js/inputWrangling.js?v=0.66.0" defer></script>
-  <script type="module" src="resources/js/regionsConfig.js?v=0.66.0" defer></script>
-  <script type="module" src="resources/js/assemblyConfigs.js?v=0.66.0" defer></script>
+  <script type="module" src="resources/js/inputWrangling.js?v=0.67.0" defer></script>
+  <script type="module" src="resources/js/regionsConfig.js?v=0.67.0" defer></script>
+  <script type="module" src="resources/js/assemblyConfigs.js?v=0.67.0" defer></script>
   <!-- bamProcessing.js is lazy-loaded in ExtractionController when needed -->
-  <script type="module" src="resources/js/apiInteractions.js?v=0.66.0" defer></script>
-  <script type="module" src="resources/js/inputValidation.js?v=0.66.0" defer></script>
-  <script type="module" src="resources/js/main.js?v=0.66.0" defer></script>
-  <script type="module" src="resources/js/modal.js?v=0.66.0" defer></script>
-  <script type="module" src="resources/js/mobileNav.js?v=0.66.0" defer></script>
-  <script type="module" src="resources/js/populateRegions.js?v=0.66.0" defer></script>
-  <script type="module" src="resources/js/uiUtils.js?v=0.66.0" defer></script>
-  <script type="module" src="resources/js/usageStats.js?v=0.66.0" defer></script>
+  <script type="module" src="resources/js/apiInteractions.js?v=0.67.0" defer></script>
+  <script type="module" src="resources/js/inputValidation.js?v=0.67.0" defer></script>
+  <script type="module" src="resources/js/main.js?v=0.67.0" defer></script>
+  <script type="module" src="resources/js/modal.js?v=0.67.0" defer></script>
+  <script type="module" src="resources/js/mobileNav.js?v=0.67.0" defer></script>
+  <script type="module" src="resources/js/populateRegions.js?v=0.67.0" defer></script>
+  <script type="module" src="resources/js/uiUtils.js?v=0.67.0" defer></script>
+  <script type="module" src="resources/js/usageStats.js?v=0.67.0" defer></script>
 
   <!-- Version and Current Year Script -->
-  <script type="module" src="resources/js/version.js?v=0.66.0" defer></script>
+  <script type="module" src="resources/js/version.js?v=0.67.0" defer></script>
   
-  <!-- Schema.org JSON-LD -->
+  <!-- Schema.org JSON-LD: WebSite -->
   <script type="application/ld+json">
     {
-      "@context": "http://schema.org",
+      "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "vntyper-online",
+      "name": "VNtyper Online",
+      "alternateName": ["vntyper-online", "VNtyper 2.0"],
       "url": "https://vntyper.org/",
-      "description": "vntyper-online offers comprehensive genetic variant analysis and visualization tools to support researchers and clinicians in genomics studies.",
-      "publisher": {
-        "@type": "Person",
-        "name": "Bernt Popp",
-        "url": "https://berntpopp.com",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://vntyper.org/resources/assets/logo/vntyperonline_logo_80px.png"
-        }
+      "description": "Free browser-based MUC1 VNTR genotyping tool for ADTKD-MUC1 screening. Analyze BAM files with VNtyper 2.0."
+    }
+  </script>
+
+  <!-- Schema.org JSON-LD: SoftwareApplication -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "VNtyper Online",
+      "alternateName": ["VNtyper 2.0", "VNtyper2", "vntyper-online"],
+      "applicationCategory": "HealthApplication",
+      "applicationSubCategory": "Genetic Analysis Tool",
+      "operatingSystem": "Web Browser",
+      "url": "https://vntyper.org/",
+      "description": "Online MUC1 VNTR genotyping tool for screening autosomal dominant tubulointerstitial kidney disease (ADTKD-MUC1) from BAM files using VNtyper 2.0.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
       },
-      "creator": [
+      "author": [
         {
           "@type": "Person",
           "name": "Bernt Popp",
           "url": "https://berntpopp.com",
           "sameAs": [
-            "https://github.com/berntpopp"
+            "https://github.com/berntpopp",
+            "https://orcid.org/0000-0002-3679-1081"
           ]
         },
         {
           "@type": "Person",
           "name": "Hassan Saei",
-          "url": "https://github.com/hassansaei"
+          "url": "https://github.com/hassansaei",
+          "sameAs": [
+            "https://github.com/hassansaei"
+          ]
+        }
+      ],
+      "citation": {
+        "@type": "ScholarlyArticle",
+        "name": "VNtyper enables accurate alignment-free genotyping of MUC1 coding VNTR using short-read sequencing data in autosomal dominant tubulointerstitial kidney disease",
+        "url": "https://doi.org/10.1016/j.isci.2023.107171",
+        "datePublished": "2023-06-17",
+        "isPartOf": {
+          "@type": "Periodical",
+          "name": "iScience"
+        }
+      }
+    }
+  </script>
+
+  <!-- Schema.org JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is vntyper-online?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "vntyper-online offers online MUC1 VNTR genotyping using the VNtyper algorithm. The MUC1 read data is extracted locally in your browser from BAM files and only this subset is uploaded to the server for analysis."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I upload my data?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Upload BAM, BAI, or SAM files using the file input section. For BAM files, ensure each has a corresponding BAI file. SAM files from IGV can also be uploaded after navigating to the MUC1 region."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is my data secure?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "vntyper.org uses SSL/HTTPS with strong encryption (Mozilla Observatory A+, SSL Labs A+). Only a small fraction of the BAM file is uploaded, preserving privacy. Read data is immediately deleted after computation, and results are kept for 7 days before deletion."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What regions can I analyze?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Select the reference assembly used for your alignment. The region corresponding to the MUC1 locus will be automatically selected for analysis."
+          }
         }
       ]
     }
@@ -110,7 +202,7 @@
     <nav class="navbar" aria-label="Main navigation">
       <div class="navbar-container">
         <div class="header" id="resetHeader" role="button" aria-label="Reset Page">
-          <img src="resources/assets/logo/vntyperonline_logo_80px.png" alt="vntyper-online Logo" class="logo">
+          <img src="resources/assets/logo/vntyperonline_logo_160px.png" alt="vntyper-online Logo" class="logo">
           <h2>vntyper-online</h2>
         </div>
 
@@ -153,6 +245,16 @@
 
     <!-- Main Content Area - Skip link target -->
     <main id="main-content" tabindex="-1">
+
+    <!-- Hero Section with H1 -->
+    <section class="hero-section">
+      <h1>Online MUC1 VNTR Genotyping for ADTKD Diagnostics</h1>
+      <p>
+        Screen BAM files for MUC1 coding VNTR mutations using VNtyper 2.0.
+        Fast, secure, browser-based analysis for autosomal dominant
+        tubulointerstitial kidney disease (ADTKD-MUC1).
+      </p>
+    </section>
 
     <!-- Upload Form - Contains all job submission inputs -->
     <form id="uploadForm" action="#" method="post" autocomplete="on">
@@ -350,6 +452,38 @@
     </div>
     <div id="error" class="error d-none hidden"></div>
   </div>
+
+  <!-- About Section - Keyword-rich crawlable content -->
+  <section id="about" class="about-section">
+    <div class="about-container">
+      <h2>About VNtyper Online</h2>
+      <p>
+        <strong>VNtyper Online</strong> is a free, browser-based tool for
+        <strong>MUC1 VNTR genotyping</strong> using the
+        <strong>VNtyper 2.0</strong> algorithm. It enables rapid screening
+        for mutations in the MUC1 coding variable number of tandem repeats
+        (VNTR), the most common cause of
+        <strong>Autosomal Dominant Tubulointerstitial Kidney Disease (ADTKD-MUC1)</strong>,
+        also known as <strong>Medullary Cystic Kidney Disease (MCKD)</strong>.
+      </p>
+      <h3>How It Works</h3>
+      <p>
+        Upload your BAM/BAI sequencing files — only the MUC1 region is
+        extracted locally in your browser using BioWasm, ensuring genomic
+        privacy. The extracted reads are then analyzed server-side by
+        VNtyper 2.0 to detect the prototypic cytosine insertion (insC) mutation and other
+        VNTR alterations.
+      </p>
+      <h3>Who Is This For?</h3>
+      <p>
+        VNtyper Online serves geneticists, nephrologists, and researchers
+        investigating <strong>ADTKD</strong>, <strong>ADTKD-MUC1</strong>,
+        chronic kidney disease of unknown etiology, and familial kidney
+        disorders. It democratizes access to <strong>MUC1 genotyping</strong> by working with
+        standard short-read sequencing data (Illumina WES/WGS).
+      </p>
+    </div>
+  </section>
 
   <!-- Citations Section -->
   <section id="citations" class="citations-section">
