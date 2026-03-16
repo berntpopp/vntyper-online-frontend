@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.67.0'; // SEO improvements: meta tags, OG/Twitter cards, Schema.org, content sections
+const frontendVersion = '0.67.1'; // Fix about section layout: move below logos, consistent separators
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;

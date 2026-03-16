@@ -73,21 +73,21 @@
   <script src="resources/js/config.js" defer></script>
   
   <!-- Link to JavaScript Modules -->
-  <script type="module" src="resources/js/inputWrangling.js?v=0.67.0" defer></script>
-  <script type="module" src="resources/js/regionsConfig.js?v=0.67.0" defer></script>
-  <script type="module" src="resources/js/assemblyConfigs.js?v=0.67.0" defer></script>
+  <script type="module" src="resources/js/inputWrangling.js?v=0.67.1" defer></script>
+  <script type="module" src="resources/js/regionsConfig.js?v=0.67.1" defer></script>
+  <script type="module" src="resources/js/assemblyConfigs.js?v=0.67.1" defer></script>
   <!-- bamProcessing.js is lazy-loaded in ExtractionController when needed -->
-  <script type="module" src="resources/js/apiInteractions.js?v=0.67.0" defer></script>
-  <script type="module" src="resources/js/inputValidation.js?v=0.67.0" defer></script>
-  <script type="module" src="resources/js/main.js?v=0.67.0" defer></script>
-  <script type="module" src="resources/js/modal.js?v=0.67.0" defer></script>
-  <script type="module" src="resources/js/mobileNav.js?v=0.67.0" defer></script>
-  <script type="module" src="resources/js/populateRegions.js?v=0.67.0" defer></script>
-  <script type="module" src="resources/js/uiUtils.js?v=0.67.0" defer></script>
-  <script type="module" src="resources/js/usageStats.js?v=0.67.0" defer></script>
+  <script type="module" src="resources/js/apiInteractions.js?v=0.67.1" defer></script>
+  <script type="module" src="resources/js/inputValidation.js?v=0.67.1" defer></script>
+  <script type="module" src="resources/js/main.js?v=0.67.1" defer></script>
+  <script type="module" src="resources/js/modal.js?v=0.67.1" defer></script>
+  <script type="module" src="resources/js/mobileNav.js?v=0.67.1" defer></script>
+  <script type="module" src="resources/js/populateRegions.js?v=0.67.1" defer></script>
+  <script type="module" src="resources/js/uiUtils.js?v=0.67.1" defer></script>
+  <script type="module" src="resources/js/usageStats.js?v=0.67.1" defer></script>
 
   <!-- Version and Current Year Script -->
-  <script type="module" src="resources/js/version.js?v=0.67.0" defer></script>
+  <script type="module" src="resources/js/version.js?v=0.67.1" defer></script>
   
   <!-- Schema.org JSON-LD: WebSite -->
   <script type="application/ld+json">
@@ -252,7 +252,7 @@
       <p>
         Screen BAM files for MUC1 coding VNTR mutations using VNtyper 2.0.
         Fast, secure, browser-based analysis for autosomal dominant
-        tubulointerstitial kidney disease (ADTKD-MUC1).
+        tubulointerstitial kidney disease (ADTKD-MUC1, MCKD).
       </p>
     </section>
 
@@ -453,38 +453,6 @@
     <div id="error" class="error d-none hidden"></div>
   </div>
 
-  <!-- About Section - Keyword-rich crawlable content -->
-  <section id="about" class="about-section">
-    <div class="about-container">
-      <h2>About VNtyper Online</h2>
-      <p>
-        <strong>VNtyper Online</strong> is a free, browser-based tool for
-        <strong>MUC1 VNTR genotyping</strong> using the
-        <strong>VNtyper 2.0</strong> algorithm. It enables rapid screening
-        for mutations in the MUC1 coding variable number of tandem repeats
-        (VNTR), the most common cause of
-        <strong>Autosomal Dominant Tubulointerstitial Kidney Disease (ADTKD-MUC1)</strong>,
-        also known as <strong>Medullary Cystic Kidney Disease (MCKD)</strong>.
-      </p>
-      <h3>How It Works</h3>
-      <p>
-        Upload your BAM/BAI sequencing files — only the MUC1 region is
-        extracted locally in your browser using BioWasm, ensuring genomic
-        privacy. The extracted reads are then analyzed server-side by
-        VNtyper 2.0 to detect the prototypic cytosine insertion (insC) mutation and other
-        VNTR alterations.
-      </p>
-      <h3>Who Is This For?</h3>
-      <p>
-        VNtyper Online serves geneticists, nephrologists, and researchers
-        investigating <strong>ADTKD</strong>, <strong>ADTKD-MUC1</strong>,
-        chronic kidney disease of unknown etiology, and familial kidney
-        disorders. It democratizes access to <strong>MUC1 genotyping</strong> by working with
-        standard short-read sequencing data (Illumina WES/WGS).
-      </p>
-    </div>
-  </section>
-
   <!-- Citations Section -->
   <section id="citations" class="citations-section">
     <div class="citations-container">
@@ -502,6 +470,8 @@
 
   <!-- Footer Section -->
   <footer class="footer">
+    <hr class="footer-separator">
+
     <div class="footer-content">
       <!-- Dynamic Institution Logos -->
       <div class="institution-logos" id="institutionLogos">
@@ -515,6 +485,43 @@
         <a href="https://github.com/berntpopp/vntyper-online-backend" class="navbar-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository" data-tooltip="Visit the GitHub repository">GitHub</a>
       </div>
     </div>
+
+    <hr class="footer-separator">
+
+    <!-- About Section - Keyword-rich crawlable content -->
+    <section id="about" class="about-section">
+      <div class="about-container">
+        <h2>About VNtyper Online</h2>
+        <p>
+          <strong>VNtyper Online</strong> is a free, browser-based tool for
+          <strong>MUC1 VNTR genotyping</strong> using the
+          <strong>VNtyper 2.0</strong> algorithm. It enables rapid screening
+          for mutations in the MUC1 coding variable number of tandem repeats
+          (VNTR), the most common cause of
+          <strong>Autosomal Dominant Tubulointerstitial Kidney Disease (ADTKD-MUC1)</strong>,
+          also known as <strong>Medullary Cystic Kidney Disease (MCKD)</strong>.
+        </p>
+        <h3>How It Works</h3>
+        <p>
+          Upload your BAM/BAI sequencing files. Only the MUC1 region is
+          extracted locally in your browser using BioWasm, ensuring genomic
+          privacy. The extracted reads are then analyzed server-side by
+          VNtyper 2.0 to detect the prototypic cytosine insertion (insC) mutation and other
+          VNTR alterations.
+        </p>
+        <h3>Who Is This For?</h3>
+        <p>
+          VNtyper Online serves geneticists, nephrologists, and researchers
+          investigating <strong>ADTKD</strong>, <strong>ADTKD-MUC1</strong>,
+          chronic kidney disease of unknown etiology, and familial kidney
+          disorders. It democratizes access to <strong>MUC1 genotyping</strong> by working with
+          standard short-read sequencing data (Illumina WES/WGS).
+        </p>
+      </div>
+    </section>
+
+    <hr class="footer-separator">
+
     <div class="footer-bottom">
       <p>&copy; <span id="currentYear"></span> vntyper-online. All rights reserved.</p>
       <!-- Version Information -->
