@@ -10,10 +10,56 @@
   border-radius: 8px;
 }
 
+.citations-heading {
+  margin: 0 0 14px;
+  font-size: 1.25rem;
+  color: #212529;
+  text-align: center;
+}
+
 .citations-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+/* --- Preprint Announcement / Call-to-action --- */
+
+.preprint-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background-color: #eef4ff;
+  border: 1px solid #b6d0ff;
+  border-left: 4px solid #0056b3;
+  padding: 12px 14px;
+  border-radius: 6px;
+}
+
+.preprint-badge {
+  flex-shrink: 0;
+  display: inline-block;
+  background-color: #0056b3;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.preprint-callout p {
+  margin: 0;
+  color: #1c3d6b;
+  line-height: 1.6;
+}
+
+.preprint-callout a {
+  white-space: nowrap;
+  font-weight: 600;
 }
 
 .citation-item {

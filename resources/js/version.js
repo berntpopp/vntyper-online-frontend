@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.67.1'; // Fix about section layout: move below logos, consistent separators
+const frontendVersion = '0.68.0'; // Add VNtyper 2 preprint citation and "Read our preprint" call-to-action
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;
