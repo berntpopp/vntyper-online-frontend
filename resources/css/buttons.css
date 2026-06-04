@@ -144,6 +144,7 @@
 .extract-button:hover {
   background-color: var(--color-secondary-hover);
   color: #1a1a1a;
+}
 
 .extract-button:active {
   background-color: var(--color-secondary-active);
