@@ -73,21 +73,21 @@
   <script src="resources/js/config.js" defer></script>
   
   <!-- Link to JavaScript Modules -->
-  <script type="module" src="resources/js/inputWrangling.js?v=0.67.1" defer></script>
-  <script type="module" src="resources/js/regionsConfig.js?v=0.67.1" defer></script>
-  <script type="module" src="resources/js/assemblyConfigs.js?v=0.67.1" defer></script>
+  <script type="module" src="resources/js/inputWrangling.js?v=0.68.0" defer></script>
+  <script type="module" src="resources/js/regionsConfig.js?v=0.68.0" defer></script>
+  <script type="module" src="resources/js/assemblyConfigs.js?v=0.68.0" defer></script>
   <!-- bamProcessing.js is lazy-loaded in ExtractionController when needed -->
-  <script type="module" src="resources/js/apiInteractions.js?v=0.67.1" defer></script>
-  <script type="module" src="resources/js/inputValidation.js?v=0.67.1" defer></script>
-  <script type="module" src="resources/js/main.js?v=0.67.1" defer></script>
-  <script type="module" src="resources/js/modal.js?v=0.67.1" defer></script>
-  <script type="module" src="resources/js/mobileNav.js?v=0.67.1" defer></script>
-  <script type="module" src="resources/js/populateRegions.js?v=0.67.1" defer></script>
-  <script type="module" src="resources/js/uiUtils.js?v=0.67.1" defer></script>
-  <script type="module" src="resources/js/usageStats.js?v=0.67.1" defer></script>
+  <script type="module" src="resources/js/apiInteractions.js?v=0.68.0" defer></script>
+  <script type="module" src="resources/js/inputValidation.js?v=0.68.0" defer></script>
+  <script type="module" src="resources/js/main.js?v=0.68.0" defer></script>
+  <script type="module" src="resources/js/modal.js?v=0.68.0" defer></script>
+  <script type="module" src="resources/js/mobileNav.js?v=0.68.0" defer></script>
+  <script type="module" src="resources/js/populateRegions.js?v=0.68.0" defer></script>
+  <script type="module" src="resources/js/uiUtils.js?v=0.68.0" defer></script>
+  <script type="module" src="resources/js/usageStats.js?v=0.68.0" defer></script>
 
   <!-- Version and Current Year Script -->
-  <script type="module" src="resources/js/version.js?v=0.67.1" defer></script>
+  <script type="module" src="resources/js/version.js?v=0.68.0" defer></script>
   
   <!-- Schema.org JSON-LD: WebSite -->
   <script type="application/ld+json">
@@ -137,16 +137,28 @@
           ]
         }
       ],
-      "citation": {
-        "@type": "ScholarlyArticle",
-        "name": "VNtyper enables accurate alignment-free genotyping of MUC1 coding VNTR using short-read sequencing data in autosomal dominant tubulointerstitial kidney disease",
-        "url": "https://doi.org/10.1016/j.isci.2023.107171",
-        "datePublished": "2023-06-17",
-        "isPartOf": {
-          "@type": "Periodical",
-          "name": "iScience"
+      "citation": [
+        {
+          "@type": "ScholarlyArticle",
+          "name": "VNtyper 2 enables open-access short-read genotyping of MUC1 VNTR variants in ADTKD at high-speed",
+          "url": "https://doi.org/10.64898/2026.05.27.26352937",
+          "datePublished": "2026",
+          "isPartOf": {
+            "@type": "Periodical",
+            "name": "medRxiv"
+          }
+        },
+        {
+          "@type": "ScholarlyArticle",
+          "name": "VNtyper enables accurate alignment-free genotyping of MUC1 coding VNTR using short-read sequencing data in autosomal dominant tubulointerstitial kidney disease",
+          "url": "https://doi.org/10.1016/j.isci.2023.107171",
+          "datePublished": "2023-06-17",
+          "isPartOf": {
+            "@type": "Periodical",
+            "name": "iScience"
+          }
         }
-      }
+      ]
     }
   </script>
 
@@ -454,14 +466,34 @@
   </div>
 
   <!-- Citations Section -->
-  <section id="citations" class="citations-section">
+  <section id="citations" class="citations-section" aria-labelledby="citations-heading">
+    <h2 id="citations-heading" class="citations-heading">Citing VNtyper Online</h2>
     <div class="citations-container">
-      <div class="citation-item">
+
+      <!-- New preprint announcement / call-to-action -->
+      <div class="preprint-callout">
+        <span class="preprint-badge">New preprint</span>
         <p>
-          <strong>Please cite:</strong> Saei H, et al. VNtyper enables accurate alignment-free genotyping of MUC1 coding VNTR using short-read sequencing data in autosomal dominant tubulointerstitielle nierenerkrankung. <strong>iScience</strong>. 2023 Jun 17;26(7):107171. doi: <a href="https://doi.org/10.1016/j.isci.2023.107171" target="_blank" rel="noopener noreferrer">10.1016/j.isci.2023.107171</a>. PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/37456840/" target="_blank" rel="noopener noreferrer">37456840</a>; PMCID: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10338300/" target="_blank" rel="noopener noreferrer">PMC10338300</a>.
+          <strong>Read our preprint.</strong> The methods, validation, and benchmarks behind
+          VNtyper&nbsp;2 and VNtyper&nbsp;Online are now described in detail on medRxiv.
+          <a href="https://www.medrxiv.org/content/10.64898/2026.05.27.26352937v1" target="_blank" rel="noopener noreferrer">Read the preprint &rarr;</a>
         </p>
       </div>
-      <!-- Add more citation items as needed -->
+
+      <!-- Primary citation: VNtyper 2 / VNtyper Online preprint -->
+      <div class="citation-item">
+        <p>
+          <strong>Please cite:</strong> Popp B, Saei H, Teltsh O, et al. VNtyper&nbsp;2 enables open-access short-read genotyping of MUC1 VNTR variants in ADTKD at high-speed. <strong>medRxiv</strong>. 2026. doi: <a href="https://doi.org/10.64898/2026.05.27.26352937" target="_blank" rel="noopener noreferrer">10.64898/2026.05.27.26352937</a>. <em>(Preprint)</em>
+        </p>
+      </div>
+
+      <!-- Foundational method citation: original VNtyper (iScience 2023) -->
+      <div class="citation-item">
+        <p>
+          <strong>Original method:</strong> Saei H, et al. VNtyper enables accurate alignment-free genotyping of MUC1 coding VNTR using short-read sequencing data in autosomal dominant tubulointerstitial kidney disease. <strong>iScience</strong>. 2023 Jun 17;26(7):107171. doi: <a href="https://doi.org/10.1016/j.isci.2023.107171" target="_blank" rel="noopener noreferrer">10.1016/j.isci.2023.107171</a>. PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/37456840/" target="_blank" rel="noopener noreferrer">37456840</a>; PMCID: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10338300/" target="_blank" rel="noopener noreferrer">PMC10338300</a>.
+        </p>
+      </div>
+
     </div>
   </section>
 
