@@ -47,6 +47,12 @@ export default defineConfig([
       'no-undef': 'error',
       'no-console': 'warn',
 
+      // New in ESLint 10 recommended set - warn during adoption (see no-unused-vars rationale).
+      // no-useless-assignment flags defensive default initializers; preserve-caught-error wants
+      // error-cause chaining. Both deferred to a dedicated cleanup PR to keep dependency bumps focused.
+      'no-useless-assignment': 'warn',
+      'preserve-caught-error': 'warn',
+
       // Security-related rules (browser-safe subset)
       'no-eval': 'error',
       'no-implied-eval': 'error',
