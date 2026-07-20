@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.68.0'; // Add VNtyper 2 preprint citation and "Read our preprint" call-to-action
+const frontendVersion = '0.68.1'; // Pin Aioli to immutable versioned biowasm CDN URL (fix SRI breakage)
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;
