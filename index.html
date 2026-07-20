@@ -65,7 +65,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0/intro.min.js" integrity="sha512-+hhhH0eKqYCmXsO28OJE1HHWkgNYwlpceBwmeeDEt5jpCL8jOuqAVunXlZ/WZ4qIluJdwlcv4f5BUIQ/l1w9iw==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 
   <!-- Include Aioli from BioWasm CDN with Subresource Integrity (SRI) -->
-  <script src="https://biowasm.com/cdn/v3/aioli.js"
+  <!-- Pin to an immutable, version-specific URL. The unversioned /cdn/v3/aioli.js is
+       mutable and gets republished by biowasm, which breaks the SRI hash (and thus
+       leaves `Aioli` undefined). The versioned path serves stable bytes matching the hash. -->
+  <script src="https://biowasm.com/cdn/v3/aioli/3.2.1/aioli.js"
           integrity="sha384-1Ergza974F0w12B/lIP0OD/cMzMizVolHbzSX1Jlmour//ypy41MIN8qYeHl45Jz"
           crossorigin="anonymous" defer></script>
   
