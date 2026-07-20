@@ -65,7 +65,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0/intro.min.js" integrity="sha512-+hhhH0eKqYCmXsO28OJE1HHWkgNYwlpceBwmeeDEt5jpCL8jOuqAVunXlZ/WZ4qIluJdwlcv4f5BUIQ/l1w9iw==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 
   <!-- Include Aioli from BioWasm CDN with Subresource Integrity (SRI) -->
-  <script src="https://biowasm.com/cdn/v3/aioli.js"
+  <!-- Pin to an immutable, version-specific URL. The unversioned /cdn/v3/aioli.js is
+       mutable and gets republished by biowasm, which breaks the SRI hash (and thus
+       leaves `Aioli` undefined). The versioned path serves stable bytes matching the hash. -->
+  <script src="https://biowasm.com/cdn/v3/aioli/3.2.1/aioli.js"
           integrity="sha384-1Ergza974F0w12B/lIP0OD/cMzMizVolHbzSX1Jlmour//ypy41MIN8qYeHl45Jz"
           crossorigin="anonymous" defer></script>
   
@@ -73,21 +76,21 @@
   <script src="resources/js/config.js" defer></script>
   
   <!-- Link to JavaScript Modules -->
-  <script type="module" src="resources/js/inputWrangling.js?v=0.68.0" defer></script>
-  <script type="module" src="resources/js/regionsConfig.js?v=0.68.0" defer></script>
-  <script type="module" src="resources/js/assemblyConfigs.js?v=0.68.0" defer></script>
+  <script type="module" src="resources/js/inputWrangling.js?v=0.68.1" defer></script>
+  <script type="module" src="resources/js/regionsConfig.js?v=0.68.1" defer></script>
+  <script type="module" src="resources/js/assemblyConfigs.js?v=0.68.1" defer></script>
   <!-- bamProcessing.js is lazy-loaded in ExtractionController when needed -->
-  <script type="module" src="resources/js/apiInteractions.js?v=0.68.0" defer></script>
-  <script type="module" src="resources/js/inputValidation.js?v=0.68.0" defer></script>
-  <script type="module" src="resources/js/main.js?v=0.68.0" defer></script>
-  <script type="module" src="resources/js/modal.js?v=0.68.0" defer></script>
-  <script type="module" src="resources/js/mobileNav.js?v=0.68.0" defer></script>
-  <script type="module" src="resources/js/populateRegions.js?v=0.68.0" defer></script>
-  <script type="module" src="resources/js/uiUtils.js?v=0.68.0" defer></script>
-  <script type="module" src="resources/js/usageStats.js?v=0.68.0" defer></script>
+  <script type="module" src="resources/js/apiInteractions.js?v=0.68.1" defer></script>
+  <script type="module" src="resources/js/inputValidation.js?v=0.68.1" defer></script>
+  <script type="module" src="resources/js/main.js?v=0.68.1" defer></script>
+  <script type="module" src="resources/js/modal.js?v=0.68.1" defer></script>
+  <script type="module" src="resources/js/mobileNav.js?v=0.68.1" defer></script>
+  <script type="module" src="resources/js/populateRegions.js?v=0.68.1" defer></script>
+  <script type="module" src="resources/js/uiUtils.js?v=0.68.1" defer></script>
+  <script type="module" src="resources/js/usageStats.js?v=0.68.1" defer></script>
 
   <!-- Version and Current Year Script -->
-  <script type="module" src="resources/js/version.js?v=0.68.0" defer></script>
+  <script type="module" src="resources/js/version.js?v=0.68.1" defer></script>
   
   <!-- Schema.org JSON-LD: WebSite -->
   <script type="application/ld+json">
