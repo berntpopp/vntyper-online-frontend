@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.68.1'; // Pin Aioli to immutable versioned biowasm CDN URL (fix SRI breakage)
+const frontendVersion = '0.68.2'; // CSP-safe deferred stylesheet loading (remove inline onload handler)
 
 // API Endpoint for Versions
 const versionEndpoint = `${window.CONFIG.API_URL}/version/`;
