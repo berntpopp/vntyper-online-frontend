@@ -1,0 +1,151 @@
+name: Docker content
+
+# The web root is allow-listed in the Dockerfile. This job is the guard: it
+# asserts that every runtime asset is served and that no source, tooling or
+# design-master file is. Without it, a `COPY` change can silently re-expose
+# the repository and still ship a green pipeline.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  web-root-contents:
+    name: Verify web root contents
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # The repo no longer contains a *.backup file or an _original/ directory,
+      # so asserting those paths 404 would prove nothing. Plant decoys so the
+      # corresponding .dockerignore rules are actually exercised.
+      - name: Plant exclusion decoys
+        run: |
+          mkdir -p resources/assets/logos/_original
+          echo "ci-decoy" > resources/assets/logos/_original/ci-decoy.tif
+          echo "ci-decoy" > resources/js/ci-decoy.backup
+
+      - name: Build image
+        run: docker build -t vntyper-frontend:ci .
+
+      - name: Start container
+        run: |
+          docker run -d --name vntyper-ci -p 8080:80 vntyper-frontend:ci
+          for _ in $(seq 1 30); do
+            if curl -sf http://localhost:8080/ >/dev/null; then
+              echo "container ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "container did not become ready"
+          docker logs vntyper-ci
+          exit 1
+
+      - name: Runtime assets must be served
+        run: |
+          set -u
+          failed=0
+          while read -r path; do
+            [ -z "$path" ] && continue
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:8080$path")
+            printf '%s  %s\n' "$code" "$path"
+            if [ "$code" != "200" ]; then
+              echo "::error::MISSING runtime asset: $path returned $code"
+              failed=1
+            fi
+          done <<'PATHS'
+          /
+          /adtkd_diagnostics.html
+          /contact.html
+          /impressum_en.html
+          /impressum_de.html
+          /robots.txt
+          /sitemap.xml
+          /resources/css/base.css
+          /resources/css/buttons.css
+          /resources/css/citations.css
+          /resources/css/drag-drop.css
+          /resources/css/faq.css
+          /resources/css/footer.css
+          /resources/css/forms.css
+          /resources/css/log.css
+          /resources/css/modal.css
+          /resources/css/navbar.css
+          /resources/css/output.css
+          /resources/css/ui-components.css
+          /resources/css/usageStats.css
+          /resources/js/loadDeferredStyles.js
+          /resources/js/config.js
+          /resources/js/inputWrangling.js
+          /resources/js/regionsConfig.js
+          /resources/js/assemblyConfigs.js
+          /resources/js/apiInteractions.js
+          /resources/js/inputValidation.js
+          /resources/js/main.js
+          /resources/js/modal.js
+          /resources/js/mobileNav.js
+          /resources/js/populateRegions.js
+          /resources/js/uiUtils.js
+          /resources/js/usageStats.js
+          /resources/js/version.js
+          /resources/js/bamProcessing.js
+          /resources/js/unmappedExtraction.js
+          /resources/js/controllers/AppController.js
+          /resources/js/utils/safeStorage.js
+          /resources/js/views/JobView.js
+          /resources/assets/logo/vntyperonline_logo_160px.png
+          /resources/assets/favicon/favicon.svg
+          /resources/assets/favicon/favicon.ico
+          /resources/assets/favicon/favicon-48x48.png
+          /resources/assets/favicon/apple-touch-icon.png
+          /resources/assets/favicon/site.webmanifest
+          /resources/assets/favicon/web-app-manifest-192x192.png
+          /resources/assets/favicon/web-app-manifest-512x512.png
+          /resources/assets/logos/II_60px.webp
+          /resources/assets/logos/UPC_60px.webp
+          /resources/assets/logos/BIH_60px.webp
+          /resources/assets/logos/LB_60px.webp
+          /resources/assets/logos/CeRKiD_60px.webp
+          /resources/assets/logos/ADTKD-Net_horizontal_60px.webp
+          /resources/assets/logos/adtkd_de_60px.webp
+          /resources/assets/og-image.png
+          /resources/assets/og-image-adtkd.png
+          PATHS
+          exit $failed
+
+      - name: Source and tooling must not be served
+        run: |
+          set -u
+          failed=0
+          while read -r path; do
+            [ -z "$path" ] && continue
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:8080$path")
+            printf '%s  %s\n' "$code" "$path"
+            if [ "$code" != "404" ]; then
+              echo "::error::EXPOSED: $path returned $code"
+              failed=1
+            fi
+          done <<'PATHS'
+          /package.json
+          /package-lock.json
+          /Makefile
+          /eslint.config.js
+          /vitest.config.js
+          /Dockerfile
+          /.dockerignore
+          /README.md
+          /LICENSE
+          /.prettierrc
+          /tests/unit/utils/EventBus.test.js
+          /.github/workflows/ci.yml
+          /resources/js/ci-decoy.backup
+          /resources/assets/logos/_original/ci-decoy.tif
+          PATHS
+          exit $failed
+
+      - name: Stop container
+        if: always()
+        run: docker rm -f vntyper-ci || true

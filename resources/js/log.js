@@ -1,5 +1,7 @@
 // frontend/resources/js/log.js
 
+import { safeStorage } from './utils/safeStorage.js';
+
 /**
  * Logging Module
  * Provides in-UI logging with filtering, download, and persistence capabilities.
@@ -417,7 +419,7 @@ function restoreVisibilityState() {
 
   if (!logContainer || !toggleLogBtn) return;
 
-  const isVisible = localStorage.getItem(STORAGE_KEY_VISIBILITY) === 'true';
+  const isVisible = safeStorage.getItem(STORAGE_KEY_VISIBILITY) === 'true';
 
   if (isVisible) {
     showLogPanel(logContainer, toggleLogBtn);
@@ -431,14 +433,14 @@ function restoreVisibilityState() {
  * @param {boolean} isVisible - Whether the panel is visible
  */
 function saveVisibilityState(isVisible) {
-  localStorage.setItem(STORAGE_KEY_VISIBILITY, isVisible.toString());
+  safeStorage.setItem(STORAGE_KEY_VISIBILITY, isVisible.toString());
 }
 
 /**
  * Restores the filter state from localStorage.
  */
 function restoreFilterState() {
-  const savedFilter = localStorage.getItem(STORAGE_KEY_FILTER) || FILTER_ALL;
+  const savedFilter = safeStorage.getItem(STORAGE_KEY_FILTER) || FILTER_ALL;
   setLogFilter(savedFilter);
 }
 
@@ -447,7 +449,7 @@ function restoreFilterState() {
  * @param {string} level - The filter level to save
  */
 function saveFilterPreference(level) {
-  localStorage.setItem(STORAGE_KEY_FILTER, level);
+  safeStorage.setItem(STORAGE_KEY_FILTER, level);
 }
 
 // ============================================================================

@@ -82,6 +82,22 @@ export class PollingManager {
     };
 
     /**
+     * Invoke a consumer callback without letting its exceptions be mistaken
+     * for a transport failure.
+     * @param {Function|undefined} fn - Callback supplied by the consumer
+     * @param {string} label - Callback name, for the log
+     * @param {...*} args - Arguments to forward
+     */
+    const notify = (fn, label, ...args) => {
+      if (!fn) return;
+      try {
+        fn(...args);
+      } catch (callbackError) {
+        logMessage(`Polling ${id} ${label} callback threw: ${callbackError.message}`, 'error');
+      }
+    };
+
+    /**
      * Main polling function
      */
     const poll = async () => {
@@ -92,9 +108,12 @@ export class PollingManager {
       if (elapsed > maxDuration) {
         logMessage(`Polling ${id} exceeded max duration (${maxDuration}ms)`, 'warning');
         stop();
-        if (onError) {
-          onError(new Error('Polling duration exceeded'));
-        }
+        // Terminal: the duration cap has been hit, nothing will retry.
+        notify(onError, 'onError', new Error('Polling duration exceeded'), {
+          retries,
+          maxRetries,
+          willRetry: false,
+        });
         return;
       }
 
@@ -109,17 +128,18 @@ export class PollingManager {
           pollInfo.retries = retries;
         }
 
-        // Notify update callback
-        if (onUpdate) {
-          onUpdate(result);
-        }
+        // Notify update callback.
+        // Consumer callbacks are isolated: a rendering exception is a bug in
+        // the view, not a transport failure, and must not be counted as a
+        // retryable poll error (which would keep polling a finished job).
+        notify(onUpdate, 'onUpdate', result);
 
         // Check if polling should stop
         if (result.status === 'completed' || result.status === 'failed') {
-          if (onComplete) {
-            onComplete(result);
-          }
+          // Stop BEFORE notifying: if the consumer throws while rendering the
+          // terminal state, polling must still be finished.
           stop();
+          notify(onComplete, 'onComplete', result);
           return;
         }
 
@@ -135,13 +155,16 @@ export class PollingManager {
           'error'
         );
 
+        // Decide the retry outcome BEFORE notifying, so consumers can tell a
+        // transient blip from exhausted polling. Without this, every callback
+        // looks terminal and a running job gets marked failed on one hiccup.
+        const willRetry = retries < maxRetries;
+
         // Notify error callback
-        if (onError) {
-          onError(error);
-        }
+        notify(onError, 'onError', error, { retries, maxRetries, willRetry });
 
         // Check if should keep retrying
-        if (retries >= maxRetries) {
+        if (!willRetry) {
           logMessage(`Polling ${id} failed after ${maxRetries} retries`, 'error');
           stop();
           return;

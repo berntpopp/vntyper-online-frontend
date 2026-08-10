@@ -1,5 +1,7 @@
 // frontend/resources/js/usageStats.js
 
+import { safeStorage } from './utils/safeStorage.js';
+
 /**
  * Fetches usage statistics from the server.
  * @returns {Promise<Object>} The usage statistics object.
@@ -60,7 +62,7 @@ export function initializeUsageStats() {
   const closeStatsBtn = usageStatsContainer.querySelector('.close-stats-btn');
 
   // Load visibility preference
-  const isVisible = localStorage.getItem('usageStatsVisible') === 'true';
+  const isVisible = safeStorage.getItem('usageStatsVisible') === 'true';
   if (isVisible) {
     usageStatsContainer.classList.add('visible');
     usageStatsContainer.classList.remove('hidden');
@@ -92,7 +94,7 @@ export function initializeUsageStats() {
     usageStatsContainer.classList.toggle('visible');
     usageStatsContainer.classList.toggle('hidden');
     toggleStatsBtn.setAttribute('aria-expanded', !currentlyVisible);
-    localStorage.setItem('usageStatsVisible', !currentlyVisible);
+    safeStorage.setItem('usageStatsVisible', !currentlyVisible);
   });
 
   // Close Stats Panel
@@ -100,6 +102,6 @@ export function initializeUsageStats() {
     usageStatsContainer.classList.add('hidden');
     usageStatsContainer.classList.remove('visible');
     toggleStatsBtn.setAttribute('aria-expanded', 'false');
-    localStorage.setItem('usageStatsVisible', 'false');
+    safeStorage.setItem('usageStatsVisible', 'false');
   });
 }

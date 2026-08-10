@@ -2,6 +2,8 @@
 
 import { logMessage } from './log.js'; // Import the logMessage function
 
+import { safeStorage } from './utils/safeStorage.js';
+
 /**
  * Initializes the In-App Guided Tutorial using Intro.js.
  */
@@ -34,11 +36,11 @@ function startIntroTutorial() {
   introJs()
     .start()
     .oncomplete(() => {
-      localStorage.setItem('tutorialCompleted', 'true');
+      safeStorage.setItem('tutorialCompleted', 'true');
       logMessage('Intro.js tutorial completed successfully.', 'success');
     })
     .onexit(() => {
-      localStorage.setItem('tutorialCompleted', 'true');
+      safeStorage.setItem('tutorialCompleted', 'true');
       logMessage('Intro.js tutorial exited by user.', 'warning');
     });
 

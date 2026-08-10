@@ -50,10 +50,13 @@ export class AppController extends BaseController {
     // true = "Extract Region" clicked, false = "Submit Jobs" clicked
     this.showDownloadButtons = false;
 
-    // Button references (cached for performance)
-    this.submitBtn = null;
-    this.extractBtn = null;
-    this.resetBtn = null;
+    // Button references (submitBtn / extractBtn / resetBtn) are cached by
+    // initializeEventListeners(), which BaseController's constructor already
+    // ran via initialize() BEFORE this constructor body executes.
+    //
+    // Do NOT re-declare them as null here. Doing so silently defeats every
+    // `if (this.submitBtn)` guard, so Submit and Extract never disable and
+    // never show their spinner during a multi-minute extraction and upload.
   }
 
   /**
@@ -186,10 +189,7 @@ export class AppController extends BaseController {
       this.showDownloadButtons = false;
 
       // Clear any existing download buttons from regionOutput
-      const regionOutputDiv = document.getElementById('regionOutput');
-      if (regionOutputDiv) {
-        regionOutputDiv.innerHTML = '';
-      }
+      this._replaceRegionOutput();
 
       // Get selected files
       const selectedFiles = this.fileController.getSelectedFiles();
@@ -373,6 +373,31 @@ export class AppController extends BaseController {
   }
 
   /**
+   * Replace the contents of #regionOutput, releasing the Blob URLs backing any
+   * links that are about to be destroyed.
+   *
+   * Extracted BAM/BAI blobs can be hundreds of MB. Every path that wipes this
+   * pane must go through here, otherwise the anchors disappear while their
+   * blobs stay resident for the whole session.
+   *
+   * @param {string} [html=''] - Markup to place in the pane
+   * @returns {HTMLElement|null} The region output element, if present
+   */
+  _replaceRegionOutput(html = '') {
+    if (this._renderedResultUrls && this._renderedResultUrls.length) {
+      const revokedCount = blobManager.revokeMultiple(this._renderedResultUrls);
+      this._log(`Revoked ${revokedCount} Blob URLs for replaced results`, 'info');
+    }
+    this._renderedResultUrls = [];
+
+    const regionOutputDiv = document.getElementById('regionOutput');
+    if (regionOutputDiv) {
+      regionOutputDiv.innerHTML = html;
+    }
+    return regionOutputDiv;
+  }
+
+  /**
    * Handle application reset
    */
   handleReset() {
@@ -403,11 +428,13 @@ export class AppController extends BaseController {
     this.jobController.jobView.clearAll();
     this.cohortController.cohortView.clearAll();
 
-    // Clear download buttons area
-    const regionOutputDiv = document.getElementById('regionOutput');
-    if (regionOutputDiv) {
-      regionOutputDiv.innerHTML = '';
-    }
+    // Clear download buttons area through the helper, so the URLs behind those
+    // links are revoked as the links are removed - never before, which would
+    // leave visible-but-dead downloads if an earlier step threw.
+    this._replaceRegionOutput();
+
+    // Release anything still tracked: nothing on screen survives a reset.
+    blobManager.revokeAll();
 
     // Show placeholder message again (restore original text)
     const placeholderMessage = document.getElementById('placeholderMessage');
@@ -468,8 +495,10 @@ export class AppController extends BaseController {
         placeholderMessage.classList.add('hidden');
       }
 
-      // Clear previous content and show assembly banner (DRY)
-      regionOutputDiv.innerHTML = createAssemblyMessageHTML(detectedAssembly);
+      // Clear previous content and show assembly banner (DRY).
+      // This destroys the previous pair's download links, so their Blob URLs
+      // are revoked here rather than left resident for the whole session.
+      this._replaceRegionOutput(createAssemblyMessageHTML(detectedAssembly));
 
       // Update assembly dropdown to detected assembly
       const assemblySelect = document.getElementById('referenceAssembly');
@@ -551,12 +580,10 @@ export class AppController extends BaseController {
       logMessage(`Download links provided for ${subsetName} and ${subsetBaiName}.`, 'info');
     });
 
-    // Revoke blob URLs after user has had time to download (5 minutes)
-    // blobManager will also auto-cleanup old URLs periodically
-    setTimeout(() => {
-      const revokedCount = blobManager.revokeMultiple(createdUrls);
-      logMessage(`Revoked ${revokedCount} Blob URLs from region extraction`, 'info');
-    }, 300000); // 5 minutes
+    // Track the URLs backing the links now on screen. They are revoked when
+    // this pane is replaced or the app is reset - never on a timer, which used
+    // to break visible links after five minutes.
+    this._renderedResultUrls = (this._renderedResultUrls || []).concat(createdUrls);
 
     this._log('Download UI created successfully', 'success');
   }

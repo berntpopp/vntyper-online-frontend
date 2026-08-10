@@ -117,6 +117,34 @@ export class JobView {
   }
 
   /**
+   * Remove a previously rendered download link.
+   *
+   * A job can reach a terminal failure after a link was already shown (the
+   * status update arrives before the terminal callback). Without this, the
+   * user is offered a download for a run that produced no result.
+   *
+   * @param {string} jobId - Job ID
+   */
+  hideDownloadLink(jobId) {
+    const jobElement = this.jobElements.get(jobId);
+    if (!jobElement) {
+      return;
+    }
+
+    const downloadContainer = jobElement.querySelector('.job-download');
+    if (!downloadContainer) {
+      return;
+    }
+
+    const existingLink = downloadContainer.querySelector(`#download-${jobId}`);
+    if (existingLink) {
+      existingLink.remove();
+    }
+
+    downloadContainer.classList.add('hidden');
+  }
+
+  /**
    * Show error for failed job
    * @param {string} jobId - Job ID
    * @param {string} errorMessage - Error message

@@ -61,6 +61,7 @@ describe('JobController', () => {
       showJob: vi.fn(),
       updateStatus: vi.fn(),
       showDownloadLink: vi.fn(),
+      hideDownloadLink: vi.fn(),
       showError: vi.fn(),
     };
 
@@ -735,6 +736,84 @@ describe('JobController', () => {
       // Simulate completion
       jobController.handleJobComplete('test-job-123', { status: 'completed' });
       expect(mockJobView.showDownloadLink).toHaveBeenCalled();
+    });
+  });
+
+  // ============================================================================
+  // Terminal failure vs transient poll errors
+  // ============================================================================
+
+  describe('terminal failure handling', () => {
+    it('renders a failed job as failed, not as a completed download', () => {
+      // Act - PollingManager fires onComplete for 'failed' too
+      jobController.handleJobComplete('job-1', { status: 'failed', error: 'boom' });
+
+      // Assert
+      expect(mockStateManager.updateJobStatus).toHaveBeenCalledWith('job-1', 'failed');
+      expect(mockJobView.updateStatus).toHaveBeenCalledWith('job-1', 'failed');
+      expect(mockJobView.hideDownloadLink).toHaveBeenCalledWith('job-1');
+      expect(mockJobView.showError).toHaveBeenCalledWith('job-1', 'boom');
+      expect(mockJobView.showDownloadLink).not.toHaveBeenCalled();
+
+      const events = mockEventBus.emit.mock.calls.map(c => c[0]);
+      expect(events).not.toContain('job:completed');
+      expect(events).toContain('job:failed');
+    });
+
+    it('falls back to a generic message when the API sends no error text', () => {
+      jobController.handleJobComplete('job-1', { status: 'failed' });
+
+      expect(mockJobView.showError).toHaveBeenCalledWith('job-1', 'Job failed.');
+    });
+
+    it('still treats a completed job as success', () => {
+      jobController.handleJobComplete('job-1', { status: 'completed' });
+
+      expect(mockJobView.showDownloadLink).toHaveBeenCalledWith('job-1');
+      expect(mockJobView.hideDownloadLink).not.toHaveBeenCalled();
+      expect(mockEventBus.emit.mock.calls.map(c => c[0])).toContain('job:completed');
+    });
+  });
+
+  describe('transient poll errors', () => {
+    /**
+     * Capture the callbacks JobController actually hands to PollingManager,
+     * so the wiring itself is under test - not just the handlers in isolation.
+     */
+    async function captureCallbacks(jobId = 'job-1') {
+      await jobController.handlePoll({ jobId });
+      return mockPollingManager.start.mock.calls[0][2];
+    }
+
+    it('wires onError to the retry-aware handler', async () => {
+      const { onError } = await captureCallbacks();
+      mockEventBus.emit.mockClear();
+      mockStateManager.updateJobStatus.mockClear();
+
+      // A retryable blip must not touch job status or the spinner
+      onError(new Error('network'), { retries: 1, maxRetries: 10, willRetry: true });
+
+      expect(mockStateManager.updateJobStatus).not.toHaveBeenCalled();
+      expect(mockJobView.showError).not.toHaveBeenCalled();
+      expect(hideSpinner).not.toHaveBeenCalled();
+      expect(mockEventBus.emit.mock.calls.map(c => c[0])).not.toContain('job:failed');
+    });
+
+    it('escalates through the wired callback once polling is exhausted', async () => {
+      const { onError } = await captureCallbacks();
+      mockEventBus.emit.mockClear();
+
+      onError(new Error('network'), { retries: 10, maxRetries: 10, willRetry: false });
+
+      expect(mockStateManager.updateJobStatus).toHaveBeenCalledWith('job-1', 'failed');
+      expect(mockJobView.showError).toHaveBeenCalledWith('job-1', 'network');
+      expect(mockEventBus.emit.mock.calls.map(c => c[0])).toContain('job:failed');
+    });
+
+    it('treats a missing context as terminal', () => {
+      jobController.handlePollError('job-1', new Error('legacy caller'), undefined);
+
+      expect(mockStateManager.updateJobStatus).toHaveBeenCalledWith('job-1', 'failed');
     });
   });
 });
