@@ -11,6 +11,24 @@ vi.mock('../../resources/js/log.js', () => ({
  * The module must therefore survive window.CONFIG being absent.
  */
 describe('version.js', () => {
+  // The frontend version is duplicated in package.json, here, and in 13 ?v=
+  // cache-busters in index.html. Asserting only the *shape* of the string is
+  // what let commit 1799d05 ship a stale constant; assert the value.
+  it('frontendVersion matches package.json', async () => {
+    // Resolve from process.cwd(), not import.meta.url: under the jsdom
+    // environment import.meta.url is an http:// URL and node:fs rejects it.
+    const { readFileSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    const root = process.cwd();
+
+    const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+    const source = readFileSync(join(root, 'resources/js/version.js'), 'utf8');
+    const match = source.match(/const frontendVersion = '([^']+)'/);
+
+    expect(match, 'frontendVersion declaration not found').not.toBeNull();
+    expect(match[1]).toBe(pkg.version);
+  });
+
   beforeEach(() => {
     vi.resetModules();
     delete window.CONFIG;
