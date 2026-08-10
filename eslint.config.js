@@ -18,9 +18,12 @@ export default defineConfig([
     'package-lock.json',
   ]),
 
-  // JavaScript files - main source code
+  // JavaScript files - main source code.
+  // .mjs is listed explicitly: eslint enumerates .mjs by default but a
+  // `**/*.js` block does not match it, so tooling scripts were being reported
+  // as "linted" while no rule actually applied to them.
   {
-    files: ['**/*.js'],
+    files: ['**/*.js', '**/*.mjs'],
     extends: [js.configs.recommended],
     languageOptions: {
       ecmaVersion: 2022,
@@ -172,9 +175,39 @@ export default defineConfig([
     },
   },
 
+  // Legacy oversized module. A blanket eslint-disable would let this file grow
+  // without limit, which is the opposite of the point; pin it to its current
+  // size instead so it can only shrink. Ratchet this number down as logic is
+  // extracted, and delete the block once it passes the 650 default.
+  //
+  // bamProcessing.js mixes Aioli/samtools orchestration, reference assembly
+  // detection and region extraction - three responsibilities. TODO(split).
+  // Do not add to it; see the dual-generation rule in AGENTS.md.
+  {
+    files: ['resources/js/bamProcessing.js'],
+    rules: {
+      'max-lines': ['error', { max: 904, skipBlankLines: true, skipComments: true }],
+    },
+  },
+
+  // Node tooling - build scripts and config files run under Node, not the
+  // browser, so they need Node globals and must not inherit browser ones.
+  {
+    files: ['scripts/**/*.{js,mjs}', '*.config.js', '*.config.mjs'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      // Tooling scripts report progress on stdout; that is their interface.
+      'no-console': 'off',
+    },
+  },
+
   // Prettier - only for JS files, HTML uses its own formatting
   {
-    files: ['**/*.js'],
+    files: ['**/*.js', '**/*.mjs'],
     ...prettierRecommended,
   },
 ]);

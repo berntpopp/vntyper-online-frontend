@@ -1,12 +1,3 @@
-/* eslint-disable max-lines --
- * 904 effective lines against a 650 limit. This module carries three separate
- * responsibilities - Aioli/samtools orchestration, reference assembly detection,
- * and region extraction - and should be split along them. Tracked as
- * TODO(split).
- *
- * Do not add to this file. Per the dual-generation rule in AGENTS.md, new logic
- * belongs in the MVC layer under resources/js/{controllers,services,utils}/.
- */
 // frontend/resources/js/bamProcessing.js
 
 // Import the logging and UI message functions
