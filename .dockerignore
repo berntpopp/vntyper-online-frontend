@@ -12,6 +12,8 @@ tests/
 scripts/
 eslint.config.js
 vitest.config.js
+tsconfig.json
+types/
 Makefile
 package.json
 package-lock.json

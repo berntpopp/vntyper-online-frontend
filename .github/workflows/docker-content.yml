@@ -143,6 +143,8 @@ jobs:
           /CLAUDE.md
           /.nvmrc
           /scripts/sync-version.mjs
+          /tsconfig.json
+          /types/globals.d.ts
           /tests/unit/utils/EventBus.test.js
           /.github/workflows/ci.yml
           /resources/js/ci-decoy.backup

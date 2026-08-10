@@ -1,0 +1,27 @@
+{
+  // TypeScript is used for CHECKING ONLY. This project has no build step and
+  // ships the .js files in resources/js/ directly to the browser as native ES
+  // modules. Never set noEmit to false, and never add a .ts source file.
+  //
+  // The typescript devDependency is pinned exactly so the error count cannot
+  // drift underneath us on a patch bump.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+
+    // strict: true is the next planned ratchet. Enabling it today adds several
+    // hundred errors on top of the ones this cleanup addresses. Do not turn it
+    // on as a side effect of another change. See AGENTS.md.
+    "strict": false,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["resources/js/**/*.js", "types/**/*.d.ts"],
+  "exclude": ["node_modules", "coverage", "tests"]
+}

@@ -213,8 +213,15 @@ export class BaseController {
   }
 
   /**
-   * Log message with controller context
-   * @private
+   * Log message with controller context.
+   *
+   * Protected, not private: every subclass calls this. The visibility tag was
+   * wrong, which made the typecheck reject 65 legitimate call sites.
+   *
+   * @protected
+   * @param {string} message - Message to log
+   * @param {string} [level] - Log level
+   * @param {...unknown} args - Extra context passed through to the logger
    */
   _log(message, level = 'info', ...args) {
     const prefix = `[${this.constructor.name}]`;
