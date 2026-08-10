@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.69.0'; // Correctness: failed jobs, poll errors, storage, blob lifetime, web-root exposure
+const frontendVersion = '0.69.1'; // Dependency maintenance: nginx base image, GitHub Actions, dev dependencies
 
 /**
  * Build the API version endpoint, or null when this page has no API config.
