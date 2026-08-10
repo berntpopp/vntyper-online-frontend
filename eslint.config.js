@@ -66,6 +66,12 @@ export default defineConfig([
       'no-var': 'error',
       'no-prototype-builtins': 'warn',
 
+      // Size limit. Above roughly this, a file stops fitting in an agent's
+      // working context alongside its dependencies, and edits get less
+      // reliable. Measured on effective lines - blanks and comments do not
+      // count. Tests are exempt below. See AGENTS.md.
+      'max-lines': ['error', { max: 650, skipBlankLines: true, skipComments: true }],
+
       // Code quality
       curly: ['error', 'all'],
       'default-case': 'warn',
@@ -111,6 +117,8 @@ export default defineConfig([
     rules: {
       'no-console': 'off',
       'no-undef': 'error',
+      // Long, explicit tests are correct; nine test files exceed 650 lines.
+      'max-lines': 'off',
       // Relax unused vars for test files - mocks often have unused params
       'no-unused-vars': [
         'warn',

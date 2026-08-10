@@ -1,3 +1,12 @@
+/* eslint-disable max-lines --
+ * 904 effective lines against a 650 limit. This module carries three separate
+ * responsibilities - Aioli/samtools orchestration, reference assembly detection,
+ * and region extraction - and should be split along them. Tracked as
+ * TODO(split).
+ *
+ * Do not add to this file. Per the dual-generation rule in AGENTS.md, new logic
+ * belongs in the MVC layer under resources/js/{controllers,services,utils}/.
+ */
 // frontend/resources/js/bamProcessing.js
 
 // Import the logging and UI message functions
@@ -642,9 +651,9 @@ function detectAssembly(bamContigs, assemblyHints) {
   logMessage(`  Contigs: ${detectedFromContigs} → Normalized: ${normalizedContigs}`, 'info');
   logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
 
-  let finalAssembly = null;
-  let confidence = 'LOW';
-  let reasoning = '';
+  let finalAssembly;
+  let confidence;
+  let reasoning;
 
   // DECISION LOGIC (Priority Order based on reliability)
   //  1. All three agree → VERY HIGH confidence
@@ -809,7 +818,7 @@ function detectAssembly(bamContigs, assemblyHints) {
  * @throws {Error} - If no region is configured for the detected/selected assembly
  */
 function determineAssemblyAndRegion(bamContigs, assemblyHints, regionValue) {
-  let detectedAssembly = null;
+  let detectedAssembly;
 
   // Determine assembly (either auto-detect or use user selection)
   if (regionValue === 'guess') {
@@ -954,8 +963,8 @@ export async function extractRegionAndIndex(CLI, pair) {
   });
   logMessage("Extract button disabled and text updated to 'Processing...'", 'info');
 
-  let detectedAssembly = null;
-  let region = null;
+  let detectedAssembly;
+  let region;
   const subsetBamAndBaiBlobs = [];
 
   try {
@@ -1136,7 +1145,8 @@ export async function extractRegionAndIndex(CLI, pair) {
               );
             } catch (e) {
               throw new Error(
-                `Unmapped BAM file ${unmappedBamName} not found in virtual FS: ${e.message}`
+                `Unmapped BAM file ${unmappedBamName} not found in virtual FS: ${e.message}`,
+                { cause: e }
               );
             }
 

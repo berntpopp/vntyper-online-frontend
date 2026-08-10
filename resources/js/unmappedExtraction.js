@@ -41,7 +41,7 @@ async function loadPako() {
     } catch (error) {
       pakoLoadPromise = null; // Reset on error to allow retry
       logMessage(`Failed to load pako: ${error.message}`, 'error');
-      throw new Error(`Failed to load pako library: ${error.message}`);
+      throw new Error(`Failed to load pako library: ${error.message}`, { cause: error });
     }
   })();
 
@@ -118,7 +118,7 @@ class BGZFReader {
         nextOffset: fileOffset + blockSize,
       };
     } catch (e) {
-      throw new Error(`Failed to decompress BGZF block: ${e.message}`);
+      throw new Error(`Failed to decompress BGZF block: ${e.message}`, { cause: e });
     }
   }
 
@@ -440,7 +440,7 @@ export async function extractUnmappedReads(CLI, bamFile, baiFile, outputPath) {
     };
   } catch (error) {
     logMessage(`Failed: ${error.message}`, 'error');
-    throw new Error(`Failed to extract unmapped reads: ${error.message}`);
+    throw new Error(`Failed to extract unmapped reads: ${error.message}`, { cause: error });
   }
 }
 
@@ -532,7 +532,7 @@ export async function mergeBamFiles(CLI, inputPaths, outputPath) {
     };
   } catch (error) {
     logMessage(`Merge failed: ${error.message}`, 'error');
-    throw new Error(`Failed to merge BAM files: ${error.message}`);
+    throw new Error(`Failed to merge BAM files: ${error.message}`, { cause: error });
   }
 }
 
