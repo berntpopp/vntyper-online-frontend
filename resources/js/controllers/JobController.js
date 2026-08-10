@@ -133,8 +133,8 @@ export class JobController extends BaseController {
           onComplete: statusData => {
             this.handleJobComplete(jobId, statusData);
           },
-          onError: error => {
-            this.handleJobError(jobId, error);
+          onError: (error, context) => {
+            this.handlePollError(jobId, error, context);
           },
         }
       );
@@ -172,6 +172,14 @@ export class JobController extends BaseController {
    * @param {Object} statusData - Final status data
    */
   handleJobComplete(jobId, statusData) {
+    // PollingManager fires onComplete for BOTH 'completed' and 'failed' - it
+    // means "polling reached a terminal state", not "the job succeeded".
+    // A screening tool must never show a download link for a failed run.
+    if (statusData?.status === 'failed') {
+      this.handleTerminalFailure(jobId, statusData.error || 'Job failed.');
+      return;
+    }
+
     this._log(`Job ${jobId} completed`, 'success');
 
     // Update state
@@ -194,12 +202,50 @@ export class JobController extends BaseController {
    * @param {Error} error - Error object
    */
   handleJobError(jobId, error) {
+    this.handleTerminalFailure(jobId, error);
+  }
+
+  /**
+   * Handle a poll request that failed in transport.
+   *
+   * PollingManager retries up to maxRetries. While it will retry, this must
+   * NOT mark the job failed: doing so flips the UI to "Failed" and hides the
+   * spinner on a single network hiccup, and a later successful poll then
+   * emits job:completed after a visible false failure.
+   *
+   * @param {string} jobId - Job ID
+   * @param {Error} error - Error object
+   * @param {{retries: number, maxRetries: number, willRetry: boolean}} [context]
+   */
+  handlePollError(jobId, error, context) {
+    if (context && context.willRetry) {
+      this._log(
+        `Job ${jobId} poll failed (${context.retries}/${context.maxRetries}), retrying: ${error.message}`,
+        'warning'
+      );
+      return;
+    }
+
+    this.handleTerminalFailure(jobId, error);
+  }
+
+  /**
+   * Terminal failure: this job will not produce a result.
+   * @param {Error|string} reason - Error object, or a message from the API
+   */
+  handleTerminalFailure(jobId, reason) {
+    // Preserve the original Error when we have one; callers and listeners
+    // compare identity.
+    const error = reason instanceof Error ? reason : new Error(reason);
+
     this._log(`Job ${jobId} failed: ${error.message}`, 'error');
 
     // Update state
     this.stateManager.updateJobStatus(jobId, 'failed');
 
-    // Show error in view
+    // Render the failure: status text, no download, error message.
+    this.jobView.updateStatus(jobId, 'failed');
+    this.jobView.hideDownloadLink(jobId);
     this.jobView.showError(jobId, error.message);
 
     // Clean up UI
