@@ -93,7 +93,12 @@ export class PollingManager {
         logMessage(`Polling ${id} exceeded max duration (${maxDuration}ms)`, 'warning');
         stop();
         if (onError) {
-          onError(new Error('Polling duration exceeded'));
+          // Terminal: the duration cap has been hit, nothing will retry.
+          onError(new Error('Polling duration exceeded'), {
+            retries,
+            maxRetries,
+            willRetry: false,
+          });
         }
         return;
       }
@@ -135,13 +140,18 @@ export class PollingManager {
           'error'
         );
 
+        // Decide the retry outcome BEFORE notifying, so consumers can tell a
+        // transient blip from exhausted polling. Without this, every callback
+        // looks terminal and a running job gets marked failed on one hiccup.
+        const willRetry = retries < maxRetries;
+
         // Notify error callback
         if (onError) {
-          onError(error);
+          onError(error, { retries, maxRetries, willRetry });
         }
 
         // Check if should keep retrying
-        if (retries >= maxRetries) {
+        if (!willRetry) {
           logMessage(`Polling ${id} failed after ${maxRetries} retries`, 'error');
           stop();
           return;

@@ -247,7 +247,7 @@ describe('PollingManager', () => {
       // Initial poll (fails)
       await vi.advanceTimersByTimeAsync(0);
       expect(pollFn).toHaveBeenCalledTimes(1);
-      expect(onError).toHaveBeenCalledWith(expect.any(Error));
+      expect(onError).toHaveBeenCalledWith(expect.any(Error), expect.any(Object));
 
       // First retry after 2s (interval * 2^1)
       await vi.advanceTimersByTimeAsync(2000);
@@ -374,7 +374,8 @@ describe('PollingManager', () => {
       expect(onError).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'Polling duration exceeded',
-        })
+        }),
+        expect.objectContaining({ willRetry: false })
       );
       expect(pollingManager.isActive('job-123')).toBe(false);
     });
@@ -605,6 +606,61 @@ describe('PollingManager', () => {
 
       // Assert
       expect(pollingManager.activePolls.size).toBe(0);
+    });
+  });
+
+  describe('onError retry context', () => {
+    it('tells onError whether polling will retry', async () => {
+      // Arrange
+      const onError = vi.fn();
+      const pollFn = vi.fn().mockRejectedValue(new Error('Network error'));
+
+      // Act
+      pollingManager.start('ctx-1', pollFn, {
+        interval: 1000,
+        maxRetries: 2,
+        onError,
+      });
+
+      // Assert - first failure is transient
+      await vi.advanceTimersByTimeAsync(0);
+      expect(onError).toHaveBeenCalledTimes(1);
+      expect(onError.mock.calls[0][1]).toEqual({
+        retries: 1,
+        maxRetries: 2,
+        willRetry: true,
+      });
+      expect(pollingManager.isActive('ctx-1')).toBe(true);
+
+      // Assert - second failure exhausts retries (backoff = 1000 * 2^1)
+      await vi.advanceTimersByTimeAsync(2000);
+      expect(onError).toHaveBeenCalledTimes(2);
+      expect(onError.mock.calls[1][1]).toEqual({
+        retries: 2,
+        maxRetries: 2,
+        willRetry: false,
+      });
+      expect(pollingManager.isActive('ctx-1')).toBe(false);
+    });
+
+    it('marks a max-duration abort as terminal', async () => {
+      // Arrange
+      const onError = vi.fn();
+      const pollFn = vi.fn().mockResolvedValue({ status: 'processing' });
+
+      pollingManager.start('ctx-2', pollFn, {
+        interval: 1000,
+        maxDuration: 1500,
+        onError,
+      });
+
+      // Act - run past the duration cap
+      await vi.advanceTimersByTimeAsync(0);
+      await vi.advanceTimersByTimeAsync(2000);
+
+      // Assert
+      expect(onError).toHaveBeenCalledTimes(1);
+      expect(onError.mock.calls[0][1].willRetry).toBe(false);
     });
   });
 });
