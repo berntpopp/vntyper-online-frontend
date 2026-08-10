@@ -1,9 +1,58 @@
-# Exclude README, LICENSE, and other non-essential files
+# The Dockerfile allow-lists what it copies into the web root; this file is
+# defence in depth and keeps the build context small.
+
+# Dependencies and build output
+node_modules/
+coverage/
+dist/
+build/
+
+# Tests and tooling
+tests/
+eslint.config.js
+vitest.config.js
+Makefile
+package.json
+package-lock.json
+.prettierrc
+.prettierignore
+
+# CI, VCS and planning artefacts
+.github/
+.git/
+.gitignore
+.gitattributes
+.planning/
+.impeccable/
+docs/
+plan/
+
+# Agent and editor files
+.claude/
+CLAUDE.md
+.vscode/
+.idea/
+
+# Docs and licence (not served)
 README.md
 LICENSE
-.gitattributes
-.gitignore
 
-# claude files
-CLAUDE.md
-.claude
+# Docker's own files
+Dockerfile
+.dockerignore
+
+# Stale copies and scratch files. The ** prefix is required: a bare *.backup
+# only matches at the context root, not resources/js/main.js.backup.
+**/*.backup
+**/*.bak
+**/*.orig
+**/*.log
+**/*.tmp
+**/*.swp
+
+# Design source, not web assets
+**/_original/
+
+# OS noise
+.DS_Store
+Thumbs.db
