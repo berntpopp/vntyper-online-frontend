@@ -33,8 +33,8 @@ Thumbs.db
 *.tmp
 *.swp
 
-# claude files
-CLAUDE.md
+# Claude local settings. CLAUDE.md and AGENTS.md are committed project
+# documentation and are deliberately NOT ignored.
 .claude
 
 # Documentation (code reviews, internal notes)

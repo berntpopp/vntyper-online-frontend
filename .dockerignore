@@ -30,6 +30,7 @@ plan/
 # Agent and editor files
 .claude/
 CLAUDE.md
+AGENTS.md
 .vscode/
 .idea/
 

@@ -139,6 +139,8 @@ jobs:
           /README.md
           /LICENSE
           /.prettierrc
+          /AGENTS.md
+          /CLAUDE.md
           /tests/unit/utils/EventBus.test.js
           /.github/workflows/ci.yml
           /resources/js/ci-decoy.backup
