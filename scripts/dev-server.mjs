@@ -56,6 +56,10 @@ const SERVED_FILES = new Set([
 ]);
 const SERVED_DIRS = ['resources'];
 
+// Mirrors .dockerignore: these never reach the image, so they must not be
+// reachable here either, or a developer can load a file production will 404.
+const EXCLUDED = /(^|\/)(_original\/|.*\.(backup|bak|orig|log|tmp|swp)$)/;
+
 /**
  * Is this repo-relative path one that production would serve?
  *
@@ -103,14 +107,12 @@ async function resolveFile(urlPath) {
     return null;
   }
 
-  if (
-    !isServable(
-      real
-        .slice(root.length + 1)
-        .split(sep)
-        .join('/')
-    )
-  ) {
+  const relative = real
+    .slice(root.length + 1)
+    .split(sep)
+    .join('/');
+
+  if (EXCLUDED.test(relative) || !isServable(relative)) {
     return null;
   }
 

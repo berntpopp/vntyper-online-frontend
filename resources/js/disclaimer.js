@@ -6,6 +6,10 @@ import { getCookie, setCookie } from './cookie.js';
  * Initializes the disclaimer functionality by setting up event listeners and managing disclaimer display.
  */
 export function initializeDisclaimer() {
+  // Wire the modal's own listeners. This used to run at import time; it is
+  // called from here so main.js remains the single initialization path.
+  initializeDisclaimerModal();
+
   // Check if the disclaimer has been acknowledged
   const disclaimerAcknowledged = getCookie('disclaimerAcknowledged');
 
@@ -177,6 +181,6 @@ function initializeDisclaimerModal() {
   }
 }
 
-// Initialize the disclaimer when the module is loaded
-initializeDisclaimer();
-initializeDisclaimerModal();
+// No import-time initialization - main.js calls initializeDisclaimer(), which
+// now wires the modal too. Self-initializing here registered every listener a
+// second time on top of main.js's call. See the note in modal.js.

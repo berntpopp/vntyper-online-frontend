@@ -247,5 +247,10 @@ export function initializeModal() {
   }
 }
 
-// Initialize modals when the script is loaded
-initializeModal();
+// No import-time initialization. main.js is the single orchestrator: it calls
+// initializeModal() explicitly. Self-initializing here registered every
+// listener twice - and index.html additionally loaded this file as
+// `modal.js?v=…`, a different URL from main.js's `./modal.js` and therefore a
+// second module instance, so listeners were attached three times over. Each
+// trapFocus() call also overwrote the single `focusHandler` expando, so
+// closing a modal removed only the newest handler and leaked the rest.

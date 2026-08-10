@@ -1,7 +1,7 @@
 # Makefile for vntyper-online-frontend
 # Run these commands locally before committing
 
-.PHONY: help install dev lint lint-fix format format-check typecheck test test-run test-coverage e2e check test-all pre-commit audit clean quick-check
+.PHONY: help install dev docs-check lint lint-fix format format-check typecheck test test-run test-coverage e2e check test-all pre-commit audit clean quick-check
 
 # Default target
 help:
@@ -68,9 +68,12 @@ e2e:
 test-all:
 	npm run test:all
 
-# Combined checks (simulates CI)
+# Combined checks - the same command CI runs
 check:
 	npm run check
+
+docs-check:
+	npm run docs:check
 
 # Security audit
 audit:

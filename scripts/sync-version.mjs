@@ -43,7 +43,9 @@ if (lock.packages?.['']?.version && lock.packages[''].version !== version) {
 // --- resources/js/version.js ------------------------------------------------
 const versionJsPath = 'resources/js/version.js';
 const versionJs = read(versionJsPath);
-const constPattern = /(const frontendVersion = ')([^']+)(')/g;
+// Anchored to the start of a line so a matching string inside a comment cannot
+// satisfy the check while the real declaration drifts.
+const constPattern = /^([ \t]*const frontendVersion = ')([^']+)(')/gm;
 const constMatches = [...versionJs.matchAll(constPattern)];
 
 if (constMatches.length !== 1) {
@@ -60,7 +62,11 @@ const htmlPath = 'index.html';
 const html = read(htmlPath);
 
 // Every <script> pointing at a local module, whether or not it is versioned.
-const scriptPattern = /(<script\b[^>]*\bsrc=")(resources\/js\/[^"?]+\.js)(\?v=[^"]*)?(")/g;
+// [^>]* spans newlines only because there is no `.` here, so attributes split
+// across lines still match. Whitespace and single quotes around src= are
+// tolerated: a stale tag written as `src = '...'` must not slip past.
+const scriptPattern =
+  /(<script\b[^>]*\bsrc\s*=\s*["'])(resources\/js\/[^"'?]+\.js)(\?v=[^"']*)?(["'])/g;
 const scripts = [...html.matchAll(scriptPattern)];
 
 if (scripts.length === 0) {

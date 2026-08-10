@@ -22,7 +22,9 @@ const problems = [];
 const pkg = JSON.parse(read('package.json'));
 const scripts = new Set(Object.keys(pkg.scripts ?? {}));
 
-for (const [, name] of doc.matchAll(/`npm run ([a-z0-9:-]+)`/g)) {
+// [^`]* so a command written with arguments - `npm run test:e2e -- --ui` -
+// is still checked rather than silently skipped.
+for (const [, name] of doc.matchAll(/`npm run ([a-z0-9:-]+)[^`]*`/g)) {
   if (!scripts.has(name)) {
     problems.push(`AGENTS.md references \`npm run ${name}\`, which is not in package.json`);
   }
@@ -32,7 +34,7 @@ for (const [, name] of doc.matchAll(/`npm run ([a-z0-9:-]+)`/g)) {
 const makefile = read('Makefile');
 const targets = new Set([...makefile.matchAll(/^([a-zA-Z][a-zA-Z0-9_-]*):/gm)].map(m => m[1]));
 
-for (const [, name] of doc.matchAll(/`make ([a-z-]+)`/g)) {
+for (const [, name] of doc.matchAll(/`make ([a-z-]+)[^`]*`/g)) {
   if (!targets.has(name)) {
     problems.push(`AGENTS.md references \`make ${name}\`, which is not a Makefile target`);
   }
@@ -46,6 +48,16 @@ for (const [, path] of doc.matchAll(/`((?:resources|tests|scripts|types|\.github
   const clean = (path.includes('*') ? path.slice(0, path.indexOf('*')) : path).replace(/\/$/, '');
   if (!existsSync(join(root, clean))) {
     problems.push(`AGENTS.md references ${path}, which does not exist`);
+  }
+}
+
+// --- root-level files -------------------------------------------------------
+// Backticked bare filenames with a config-ish extension, e.g. `tsconfig.json`.
+for (const [, name] of doc.matchAll(
+  /`([A-Za-z0-9._-]+\.(?:json|mjs|cjs|md|yml|yaml|config\.js))`/g
+)) {
+  if (!existsSync(join(root, name))) {
+    problems.push(`AGENTS.md references ${name}, which does not exist at the repository root`);
   }
 }
 

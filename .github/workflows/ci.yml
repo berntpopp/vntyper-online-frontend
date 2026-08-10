@@ -27,17 +27,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run ESLint
-        run: npm run lint:check
-
-      - name: Check Prettier formatting
-        run: npm run format:check
-
-      - name: Check version sync
-        run: npm run version:check
-
-      - name: Typecheck
-        run: npm run typecheck
+      # Invoke the canonical gate rather than reconstructing it here: two lists
+      # of the same checks drift, and CI silently omitted docs:check.
+      - name: Run quality gate
+        run: npm run check
 
   test:
     name: Unit Tests

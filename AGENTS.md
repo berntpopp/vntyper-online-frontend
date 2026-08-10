@@ -48,11 +48,14 @@ extract the changed logic into the modern layer and call it from the old file.
 
 ## Hard rules
 
-1. **650 lines per file** in `resources/js/**`, counting neither blanks nor
-   comments. Enforced by ESLint `max-lines`. Split before you approach it.
-   `tests/**` is exempt — long explicit tests are correct.
+1. **650 lines per `.js`/`.mjs` file**, counting neither blanks nor comments.
+   Enforced by ESLint `max-lines`. Split before you approach it. `tests/**` is
+   exempt — long explicit tests are correct. `bamProcessing.js` has a private
+   ceiling at its current size, which may only ever be lowered.
 2. **JSDoc `@param` and `@returns` on every exported function.** The typecheck
-   reads them; they are not decoration.
+   consumes them, so a wrong annotation fails `npm run typecheck` — but a
+   _missing_ one does not. This rule is convention, upheld in review; only its
+   correctness is machine-checked, not its presence.
 3. **`npm run check` must pass before you commit.** It runs version sync, lint
    at zero warnings, format, and typecheck.
 4. **Add no new inline `<script>` blocks and no `on*=` attribute handlers.** A

@@ -48,13 +48,15 @@ export default defineConfig({
       // numbers are statements 33.51, branches 31.02, functions 41.94,
       // lines 33.61.
       //
-      // The floor sits just under those, so coverage cannot regress. 60 remains
-      // the goal: raise these numbers as tests are added. Never lower them.
+      // Set to the EXACT current values, not rounded down: a floor rounded to
+      // the whole percent silently tolerates a real regression (five uncovered
+      // functions dropped lines to 33.47 and still passed a floor of 33).
+      // 60 remains the goal - raise these as tests are added, never lower them.
       thresholds: {
-        lines: 33,
-        functions: 41,
-        branches: 30,
-        statements: 33,
+        lines: 33.61,
+        functions: 41.94,
+        branches: 31.02,
+        statements: 33.51,
       },
     },
 
