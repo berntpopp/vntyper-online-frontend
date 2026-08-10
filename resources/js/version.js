@@ -5,8 +5,20 @@ import { logMessage } from './log.js'; // Import the logMessage function
 // Frontend Version
 const frontendVersion = '0.68.2'; // CSP-safe deferred stylesheet loading (remove inline onload handler)
 
-// API Endpoint for Versions
-const versionEndpoint = `${window.CONFIG.API_URL}/version/`;
+/**
+ * Build the API version endpoint, or null when this page has no API config.
+ *
+ * Only index.html loads config.js. Reading window.CONFIG at module scope threw
+ * during evaluation on contact.html, both imprints and adtkd_diagnostics.html,
+ * which prevented the DOMContentLoaded handler below from ever registering -
+ * so the copyright year was blank on 4 of 5 pages.
+ *
+ * @returns {string|null} The versions endpoint, or null when unavailable.
+ */
+function getVersionEndpoint() {
+  const apiUrl = window.CONFIG?.API_URL;
+  return apiUrl ? `${apiUrl}/version/` : null;
+}
 
 /**
  * Fetches and displays version information.
@@ -20,6 +32,14 @@ async function displayVersions() {
     logMessage(`Frontend version set to ${frontendVersion}.`, 'info');
   } else {
     logMessage('Frontend version element (#appVersion) not found.', 'warning');
+  }
+
+  // Pages without config.js have no API to ask; the frontend version above is
+  // still rendered, and API/tool versions stay at their markup defaults.
+  const versionEndpoint = getVersionEndpoint();
+  if (!versionEndpoint) {
+    logMessage('No API configuration on this page; skipping version fetch.', 'info');
+    return;
   }
 
   // Fetch Tool Version from Backend
