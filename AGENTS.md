@@ -121,9 +121,12 @@ npm run version:sync  # rewrites resources/js/version.js and index.html
 - **E2E** — Playwright in `tests/e2e/`, driving a real browser against
   `scripts/dev-server.mjs`. Only the VNtyper backend is stubbed, via
   `page.route()`; an unmocked backend call fails the test loudly instead of
-  hanging. **These tests are not offline:** `index.html` loads intro.js and
-  Aioli from CDNs with SRI, and the browser hashes the bytes it receives, so
-  those requests cannot be stubbed.
+  hanging. **Do not stub the CDN requests.** `index.html` loads intro.js and
+  Aioli with Subresource Integrity, and the browser hashes the bytes it
+  actually receives, so a stub fails SRI and breaks the page. The current
+  suite still passes with the CDNs unreachable, because those globals are only
+  needed by the tutorial and by extraction; a test that exercises extraction
+  will need real network access.
 - **Assert what the app does, not what you assume it does.** Check behaviour
   against the running page before writing the assertion. Several of these
   tests were written from the source and were wrong: a lone `.bam` is rejected

@@ -4,7 +4,10 @@
 // (intro.js, BioWasm Aioli) are deliberately left alone - index.html loads
 // them with Subresource Integrity, and the browser hashes the bytes it
 // actually receives, so a stubbed response fails SRI and the page breaks.
-// These tests therefore need network access to those CDNs.
+//
+// Verified: the current suite still passes with all external traffic blocked,
+// because those globals are only touched by the tutorial and by extraction.
+// A test that drives extraction will need real access to biowasm.com.
 
 // resources/js/config.js sets API_URL to http://localhost:8000/api when the
 // page is served on port 3000, which is how the dev server runs.

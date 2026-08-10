@@ -112,9 +112,13 @@ tests/
 
 ### Coverage
 
-- **Target:** 60% minimum, enforced by `vitest.config.js` thresholds in CI
-- **Critical modules:** EventBus, StateManager, httpUtils
-- **Current status:** 602 tests passing across 19 test files
+- **Current:** 602 tests across 19 files; 33.5% statements, 31.0% branches,
+  41.9% functions, 33.6% lines
+- **Enforced floor:** the `vitest.config.js` thresholds sit just under those
+  numbers and run in CI, so coverage cannot regress. Raise them as tests are
+  added; never lower them.
+- **Target:** 60%. Getting there means covering the legacy flat modules, which
+  are the bulk of the untested code.
 
 ### Writing Tests
 
@@ -158,9 +162,11 @@ npm run test:e2e
 npm run test:e2e:ui                           # interactive
 ```
 
-These tests need network access: `index.html` loads intro.js and BioWasm's
-Aioli from CDNs with Subresource Integrity, so those requests cannot be
-stubbed. Only the VNtyper backend is mocked.
+Only the VNtyper backend is mocked. The CDN assets are not: `index.html` loads
+intro.js and BioWasm's Aioli with Subresource Integrity, so stubbing those
+responses fails the hash check and breaks the page. The current suite still
+passes with the CDNs unreachable, since those globals are only needed by the
+tutorial and by extraction.
 
 ## Quality Gates
 
