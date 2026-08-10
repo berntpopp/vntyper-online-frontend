@@ -25,6 +25,16 @@ vi.mock('../../../resources/js/errorHandling.js', () => ({
   displayMessage: vi.fn(),
 }));
 
+vi.mock('../../../resources/js/blobManager.js', () => ({
+  blobManager: {
+    create: vi.fn(() => 'blob:mock'),
+    revoke: vi.fn(() => true),
+    revokeMultiple: vi.fn(urls => urls.length),
+    revokeAll: vi.fn(() => 0),
+  },
+}));
+
+import { blobManager } from '../../../resources/js/blobManager.js';
 import { AppController } from '../../../resources/js/controllers/AppController.js';
 
 /**
@@ -58,8 +68,8 @@ function buildDependencies() {
     eventBus: { on: vi.fn(() => vi.fn()), emit: vi.fn(), emitAsync: vi.fn() },
     stateManager: { reset: vi.fn(), getJobs: vi.fn(() => []) },
     logger: { logMessage: vi.fn() },
-    jobController: { ...stubController },
-    cohortController: { ...stubController },
+    jobController: { ...stubController, jobView: { clearAll: vi.fn() } },
+    cohortController: { ...stubController, cohortView: { clearAll: vi.fn() } },
     fileController: { ...stubController, selectedFiles: [] },
     extractionController: { ...stubController },
     errorView: { show: vi.fn(), clear: vi.fn() },
@@ -109,5 +119,50 @@ describe('AppController button references', () => {
     app.submitBtn.disabled = true;
 
     expect(document.getElementById('submitBtn').disabled).toBe(true);
+  });
+});
+
+describe('AppController Blob URL lifetime', () => {
+  let deps;
+
+  beforeEach(() => {
+    buildDom();
+    deps = buildDependencies();
+    window.CONFIG = { API_URL: '/api' };
+  });
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+    delete window.CONFIG;
+    vi.clearAllMocks();
+  });
+
+  it('revokes the URLs it orphans when the result pane is replaced', () => {
+    const app = new AppController(deps);
+    app._renderedResultUrls = ['blob:a', 'blob:b'];
+
+    app._replaceRegionOutput('<p>next result</p>');
+
+    expect(blobManager.revokeMultiple).toHaveBeenCalledWith(['blob:a', 'blob:b']);
+    expect(app._renderedResultUrls).toEqual([]);
+    expect(document.getElementById('regionOutput').innerHTML).toBe('<p>next result</p>');
+  });
+
+  it('does not call revokeMultiple when nothing is rendered', () => {
+    const app = new AppController(deps);
+
+    app._replaceRegionOutput();
+
+    expect(blobManager.revokeMultiple).not.toHaveBeenCalled();
+  });
+
+  it('revokes everything on reset', () => {
+    const app = new AppController(deps);
+    app._renderedResultUrls = ['blob:a'];
+
+    app.handleReset();
+
+    expect(blobManager.revokeAll).toHaveBeenCalled();
+    expect(app._renderedResultUrls).toEqual([]);
   });
 });

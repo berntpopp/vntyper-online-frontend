@@ -211,5 +211,13 @@ window.addEventListener('beforeunload', () => {
   blobManager.cleanup();
 });
 
-// Start automatic cleanup (check every 60 seconds, revoke URLs older than 5 minutes)
-blobManager.startAutoCleanup(60000, 300000);
+// NOTE: age-based auto-cleanup is deliberately NOT started.
+//
+// startAutoCleanup(60000, 300000) revoked result URLs after five minutes while
+// their anchors stayed in the DOM looking clickable - a large BAM extraction
+// plus a short interruption was enough to lose them silently.
+//
+// Lifetime is instead tied to what is on screen: AppController revokes the URLs
+// it orphans whenever it replaces the result pane, and cleanup() on unload
+// revokes the rest. startAutoCleanup() remains available for callers that want
+// it.
