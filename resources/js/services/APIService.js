@@ -135,7 +135,11 @@ export class APIService {
    */
   pollCohortStatus(cohortId, passphrase, onUpdate, onComplete, onError) {
     try {
-      return pollCohortStatusAPI(cohortId, passphrase, onUpdate, onComplete, onError);
+      // pollCohortStatusAPI takes callbacks first and the passphrase last:
+      // (cohortId, onStatusUpdate, onComplete, onError, onPoll, passphrase).
+      // Passing this method's own argument order straight through shifted every
+      // callback one slot and dropped the passphrase entirely.
+      return pollCohortStatusAPI(cohortId, onUpdate, onComplete, onError, null, passphrase);
     } catch (error) {
       this._handleError('pollCohortStatus', error);
       throw error;

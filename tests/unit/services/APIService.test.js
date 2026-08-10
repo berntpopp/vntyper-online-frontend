@@ -383,13 +383,18 @@ describe('APIService', () => {
         onError
       );
 
-      // Assert
+      // Assert: pollCohortStatusAPI's signature is
+      // (cohortId, onStatusUpdate, onComplete, onError, onPoll, passphrase).
+      // This assertion previously mirrored pollCohortStatus's own argument
+      // order, which is different, and so cemented a real defect: every
+      // callback arrived one position early and the passphrase was dropped.
       expect(pollCohortStatusAPI).toHaveBeenCalledWith(
         cohortId,
-        passphrase,
         onUpdate,
         onComplete,
-        onError
+        onError,
+        null,
+        passphrase
       );
       expect(result).toBe(mockStopFn);
     });
