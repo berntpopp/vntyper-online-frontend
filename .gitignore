@@ -45,3 +45,5 @@ plan/
 
 # Playwright MCP screenshots and artifacts
 .playwright-mcp/
+# Impeccable design-review snapshots
+.impeccable/

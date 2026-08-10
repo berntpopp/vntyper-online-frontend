@@ -24,3 +24,6 @@ plan/
 
 # HTML files - preserve existing formatting
 *.html
+
+# Impeccable design-review snapshots (generated, not committed)
+.impeccable/
