@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.68.3'; // Correctness: failed jobs, storage, blob lifetime, web-root exposure
+const frontendVersion = '0.69.0'; // Correctness: failed jobs, poll errors, storage, blob lifetime, web-root exposure
 
 /**
  * Build the API version endpoint, or null when this page has no API config.
