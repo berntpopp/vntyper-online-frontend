@@ -117,8 +117,8 @@ describe('EventBus', () => {
       eventBus.on('test:event', handler);
 
       expect(logMessage).toHaveBeenCalledWith(
-        expect.stringContaining('Subscribed to "test:event"'),
-        expect.objectContaining({ listeners: 1, once: undefined })
+        expect.stringContaining('Subscribed to "test:event" (listeners: 1, once: false)'),
+        'debug'
       );
     });
   });
@@ -206,8 +206,8 @@ describe('EventBus', () => {
       eventBus.off('test:event', handler);
 
       expect(logMessage).toHaveBeenCalledWith(
-        expect.stringContaining('Unsubscribed from "test:event"'),
-        expect.objectContaining({ remainingListeners: 0 })
+        expect.stringContaining('Unsubscribed from "test:event" (remainingListeners: 0)'),
+        'debug'
       );
     });
   });
@@ -259,8 +259,8 @@ describe('EventBus', () => {
       expect(handler3).toHaveBeenCalled();
       expect(count).toBe(2); // Only handler2 and handler3 succeeded
       expect(logMessage).toHaveBeenCalledWith(
-        expect.stringContaining('Error in listener for "test:event"'),
-        expect.any(Error)
+        expect.stringContaining('Error in listener for "test:event": Handler 1 error'),
+        'error'
       );
     });
 
@@ -285,11 +285,8 @@ describe('EventBus', () => {
       eventBus.emit('test:event', { data: 'test' });
 
       expect(logMessage).toHaveBeenCalledWith(
-        expect.stringContaining('Emitted "test:event"'),
-        expect.objectContaining({
-          args: [{ data: 'test' }],
-          listeners: 1,
-        })
+        expect.stringContaining('Emitted "test:event" (args: 1, listeners: 1)'),
+        'debug'
       );
     });
 
@@ -354,8 +351,8 @@ describe('EventBus', () => {
       expect(handler2).toHaveBeenCalled();
       expect(count).toBe(1); // Only handler2 succeeded
       expect(logMessage).toHaveBeenCalledWith(
-        expect.stringContaining('Error in async listener for "test:event"'),
-        expect.any(Error)
+        expect.stringContaining('Error in async listener for "test:event": Async handler error'),
+        'error'
       );
     });
 

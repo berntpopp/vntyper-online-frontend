@@ -28,11 +28,12 @@ import { showSpinner, hideSpinner, startCountdown, clearCountdown } from '../uiU
 export class JobController extends BaseController {
   /**
    * @param {Object} dependencies - Injected dependencies
-   * @param {EventBus} dependencies.eventBus - Event bus
-   * @param {StateManager} dependencies.stateManager - State manager
-   * @param {APIService} dependencies.apiService - API service
-   * @param {JobView} dependencies.jobView - Job view
-   * @param {ErrorView} dependencies.errorView - Error view
+   * @param {import('../utils/EventBus.js').EventBus} dependencies.eventBus - Event bus
+   * @param {import('../stateManager.js').StateManager} dependencies.stateManager - State manager
+   * @param {import('../services/APIService.js').APIService} dependencies.apiService - API service
+   * @param {import('../views/JobView.js').JobView} dependencies.jobView - Job view
+   * @param {import('../views/ErrorView.js').ErrorView} dependencies.errorView - Error view
+   * @param {import('../pollingManager.js').PollingManager} dependencies.pollingManager - Polling manager
    */
   constructor(dependencies) {
     super(dependencies);

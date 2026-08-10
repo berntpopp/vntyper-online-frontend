@@ -34,7 +34,7 @@ export class CohortView {
 
   /**
    * Show a new cohort in the UI
-   * @param {Cohort} cohort - Cohort model
+   * @param {import('../models/Cohort.js').Cohort} cohort - Cohort model
    * @param {Object} [options={}] - Display options
    */
   showCohort(cohort, options = {}) {
@@ -87,18 +87,24 @@ export class CohortView {
 
   /**
    * Show shareable link for cohort
+   *
+   * displayShareableLink builds the URL itself from the id, so it takes
+   * (id, targetContainer, type) - see JobView.showShareableLink for the same
+   * call. The container comes from querySelector as an Element, and
+   * displayShareableLink rejects anything that is not an HTMLElement, so it is
+   * narrowed here rather than asserted.
+   *
    * @param {string} cohortId - Cohort ID
-   * @param {string} link - Shareable link
    */
-  showShareableLink(cohortId, link) {
+  showShareableLink(cohortId) {
     const cohortElement = this.cohortElements.get(cohortId);
     if (!cohortElement) {
       return;
     }
 
     const linkContainer = cohortElement.querySelector('.cohort-shareable-link');
-    if (linkContainer) {
-      displayShareableLink(link, cohortId, linkContainer);
+    if (linkContainer instanceof HTMLElement) {
+      displayShareableLink(cohortId, linkContainer, 'cohort');
     }
   }
 

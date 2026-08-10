@@ -73,7 +73,10 @@ export class DIContainer {
     });
 
     if (this.debug) {
-      logMessage(`[DI] Registered "${name}"`, { singleton, factory });
+      logMessage(
+        `[DI] Registered "${name}" (singleton: ${singleton}, factory: ${factory})`,
+        'debug'
+      );
     }
   }
 
@@ -141,7 +144,7 @@ export class DIContainer {
       }
 
       if (this.debug) {
-        logMessage(`[DI] Resolved "${name}"`, { singleton: dep.singleton });
+        logMessage(`[DI] Resolved "${name}" (singleton: ${Boolean(dep.singleton)})`, 'debug');
       }
 
       return instance;
@@ -233,7 +236,7 @@ export class DIContainer {
 
   /**
    * Create an instance with automatic dependency injection
-   * @param {Function} Constructor - Constructor function
+   * @param {new (deps: Object) => *} Constructor - Constructor called with a single deps object
    * @param {Object} [manualDeps={}] - Manual dependencies to override
    * @returns {*} Instance
    */

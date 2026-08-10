@@ -43,7 +43,9 @@ docs/
 # Planning files and prototypes
 plan/
 
-# Playwright MCP screenshots and artifacts
+# Playwright artifacts
 .playwright-mcp/
+playwright-report/
+test-results/
 # Impeccable design-review snapshots
 .impeccable/

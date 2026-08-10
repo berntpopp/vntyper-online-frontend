@@ -14,6 +14,10 @@ eslint.config.js
 vitest.config.js
 tsconfig.json
 types/
+playwright.config.js
+playwright-report/
+test-results/
+.editorconfig
 Makefile
 package.json
 package-lock.json
@@ -35,6 +39,7 @@ plan/
 .claude/
 CLAUDE.md
 AGENTS.md
+GEMINI.md
 .vscode/
 .idea/
 

@@ -93,8 +93,8 @@ export function initializeUsageStats() {
     }
     usageStatsContainer.classList.toggle('visible');
     usageStatsContainer.classList.toggle('hidden');
-    toggleStatsBtn.setAttribute('aria-expanded', !currentlyVisible);
-    safeStorage.setItem('usageStatsVisible', !currentlyVisible);
+    toggleStatsBtn.setAttribute('aria-expanded', String(!currentlyVisible));
+    safeStorage.setItem('usageStatsVisible', String(!currentlyVisible));
   });
 
   // Close Stats Panel

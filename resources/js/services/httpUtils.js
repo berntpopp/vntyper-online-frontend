@@ -116,6 +116,7 @@ export async function parseErrorResponse(response) {
   }
 
   // Create error with metadata
+  /** @type {Error & { status?: number, response?: Response, statusText?: string }} */
   const error = new Error(errorMessage);
   error.status = response.status;
   error.response = response;

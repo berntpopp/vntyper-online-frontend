@@ -29,6 +29,10 @@ export class Cohort {
    * @param {Object} [data.metadata={}] - Additional metadata
    * @param {number} [data.createdAt] - Creation timestamp
    * @param {number} [data.updatedAt] - Last update timestamp
+   * @param {Function} [data.pollStop] - Function that stops status polling for this cohort
+   * @param {boolean} [data.isPolling=false] - Whether status polling is currently active
+   * @param {string} [data.analysisJobId] - Job ID of the cohort-level analysis
+   * @param {string} [data.analysisStatus] - Status of the cohort-level analysis
    */
   constructor(data) {
     this.validateCohortId(data.cohortId);

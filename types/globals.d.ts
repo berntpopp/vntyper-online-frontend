@@ -25,7 +25,16 @@ declare class Aioli {
 
   fs: {
     stat(path: string): Promise<{ size: number }>;
-    readFile(path: string, options?: { encoding?: string }): Promise<Uint8Array>;
+
+    /**
+     * Read a file out of the virtual filesystem. The bytes come back across the
+     * WebWorker boundary as a copy backed by a plain ArrayBuffer, never a
+     * SharedArrayBuffer - which is what lets the app hand the result straight to
+     * `new Blob([...])`. The `Uint8Array<ArrayBuffer>` type argument records that;
+     * a bare `Uint8Array` would widen the buffer to `ArrayBufferLike` and stop
+     * being a valid BlobPart.
+     */
+    readFile(path: string, options?: { encoding?: string }): Promise<Uint8Array<ArrayBuffer>>;
     writeFile(path: string, data: Uint8Array | string): Promise<void>;
   };
 }

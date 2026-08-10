@@ -62,22 +62,40 @@ export function checkAndShowDisclaimer() {
 }
 
 /**
+ * A modal element carrying the two expando properties the focus trap stores on
+ * it: the keydown handler (so it can be detached again) and the element that
+ * held focus before the modal opened (so focus can be returned to it).
+ *
+ * @typedef {HTMLElement & {
+ *   focusHandler?: EventListener,
+ *   previousFocus?: HTMLElement
+ * }} FocusTrapElement
+ */
+
+/**
  * Trap focus within a given element for accessibility (ARIA best practices).
- * @param {HTMLElement} element - The element to trap focus within.
+ * @param {FocusTrapElement} element - The element to trap focus within.
  * @param {boolean} allowEscape - Whether Escape key should close the modal (default: true).
  */
 function trapFocus(element, allowEscape = true) {
-  const focusableElements = element.querySelectorAll(
-    'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+  const focusableElements = /** @type {NodeListOf<HTMLElement>} */ (
+    element.querySelectorAll(
+      'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+    )
   );
   const firstFocusable = focusableElements[0];
   const lastFocusable = focusableElements[focusableElements.length - 1];
 
   // Store element that had focus before modal opened
-  element.previousFocus = document.activeElement;
+  element.previousFocus = /** @type {HTMLElement} */ (document.activeElement);
 
   function handleFocus(event) {
     if (event.key === 'Tab') {
+      // A modal with no focusable children leaves first/last undefined - there
+      // is nothing to cycle between, so let the browser handle Tab itself.
+      if (!firstFocusable || !lastFocusable) {
+        return;
+      }
       if (event.shiftKey) {
         // Shift + Tab
         if (document.activeElement === firstFocusable) {
@@ -105,7 +123,7 @@ function trapFocus(element, allowEscape = true) {
 
 /**
  * Removes the focus trap from the modal and returns focus to trigger element.
- * @param {HTMLElement} element - The modal element.
+ * @param {FocusTrapElement} element - The modal element.
  */
 function removeTrapFocus(element) {
   if (element.focusHandler) {
@@ -134,7 +152,7 @@ function openFaqModal() {
     // Use requestAnimationFrame to ensure DOM updates are complete before focusing
     // This prevents the "aria-hidden on focused element" accessibility warning
     requestAnimationFrame(() => {
-      const closeButton = faqModal.querySelector('.modal-close');
+      const closeButton = /** @type {HTMLButtonElement} */ (faqModal.querySelector('.modal-close'));
       if (closeButton) {
         closeButton.focus();
       }

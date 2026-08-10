@@ -7,6 +7,7 @@
 - [Technologies Used](#technologies-used)
 - [Development](#development)
 - [Testing](#testing)
+- [Quality Gates](#quality-gates)
 - [Usage](#usage)
 - [File Naming Conventions](#file-naming-conventions)
 - [License](#license)
@@ -50,14 +51,15 @@
 3. **Start Development Server:**
 
    ```bash
-   # Using Python (recommended for development)
-   python3 -m http.server 3000
-
-   # Or using Node.js
-   npx serve -l 3000
+   make dev            # or: node scripts/dev-server.mjs
    ```
 
-   The application will be available at `http://localhost:3000`
+   The application will be available at `http://localhost:3000`.
+
+   Port 3000 is required, not a preference: `resources/js/config.js` points the
+   app at a local backend only when the page is served on that port. The dev
+   server also mirrors production's web root, so a file that 404s in production
+   404s here too.
 
 4. **Open the Application:**
 
@@ -71,7 +73,7 @@
 
 ## Testing
 
-The frontend uses **Vitest** with **happy-dom** for fast, modern testing of Vanilla JavaScript modules.
+The frontend uses **Vitest** with **jsdom** for unit tests and **Playwright** for end-to-end tests.
 
 ### Quick Start
 
@@ -99,21 +101,20 @@ npm run test:ui
 
 ```
 tests/
-├── unit/                    # Unit tests
+├── unit/                    # Vitest unit tests, mirroring the source layout
 │   ├── controllers/         # Controller tests
-│   ├── models/              # Model tests
-│   ├── services/            # Service tests (httpUtils, etc.)
-│   ├── utils/               # Utility tests (EventBus, StateManager)
-│   └── fixtures/            # Shared test data
-├── integration/             # Integration tests
-└── e2e/                     # End-to-end tests (optional)
+│   ├── services/            # Service tests (APIService, httpUtils)
+│   ├── utils/               # Utility tests (EventBus, DI, stateManager)
+│   └── views/               # View tests
+└── e2e/                     # Playwright end-to-end tests
+    └── fixtures/            # Backend stubs and shared helpers
 ```
 
 ### Coverage
 
-- **Target:** 60-80% overall coverage
-- **Critical modules:** EventBus (100%), StateManager (95%), httpUtils (95%)
-- **Current status:** 228 tests passing across 4 test suites
+- **Target:** 60% minimum, enforced by `vitest.config.js` thresholds in CI
+- **Critical modules:** EventBus, StateManager, httpUtils
+- **Current status:** 602 tests passing across 19 test files
 
 ### Writing Tests
 
@@ -142,9 +143,34 @@ describe('myFunction()', () => {
 
 Test configuration in `vitest.config.js`:
 
-- Environment: `happy-dom` (fast DOM simulation)
+- Environment: `jsdom` (stable DOM simulation)
 - Coverage provider: `v8` (native, fast)
 - Globals: `true` (describe, it, expect available everywhere)
+
+### End-to-End Tests
+
+Playwright drives a real browser against the site served by
+`scripts/dev-server.mjs`, with the backend API stubbed.
+
+```bash
+npx playwright install --with-deps chromium   # once
+npm run test:e2e
+npm run test:e2e:ui                           # interactive
+```
+
+These tests need network access: `index.html` loads intro.js and BioWasm's
+Aioli from CDNs with Subresource Integrity, so those requests cannot be
+stubbed. Only the VNtyper backend is mocked.
+
+## Quality Gates
+
+```bash
+npm run check      # version sync + lint (zero warnings) + format + typecheck
+npm run test:all   # unit + end-to-end tests
+```
+
+Both run in CI. `AGENTS.md` documents the project rules these enforce, and is
+the single source of truth for AI coding agents.
 
 ## Usage
 

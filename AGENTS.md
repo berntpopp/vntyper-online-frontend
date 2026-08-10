@@ -1,7 +1,8 @@
 # AGENTS.md
 
 Instructions for AI coding agents working in this repository. This is the single
-source of truth; `CLAUDE.md` only points here.
+source of truth; `CLAUDE.md` and `GEMINI.md` only point here. Add a pointer for
+any new tool rather than a second copy of these rules.
 
 ## What this is
 
@@ -54,10 +55,14 @@ extract the changed logic into the modern layer and call it from the old file.
    reads them; they are not decoration.
 3. **`npm run check` must pass before you commit.** It runs version sync, lint
    at zero warnings, format, and typecheck.
-4. **No inline `<script>` blocks and no `on*=` attribute handlers.** A Content
-   Security Policy is enforced at deploy time from outside this repository, so
-   nothing here will catch the violation locally — but production will break.
-   Commit `062711b` is one of these reaching users.
+4. **Add no new inline `<script>` blocks and no `on*=` attribute handlers.** A
+   Content Security Policy is enforced at deploy time from outside this
+   repository, so nothing here catches a violation locally — production breaks
+   instead. Commit `062711b` is one of these reaching users.
+   Two pre-existing exceptions, neither of which licenses more: the `ld+json`
+   structured-data blocks, which are data rather than executable code, and one
+   executable block in `contact.html` that obfuscates the support address.
+   That one should move into a module.
 5. **CDN assets need `integrity` and a pinned version.** Commit `0438aac` is an
    unpinned biowasm URL taking the app down.
 6. **Never add a build step, bundler, or `.ts` source file.** TypeScript is
@@ -113,7 +118,15 @@ npm run version:sync  # rewrites resources/js/version.js and index.html
 
 - **Unit** — Vitest with jsdom, in `tests/unit/`, mirroring the source layout.
   Do not reach for the DOM when a pure function will do.
-- **E2E** — Playwright in `tests/e2e/`, against the local dev server with the
-  backend stubbed through `page.route()`. Tests are hermetic and run offline.
-  An unmocked request fails the test loudly instead of hanging.
+- **E2E** — Playwright in `tests/e2e/`, driving a real browser against
+  `scripts/dev-server.mjs`. Only the VNtyper backend is stubbed, via
+  `page.route()`; an unmocked backend call fails the test loudly instead of
+  hanging. **These tests are not offline:** `index.html` loads intro.js and
+  Aioli from CDNs with SRI, and the browser hashes the bytes it receives, so
+  those requests cannot be stubbed.
+- **Assert what the app does, not what you assume it does.** Check behaviour
+  against the running page before writing the assertion. Several of these
+  tests were written from the source and were wrong: a lone `.bam` is rejected
+  as "invalid", an unsupported extension is discarded with no message at all,
+  and `footer.js` deletes the footer's FAQ link at runtime.
 - Never lower a coverage threshold or delete an assertion to make a suite pass.

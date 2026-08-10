@@ -6,7 +6,7 @@ import { showSpinner, hideSpinner } from './uiUtils.js';
 
 export function initializeFileSelection(selectedFiles) {
   const dropArea = document.getElementById('dropArea');
-  const bamFilesInput = document.getElementById('bamFiles');
+  const bamFilesInput = /** @type {HTMLInputElement} */ (document.getElementById('bamFiles'));
   const fileList = document.getElementById('fileList');
 
   // Debounce timer for file validation (Performance: smooth UX with 100+ files)

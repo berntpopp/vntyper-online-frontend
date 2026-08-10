@@ -95,7 +95,7 @@ function displayCurrentYear() {
   const currentYearElement = document.getElementById('currentYear');
   if (currentYearElement) {
     const currentYear = new Date().getFullYear();
-    currentYearElement.textContent = currentYear;
+    currentYearElement.textContent = String(currentYear);
     logMessage(`Current year set to ${currentYear}.`, 'info');
   } else {
     logMessage('Current year element (#currentYear) not found.', 'warning');

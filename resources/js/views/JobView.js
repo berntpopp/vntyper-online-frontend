@@ -34,7 +34,7 @@ export class JobView {
 
   /**
    * Show a new job in the UI
-   * @param {Job} job - Job model
+   * @param {import('../models/Job.js').Job} job - Job model
    */
   showJob(job) {
     // Hide placeholder message when showing job

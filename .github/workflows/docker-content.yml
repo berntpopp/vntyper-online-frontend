@@ -144,6 +144,10 @@ jobs:
           /.nvmrc
           /scripts/sync-version.mjs
           /tsconfig.json
+          /GEMINI.md
+          /playwright.config.js
+          /scripts/dev-server.mjs
+          /.editorconfig
           /types/globals.d.ts
           /tests/unit/utils/EventBus.test.js
           /.github/workflows/ci.yml

@@ -19,8 +19,8 @@ import { logMessage } from './log.js';
 
 class MobileNavigation {
   constructor() {
-    this.navbarToggle = document.querySelector('.navbar-toggle');
-    this.navbarMenu = document.querySelector('.navbar-menu');
+    this.navbarToggle = /** @type {HTMLButtonElement} */ (document.querySelector('.navbar-toggle'));
+    this.navbarMenu = /** @type {HTMLElement} */ (document.querySelector('.navbar-menu'));
     this.hamburgerIcon = document.querySelector('.hamburger-icon');
     this.body = document.body;
     this.scrollPosition = 0;
@@ -63,7 +63,8 @@ class MobileNavigation {
     // Close menu when clicking outside
     document.addEventListener('click', e => {
       if (this.isMenuOpen()) {
-        if (!this.navbarMenu.contains(e.target) && !this.navbarToggle.contains(e.target)) {
+        const target = /** @type {Node} */ (e.target);
+        if (!this.navbarMenu.contains(target) && !this.navbarToggle.contains(target)) {
           this.closeMenu();
         }
       }
@@ -125,7 +126,9 @@ class MobileNavigation {
     this.body.style.top = `-${this.scrollPosition}px`;
 
     // Focus first menu item for keyboard users
-    const firstLink = this.navbarMenu.querySelector('.navbar-link');
+    const firstLink = /** @type {HTMLAnchorElement} */ (
+      this.navbarMenu.querySelector('.navbar-link')
+    );
     if (firstLink) {
       setTimeout(() => firstLink.focus(), 100);
     }

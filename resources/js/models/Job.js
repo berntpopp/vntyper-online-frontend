@@ -45,6 +45,11 @@ export class Job {
    * @param {Error} [data.error] - Job error
    * @param {number} [data.createdAt] - Creation timestamp
    * @param {number} [data.updatedAt] - Last update timestamp
+   * @param {Function} [data.pollStop] - Function that stops status polling for this job
+   * @param {number} [data.pollInterval=5000] - Polling interval in milliseconds
+   * @param {number} [data.retryCount=0] - Number of retries already attempted
+   * @param {number} [data.maxRetries=10] - Maximum number of retries allowed
+   * @param {Object} [data.metadata={}] - Additional metadata
    */
   constructor(data) {
     this.validateJobId(data.jobId);
@@ -264,14 +269,19 @@ export class Job {
    * @returns {Job} New job instance
    */
   static fromFormData(formData, jobId) {
+    // FormData.get() returns File | string | null, so every entry has to be
+    // narrowed before it is used: reading .name off a string entry silently
+    // yields undefined, and a File entry is not a usable email/cohort id.
     const file = formData.get('file');
+    const email = formData.get('email');
+    const cohortId = formData.get('cohort_id');
 
     return new Job({
       jobId,
       status: Job.STATUS.PENDING,
-      fileName: file ? file.name : null,
-      email: formData.get('email'),
-      cohortId: formData.get('cohort_id'),
+      fileName: file instanceof File ? file.name : null,
+      email: typeof email === 'string' ? email : null,
+      cohortId: typeof cohortId === 'string' ? cohortId : null,
       options: {
         advntr_mode: formData.get('advntr_mode') === 'true',
         archive: formData.get('archive') === 'true',

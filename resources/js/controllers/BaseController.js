@@ -1,6 +1,20 @@
 // frontend/resources/js/controllers/BaseController.js
 
 /**
+ * The logger surface every controller depends on. Two shapes satisfy it: a
+ * console-like object with one method per level (the default fallback), and
+ * our log.js-style logger which exposes logMessage(message, level) instead.
+ * _log() feature-detects which one it was handed, so every member is optional.
+ *
+ * @typedef {Object} ControllerLogger
+ * @property {(message: string, level?: string) => void} [logMessage]
+ * @property {(...args: unknown[]) => void} [debug]
+ * @property {(...args: unknown[]) => void} [info]
+ * @property {(...args: unknown[]) => void} [warn]
+ * @property {(...args: unknown[]) => void} [error]
+ */
+
+/**
  * Base Controller Class
  *
  * Purpose: Provides common functionality for all controllers, implementing
@@ -30,9 +44,9 @@
 export class BaseController {
   /**
    * @param {Object} dependencies - Injected dependencies
-   * @param {EventBus} dependencies.eventBus - Event bus for pub/sub
-   * @param {StateManager} dependencies.stateManager - State manager
-   * @param {Logger} [dependencies.logger] - Logger instance
+   * @param {import('../utils/EventBus.js').EventBus} dependencies.eventBus - Event bus for pub/sub
+   * @param {import('../stateManager.js').StateManager} dependencies.stateManager - State manager
+   * @param {ControllerLogger} [dependencies.logger] - Logger instance
    */
   constructor(dependencies) {
     // Validate required dependencies
@@ -51,6 +65,7 @@ export class BaseController {
     // Store dependencies
     this.eventBus = dependencies.eventBus;
     this.stateManager = dependencies.stateManager;
+    /** @type {ControllerLogger} */
     this.logger = dependencies.logger || console;
 
     // Track event subscriptions for cleanup

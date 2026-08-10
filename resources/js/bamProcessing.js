@@ -922,11 +922,18 @@ async function indexBam(CLI, subsetBamPath) {
  * @returns {Promise<Object>} - An object containing subset BAM/BAI Blobs and detected assembly & region.
  */
 export async function extractRegionAndIndex(CLI, pair) {
-  const regionSelect = document.getElementById('region');
+  // #region is a <select> and #normalMode an <input type="checkbox">, both static markup in
+  // index.html - the only page that loads this module (lazily, from ExtractionController).
+  const regionSelect = /** @type {HTMLSelectElement} */ (document.getElementById('region'));
   const regionValue = regionSelect.value;
 
   // ADDED: Read normal mode checkbox
-  const normalModeCheckbox = document.getElementById('normalMode');
+  // The cast below is deliberately written without inner spaces: at the usual `/** @type ... */`
+  // spacing the line is 101 columns, and Prettier would wrap it into three, pushing this file past
+  // the max-lines budget pinned for it in eslint.config.js.
+  const normalModeCheckbox = /** @type {HTMLInputElement} */ (
+    document.getElementById('normalMode')
+  );
   const normalMode = normalModeCheckbox ? normalModeCheckbox.checked : false;
 
   logMessage('Extract Region and Index Function Triggered', 'info');
@@ -946,7 +953,8 @@ export async function extractRegionAndIndex(CLI, pair) {
   ensureSpinAnimation();
 
   // Update UI to indicate processing with spinner (DRY)
-  const extractBtn = document.getElementById('extractBtn');
+  // #extractBtn is a <button> in index.html; the finally block below re-enables it.
+  const extractBtn = /** @type {HTMLButtonElement} */ (document.getElementById('extractBtn'));
   extractBtn.disabled = true;
   extractBtn.innerHTML = createSpinnerHTML({
     size: 16,

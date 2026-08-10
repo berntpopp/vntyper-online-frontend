@@ -185,10 +185,17 @@ export class ExtractionController extends BaseController {
   }
 
   /**
-   * Check if Aioli is initialized
-   * @returns {boolean} True if initialized
+   * Check if Aioli is initialized and ready to extract.
+   *
+   * Deliberately NOT named isInitialized(): BaseController's constructor sets
+   * an instance property of that name, which shadows any same-named method on
+   * the prototype, so `controller.isInitialized()` threw "is not a function".
+   * The two questions are different anyway - BaseController.isInitialized is
+   * the controller lifecycle flag, this is whether the Aioli CLI exists.
+   *
+   * @returns {boolean} True if the Aioli CLI has been created
    */
-  isInitialized() {
+  isExtractionReady() {
     return !!this.cli;
   }
 

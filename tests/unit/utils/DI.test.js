@@ -120,10 +120,10 @@ describe('DIContainer', () => {
       container.register('service', {}, { singleton: true });
 
       // Assert
-      expect(logMessage).toHaveBeenCalledWith('[DI] Registered "service"', {
-        singleton: true,
-        factory: false,
-      });
+      expect(logMessage).toHaveBeenCalledWith(
+        '[DI] Registered "service" (singleton: true, factory: false)',
+        'debug'
+      );
     });
   });
 

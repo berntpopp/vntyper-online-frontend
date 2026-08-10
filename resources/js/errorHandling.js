@@ -34,8 +34,8 @@ export class ErrorHandler {
    */
   handleError(error, context = {}, level = ErrorLevel.ERROR) {
     const errorEntry = {
-      message: error?.message || String(error),
-      stack: error?.stack,
+      message: typeof error === 'string' ? error : error?.message || String(error),
+      stack: typeof error === 'string' ? undefined : error?.stack,
       timestamp: new Date().toISOString(),
       level,
       context,
@@ -166,11 +166,11 @@ export class ErrorHandler {
    * Retry a function with exponential backoff
    * Based on Cockatiel best practices for fault tolerance
    * @param {Function} fn - Function to retry (sync or async)
-   * @param {Object} options - Retry configuration
-   * @param {number} options.maxRetries - Maximum retry attempts (default: 3)
-   * @param {number} options.baseDelay - Base delay in ms (default: 1000)
-   * @param {number} options.maxDelay - Maximum delay in ms (default: 10000)
-   * @param {Function} options.onRetry - Callback on each retry (attempt, delay, error)
+   * @param {Object} [options={}] - Retry configuration
+   * @param {number} [options.maxRetries=3] - Maximum retry attempts
+   * @param {number} [options.baseDelay=1000] - Base delay in ms
+   * @param {number} [options.maxDelay=10000] - Maximum delay in ms
+   * @param {Function} [options.onRetry] - Callback on each retry (attempt, delay, error)
    * @returns {Promise} Result of function
    * @throws {Error} Last error if all retries exhausted
    */

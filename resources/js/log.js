@@ -180,6 +180,7 @@ function applyLogFilter() {
   const logContent = getLogContentElement();
   if (!logContent) return;
 
+  /** @type {NodeListOf<HTMLElement>} */
   const entries = logContent.querySelectorAll('.log-entry');
   entries.forEach(entry => {
     const level = entry.dataset.level;
@@ -193,6 +194,7 @@ function applyLogFilter() {
  * @param {string} activeLevel - The active filter level
  */
 function updateFilterButtonStates(activeLevel) {
+  /** @type {NodeListOf<HTMLElement>} */
   const filterButtons = document.querySelectorAll('.log-filter-btn');
   filterButtons.forEach(button => {
     const isActive = button.dataset.level === activeLevel;
@@ -341,6 +343,7 @@ function setupClearButton() {
  * Sets up filter button event listeners.
  */
 function setupFilterButtons() {
+  /** @type {NodeListOf<HTMLElement>} */
   const filterButtons = document.querySelectorAll('.log-filter-btn');
 
   filterButtons.forEach(button => {
@@ -355,7 +358,9 @@ function setupFilterButtons() {
  */
 function setupDownloadButton() {
   const downloadBtn = document.getElementById('downloadLogsBtn');
-  const formatSelect = document.getElementById('downloadFormatSelect');
+  const formatSelect = /** @type {HTMLSelectElement|null} */ (
+    document.getElementById('downloadFormatSelect')
+  );
 
   if (!downloadBtn || !formatSelect) return;
 

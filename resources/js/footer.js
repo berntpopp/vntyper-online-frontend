@@ -67,6 +67,6 @@ function setCurrentYear() {
   const currentYear = new Date().getFullYear();
   const currentYearSpan = document.getElementById('currentYear');
   if (currentYearSpan) {
-    currentYearSpan.textContent = currentYear;
+    currentYearSpan.textContent = String(currentYear);
   }
 }

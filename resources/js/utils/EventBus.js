@@ -25,7 +25,10 @@ export class EventBus {
     /** @type {Map<string, Set<Function>>} */
     this.listeners = new Map();
 
-    /** @type {Map<string, Array>} - Event history for debugging */
+    /**
+     * @type {Array<{event: string, args: any[], listenerCount: number, timestamp: number}>}
+     * Event history for debugging. Append-only ring buffer capped at maxHistory.
+     */
     this.eventHistory = [];
 
     /** @type {number} - Max history entries to keep */
@@ -68,10 +71,10 @@ export class EventBus {
     listeners.add(wrappedCallback);
 
     if (this.debug) {
-      logMessage(`[EventBus] Subscribed to "${event}"`, {
-        listeners: listeners.size,
-        once: options.once,
-      });
+      logMessage(
+        `[EventBus] Subscribed to "${event}" (listeners: ${listeners.size}, once: ${Boolean(options.once)})`,
+        'debug'
+      );
     }
 
     // Return unsubscribe function
@@ -104,9 +107,10 @@ export class EventBus {
       }
 
       if (this.debug) {
-        logMessage(`[EventBus] Unsubscribed from "${event}"`, {
-          remainingListeners: listeners.size,
-        });
+        logMessage(
+          `[EventBus] Unsubscribed from "${event}" (remainingListeners: ${listeners.size})`,
+          'debug'
+        );
       }
     }
   }
@@ -130,7 +134,10 @@ export class EventBus {
           callback(...args);
           notifiedCount++;
         } catch (error) {
-          logMessage(`[EventBus] Error in listener for "${event}":`, error);
+          logMessage(
+            `[EventBus] Error in listener for "${event}": ${error?.message ?? String(error)}`,
+            'error'
+          );
           // Don't stop execution if one listener fails
         }
       }
@@ -140,10 +147,10 @@ export class EventBus {
     this._recordEvent(event, args, notifiedCount);
 
     if (this.debug) {
-      logMessage(`[EventBus] Emitted "${event}"`, {
-        args,
-        listeners: notifiedCount,
-      });
+      logMessage(
+        `[EventBus] Emitted "${event}" (args: ${args.length}, listeners: ${notifiedCount})`,
+        'debug'
+      );
     }
 
     return notifiedCount;
@@ -167,7 +174,10 @@ export class EventBus {
           await callback(...args);
           notifiedCount++;
         } catch (error) {
-          logMessage(`[EventBus] Error in async listener for "${event}":`, error);
+          logMessage(
+            `[EventBus] Error in async listener for "${event}": ${error?.message ?? String(error)}`,
+            'error'
+          );
         }
       }
     }
@@ -175,10 +185,10 @@ export class EventBus {
     this._recordEvent(event, args, notifiedCount);
 
     if (this.debug) {
-      logMessage(`[EventBus] Emitted async "${event}"`, {
-        args,
-        listeners: notifiedCount,
-      });
+      logMessage(
+        `[EventBus] Emitted async "${event}" (args: ${args.length}, listeners: ${notifiedCount})`,
+        'debug'
+      );
     }
 
     return notifiedCount;

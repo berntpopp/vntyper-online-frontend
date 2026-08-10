@@ -14,10 +14,10 @@ import { logMessage } from './log.js';
  *
  * @param {string} label - The label text (e.g., "Job ID: ")
  * @param {string} value - The value to display (user input, API data, etc.)
- * @param {Object} options - Optional configuration
- * @param {string} options.containerClass - CSS class for container div
- * @param {string} options.valueTag - HTML tag for value (default: 'strong')
- * @param {string} options.valueClass - CSS class for value element
+ * @param {Object} [options] - Optional configuration
+ * @param {string} [options.containerClass] - CSS class for container div
+ * @param {string} [options.valueTag] - HTML tag for value (default: 'strong')
+ * @param {string} [options.valueClass] - CSS class for value element
  * @returns {HTMLElement} Safe DOM element
  *
  * @example
@@ -54,9 +54,9 @@ export function createLabelValue(label, value, options = {}) {
  *
  * @param {string} tag - HTML tag name (e.g., 'div', 'p', 'span')
  * @param {string} content - Text content
- * @param {Object} options - Optional configuration
- * @param {string} options.className - CSS class
- * @param {Object} options.attributes - HTML attributes to set
+ * @param {Object} [options] - Optional configuration
+ * @param {string} [options.className] - CSS class
+ * @param {Object<string, string>} [options.attributes] - HTML attributes to set
  * @returns {HTMLElement} Safe DOM element
  *
  * @example
@@ -84,10 +84,10 @@ export function createTextElement(tag, content, options = {}) {
  *
  * @param {string} text - Link text
  * @param {string} href - Link URL
- * @param {Object} options - Optional configuration
- * @param {string} options.className - CSS class
- * @param {string} options.target - Link target (e.g., '_blank')
- * @param {string} options.rel - Link relationship (e.g., 'noopener noreferrer')
+ * @param {Object} [options] - Optional configuration
+ * @param {string} [options.className] - CSS class
+ * @param {string} [options.target] - Link target (e.g., '_blank')
+ * @param {string} [options.rel] - Link relationship (e.g., 'noopener noreferrer')
  * @returns {HTMLAnchorElement} Safe link element
  *
  * @example
@@ -119,7 +119,10 @@ export function createLink(text, href, options = {}) {
  * @param {HTMLElement} element - Target element
  * @param {string} label - Label text
  * @param {string} value - Value to display
- * @param {Object} options - Optional configuration (same as createLabelValue)
+ * @param {Object} [options] - Optional configuration (same as createLabelValue)
+ * @param {string} [options.containerClass] - CSS class for container div
+ * @param {string} [options.valueTag] - HTML tag for value (default: 'strong')
+ * @param {string} [options.valueClass] - CSS class for value element
  *
  * @example
  * // Replace: element.innerHTML = `Status: <strong>${status}</strong>`;
@@ -165,10 +168,10 @@ export function appendChildren(parent, ...children) {
  * Create a list of safe elements
  *
  * @param {Array<string>} items - Array of text items
- * @param {Object} options - Optional configuration
- * @param {string} options.listType - 'ul' or 'ol' (default: 'ul')
- * @param {string} options.listClass - CSS class for list
- * @param {string} options.itemClass - CSS class for list items
+ * @param {Object} [options] - Optional configuration
+ * @param {string} [options.listType] - 'ul' or 'ol' (default: 'ul')
+ * @param {string} [options.listClass] - CSS class for list
+ * @param {string} [options.itemClass] - CSS class for list items
  * @returns {HTMLElement} Safe list element
  *
  * @example
@@ -201,7 +204,7 @@ export function createList(items, options = {}) {
  * Returns null if not found instead of crashing
  *
  * @param {string} selector - CSS selector
- * @param {Element} parent - Parent element (default: document)
+ * @param {Element|Document} [parent] - Parent element (default: document)
  * @returns {Element|null} Element or null if not found
  *
  * @example
@@ -277,7 +280,7 @@ export function requireElementById(id) {
  * Returns empty array if none found instead of null
  *
  * @param {string} selector - CSS selector
- * @param {Element} parent - Parent element (default: document)
+ * @param {Element|Document} [parent] - Parent element (default: document)
  * @returns {Element[]} Array of elements (empty if none found)
  *
  * @example

@@ -34,8 +34,8 @@ import { logMessage } from '../log.js';
  */
 export class APIService {
   /**
-   * @param {Object} dependencies - Injected dependencies
-   * @param {Object} dependencies.config - Configuration object
+   * @param {Object} [dependencies={}] - Injected dependencies
+   * @param {Object} [dependencies.config] - Configuration object (defaults to window.CONFIG)
    * @param {Object} [dependencies.logger] - Logger instance
    */
   constructor(dependencies = {}) {
@@ -127,7 +127,7 @@ export class APIService {
   /**
    * Poll cohort status until all jobs complete
    * @param {string} cohortId - Cohort ID
-   * @param {string} [passphrase] - Optional passphrase
+   * @param {string|null} passphrase - Passphrase, or null when the cohort has none
    * @param {Function} onUpdate - Status update callback
    * @param {Function} onComplete - Completion callback
    * @param {Function} onError - Error callback

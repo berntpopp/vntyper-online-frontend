@@ -95,18 +95,30 @@ export function hideDisclaimerIndicator() {
 }
 
 /**
+ * A modal element carrying the keydown handler the focus trap stores on it as
+ * an expando property so that it can be detached again later.
+ *
+ * @typedef {HTMLElement & { focusHandler?: EventListener }} FocusTrapElement
+ */
+
+/**
  * Trap focus within a given element for accessibility.
- * @param {HTMLElement} element - The element to trap focus within.
+ * @param {FocusTrapElement} element - The element to trap focus within.
  */
 function trapFocus(element) {
-  const focusableElements = element.querySelectorAll(
-    'a[href], button:not([disabled]), textarea, input, select'
+  const focusableElements = /** @type {NodeListOf<HTMLElement>} */ (
+    element.querySelectorAll('a[href], button:not([disabled]), textarea, input, select')
   );
   const firstFocusable = focusableElements[0];
   const lastFocusable = focusableElements[focusableElements.length - 1];
 
   function handleFocus(event) {
     if (event.key === 'Tab') {
+      // A modal with no focusable children leaves first/last undefined - there
+      // is nothing to cycle between, so let the browser handle Tab itself.
+      if (!firstFocusable || !lastFocusable) {
+        return;
+      }
       if (event.shiftKey) {
         // Shift + Tab
         if (document.activeElement === firstFocusable) {
@@ -133,7 +145,7 @@ function trapFocus(element) {
 
 /**
  * Removes the focus trap from the modal.
- * @param {HTMLElement} element - The modal element.
+ * @param {FocusTrapElement} element - The modal element.
  */
 function removeTrapFocus(element) {
   if (element.focusHandler) {

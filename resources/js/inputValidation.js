@@ -161,7 +161,7 @@ function removeMessage(inputElement) {
  * @returns {boolean} - True if valid, false otherwise
  */
 export function validateInput(inputId, value) {
-  const inputElement = document.getElementById(inputId);
+  const inputElement = /** @type {HTMLInputElement} */ (document.getElementById(inputId));
   if (!inputElement) {
     logMessage(`Input element not found: ${inputId}`, 'warn');
     return false;
@@ -199,7 +199,7 @@ export function validateInput(inputId, value) {
  * @param {string} inputId - ID of the input element
  */
 export function setupValidation(inputId) {
-  const inputElement = document.getElementById(inputId);
+  const inputElement = /** @type {HTMLInputElement} */ (document.getElementById(inputId));
   if (!inputElement) {
     logMessage(`Cannot setup validation: input not found - ${inputId}`, 'warn');
     return;
@@ -207,13 +207,15 @@ export function setupValidation(inputId) {
 
   // Validate on blur
   inputElement.addEventListener('blur', e => {
-    validateInput(inputId, e.target.value);
+    const target = /** @type {HTMLInputElement} */ (e.target);
+    validateInput(inputId, target.value);
   });
 
   // Clear error on focus (give user a fresh start)
   inputElement.addEventListener('focus', e => {
-    if (e.target.classList.contains('error')) {
-      removeMessage(e.target);
+    const target = /** @type {HTMLInputElement} */ (e.target);
+    if (target.classList.contains('error')) {
+      removeMessage(target);
       // Keep error class until they fix it, just remove the message
     }
   });
@@ -223,10 +225,11 @@ export function setupValidation(inputId) {
   inputElement.addEventListener('input', e => {
     clearTimeout(debounceTimer);
 
+    const target = /** @type {HTMLInputElement} */ (e.target);
     // Only validate if there's already an error (help them fix it)
-    if (e.target.classList.contains('error')) {
+    if (target.classList.contains('error')) {
       debounceTimer = setTimeout(() => {
-        validateInput(inputId, e.target.value);
+        validateInput(inputId, target.value);
       }, 500); // 500ms debounce
     }
   });
@@ -259,7 +262,7 @@ export function validateAll(inputIds = ['email', 'cohortAlias', 'passphrase']) {
   let allValid = true;
 
   inputIds.forEach(inputId => {
-    const inputElement = document.getElementById(inputId);
+    const inputElement = /** @type {HTMLInputElement} */ (document.getElementById(inputId));
     if (inputElement) {
       const isValid = validateInput(inputId, inputElement.value);
       if (!isValid) {
@@ -278,7 +281,7 @@ export function validateAll(inputIds = ['email', 'cohortAlias', 'passphrase']) {
  */
 export function clearAllValidation(inputIds = ['email', 'cohortAlias', 'passphrase']) {
   inputIds.forEach(inputId => {
-    const inputElement = document.getElementById(inputId);
+    const inputElement = /** @type {HTMLInputElement} */ (document.getElementById(inputId));
     if (inputElement) {
       clearValidation(inputElement);
     }

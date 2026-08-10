@@ -127,13 +127,13 @@ export class AppController extends BaseController {
    */
   initializeEventListeners() {
     // Wire up submit button (cache reference for performance)
-    this.submitBtn = document.getElementById('submitBtn');
+    this.submitBtn = /** @type {HTMLButtonElement} */ (document.getElementById('submitBtn'));
     if (this.submitBtn) {
       this.submitBtn.addEventListener('click', () => this.handleSubmitClick());
     }
 
     // Wire up extract button (cache reference for performance)
-    this.extractBtn = document.getElementById('extractBtn');
+    this.extractBtn = /** @type {HTMLButtonElement} */ (document.getElementById('extractBtn'));
     if (this.extractBtn) {
       this.extractBtn.addEventListener('click', () => this.handleExtractClick());
     }
@@ -213,10 +213,16 @@ export class AppController extends BaseController {
       }
 
       // Get form inputs
-      const emailInput = document.getElementById('email');
-      const cohortAliasInput = document.getElementById('cohortAlias');
-      const passphraseInput = document.getElementById('passphrase');
-      const advntrModeCheckbox = document.getElementById('advntrMode');
+      const emailInput = /** @type {HTMLInputElement} */ (document.getElementById('email'));
+      const cohortAliasInput = /** @type {HTMLInputElement} */ (
+        document.getElementById('cohortAlias')
+      );
+      const passphraseInput = /** @type {HTMLInputElement} */ (
+        document.getElementById('passphrase')
+      );
+      const advntrModeCheckbox = /** @type {HTMLInputElement} */ (
+        document.getElementById('advntrMode')
+      );
 
       const email = emailInput?.value?.trim() || null;
       const cohortAlias = cohortAliasInput?.value?.trim() || null;
@@ -444,9 +450,11 @@ export class AppController extends BaseController {
     }
 
     // Clear form inputs
-    const emailInput = document.getElementById('email');
-    const cohortAliasInput = document.getElementById('cohortAlias');
-    const passphraseInput = document.getElementById('passphrase');
+    const emailInput = /** @type {HTMLInputElement} */ (document.getElementById('email'));
+    const cohortAliasInput = /** @type {HTMLInputElement} */ (
+      document.getElementById('cohortAlias')
+    );
+    const passphraseInput = /** @type {HTMLInputElement} */ (document.getElementById('passphrase'));
 
     if (emailInput) emailInput.value = '';
     if (cohortAliasInput) cohortAliasInput.value = '';
@@ -500,9 +508,15 @@ export class AppController extends BaseController {
       // are revoked here rather than left resident for the whole session.
       this._replaceRegionOutput(createAssemblyMessageHTML(detectedAssembly));
 
-      // Update assembly dropdown to detected assembly
+      // Update assembly dropdown to detected assembly.
+      //
+      // NOTE: no element with id "referenceAssembly" exists on any page - the
+      // assembly dropdown in index.html is <select id="region">. This branch
+      // therefore never runs today. Narrowing with instanceof rather than a
+      // truthiness check keeps the access to .options/.value provably safe
+      // whichever element the id eventually resolves to.
       const assemblySelect = document.getElementById('referenceAssembly');
-      if (assemblySelect) {
+      if (assemblySelect instanceof HTMLSelectElement) {
         const normalizedAssembly = detectedAssembly.toLowerCase();
         // Find matching option (exact match or contains match)
         const option = Array.from(assemblySelect.options).find(
