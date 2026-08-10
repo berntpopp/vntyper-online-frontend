@@ -50,10 +50,13 @@ export class AppController extends BaseController {
     // true = "Extract Region" clicked, false = "Submit Jobs" clicked
     this.showDownloadButtons = false;
 
-    // Button references (cached for performance)
-    this.submitBtn = null;
-    this.extractBtn = null;
-    this.resetBtn = null;
+    // Button references (submitBtn / extractBtn / resetBtn) are cached by
+    // initializeEventListeners(), which BaseController's constructor already
+    // ran via initialize() BEFORE this constructor body executes.
+    //
+    // Do NOT re-declare them as null here. Doing so silently defeats every
+    // `if (this.submitBtn)` guard, so Submit and Extract never disable and
+    // never show their spinner during a multi-minute extraction and upload.
   }
 
   /**
