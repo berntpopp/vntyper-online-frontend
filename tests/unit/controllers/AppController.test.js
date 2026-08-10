@@ -110,15 +110,17 @@ describe('AppController button references', () => {
     expect(app.resetBtn).toBe(document.getElementById('resetFileSelectionBtn'));
   });
 
-  it('can actually disable the submit button through the cached reference', () => {
+  it('caches the live DOM nodes, not detached copies', () => {
     const app = new AppController(deps);
 
-    // This is what every `if (this.submitBtn)` guard in the controller does.
-    // Before the fix the reference was null and the guard silently no-opped.
-    expect(app.submitBtn).not.toBeNull();
-    app.submitBtn.disabled = true;
+    // Every `if (this.submitBtn)` guard mutates the cached node and expects the
+    // rendered button to change. Prove the cached reference IS the rendered
+    // node by mutating the document and reading through the cache.
+    document.getElementById('submitBtn').textContent = 'Submitting...';
+    document.getElementById('extractBtn').disabled = true;
 
-    expect(document.getElementById('submitBtn').disabled).toBe(true);
+    expect(app.submitBtn.textContent).toBe('Submitting...');
+    expect(app.extractBtn.disabled).toBe(true);
   });
 });
 

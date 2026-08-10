@@ -182,8 +182,8 @@ export class CohortController extends BaseController {
           onComplete: statusData => {
             this.handleCohortComplete(cohortId, statusData);
           },
-          onError: error => {
-            this.handleCohortError(cohortId, error);
+          onError: (error, context) => {
+            this.handlePollError(cohortId, error, context);
           },
         }
       );
@@ -213,10 +213,40 @@ export class CohortController extends BaseController {
    * @param {Object} statusData - Status data
    */
   handleCohortComplete(cohortId, statusData) {
+    // PollingManager fires onComplete for BOTH 'completed' and 'failed'.
+    // Announcing success for a failed cohort is the same defect fixed in
+    // JobController - do not reintroduce it here.
+    if (statusData?.status === 'failed') {
+      this.handleCohortError(cohortId, new Error(statusData.error || 'Cohort failed.'));
+      return;
+    }
+
     this._log(`Cohort ${cohortId} completed`, 'success');
 
     // Emit completion event
     this.emit('cohort:completed', { cohortId, statusData });
+  }
+
+  /**
+   * Handle a poll request that failed in transport.
+   *
+   * PollingManager retries; a retryable blip must not be announced as a cohort
+   * failure, or a later successful poll emits cohort:completed after it.
+   *
+   * @param {string} cohortId - Cohort ID
+   * @param {Error} error - Error object
+   * @param {{retries: number, maxRetries: number, willRetry: boolean}} [context]
+   */
+  handlePollError(cohortId, error, context) {
+    if (context && context.willRetry) {
+      this._log(
+        `Cohort ${cohortId} poll failed (${context.retries}/${context.maxRetries}), retrying: ${error.message}`,
+        'warning'
+      );
+      return;
+    }
+
+    this.handleCohortError(cohortId, error);
   }
 
   /**

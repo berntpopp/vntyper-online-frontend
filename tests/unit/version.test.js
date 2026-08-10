@@ -25,7 +25,14 @@ describe('version.js', () => {
   afterEach(() => {
     delete window.CONFIG;
     document.body.innerHTML = '';
+    // vi.restoreAllMocks() does not undo a plain assignment to global.fetch.
+    delete global.fetch;
     vi.restoreAllMocks();
+    // Each resetModules() + import registers another DOMContentLoaded
+    // listener on `document`. Replace the document body's listener target by
+    // recreating the element the handlers write into, and drop the module
+    // registry so the next test starts clean.
+    vi.resetModules();
   });
 
   describe('without window.CONFIG (contact, imprints, adtkd pages)', () => {

@@ -18,6 +18,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # The repo no longer contains a *.backup file or an _original/ directory,
+      # so asserting those paths 404 would prove nothing. Plant decoys so the
+      # corresponding .dockerignore rules are actually exercised.
+      - name: Plant exclusion decoys
+        run: |
+          mkdir -p resources/assets/logos/_original
+          echo "ci-decoy" > resources/assets/logos/_original/ci-decoy.tif
+          echo "ci-decoy" > resources/js/ci-decoy.backup
+
       - name: Build image
         run: docker build -t vntyper-frontend:ci .
 
@@ -130,10 +139,10 @@ jobs:
           /README.md
           /LICENSE
           /.prettierrc
-          /resources/js/main.js.backup
           /tests/unit/utils/EventBus.test.js
           /.github/workflows/ci.yml
-          /resources/assets/logos/_original/BIH_Logo_at-Charite_kurz_quer_4c.tif
+          /resources/js/ci-decoy.backup
+          /resources/assets/logos/_original/ci-decoy.tif
           PATHS
           exit $failed
 

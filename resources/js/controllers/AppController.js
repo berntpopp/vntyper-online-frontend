@@ -403,10 +403,6 @@ export class AppController extends BaseController {
   handleReset() {
     this._log('Resetting application', 'info');
 
-    // Release every Blob URL: nothing on screen survives a reset.
-    this._renderedResultUrls = [];
-    blobManager.revokeAll();
-
     // Reset guard flags
     this.isSubmitting = false;
     this.isExtracting = false;
@@ -432,11 +428,13 @@ export class AppController extends BaseController {
     this.jobController.jobView.clearAll();
     this.cohortController.cohortView.clearAll();
 
-    // Clear download buttons area
-    const regionOutputDiv = document.getElementById('regionOutput');
-    if (regionOutputDiv) {
-      regionOutputDiv.innerHTML = '';
-    }
+    // Clear download buttons area through the helper, so the URLs behind those
+    // links are revoked as the links are removed - never before, which would
+    // leave visible-but-dead downloads if an earlier step threw.
+    this._replaceRegionOutput();
+
+    // Release anything still tracked: nothing on screen survives a reset.
+    blobManager.revokeAll();
 
     // Show placeholder message again (restore original text)
     const placeholderMessage = document.getElementById('placeholderMessage');
@@ -585,7 +583,7 @@ export class AppController extends BaseController {
     // Track the URLs backing the links now on screen. They are revoked when
     // this pane is replaced or the app is reset - never on a timer, which used
     // to break visible links after five minutes.
-    this._renderedResultUrls = createdUrls;
+    this._renderedResultUrls = (this._renderedResultUrls || []).concat(createdUrls);
 
     this._log('Download UI created successfully', 'success');
   }
