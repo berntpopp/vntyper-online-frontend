@@ -38,6 +38,26 @@ import { initializeFileSelection } from './fileSelection.js';
 import { initializeServerLoad } from './serverLoad.js';
 
 /**
+ * Run an optional feature initializer.
+ *
+ * A failure here degrades one feature; it must never stop the application from
+ * starting. Previously every initializer shared one try block, so a single
+ * throw - e.g. blocked localStorage inside initializeLogging - skipped file
+ * selection, dependency registration and every controller. The page rendered
+ * completely and nothing worked.
+ *
+ * @param {string} name - Feature name, for the log
+ * @param {Function} fn - Initializer to run
+ */
+function initOptional(name, fn) {
+  try {
+    fn();
+  } catch (error) {
+    logMessage(`Optional feature "${name}" failed to initialize: ${error.message}`, 'warning');
+  }
+}
+
+/**
  * Main Application Initialization
  * Refactored to follow SOLID principles with dependency injection
  */
@@ -45,24 +65,27 @@ async function initializeApp() {
   try {
     logMessage('Starting application initialization...', 'info');
 
-    // Initialize UI components (existing modules)
-    initializeModal();
-    initializeFooter();
-    initializeDisclaimer();
-    initializeFAQ();
-    initializeUserGuide();
-    initializeCitations();
-    initializeTutorial();
-    initializeUIUtils();
-    initializeLogging();
-    initializeUsageStats();
+    // Initialize UI components (existing modules).
+    // These are optional: losing one costs one feature, not the app.
+    initOptional('modal', initializeModal);
+    initOptional('footer', initializeFooter);
+    initOptional('disclaimer', initializeDisclaimer);
+    initOptional('faq', initializeFAQ);
+    initOptional('userGuide', initializeUserGuide);
+    initOptional('citations', initializeCitations);
+    initOptional('tutorial', initializeTutorial);
+    initOptional('uiUtils', initializeUIUtils);
+    initOptional('logging', initializeLogging);
+    initOptional('usageStats', initializeUsageStats);
 
-    // Initialize file selection (existing module with selectedFiles array)
+    // Initialize file selection (existing module with selectedFiles array).
+    // Fatal: selectedFiles is injected into the DI container, so without it
+    // the app cannot accept input at all.
     const selectedFiles = [];
     const fileSelection = initializeFileSelection(selectedFiles);
 
-    // Initialize server load monitoring
-    initializeServerLoad();
+    // Initialize server load monitoring (optional: a nav indicator)
+    initOptional('serverLoad', initializeServerLoad);
 
     // Register dependencies in DI container
     registerDependencies(selectedFiles, fileSelection);
