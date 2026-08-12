@@ -193,7 +193,7 @@
           "name": "Is my data secure?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "vntyper.org uses SSL/HTTPS with strong encryption (Mozilla Observatory A+, SSL Labs A+). Only a small fraction of the BAM file is uploaded, preserving privacy. Read data is immediately deleted after computation, and results are kept for 3 days before deletion."
+            "text": "vntyper.org uses SSL/HTTPS with strong encryption (Mozilla Observatory A+, SSL Labs A+). Only a small fraction of the BAM file is uploaded, preserving privacy. Read data is immediately deleted after computation, and results are kept for 3 days before deletion. Note that the results link itself carries no password: anyone who has it can download the results, so it should be treated as confidential."
           }
         },
         {
@@ -618,6 +618,12 @@
           <p>The website https://vntyper.org/ uses SSL/HTTPS protocols with strong encryption and gets a high score for its security implementation (<a href="https://developer.mozilla.org/en-US/observatory/analyze?host=vntyper.org" target="_blank" rel="noopener noreferrer">Mozilla Observatory A+ rating</a>, <a href="https://www.ssllabs.com/ssltest/analyze.html?d=vntyper.org&latest" target="_blank" rel="noopener noreferrer">SSL Labs A+ rating</a>, <a href="https://www.immuniweb.com/ssl/vntyper.org/eqEFlmqX/" target="_blank" rel="noopener noreferrer">ImmuniWeb A+ rating</a>).
             Additionally, only a small fraction of the BAM file is uploaded, preserving privacy and even this read data is immediately deleted after computation.
             Results are kept for 3 days and then deleted from the server.
+          </p>
+          <p>
+            One thing SSL does not cover: your results link is the only thing protecting them.
+            <strong>Anyone who has the link can download your results</strong> &mdash; there is no
+            password on it, and it is included directly in the completion email. Treat it like a
+            password: do not forward it or post it anywhere you would not post the data itself.
           </p>
         </div>
         <div class="faq-item">
