@@ -29,7 +29,7 @@ export class ErrorHandler {
    * Handle any error with context and severity level
    * @param {Error|string} error - The error to handle
    * @param {Object} context - Additional context (e.g., {function: 'submitJob', jobId: '123'})
-   * @param {ErrorLevel} level - Severity level
+   * @param {string} [level] - Severity level
    * @returns {Object} Error entry that was created
    */
   handleError(error, context = {}, level = ErrorLevel.ERROR) {
@@ -78,7 +78,7 @@ export class ErrorHandler {
    * Safely display error message to user
    * Uses defensive null checking to prevent crashes
    * @param {string} message - Error message to display
-   * @param {ErrorLevel} level - Severity level for styling
+   * @param {string} [level] - Severity level for styling
    */
   displayError(message, level = ErrorLevel.ERROR) {
     const errorDiv = document.getElementById('error');
@@ -221,7 +221,7 @@ export class ErrorHandler {
 
   /**
    * Get error history with optional filtering
-   * @param {ErrorLevel} level - Filter by severity level (optional)
+   * @param {string} [level] - Filter by severity level (optional)
    * @returns {Array} Array of error entries
    */
   getHistory(level = null) {

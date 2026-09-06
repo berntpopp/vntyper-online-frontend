@@ -662,7 +662,7 @@ export class AppController extends BaseController {
    */
   async loadCohortFromURL(cohortId, passphrase) {
     try {
-      await loadCohortFromURL(cohortId, passphrase);
+      await loadCohortFromURL(cohortId, { passphrase });
       this.emit('app:cohort:loaded', { cohortId });
     } catch (error) {
       this.handleError(error, `Failed to load cohort ${cohortId}`);

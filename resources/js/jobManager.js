@@ -141,7 +141,7 @@ export async function fetchAndUpdateJobStatus(cohortId, cohortStatus, context) {
  * Fetches and displays cohort details based on the cohort ID.
  * Utilizes pollCohortStatusAPI to retrieve cohort status and update UI accordingly.
  * @param {string} cohortId - The cohort identifier.
- * @param {object} context - An object containing necessary DOM elements and state.
+ * @param {Record<string, any>} [context] - An object containing necessary DOM elements and state.
  */
 export async function loadCohortFromURL(cohortId, context) {
   const {
@@ -247,7 +247,7 @@ export async function loadCohortFromURL(cohortId, context) {
  * Fetches and displays job details based on the job ID.
  * Utilizes pollJobStatusAPI to retrieve job status and details.
  * @param {string} jobId - The job identifier.
- * @param {object} context - An object containing necessary DOM elements and state.
+ * @param {Record<string, any>} [context] - An object containing necessary DOM elements and state.
  */
 export async function loadJobFromURL(jobId, context) {
   const {

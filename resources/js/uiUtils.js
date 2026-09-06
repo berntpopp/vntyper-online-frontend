@@ -231,7 +231,7 @@ export function displayShareableLink(id, targetContainer, type = 'job') {
  * Checks if the buttons already exist to prevent duplicates.
  * Also clears the countdown and hides the spinner.
  * @param {string} jobId - The job identifier.
- * @param {object} context - An object containing necessary DOM elements and state.
+ * @param {Record<string, any>} context - An object containing necessary DOM elements and state.
  */
 export function displayDownloadLink(jobId, context) {
   logMessage(`displayDownloadLink called for Job ID: ${jobId}`, 'info');
