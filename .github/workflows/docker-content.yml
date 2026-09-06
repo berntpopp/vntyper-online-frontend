@@ -86,6 +86,7 @@ jobs:
           /resources/js/inputValidation.js
           /resources/js/main.js
           /resources/js/modal.js
+          /resources/js/navbar.js
           /resources/js/mobileNav.js
           /resources/js/populateRegions.js
           /resources/js/uiUtils.js

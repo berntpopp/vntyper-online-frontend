@@ -114,3 +114,27 @@ test.describe('mobile navigation', () => {
     await expect(page.locator('#navbar-menu')).toBeVisible();
   });
 });
+
+test.describe('navbar navigation', () => {
+  test('API documentation link points to configured API docs endpoint and dev server proxies it', async ({
+    page,
+    request,
+    isMobile,
+  }) => {
+    test.skip(isMobile, 'desktop navbar visibility');
+    await acknowledgeDisclaimer(page);
+    await mockApi(page);
+    await page.goto('/');
+
+    const apiLink = page.locator('#apiDocsLink');
+    await expect(apiLink).toBeVisible();
+    await expect(apiLink).toHaveAttribute('target', '_blank');
+    await expect(apiLink).toHaveAttribute('rel', 'noopener noreferrer');
+    // In dev mode (port 3000), configured to point directly to backend docs:
+    await expect(apiLink).toHaveAttribute('href', 'http://localhost:8000/api/docs');
+
+    // Dev server also proxies /api/docs directly:
+    const devDocsResponse = await request.get('/api/docs');
+    expect(devDocsResponse.status()).toBe(200);
+  });
+});

@@ -25,6 +25,7 @@ import { pollingManager } from './pollingManager.js';
 
 // UI Initialization Modules
 import { initializeModal } from './modal.js';
+import { initializeNavbar } from './navbar.js';
 import { initializeFooter } from './footer.js';
 import { initializeDisclaimer } from './disclaimer.js';
 import { initializeFAQ } from './faq.js';
@@ -68,6 +69,7 @@ async function initializeApp() {
     // Initialize UI components (existing modules).
     // These are optional: losing one costs one feature, not the app.
     initOptional('modal', initializeModal);
+    initOptional('navbar', initializeNavbar);
     initOptional('footer', initializeFooter);
     initOptional('disclaimer', initializeDisclaimer);
     initOptional('faq', initializeFAQ);

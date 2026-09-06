@@ -1,13 +1,17 @@
 // frontend/resources/js/config.js
 
-// Detect development mode (running on Python http.server on port 3000)
+// Detect development mode (running on dev server on port 3000)
 const isDev = window.location.port === '3000';
+const defaultApiUrl = isDev ? 'http://localhost:8000/api' : '/api';
+const apiUrl = window.CONFIG?.API_URL || defaultApiUrl;
+const defaultApiDocsUrl = isDev ? 'http://localhost:8000/api/docs' : `${apiUrl}/docs`;
 
 window.CONFIG = {
   // In dev mode, call backend directly on port 8000
   // In production, use relative path (handled by nginx proxy)
-  API_URL: isDev ? 'http://localhost:8000/api' : '/api',
-  ENABLE_DONATIONS: false,
+  API_URL: apiUrl,
+  API_DOCS_URL: window.CONFIG?.API_DOCS_URL || defaultApiDocsUrl,
+  ENABLE_DONATIONS: window.CONFIG?.ENABLE_DONATIONS ?? false,
   institutions: [
     {
       name: 'Institut Imagine',

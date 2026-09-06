@@ -13,13 +13,15 @@
 // and would hand out package.json and the test suite on localhost. The
 // allow-list below is the same rule the Dockerfile applies.
 
-import { createServer } from 'node:http';
+import { createServer, request as httpRequest } from 'node:http';
 import { readFile, stat, realpath } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve, extname, sep } from 'node:path';
 
 const root = await realpath(join(dirname(fileURLToPath(import.meta.url)), '..'));
 const port = Number(process.env.PORT) || 3000;
+const backendUrl = process.env.BACKEND_URL || 'http://127.0.0.1:8000';
+const backendTarget = new URL(backendUrl);
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -121,17 +123,45 @@ async function resolveFile(urlPath) {
 }
 
 const server = createServer(async (req, res) => {
-  if (req.method !== 'GET' && req.method !== 'HEAD') {
-    res.writeHead(405, { Allow: 'GET, HEAD' }).end('Method Not Allowed');
-    return;
-  }
-
   let pathname;
   try {
     // Strips the ?v= cache-buster and any other query string.
     pathname = decodeURIComponent(new URL(req.url, `http://localhost:${port}`).pathname);
   } catch {
     res.writeHead(400).end('Bad Request');
+    return;
+  }
+
+  // Proxy /api requests to the backend API (FastAPI) on port 8000
+  if (pathname === '/api' || pathname.startsWith('/api/')) {
+    const backendReq = httpRequest(
+      {
+        hostname: backendTarget.hostname,
+        port: backendTarget.port || (backendTarget.protocol === 'https:' ? 443 : 80),
+        path: req.url,
+        method: req.method,
+        headers: {
+          ...req.headers,
+          host: backendTarget.host,
+        },
+      },
+      backendRes => {
+        res.writeHead(backendRes.statusCode || 500, backendRes.headers);
+        backendRes.pipe(res);
+      }
+    );
+
+    backendReq.on('error', err => {
+      res.writeHead(502, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end(`Bad Gateway: Backend API not reachable at ${backendTarget.origin} (${err.message})`);
+    });
+
+    req.pipe(backendReq);
+    return;
+  }
+
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    res.writeHead(405, { Allow: 'GET, HEAD' }).end('Method Not Allowed');
     return;
   }
 
