@@ -263,34 +263,6 @@ export class Job {
   }
 
   /**
-   * Create Job from form data
-   * @param {FormData} formData - Form data
-   * @param {string} jobId - Generated job ID
-   * @returns {Job} New job instance
-   */
-  static fromFormData(formData, jobId) {
-    // FormData.get() returns File | string | null, so every entry has to be
-    // narrowed before it is used: reading .name off a string entry silently
-    // yields undefined, and a File entry is not a usable email/cohort id.
-    const file = formData.get('file');
-    const email = formData.get('email');
-    const cohortId = formData.get('cohort_id');
-
-    return new Job({
-      jobId,
-      status: Job.STATUS.PENDING,
-      fileName: file instanceof File ? file.name : null,
-      email: typeof email === 'string' ? email : null,
-      cohortId: typeof cohortId === 'string' ? cohortId : null,
-      options: {
-        advntr_mode: formData.get('advntr_mode') === 'true',
-        archive: formData.get('archive') === 'true',
-        keep_intermediates: formData.get('keep_intermediates') === 'true',
-      },
-    });
-  }
-
-  /**
    * Clone job with optional updates
    * @param {Object} updates - Properties to update
    * @returns {Job} New job instance

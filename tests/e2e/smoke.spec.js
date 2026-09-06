@@ -21,6 +21,7 @@ test.describe('page load', () => {
     '/impressum_en.html',
     '/impressum_de.html',
     '/adtkd_diagnostics.html',
+    '/donate.html',
   ]) {
     test(`${path} loads and fills the footer year`, async ({ page }) => {
       const errors = collectPageErrors(page);

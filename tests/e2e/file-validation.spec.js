@@ -38,14 +38,14 @@ test.describe('file selection', () => {
   // extension is discarded with NO message at all, so the user sees their file
   // vanish. A lone .bam at least explains itself. Worth fixing; until then this
   // test will fail the moment the behaviour changes, which is the point.
-  test('an unsupported file type is silently discarded', async ({ page }) => {
+  test('an unsupported file type is reported as invalid', async ({ page }) => {
     await page
       .locator('#bamFiles')
       .setInputFiles([
         { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('not a bam') },
       ]);
 
-    await expect(page.locator('#fileList')).toContainText(/no files selected/i);
-    await expect(page.locator('#error')).toBeEmpty();
+    await expect(page.locator('#error')).toContainText(/invalid/i);
+    await expect(page.locator('#error')).toContainText('notes.txt');
   });
 });

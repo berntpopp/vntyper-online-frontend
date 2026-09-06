@@ -7,6 +7,7 @@ window.CONFIG = {
   // In dev mode, call backend directly on port 8000
   // In production, use relative path (handled by nginx proxy)
   API_URL: isDev ? 'http://localhost:8000/api' : '/api',
+  ENABLE_DONATIONS: false,
   institutions: [
     {
       name: 'Institut Imagine',

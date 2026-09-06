@@ -79,6 +79,20 @@ export function validateFiles(selectedFiles, logWarnings = true) {
     }
   });
 
+  // Process unsupported files
+  const unsupportedFiles = lowerCaseFiles.filter(
+    file =>
+      !file.lowerCaseName.endsWith('.bam') &&
+      !file.lowerCaseName.endsWith('.sam') &&
+      !file.lowerCaseName.endsWith('.bai')
+  );
+  unsupportedFiles.forEach(file => {
+    invalidFiles.push(file.originalFile);
+    if (logWarnings) {
+      logMessage(`Unsupported file type: ${file.originalFile.name}`, 'warning');
+    }
+  });
+
   logMessage(
     `File validation completed. ${matchedPairs.length} matched pair(s) and ${invalidFiles.length} invalid file(s) found.`,
     'info'

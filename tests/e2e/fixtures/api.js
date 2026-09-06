@@ -17,6 +17,7 @@ export const FIXTURES = {
   version: { api_version: '1.2.3', tool_version: '2.0.0' },
   usageStatistics: { total_jobs: 42, jobs_last_24h: 7 },
   jobQueue: { queue_length: 0, running: 0 },
+  donationsStatus: { enabled: false },
 };
 
 /**
@@ -50,6 +51,7 @@ export async function mockApi(page, overrides = {}) {
     '/version/': FIXTURES.version,
     '/usage-statistics/': FIXTURES.usageStatistics,
     '/job-queue/': FIXTURES.jobQueue,
+    '/donations/status/': FIXTURES.donationsStatus,
     ...overrides,
   };
 

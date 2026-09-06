@@ -168,3 +168,35 @@ describe('AppController Blob URL lifetime', () => {
     expect(app._renderedResultUrls).toEqual([]);
   });
 });
+
+describe('AppController extraction events', () => {
+  let deps;
+
+  beforeEach(() => {
+    buildDom();
+    deps = buildDependencies();
+    window.CONFIG = { API_URL: '/api' };
+  });
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+    delete window.CONFIG;
+    vi.clearAllMocks();
+  });
+
+  it('updates the region dropdown when extraction detects an assembly', () => {
+    const app = new AppController(deps);
+    app.showDownloadButtons = true;
+
+    // Add options to the mock DOM for region
+    document.getElementById('region').innerHTML =
+      '<option value="guess">Guess assembly</option><option value="hg38">hg38</option>';
+
+    app.handleExtractionComplete({
+      subsetBamAndBaiBlobs: [],
+      detectedAssembly: 'HG38',
+    });
+
+    expect(document.getElementById('region').value).toBe('hg38');
+  });
+});

@@ -14,7 +14,7 @@ RUN rm -rf /usr/share/nginx/html/*
 # CI workflows - and exposed every future file by default. Copy only what the
 # site actually serves.
 COPY index.html adtkd_diagnostics.html contact.html \
-     impressum_en.html impressum_de.html \
+     impressum_en.html impressum_de.html donate.html \
      robots.txt sitemap.xml /usr/share/nginx/html/
 COPY resources/ /usr/share/nginx/html/resources/
 

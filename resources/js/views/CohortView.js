@@ -53,6 +53,10 @@ export class CohortView {
       this.container.appendChild(cohortElement);
     }
 
+    if (options.showShareableLink) {
+      this.showShareableLink(cohort.cohortId);
+    }
+
     return cohortElement;
   }
 

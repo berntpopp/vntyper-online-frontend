@@ -51,6 +51,7 @@ const SERVED_FILES = new Set([
   'contact.html',
   'impressum_en.html',
   'impressum_de.html',
+  'donate.html',
   'robots.txt',
   'sitemap.xml',
 ]);

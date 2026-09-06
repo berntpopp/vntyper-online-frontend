@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Data Donation - VNtyper Online | ADTKD-MUC1 Research</title>
+
+  <!-- Viewport Meta Tag -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Meta Description -->
+  <meta name="description" content="Voluntarily donate anonymous VNtyper analysis metrics to help calibrate MUC1 VNTR diagnostic thresholds across exome capture kits for ADTKD-MUC1 research.">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://vntyper.org/donate.html">
+  <meta property="og:title" content="Scientific Data Donation - VNtyper Online">
+  <meta property="og:description" content="Support ADTKD-MUC1 research by anonymously donating stripped VNtyper decision metrics.">
+  <meta property="og:image" content="https://vntyper.org/resources/assets/og-image.png">
+  <meta property="og:site_name" content="VNtyper Online">
+
+  <!-- Favicon Links -->
+  <link rel="icon" type="image/png" href="resources/assets/favicon/favicon-48x48.png" sizes="48x48" />
+  <link rel="icon" type="image/svg+xml" href="resources/assets/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="resources/assets/favicon/favicon.ico" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="resources/css/base.css">
+  <link rel="stylesheet" href="resources/css/navbar.css">
+  <link rel="stylesheet" href="resources/css/buttons.css">
+  <link rel="stylesheet" href="resources/css/forms.css">
+  <link rel="stylesheet" href="resources/css/footer.css">
+
+  <style>
+    .donation-card {
+      background: var(--color-white, #ffffff);
+      border: 1px solid #e0e6ed;
+      border-radius: 8px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .consent-banner {
+      background: #f0f7f9;
+      border-left: 4px solid var(--color-primary, #005f73);
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      border-radius: 0 6px 6px 0;
+    }
+    .consent-banner h3 {
+      margin-top: 0;
+      color: var(--color-primary, #005f73);
+      font-size: 1.05rem;
+    }
+    .consent-checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-top: 1rem;
+      background: #ffffff;
+      padding: 0.75rem 1rem;
+      border: 1px solid #cce3e6;
+      border-radius: 6px;
+    }
+    .consent-checkbox-group input[type="checkbox"] {
+      margin-top: 4px;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    .notice-negative {
+      background: #e8f5e9;
+      border-left: 4px solid #2e7d32;
+      padding: 0.8rem 1.2rem;
+      margin: 1rem 0;
+      border-radius: 0 4px 4px 0;
+      font-size: 0.95rem;
+      color: #1b5e20;
+    }
+    .hpo-tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .hpo-tag {
+      background: #e9ecef;
+      border: 1px solid #ced4da;
+      border-radius: 12px;
+      padding: 2px 10px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+    .hpo-tag:hover {
+      background: #dde2e6;
+    }
+    .hpo-tag.active {
+      background: var(--color-primary, #005f73);
+      color: #ffffff;
+      border-color: var(--color-primary, #005f73);
+    }
+    .disabled-feature-overlay {
+      text-align: center;
+      padding: 3rem 1rem;
+      background: #fdfefe;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header with Navigation -->
+    <nav class="navbar" aria-label="Main navigation">
+      <div class="navbar-container">
+        <a href="index.html" class="header" style="text-decoration: none; color: inherit;" aria-label="Back to Home">
+          <img src="resources/assets/logo/vntyperonline_logo_160px.png" alt="vntyper-online Logo" class="logo" width="80" height="80">
+          <h2>vntyper-online</h2>
+        </a>
+        <a href="index.html" class="back-link" aria-label="Back to Home">← Back to Home</a>
+      </div>
+    </nav>
+
+    <main>
+      <h1>Scientific Data Donation for ADTKD Research</h1>
+      <p style="font-size: 1.05rem; color: #4b5563; line-height: 1.5;">
+        Contribute to the ongoing global calibration of MUC1 VNTR diagnostic thresholds. Your donated decision metrics help academic and clinical laboratories establish reliable capture-kit specific coverage models for Autosomal Dominant Tubulointerstitial Kidney Disease (ADTKD-MUC1).
+      </p>
+
+      <!-- Container when donation is disabled -->
+      <div id="donationDisabledMsg" class="disabled-feature-overlay hidden">
+        <h2>Data Donation Inactive</h2>
+        <p>Scientific data donation is currently not active in this environment.</p>
+        <a href="index.html" class="button button-primary" style="margin-top: 1rem;">Return to Analysis Tool</a>
+      </div>
+
+      <!-- Container when donation is enabled -->
+      <div id="donationActiveContainer">
+        <!-- Privacy & Consent Notice -->
+        <div class="consent-banner">
+          <h3>GDPR Article 9 Informed Consent Notice</h3>
+          <p style="font-size: 0.9rem; line-height: 1.45; color: #334155;">
+            Under the EU General Data Protection Regulation (GDPR Art. 9), genetic and health information requires explicit, informed consent. 
+            Data controller: <strong>Dr. Bernt Popp</strong>, Berlin Institute of Health at Charité / Universitätsmedizin Berlin (<a href="mailto:support@vntyper.org">support@vntyper.org</a>).
+          </p>
+          <p style="font-size: 0.9rem; line-height: 1.45; color: #334155;">
+            <strong>What is donated:</strong> Only anonymous pipeline summary statistics (decision-bearing metrics, coverage depth, target kit, sequencing platform, and coarse phenotype tags). <strong>Raw genomic reads (BAM, CRAM, FASTQ) are strictly excluded and will never be accepted or stored.</strong> All sample identifiers are irreversibly hashed client-side before submission.
+          </p>
+          <div class="consent-checkbox-group">
+            <input type="checkbox" id="gdprConsent" name="consent" required>
+            <label for="gdprConsent" style="font-size: 0.9rem; font-weight: 500; cursor: pointer;">
+              I explicitly consent to donate these anonymous pipeline decision metrics and clinical annotations for non-profit scientific research on ADTKD-MUC1.
+            </label>
+          </div>
+        </div>
+
+        <form id="donationForm" class="donation-card" enctype="multipart/form-data">
+          <!-- Step 1: Upload Archive -->
+          <fieldset style="border: none; padding: 0; margin-bottom: 1.5rem;">
+            <legend style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b;">1. VNtyper Result Archive</legend>
+            <p style="font-size: 0.9rem; color: #64748b; margin-top: 0;">Upload your downloaded VNtyper <code>.zip</code> result file. Raw sequence files are automatically checked and must not be present.</p>
+            <div class="file-input-wrapper">
+              <input type="file" id="archiveFile" accept=".zip" required class="form-input" style="padding: 8px;">
+            </div>
+          </fieldset>
+
+          <!-- Step 2: Sequencing & Library Kit -->
+          <fieldset style="border: none; padding: 0; margin-bottom: 1.5rem;">
+            <legend style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b;">2. Sequencing & Library Preparation</legend>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+              <div>
+                <label for="kitSelect" style="display: block; font-weight: 500; margin-bottom: 4px;">Target Capture / Library Kit *</label>
+                <select id="kitSelect" name="kit" required class="form-input" style="width: 100%; padding: 8px;">
+                  <option value="">Select capture kit...</option>
+                  <option value="Twist Exome 2.0">Twist Exome 2.0</option>
+                  <option value="Twist Comprehensive Exome">Twist Comprehensive Exome</option>
+                  <option value="Twist Human Core Exome">Twist Human Core Exome</option>
+                  <option value="Agilent SureSelect Human All Exon V8">Agilent SureSelect Human All Exon V8</option>
+                  <option value="Agilent SureSelect Human All Exon V7">Agilent SureSelect Human All Exon V7</option>
+                  <option value="Agilent SureSelect Human All Exon V6">Agilent SureSelect Human All Exon V6</option>
+                  <option value="Illumina TruSeq Exome">Illumina TruSeq Exome</option>
+                  <option value="Illumina DNA Prep with Enrichment">Illumina DNA Prep with Enrichment</option>
+                  <option value="IDT xGen Exome Research Panel v2">IDT xGen Exome Research Panel v2</option>
+                  <option value="WGS (PCR-free)">WGS (PCR-free)</option>
+                  <option value="WGS (standard)">WGS (standard)</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="platformSelect" style="display: block; font-weight: 500; margin-bottom: 4px;">Sequencing Platform *</label>
+                <select id="platformSelect" name="sequencing_platform" required class="form-input" style="width: 100%; padding: 8px;">
+                  <option value="">Select platform...</option>
+                  <option value="Illumina NovaSeq 6000">Illumina NovaSeq 6000</option>
+                  <option value="Illumina NovaSeq X / X Plus">Illumina NovaSeq X / X Plus</option>
+                  <option value="Illumina NextSeq 500 / 550">Illumina NextSeq 500 / 550</option>
+                  <option value="Illumina NextSeq 1000 / 2000">Illumina NextSeq 1000 / 2000</option>
+                  <option value="Illumina HiSeq 2500 / 4000">Illumina HiSeq 2500 / 4000</option>
+                  <option value="Element AVITI">Element AVITI</option>
+                  <option value="Ultima UG100">Ultima UG100</option>
+                  <option value="PacBio Revio / Sequel IIe">PacBio Revio / Sequel IIe</option>
+                  <option value="Oxford Nanopore PromethION / MinION">Oxford Nanopore PromethION / MinION</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Step 3: Finding Category (First-class Negative Arm) -->
+          <fieldset style="border: none; padding: 0; margin-bottom: 1.5rem;">
+            <legend style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b;">3. Diagnostic Finding Category</legend>
+            <div style="display: flex; gap: 1.5rem; margin-bottom: 0.75rem;">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="radio" name="finding_call" value="negative" checked id="radioNegative">
+                <strong>Negative Control / No Finding</strong>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="radio" name="finding_call" value="positive" id="radioPositive">
+                <strong>Positive Finding (MUC1 mutation)</strong>
+              </label>
+            </div>
+
+            <div id="negativeArmNotice" class="notice-negative">
+              ✓ <strong>Negative controls are essential:</strong> Benchmarking commercial kits requires verified negative samples to calculate specificity and establish minimum-depth thresholds. Thank you for contributing negative data!
+            </div>
+
+            <div id="positiveConfirmationGroup" class="hidden" style="margin-top: 1rem;">
+              <label for="confirmationSelect" style="display: block; font-weight: 500; margin-bottom: 4px;">Confirmation Method * (Required for positive calls)</label>
+              <select id="confirmationSelect" class="form-input" style="width: 100%; max-width: 400px; padding: 8px;">
+                <option value="">Select confirmation method...</option>
+                <option value="Sanger sequencing">Sanger sequencing</option>
+                <option value="ddPCR / digital PCR">ddPCR / digital PCR</option>
+                <option value="Long-read sequencing (PacBio / ONT)">Long-read sequencing (PacBio / ONT)</option>
+                <option value="Mass spectrometry">Mass spectrometry</option>
+                <option value="Targeted amplicon NGS">Targeted amplicon NGS</option>
+                <option value="None / Research only">None / Research only</option>
+              </select>
+            </div>
+          </fieldset>
+
+          <!-- Step 4: Clinical Phenotypes (HPO) & Coarse Demographics -->
+          <fieldset style="border: none; padding: 0; margin-bottom: 1.5rem;">
+            <legend style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b;">4. Clinical Features & Coarse Demographics</legend>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+              <div>
+                <label for="collectionMonth" style="display: block; font-weight: 500; margin-bottom: 4px;">Collection Date (Coarse YYYY-MM)</label>
+                <input type="month" id="collectionMonth" class="form-input" style="width: 100%; padding: 8px;">
+                <small style="color: #64748b;">Only year and month are accepted to protect privacy.</small>
+              </div>
+
+              <div>
+                <label for="sexSelect" style="display: block; font-weight: 500; margin-bottom: 4px;">Genetic / Chromosomal Sex</label>
+                <select id="sexSelect" class="form-input" style="width: 100%; padding: 8px;">
+                  <option value="">Unspecified / Unknown</option>
+                  <option value="XX">XX (Female)</option>
+                  <option value="XY">XY (Male)</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label for="hpoInput" style="display: block; font-weight: 500; margin-bottom: 4px;">Phenotype (HPO Terms)</label>
+              <input type="text" id="hpoInput" placeholder="e.g. HP:0000112, HP:0000083" class="form-input" style="width: 100%; padding: 8px;">
+              <small style="color: #64748b;">Click tags below to toggle common terms:</small>
+              <div class="hpo-tag-cloud" id="hpoTags">
+                <span class="hpo-tag" data-hpo="HP:0000112">HP:0000112 (Renal tubular dysfunction)</span>
+                <span class="hpo-tag" data-hpo="HP:0000083">HP:0000083 (Renal insufficiency)</span>
+                <span class="hpo-tag" data-hpo="HP:0000100">HP:0000100 (Nephronophthisis)</span>
+                <span class="hpo-tag" data-hpo="HP:0001427">HP:0001427 (Hyperuricemia)</span>
+                <span class="hpo-tag" data-hpo="HP:0000077">HP:0000077 (Abnormal renal morphology)</span>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Submit Button -->
+          <div style="margin-top: 2rem; display: flex; align-items: center; gap: 1rem;">
+            <button type="submit" id="donateSubmitBtn" class="button button-primary" disabled>
+              Submit Anonymous Donation
+            </button>
+            <span id="donationStatusText" style="font-size: 0.95rem; color: #475569;"></span>
+          </div>
+        </form>
+
+        <!-- Success Display -->
+        <div id="donationSuccessCard" class="donation-card hidden" style="border-color: #2e7d32; background: #f9fdfa;">
+          <h2 style="color: #2e7d32; margin-top: 0;">✓ Donation Successfully Recorded</h2>
+          <p>Thank you for contributing to open scientific research for ADTKD-MUC1. Your metrics have been cryptographically validated and anonymized.</p>
+          <p><strong>Donation ID:</strong> <code id="dispDonationId"></code></p>
+          <p><strong>Run ID:</strong> <code id="dispRunId"></code></p>
+          <div style="margin-top: 1.5rem;">
+            <a href="index.html" class="button button-secondary">Return to Analysis Tool</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-bottom">
+      <p>&copy; <span id="currentYear"></span> vntyper-online. All rights reserved.</p>
+      <p>
+        <a href="impressum_en.html" aria-label="Imprint">Imprint</a> |
+        <a href="contact.html" aria-label="Contact">Contact</a> |
+        <a href="https://github.com/berntpopp/vntyper-online-backend" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">GitHub</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script type="module" src="resources/js/config.js"></script>
+  <script type="module" src="resources/js/version.js"></script>
+  <script type="module" src="resources/js/donate.js"></script>
+</body>
+</html>

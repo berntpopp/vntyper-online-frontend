@@ -509,13 +509,7 @@ export class AppController extends BaseController {
       this._replaceRegionOutput(createAssemblyMessageHTML(detectedAssembly));
 
       // Update assembly dropdown to detected assembly.
-      //
-      // NOTE: no element with id "referenceAssembly" exists on any page - the
-      // assembly dropdown in index.html is <select id="region">. This branch
-      // therefore never runs today. Narrowing with instanceof rather than a
-      // truthiness check keeps the access to .options/.value provably safe
-      // whichever element the id eventually resolves to.
-      const assemblySelect = document.getElementById('referenceAssembly');
+      const assemblySelect = document.getElementById('region');
       if (assemblySelect instanceof HTMLSelectElement) {
         const normalizedAssembly = detectedAssembly.toLowerCase();
         // Find matching option (exact match or contains match)

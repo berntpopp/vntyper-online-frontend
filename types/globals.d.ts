@@ -59,6 +59,7 @@ interface Window {
    */
   CONFIG?: {
     API_URL: string;
+    ENABLE_DONATIONS?: boolean;
     institutions: {
       name: string;
       logo: string;
