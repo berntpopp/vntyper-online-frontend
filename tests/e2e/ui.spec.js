@@ -74,6 +74,28 @@ test.describe('modals', () => {
     const style = await container.evaluate(el => window.getComputedStyle(el).justifyContent);
     expect(style).toBe('center');
   });
+
+  test('footer text and navigation links are centered within the footer', async ({ page }) => {
+    const footerBottom = page.locator('.footer-bottom');
+    await expect(footerBottom).toBeVisible();
+    const style = await footerBottom.evaluate(el => window.getComputedStyle(el).alignItems);
+    expect(style).toBe('center');
+
+    const firstP = footerBottom.locator('p').first();
+    const pAlign = await firstP.evaluate(el => window.getComputedStyle(el).textAlign);
+    expect(pAlign).toBe('center');
+
+    const links = await footerBottom.locator('a').all();
+    expect(links.length).toBeGreaterThanOrEqual(3);
+    const firstBox = await links[0].boundingBox();
+    const lastBox = await links[links.length - 1].boundingBox();
+    const containerBox = await footerBottom.boundingBox();
+    if (firstBox && lastBox && containerBox) {
+      const linksCenter = (firstBox.x + lastBox.x + lastBox.width) / 2;
+      const containerCenter = containerBox.x + containerBox.width / 2;
+      expect(Math.abs(linksCenter - containerCenter)).toBeLessThan(5);
+    }
+  });
 });
 
 test.describe('mobile navigation', () => {
