@@ -44,7 +44,8 @@
 
 #usageStatsContainer .usage-stats-header h2 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.6rem;
+  font-weight: 600;
 }
 
 #usageStatsContainer .usage-stats-header button {

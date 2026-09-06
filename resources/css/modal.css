@@ -39,6 +39,15 @@
   animation-duration: 0.4s;
 }
 
+.modal-content h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-primary, #005f73);
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
 /* Close Button */
 .modal-close {
   position: absolute;
