@@ -2,7 +2,7 @@
 
 /* --- Unified Modal Styles --- */
 
-/* General Modal Styles */
+/* General Modal Container */
 .modal {
   display: none;
   position: fixed;
@@ -14,86 +14,121 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  padding: 16px;
+  padding: 24px 16px;
   box-sizing: border-box;
 }
 
-/* Modal Overlay */
+/* Modal Overlay Scrim */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(2px);
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  cursor: pointer;
 }
 
-/* Modal Content Container */
+/* Modal Content Dialog Box */
 .modal-content {
   position: relative;
   background-color: #ffffff;
-  margin: 3% auto;
-  padding: 24px 28px;
+  margin: 2% auto;
+  padding: 28px 32px;
   border: 1px solid #cbd5e1;
   width: 100%;
-  max-width: 720px;
-  max-height: calc(100vh - 48px);
+  max-width: 760px;
+  max-height: calc(100vh - 64px);
   border-radius: 12px;
   box-shadow:
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    0 10px 15px -3px rgba(15, 23, 42, 0.12),
+    0 4px 6px -2px rgba(15, 23, 42, 0.08);
   animation-name: modalopen;
-  animation-duration: 0.25s;
+  animation-duration: 0.22s;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  z-index: 10;
+}
+
+/* Compact Modal Variant for Dialogs (e.g. Disclaimer) */
+.modal-content.modal-sm {
+  max-width: 560px;
+}
+
+/* Modal Header */
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 1.25rem;
+  flex-shrink: 0;
+}
+
+.modal-header-main {
+  flex-grow: 1;
+}
+
+.modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .modal-content h2 {
-  font-size: 1.6rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 700;
   line-height: 1.3;
   color: var(--color-primary, #005f73);
-  margin-top: 0;
-  margin-bottom: 1rem;
-  padding-right: 48px; /* Avoid close button overlap */
-  flex-shrink: 0;
+  margin: 0;
+}
+
+.modal-subtitle {
+  font-size: 0.925rem;
+  color: #64748b;
+  margin: 6px 0 0;
+  line-height: 1.5;
 }
 
 /* Close Button */
 .modal-close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
   background: none;
   border: none;
   cursor: pointer;
   color: #64748b;
   transition:
     background-color 0.2s ease,
-    color 0.3s ease;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 10px;
+    color 0.2s ease,
+    transform 0.15s ease;
+  min-width: 40px;
+  min-height: 40px;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 8px;
   box-sizing: border-box;
-  z-index: 10;
+  flex-shrink: 0;
+  margin-top: -4px;
+  margin-right: -4px;
 }
 
 .modal-close:hover {
   color: #0f172a;
-  background-color: rgba(15, 23, 42, 0.06);
+  background-color: #f1f5f9;
 }
 
 .modal-close:focus-visible {
   color: #0f172a;
-  outline: 2px solid var(--color-focus);
+  outline: 2px solid var(--color-focus, #0a9396);
   outline-offset: 2px;
 }
 
@@ -101,7 +136,7 @@
 @keyframes modalopen {
   from {
     opacity: 0;
-    transform: scale(0.97) translateY(8px);
+    transform: scale(0.96) translateY(6px);
   }
   to {
     opacity: 1;
@@ -109,50 +144,84 @@
   }
 }
 
-/* Scrollable Inner Containers */
-.faq-container,
+/* Scrollable Inner Body */
 .modal-body {
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  padding-right: 4px;
+  padding-right: 6px;
   flex-grow: 1;
 }
 
-.faq-item {
-  margin-bottom: 20px;
+/* Modal Footer Actions */
+.modal-footer {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
-.faq-item h3 {
-  margin-bottom: 8px;
-  color: #1e293b;
-  font-size: 1.25rem;
+/* Disclaimer-specific modern styles */
+.disclaimer-callout {
+  background-color: #f1f5f9;
+  border: none;
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 1.25rem;
+}
+
+.disclaimer-callout p {
+  margin: 0;
+  font-size: 0.925rem;
+  line-height: 1.55;
+  color: #334155;
+}
+
+.disclaimer-section {
+  margin-bottom: 1.15rem;
+}
+
+.disclaimer-section h3 {
+  font-size: 0.975rem;
   font-weight: 600;
-  line-height: 1.4;
+  color: #0f172a;
+  margin: 0 0 4px;
 }
 
-.faq-item p {
+.disclaimer-section p {
+  font-size: 0.9rem;
   color: #475569;
-  line-height: 1.6;
-  margin-top: 0;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.modal-footer .agree-button {
+  width: 100%;
+  text-align: center;
+  display: inline-block;
+  box-sizing: border-box;
 }
 
 /* Mobile Responsive Modal Adjustments */
 @media (max-width: 600px) {
   .modal {
-    padding: 10px;
+    padding: 12px 8px;
   }
 
   .modal-content {
-    margin: 10px auto;
-    padding: 18px 14px;
-    width: 100%;
+    margin: 4px auto;
+    padding: 20px 16px;
     max-height: calc(100vh - 20px);
     border-radius: 10px;
   }
 
   .modal-content h2 {
-    font-size: 1.35rem;
-    padding-right: 44px;
+    font-size: 1.3rem;
+  }
+
+  .modal-header {
+    margin-bottom: 1rem;
   }
 }

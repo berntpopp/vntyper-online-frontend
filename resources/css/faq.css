@@ -1,98 +1,143 @@
 /* frontend/resources/css/faq.css */
 
-/* --- FAQ Section Styles --- */
-
-.faq-section {
-  padding: 10px 10px;
-  background-color: #f8f9fa;
-  max-width: 800px;
-  margin: 10px auto;
-  border-radius: 8px;
-}
-
-.faq-section h2 {
-  text-align: center;
-  margin-bottom: 24px;
-  font-size: 1.6rem;
-  font-weight: 600;
-  line-height: 1.3;
-  color: #1e293b;
-}
+/* --- FAQ Container & Modern Accordion Styles --- */
 
 .faq-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 4px;
+  flex-grow: 1;
 }
 
+/* Sleek divider-based accordion item (avoids nested-card anti-pattern) */
 .faq-item {
-  background-color: #ffffff;
-  border: 1px solid #dee2e6;
-  padding: 10px;
-  border-radius: 5px;
-  transition: box-shadow 0.3s ease;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0;
+  background: transparent;
+  transition: background-color 0.15s ease;
 }
 
-.faq-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.faq-item:last-child {
+  border-bottom: none;
 }
 
-.faq-item h3 {
-  font-size: 1.25rem;
+/* Accessible full-width trigger button */
+.faq-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: 16px;
+  color: #0f172a;
+  min-height: 44px;
+  transition: color 0.15s ease;
+}
+
+.faq-trigger:hover {
+  color: var(--color-primary, #005f73);
+}
+
+.faq-trigger:focus-visible {
+  outline: 2px solid var(--color-focus, #0a9396);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.faq-question-text {
+  font-size: 1.025rem;
   font-weight: 600;
   line-height: 1.4;
-  margin-bottom: 10px;
-  color: #1e293b;
-  cursor: pointer;
-  position: relative;
+  margin: 0;
+  color: inherit;
 }
 
-.faq-item h3::after {
-  content: '+';
-  position: absolute;
-  right: 0;
-  font-size: 1.2em;
-  transition: transform 0.3s ease;
+/* Smooth rotating chevron icon */
+.faq-icon {
+  flex-shrink: 0;
+  color: #64748b;
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.15s ease;
 }
 
-.faq-item h3.active::after {
-  transform: rotate(45deg);
+.faq-trigger:hover .faq-icon {
+  color: var(--color-primary, #005f73);
 }
 
-.faq-item p {
-  color: #6c757d;
+.faq-trigger[aria-expanded='true'] .faq-icon {
+  transform: rotate(180deg);
+  color: var(--color-primary, #005f73);
+}
+
+/* Accordion answer body */
+.faq-answer {
+  padding: 0 4px 16px;
+  color: #475569;
+  font-size: 0.925rem;
   line-height: 1.6;
+  max-width: 68ch;
+}
+
+.faq-answer[hidden] {
   display: none;
 }
 
-.faq-item p.visible {
-  display: block;
+.faq-answer p {
+  margin: 0 0 10px;
+  color: #475569;
+  line-height: 1.6;
 }
 
-/* Enhanced Accessibility */
-
-.faq-item h3:focus {
-  box-shadow: 0 0 0 3px #007bff;
+.faq-answer p:last-child {
+  margin-bottom: 0;
 }
 
-/* --- FAQ Links (WCAG 1.4.1 Use of Color) --- */
+.faq-answer ul {
+  margin: 8px 0 12px;
+  padding-left: 20px;
+}
 
+.faq-answer li {
+  margin-bottom: 6px;
+  line-height: 1.55;
+}
+
+/* Security / Attention Callout within FAQ */
+.faq-callout {
+  background-color: #fef3c7;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin: 10px 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #78350f;
+}
+
+/* Enhanced Accessible Links in FAQ */
+.faq-answer a,
 .faq-item a {
-  color: #0056b3; /* Darker blue for better contrast */
+  color: #0056b3;
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
+.faq-answer a:hover,
+.faq-answer a:focus,
 .faq-item a:hover,
 .faq-item a:focus {
-  color: #003d82; /* Even darker on interaction */
+  color: #003d82;
   text-decoration-thickness: 2px;
-  background-color: rgba(0, 86, 179, 0.05); /* Subtle highlight */
-  padding: 0 2px;
-  margin: 0 -2px;
-  border-radius: 2px;
 }
 
 /* External link indicator in FAQ */
@@ -100,9 +145,20 @@
   content: ' ↗';
   font-size: 0.85em;
   opacity: 0.7;
-  transition: opacity 0.3s;
+  transition: opacity 0.2s;
 }
 
 .faq-item a[href^='http']:hover::after {
   opacity: 1;
+}
+
+/* Legacy fallback support */
+.faq-item h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0;
+  color: #0f172a;
+  cursor: pointer;
+  padding: 14px 4px;
 }

@@ -768,24 +768,24 @@ figcaption {
 
 /* --- Article & Documentation Container --- */
 .article-page {
-  background-color: #f8fafc;
+  background-color: #ffffff;
 }
 
 .article-container {
-  max-width: 960px;
-  background-color: #ffffff;
+  max-width: 920px;
+  background-color: transparent;
   box-shadow: none;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 36px 32px;
+  border: none;
+  border-radius: 0;
+  padding: 36px 24px 48px;
+  margin: 0 auto;
 }
 
 @media (max-width: 768px) {
   .article-container {
-    padding: 20px 16px;
+    padding: 20px 16px 36px;
     border-radius: 0;
-    border-left: none;
-    border-right: none;
+    border: none;
   }
 }
 

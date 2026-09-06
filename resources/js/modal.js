@@ -10,6 +10,7 @@ export function openDisclaimerModal() {
   const disclaimerModal = document.getElementById('disclaimerModal');
   const agreeBtn = document.getElementById('agreeBtn');
   if (disclaimerModal && agreeBtn) {
+    const isAcknowledged = !!getCookie('disclaimerAcknowledged');
     // Set aria-hidden FIRST before any display/focus operations
     disclaimerModal.setAttribute('aria-hidden', 'false');
     disclaimerModal.style.display = 'block';
@@ -20,8 +21,14 @@ export function openDisclaimerModal() {
     requestAnimationFrame(() => {
       // Set focus to the "I Agree" button for accessibility
       agreeBtn.focus();
-      // Trap focus within the modal - Escape disabled for disclaimer
-      trapFocus(disclaimerModal, false);
+      // Trap focus within the modal - Escape enabled only if already acknowledged
+      trapFocus(disclaimerModal, isAcknowledged);
+
+      if (isAcknowledged) {
+        disclaimerModal.addEventListener('modal:close', () => closeDisclaimerModal(), {
+          once: true,
+        });
+      }
     });
   }
 }
@@ -190,24 +197,30 @@ export function initializeModal() {
     agreeBtn.addEventListener('click', handleAgree);
   }
 
-  // Handle Close Button in Disclaimer Modal (same as agree)
+  // Handle Close Button in Disclaimer Modal
   const disclaimerModal = document.getElementById('disclaimerModal');
   const disclaimerCloseButton = disclaimerModal
     ? disclaimerModal.querySelector('.modal-close')
     : null;
   if (disclaimerCloseButton) {
     disclaimerCloseButton.addEventListener('click', () => {
-      handleAgree();
+      if (getCookie('disclaimerAcknowledged')) {
+        closeDisclaimerModal();
+      } else {
+        handleAgree();
+      }
     });
   }
 
-  // Handle Overlay Click in Disclaimer Modal (same as agree)
+  // Handle Overlay Click in Disclaimer Modal
   const disclaimerOverlay = disclaimerModal
     ? disclaimerModal.querySelector('.modal-overlay')
     : null;
   if (disclaimerOverlay) {
     disclaimerOverlay.addEventListener('click', () => {
-      handleAgree();
+      if (getCookie('disclaimerAcknowledged')) {
+        closeDisclaimerModal();
+      }
     });
   }
 

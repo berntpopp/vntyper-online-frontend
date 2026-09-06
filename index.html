@@ -639,20 +639,40 @@
   <!-- Disclaimer Modal -->
   <div id="disclaimerModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle" aria-describedby="disclaimerDescription">
     <div class="modal-overlay"></div> <!-- Overlay background -->
-    <div class="modal-content">
-      <button class="modal-close" aria-label="Close Disclaimer Modal">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-      <h2 id="disclaimerTitle">Disclaimer</h2>
-      <p id="disclaimerDescription">
-        <strong>Important Information</strong><br>
-        vntyper-online is intended for educational and research purposes only. It is not a substitute for professional medical advice and should not be used for clinical decision-making.
-      </p>
-      <p>
-        <strong>Usage Guidelines</strong><br>
-        The results provided by this tool should not be used as a basis for diagnosis or treatment without consulting a healthcare professional.
-      </p>
-      <button id="agreeBtn" class="agree-button" data-tooltip="Agree to the disclaimer">I Agree</button>
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <div class="modal-header-main">
+          <div class="modal-title-row">
+            <h2 id="disclaimerTitle">Research &amp; Clinical Disclaimer</h2>
+            <span class="badge" style="background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 9999px;">Research Use Only</span>
+          </div>
+        </div>
+        <button class="modal-close" aria-label="Close Disclaimer Modal">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="disclaimer-callout">
+          <p id="disclaimerDescription">
+            <strong>Important Notice:</strong> vntyper-online is designed for academic and educational research purposes only. It is not an in vitro diagnostic (IVD) medical device and must not be used as the sole basis for clinical decision-making.
+          </p>
+        </div>
+        <div class="disclaimer-section">
+          <h3>Diagnostic &amp; Clinical Guidance</h3>
+          <p>
+            Evaluation of suspected Autosomal Dominant Tubulointerstitial Kidney Disease (ADTKD) should be performed in consultation with qualified clinical geneticists and nephrologists. Variant calls should be interpreted alongside clinical phenotyping and confirmed per accredited laboratory standards.
+          </p>
+        </div>
+        <div class="disclaimer-section">
+          <h3>Data Protection &amp; Privacy</h3>
+          <p>
+            Genomic alignments are sliced client-side within your browser via WebAssembly (samtools). Only extracted regional <em>MUC1</em> reads are transmitted over encrypted TLS. Temporary read files are deleted immediately upon completion, and result files are automatically purged after 3 days.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="agreeBtn" class="agree-button">I Understand &amp; Agree</button>
+      </div>
     </div>
   </div>
 
@@ -660,46 +680,97 @@
   <div id="faqModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="faqTitle" aria-describedby="faqDescription" aria-hidden="true">
     <div class="modal-overlay"></div> <!-- Overlay background -->
     <div class="modal-content">
-      <button class="modal-close" aria-label="Close FAQ Modal">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-      <h2 id="faqTitle">Frequently Asked Questions</h2>
+      <div class="modal-header">
+        <div class="modal-header-main">
+          <h2 id="faqTitle">Frequently Asked Questions</h2>
+          <p class="modal-subtitle">Guidance on data privacy, file preparation, reference builds, and diagnostic workflows.</p>
+        </div>
+        <button class="modal-close" aria-label="Close FAQ Modal">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
       <div id="faqDescription" class="faq-container">
         <div class="faq-item">
-          <h3>What is vntyper-online?</h3>
-          <p>The website vntyper-online offers online MUC1 VNTR genotyping using the vntyper algorithm. The MUC1 read data will be extracted locally on your device's browser from the BAM files you select and only this subset will be uploaded to the server for analysis</p>
+          <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-1" id="faq-q-1">
+            <span class="faq-question-text">What is vntyper-online?</span>
+            <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="faq-ans-1" class="faq-answer" role="region" aria-labelledby="faq-q-1" hidden>
+            <p>
+              vntyper-online provides web-based <em>MUC1</em> VNTR mutation detection powered by the VNtyper 2 algorithm. Target region read extraction executes directly inside your browser via WebAssembly (samtools), meaning only a small subset of relevant reads is sent to the server for variant calling. Your raw genomic sequencing files never leave your computer.
+            </p>
+          </div>
         </div>
+
         <div class="faq-item">
-          <h3>How do I upload my data?</h3>
-          <p>
-            You can upload your BAM, BAI, or SAM files using the file input section on the Home page.
-            For BAM files, ensure that each BAM file has a corresponding BAI file (e.g., test.bam and test.bam.bai or test.bai).
-            If you wish to upload an IGV SAM file, open IGV and type "muc1" in the search field to navigate to the MUC1 region.
-            Then right-click on the alignment track and choose "Export Alignments." Save the SAM file to your desired location and upload it to vntyper.org.
-          </p>
+          <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-2" id="faq-q-2">
+            <span class="faq-question-text">How do I prepare and upload my sequencing data?</span>
+            <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="faq-ans-2" class="faq-answer" role="region" aria-labelledby="faq-q-2" hidden>
+            <p>You can upload BAM, BAI, CRAM, CRAI, or SAM files using the file input section on the home page:</p>
+            <ul>
+              <li><strong>BAM / CRAM Files:</strong> Ensure each alignment file has an accompanying index (e.g., <code>sample.bam</code> and <code>sample.bam.bai</code> or <code>sample.bai</code>). The index allows fast browser-side regional slicing without reading the entire multi-gigabyte file.</li>
+              <li><strong>IGV SAM Export:</strong> Open your alignment in IGV, type <code>muc1</code> in the search bar, right-click the alignment track, and select <em>Export Alignments</em>. Save the resulting SAM file and upload it directly.</li>
+            </ul>
+          </div>
         </div>
+
         <div class="faq-item">
-          <h3>Is my data secure?</h3>
-          <p>The website https://vntyper.org/ uses SSL/HTTPS protocols with strong encryption and gets a high score for its security implementation (<a href="https://developer.mozilla.org/en-US/observatory/analyze?host=vntyper.org" target="_blank" rel="noopener noreferrer">Mozilla Observatory A+ rating</a>, <a href="https://www.ssllabs.com/ssltest/analyze.html?d=vntyper.org&latest" target="_blank" rel="noopener noreferrer">SSL Labs A+ rating</a>, <a href="https://www.immuniweb.com/ssl/vntyper.org/eqEFlmqX/" target="_blank" rel="noopener noreferrer">ImmuniWeb A+ rating</a>).
-            Additionally, only a small fraction of the BAM file is uploaded, preserving privacy and even this read data is immediately deleted after computation.
-            Results are kept for 3 days and then deleted from the server.
-          </p>
-          <p>
-            One thing SSL does not cover: your results link is the only thing protecting them.
-            <strong>Anyone who has the link can download your results</strong> &mdash; there is no
-            password on it, and it is included directly in the completion email. Treat it like a
-            password: do not forward it or post it anywhere you would not post the data itself.
-          </p>
+          <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-3" id="faq-q-3">
+            <span class="faq-question-text">Is my data secure and private?</span>
+            <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="faq-ans-3" class="faq-answer" role="region" aria-labelledby="faq-q-3" hidden>
+            <p>
+              vntyper-online follows rigorous data minimization and transport security best practices (<a href="https://developer.mozilla.org/en-US/observatory/analyze?host=vntyper.org" target="_blank" rel="noopener noreferrer">Mozilla Observatory A+</a>, <a href="https://www.ssllabs.com/ssltest/analyze.html?d=vntyper.org&amp;latest" target="_blank" rel="noopener noreferrer">SSL Labs A+</a>, <a href="https://www.immuniweb.com/ssl/vntyper.org/eqEFlmqX/" target="_blank" rel="noopener noreferrer">ImmuniWeb A+</a>):
+            </p>
+            <ul>
+              <li><strong>Client-Side Slicing:</strong> Raw genomic data stays on your machine; only targeted reads are sent to the backend.</li>
+              <li><strong>Ephemeral Computation:</strong> Uploaded read data is immediately purged upon completion of the genotyping run.</li>
+              <li><strong>3-Day Result Retention:</strong> Result files are retained for 3 days to allow user retrieval, after which they are permanently deleted.</li>
+            </ul>
+            <div class="faq-callout">
+              <strong>Access Security Notice:</strong> Your results URL acts as a bearer token. Anyone with the link can view and download the result files. Treat the link securely and do not share or post it publicly.
+            </div>
+          </div>
         </div>
+
         <div class="faq-item">
-          <h3>What regions can I analyze?</h3>
-          <p>Select the reference assembly used for your alignment. The region corresponding to MUC1 Locus will be automatically selected.</p>
+          <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-4" id="faq-q-4">
+            <span class="faq-question-text">Which reference assemblies and genomic regions are supported?</span>
+            <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="faq-ans-4" class="faq-answer" role="region" aria-labelledby="faq-q-4" hidden>
+            <p>
+              vntyper-online supports both major human reference genomes: <strong>GRCh38 / hg38</strong> (chr1:155,185,824-155,192,915) and <strong>GRCh37 / hg19</strong> (chr1:155,158,000-155,163,000). The assembly can be selected manually or auto-detected from BAM/CRAM header metadata.
+            </p>
+          </div>
         </div>
+
         <div class="faq-item">
-          <h3>How can I track the status of my job?</h3>
-          <p>After submitting a job, the status will be displayed in the output section. You can also download the results once the job is complete.</p>
+          <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-5" id="faq-q-5">
+            <span class="faq-question-text">How can I track job progress and download results?</span>
+            <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="faq-ans-5" class="faq-answer" role="region" aria-labelledby="faq-q-5" hidden>
+            <p>
+              After job submission, progress is displayed live in the output section via polling. Once analysis completes, you can review variant metrics directly on screen or export the results as JSON and TSV packages.
+            </p>
+          </div>
         </div>
-        <!-- Add more FAQ items as needed -->
+
+        <div class="faq-item">
+          <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-6" id="faq-q-6">
+            <span class="faq-question-text">Where can I find clinical diagnostic recommendations for ADTKD-MUC1?</span>
+            <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="faq-ans-6" class="faq-answer" role="region" aria-labelledby="faq-q-6" hidden>
+            <p>
+              See our dedicated <a href="adtkd_diagnostics.html">ADTKD-MUC1 Diagnostics &amp; Guidelines</a> reference page for the European ADTKD-Net consensus recommendations, decision tree, interpretation tier criteria (High Precision, Uncertain, Negative), and accredited international referral laboratories.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
