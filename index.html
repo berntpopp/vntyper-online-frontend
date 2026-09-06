@@ -576,10 +576,10 @@
     <hr class="footer-separator">
 
     <!-- About Section - Keyword-rich crawlable content -->
-    <section id="about" class="about-section">
+    <section id="about" class="about-section" aria-labelledby="aboutHeading">
       <div class="about-container">
-        <h2>About VNtyper Online</h2>
-        <p>
+        <h2 id="aboutHeading">About VNtyper Online</h2>
+        <p class="about-lead">
           <strong>VNtyper Online</strong> is a free, browser-based tool for
           <strong>MUC1 VNTR genotyping</strong> using the
           <strong>VNtyper 2.0</strong> algorithm. It enables rapid screening
@@ -588,22 +588,28 @@
           <strong>Autosomal Dominant Tubulointerstitial Kidney Disease (ADTKD-MUC1)</strong>,
           also known as <strong>Medullary Cystic Kidney Disease (MCKD)</strong>.
         </p>
-        <h3>How It Works</h3>
-        <p>
-          Upload your BAM/BAI sequencing files. Only the MUC1 region is
-          extracted locally in your browser using BioWasm, ensuring genomic
-          privacy. The extracted reads are then analyzed server-side by
-          VNtyper 2.0 to detect the prototypic cytosine insertion (insC) mutation and other
-          VNTR alterations.
-        </p>
-        <h3>Who Is This For?</h3>
-        <p>
-          VNtyper Online serves geneticists, nephrologists, and researchers
-          investigating <strong>ADTKD</strong>, <strong>ADTKD-MUC1</strong>,
-          chronic kidney disease of unknown etiology, and familial kidney
-          disorders. It democratizes access to <strong>MUC1 genotyping</strong> by working with
-          standard short-read sequencing data (Illumina WES/WGS).
-        </p>
+        <div class="about-grid">
+          <div class="about-card">
+            <h3>How It Works</h3>
+            <p>
+              Upload your BAM/BAI sequencing files. Only the MUC1 region is
+              extracted locally in your browser using BioWasm, ensuring genomic
+              privacy. The extracted reads are then analyzed server-side by
+              VNtyper 2.0 to detect the prototypic cytosine insertion (insC) mutation and other
+              VNTR alterations.
+            </p>
+          </div>
+          <div class="about-card">
+            <h3>Who Is This For?</h3>
+            <p>
+              VNtyper Online serves geneticists, nephrologists, and researchers
+              investigating <strong>ADTKD</strong>, <strong>ADTKD-MUC1</strong>,
+              chronic kidney disease of unknown etiology, and familial kidney
+              disorders. It democratizes access to <strong>MUC1 genotyping</strong> by working with
+              standard short-read sequencing data (Illumina WES/WGS).
+            </p>
+          </div>
+        </div>
       </div>
     </section>
 
