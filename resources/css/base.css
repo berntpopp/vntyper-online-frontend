@@ -691,11 +691,21 @@ body.menu-open {
 .citation-item p,
 .modal-content p,
 #disclaimerDescription,
-figcaption,
-main > p,
-.lead,
-article p {
+figcaption {
   max-width: 68ch;
+}
+
+.lead {
+  font-size: 1.15rem;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  max-width: 100%;
+}
+
+.container p,
+.container li {
+  max-width: 100%;
 }
 
 /* --- Diagnostic Guides, Cards, and Badges --- */
@@ -808,22 +818,21 @@ article p {
 
 /* --- Article & Documentation Container --- */
 .article-page {
-  background-color: #f8f9fa;
+  background-color: var(--color-bg-page, #f9f9f9);
 }
 
 .article-container {
-  max-width: 960px;
+  max-width: 900px;
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  padding: 36px 36px 48px;
-  margin: 20px auto 40px;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: auto;
 }
 
 .article-container p,
 .article-container li {
-  max-width: 68ch;
+  max-width: 100%;
 }
 
 @media (max-width: 768px) {
