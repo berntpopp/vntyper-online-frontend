@@ -523,6 +523,105 @@ function initializeToggleOptionalInputs() {
 }
 
 /**
+ * Initializes and synchronizes server-side configuration for analysis options.
+ * Reads defaults and forced rules from window.CONFIG and fetches the live /options-config/ endpoint.
+ *
+ * @param {Object} [overrideConfig=null] - Optional config object for testing
+ */
+export async function initializeOptionsConfig(overrideConfig = null) {
+  const advntrCheckbox = /** @type {HTMLInputElement|null} */ (
+    document.getElementById('advntrMode')
+  );
+  const normalCheckbox = /** @type {HTMLInputElement|null} */ (
+    document.getElementById('normalMode')
+  );
+  const advntrCard = document.getElementById('advntrCard');
+  const normalCard = document.getElementById('normalModeCard');
+  const advntrBadge = document.getElementById('advntrEnforcedBadge');
+  const normalBadge = document.getElementById('normalModeEnforcedBadge');
+
+  if (!advntrCheckbox && !normalCheckbox) {
+    return;
+  }
+
+  // Bind change events to toggle card active style
+  if (advntrCheckbox && advntrCard) {
+    advntrCheckbox.addEventListener('change', () => {
+      advntrCard.classList.toggle('active', advntrCheckbox.checked);
+    });
+  }
+  if (normalCheckbox && normalCard) {
+    normalCheckbox.addEventListener('change', () => {
+      normalCard.classList.toggle('active', normalCheckbox.checked);
+    });
+  }
+
+  /**
+   * Apply settings to the DOM checkboxes and cards
+   * @param {Object} config - Configuration object
+   */
+  const applyConfig = config => {
+    if (!config) return;
+
+    // adVNTR Mode
+    if (advntrCheckbox) {
+      if (config.force_advntr_mode || config.FORCE_ADVNTR_MODE) {
+        advntrCheckbox.checked = true;
+        advntrCheckbox.disabled = true;
+        if (advntrBadge) advntrBadge.classList.remove('hidden');
+        if (advntrCard) {
+          advntrCard.classList.add('forced', 'active');
+        }
+      } else if (config.default_advntr_mode ?? config.DEFAULT_ADVNTR_MODE) {
+        advntrCheckbox.checked = true;
+        if (advntrCard) advntrCard.classList.add('active');
+      }
+    }
+
+    // Normal Mode
+    if (normalCheckbox) {
+      if (config.force_normal_mode || config.FORCE_NORMAL_MODE) {
+        normalCheckbox.checked = true;
+        normalCheckbox.disabled = true;
+        if (normalBadge) normalBadge.classList.remove('hidden');
+        if (normalCard) {
+          normalCard.classList.add('forced', 'active');
+        }
+      } else if (config.default_normal_mode ?? config.DEFAULT_NORMAL_MODE) {
+        normalCheckbox.checked = true;
+        if (normalCard) normalCard.classList.add('active');
+      }
+    }
+  };
+
+  // 1. Initial pass from local static config
+  const localConfig = overrideConfig || {
+    default_advntr_mode: window.CONFIG?.DEFAULT_ADVNTR_MODE,
+    default_normal_mode: window.CONFIG?.DEFAULT_NORMAL_MODE,
+    force_advntr_mode: window.CONFIG?.FORCE_ADVNTR_MODE,
+    force_normal_mode: window.CONFIG?.FORCE_NORMAL_MODE,
+  };
+  applyConfig(localConfig);
+
+  // 2. Fetch live config from server endpoint if overrideConfig wasn't provided
+  if (!overrideConfig) {
+    try {
+      const { getOptionsConfigAPI } = await import('./apiInteractions.js');
+      const serverConfig = await getOptionsConfigAPI();
+      if (serverConfig) {
+        applyConfig(serverConfig);
+        logMessage('Server options configuration loaded successfully.', 'debug');
+      }
+    } catch {
+      logMessage(
+        'Could not load options configuration from server, using local defaults.',
+        'debug'
+      );
+    }
+  }
+}
+
+/**
  * Initializes click functionality for the header to reset the page.
  */
 export function initializePageReset() {
@@ -629,6 +728,7 @@ export function initializeUIUtils() {
   logMessage('Initializing UI utilities...', 'info');
   setupStateManagerListeners(); // Set up state listeners first
   initializeToggleOptionalInputs();
+  initializeOptionsConfig();
   initializePageReset();
   logMessage('UI utilities initialized.', 'info');
 }

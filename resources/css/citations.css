@@ -104,7 +104,7 @@
   color: #002654;
 }
 
-/* Visited links in citations (academic convention) */
+/* Visited links in citations */
 .citations-section a:visited {
-  color: #5a23c8; /* Standard visited link purple */
+  color: #003d82;
 }

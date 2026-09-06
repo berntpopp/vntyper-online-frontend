@@ -425,64 +425,111 @@
     </div>
 
     <!-- Optional Inputs: Hidden by Default -->
-    <div id="additionalInputs" class="additional-inputs hidden">
-      <label for="email">Email (optional):</label>
-      <input
-        type="email"
-        id="email"
-        name="email"
-        class="form-input"
-        placeholder="your.email@example.com"
-        aria-label="Email for notifications"
-      >
-      <span class="input-hint">Receive notifications when your job completes.</span>
+    <div id="additionalInputs" class="additional-inputs hidden" role="region" aria-label="Job Submission Options">
+      <!-- Section 1: Notifications & Cohort Management -->
+      <div class="options-section">
+        <h2 class="options-group-title">Notifications &amp; Cohort Management</h2>
+        <div class="options-fields-grid">
+          <div class="form-field">
+            <label for="email" class="form-field-label">
+              Email (optional):
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-input"
+              placeholder="your.email@example.com"
+              aria-label="Email for notifications"
+              aria-describedby="emailHint"
+            >
+            <span id="emailHint" class="input-hint">Receive notifications when your job completes.</span>
+          </div>
 
-      <label for="cohortAlias">Cohort Alias (optional):</label>
-      <input
-        type="text"
-        id="cohortAlias"
-        name="cohortAlias"
-        class="form-input"
-        placeholder="My cohort"
-        aria-label="Cohort Alias"
-        aria-describedby="cohortAliasHint"
-      >
-      <span id="cohortAliasHint" class="input-hint">Group multiple samples under one cohort name.</span>
+          <div class="form-field">
+            <label for="cohortAlias" class="form-field-label">
+              Cohort Alias (optional):
+            </label>
+            <input
+              type="text"
+              id="cohortAlias"
+              name="cohortAlias"
+              class="form-input"
+              placeholder="My cohort"
+              aria-label="Cohort Alias"
+              aria-describedby="cohortAliasHint"
+            >
+            <span id="cohortAliasHint" class="input-hint">Group multiple samples under one cohort name.</span>
+          </div>
 
-      <label for="passphrase">Passphrase (optional):</label>
-      <input
-        type="password"
-        id="passphrase"
-        name="passphrase"
-        class="form-input"
-        placeholder="Password"
-        autocomplete="new-password"
-        aria-label="Passphrase for cohort creation"
-        aria-describedby="passphraseHint"
-      >
-      <span id="passphraseHint" class="input-hint">Secure your cohort with a passphrase to protect and re-access it.</span>
+          <div class="form-field">
+            <label for="passphrase" class="form-field-label">
+              Passphrase (optional):
+            </label>
+            <input
+              type="password"
+              id="passphrase"
+              name="passphrase"
+              class="form-input"
+              placeholder="Password"
+              autocomplete="new-password"
+              aria-label="Passphrase for cohort creation"
+              aria-describedby="passphraseHint"
+            >
+            <span id="passphraseHint" class="input-hint">Secure your cohort with a passphrase to protect and re-access it.</span>
+          </div>
+        </div>
+      </div>
 
-      <label for="advntrMode">
-        <input
-          type="checkbox"
-          id="advntrMode"
-          name="advntr_mode"
-          aria-label="Enable adVNTR analysis (secondary algorithm)"
-        >
-        adVNTR Mode (secondary algorithm)
-      </label>
-      <p class="help-text">Runs independent analysis using the adVNTR algorithm. Provides additional validation but increases processing time (~15 min).</p>
+      <div class="options-divider" role="separator"></div>
 
-      <label for="normalMode">
-        <input
-          type="checkbox"
-          id="normalMode"
-          name="normal_mode"
-          aria-label="Enable normal mode (include unmapped reads)"
-        >
-        Normal Mode (include unmapped reads)
-      </label>
-      <p class="help-text">Includes all unmapped reads for comprehensive analysis. Takes longer and uploads a larger file.</p>
+      <!-- Section 2: Advanced Analysis Modes -->
+      <div class="options-section">
+        <h2 class="options-group-title">Advanced Analysis Modes</h2>
+        <div class="options-analysis-list">
+          <!-- adVNTR Mode Card -->
+          <div class="option-item" id="advntrCard">
+            <div class="option-item-header">
+              <label class="option-item-label" for="advntrMode">
+                <input
+                  type="checkbox"
+                  id="advntrMode"
+                  name="advntr_mode"
+                  class="option-checkbox"
+                  aria-label="Enable adVNTR analysis (secondary algorithm)"
+                  aria-describedby="advntrDesc"
+                >
+                <span class="option-title">adVNTR Mode (secondary algorithm)</span>
+              </label>
+              <span class="badge-accent hidden" id="advntrEnforcedBadge">Enforced by Server</span>
+            </div>
+            <p class="help-text" id="advntrDesc">
+              Runs independent analysis using the adVNTR algorithm. Provides additional validation but increases processing time (~15 min).
+            </p>
+          </div>
+
+          <!-- Normal Mode Card -->
+          <div class="option-item" id="normalModeCard">
+            <div class="option-item-header">
+              <label class="option-item-label" for="normalMode">
+                <input
+                  type="checkbox"
+                  id="normalMode"
+                  name="normal_mode"
+                  class="option-checkbox"
+                  aria-label="Enable normal mode (include unmapped reads)"
+                  aria-describedby="normalModeDesc"
+                >
+                <span class="option-title">Normal Mode (include unmapped reads)</span>
+              </label>
+              <span class="badge-accent hidden" id="normalModeEnforcedBadge">Enforced by Server</span>
+            </div>
+            <p class="help-text" id="normalModeDesc">
+              Includes all unmapped reads for comprehensive analysis. Takes longer and uploads a larger file.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
 
     </form>

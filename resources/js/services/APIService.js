@@ -8,6 +8,7 @@ import {
   pollJobStatusAPI,
   pollCohortStatusAPI,
   analyzeCohort,
+  getOptionsConfigAPI,
 } from '../apiInteractions.js';
 import { Job } from '../models/Job.js';
 import { Cohort } from '../models/Cohort.js';
@@ -159,6 +160,24 @@ export class APIService {
       return await analyzeCohort(cohortId, passphrase, alias);
     } catch (error) {
       this._handleError('analyzeCohort', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch server-side options configuration
+   * @returns {Promise<{
+   *   default_advntr_mode: boolean,
+   *   default_normal_mode: boolean,
+   *   force_advntr_mode: boolean,
+   *   force_normal_mode: boolean
+   * }>} Server options configuration
+   */
+  async getOptionsConfig() {
+    try {
+      return await getOptionsConfigAPI();
+    } catch (error) {
+      this._handleError('getOptionsConfig', error);
       throw error;
     }
   }

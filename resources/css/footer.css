@@ -65,7 +65,7 @@
 }
 
 .footer-links a:visited {
-  color: #4a2380; /* Purple for visited links */
+  color: #003d82;
 }
 
 .footer-separator {
@@ -91,7 +91,7 @@
   text-align: center;
   margin: 4px auto;
   width: 100%;
-  max-width: none;
+  max-width: 70ch;
 }
 
 /* Footer bottom links (Imprint, Contact, etc.) */
@@ -117,7 +117,7 @@
 }
 
 .footer-bottom a:visited {
-  color: #4a2380;
+  color: #003d82;
 }
 
 /* Footer Utility Action Buttons (Logs & Stats) */
@@ -166,7 +166,7 @@
   color: #ffffff;
   background-color: var(--color-primary, #005f73);
   border-color: var(--color-primary, #005f73);
-  box-shadow: 0 4px 8px rgba(0, 95, 115, 0.25);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .utility-toggle-btn:focus-visible {

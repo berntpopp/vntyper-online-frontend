@@ -93,7 +93,6 @@
 
 .cohort-section {
   border: 1px solid #cbd5e1;
-  border-left: 4px solid #0284c7;
   padding: 20px;
   margin-bottom: 24px;
   border-radius: 8px;
@@ -244,7 +243,7 @@
 }
 
 .cohort-analyze-btn {
-  background-color: #0284c7;
+  background-color: #0369a1;
   color: #ffffff;
   border: none;
   padding: 10px 20px;
@@ -258,7 +257,7 @@
 }
 
 .cohort-analyze-btn:hover:not(:disabled) {
-  background-color: #0369a1;
+  background-color: #0284c7;
   transform: translateY(-1px);
 }
 

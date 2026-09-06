@@ -13,8 +13,8 @@
   border: 1px solid #334155;
   border-radius: 12px;
   box-shadow:
-    0 20px 25px -5px rgba(0, 0, 0, 0.35),
-    0 8px 10px -6px rgba(0, 0, 0, 0.25);
+    0 10px 15px -3px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -127,15 +127,15 @@
 }
 
 .log-filter-btn.active {
-  background-color: #0284c7;
+  background-color: #0369a1;
   color: #ffffff;
-  border-color: #0284c7;
+  border-color: #0369a1;
   font-weight: 600;
-  box-shadow: 0 1px 3px rgba(2, 132, 199, 0.4);
+  box-shadow: 0 1px 3px rgba(3, 105, 161, 0.4);
 }
 
 .log-filter-btn:focus-visible {
-  outline: 2px solid #38bdf8;
+  outline: 2px solid var(--color-focus, #0a9396);
   outline-offset: 1px;
 }
 
@@ -182,8 +182,8 @@
 
 .log-download-group #downloadLogsBtn:hover {
   color: #38bdf8;
-  border-color: #0284c7;
-  background-color: rgba(2, 132, 199, 0.15);
+  border-color: #0369a1;
+  background-color: rgba(3, 105, 161, 0.15);
 }
 
 .log-format-select {
@@ -198,7 +198,7 @@
 }
 
 .log-format-select:focus-visible {
-  outline: 2px solid #38bdf8;
+  outline: 2px solid var(--color-focus, #0a9396);
   outline-offset: 1px;
 }
 
@@ -242,9 +242,9 @@
 }
 
 .log-info {
-  background-color: rgba(14, 165, 233, 0.08);
-  border-color: rgba(14, 165, 233, 0.2);
-  color: #7dd3fc;
+  background-color: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
 }
 
 .log-success {

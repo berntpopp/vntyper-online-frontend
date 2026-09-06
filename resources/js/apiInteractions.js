@@ -489,3 +489,18 @@ export async function analyzeCohort(cohortId, passphrase, alias = null) {
     throw error;
   }
 }
+
+/**
+ * Fetches server-side configuration for optional analysis parameters.
+ *
+ * @returns {Promise<{
+ *   default_advntr_mode: boolean,
+ *   default_normal_mode: boolean,
+ *   force_advntr_mode: boolean,
+ *   force_normal_mode: boolean
+ * }>} The server options configuration
+ */
+export async function getOptionsConfigAPI() {
+  const apiUrl = window.CONFIG?.API_URL || '/api';
+  return apiRequest(`${apiUrl}/options-config/`);
+}

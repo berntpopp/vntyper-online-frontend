@@ -12,6 +12,10 @@ window.CONFIG = {
   API_URL: apiUrl,
   API_DOCS_URL: window.CONFIG?.API_DOCS_URL || defaultApiDocsUrl,
   ENABLE_DONATIONS: window.CONFIG?.ENABLE_DONATIONS ?? false,
+  DEFAULT_ADVNTR_MODE: window.CONFIG?.DEFAULT_ADVNTR_MODE ?? false,
+  DEFAULT_NORMAL_MODE: window.CONFIG?.DEFAULT_NORMAL_MODE ?? false,
+  FORCE_ADVNTR_MODE: window.CONFIG?.FORCE_ADVNTR_MODE ?? false,
+  FORCE_NORMAL_MODE: window.CONFIG?.FORCE_NORMAL_MODE ?? false,
   institutions: [
     {
       name: 'Institut Imagine',

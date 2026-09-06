@@ -15,6 +15,12 @@ const API = 'http://localhost:8000/api';
 
 export const FIXTURES = {
   version: { api_version: '1.2.3', tool_version: '2.0.0' },
+  optionsConfig: {
+    default_advntr_mode: false,
+    default_normal_mode: false,
+    force_advntr_mode: false,
+    force_normal_mode: false,
+  },
   usageStatistics: { total_jobs: 42, jobs_last_24h: 7 },
   jobQueue: { queue_length: 0, running: 0 },
   donationsStatus: { enabled: false },
@@ -49,6 +55,7 @@ export async function acknowledgeDisclaimer(page) {
 export async function mockApi(page, overrides = {}) {
   const routes = {
     '/version/': FIXTURES.version,
+    '/options-config/': FIXTURES.optionsConfig,
     '/usage-statistics/': FIXTURES.usageStatistics,
     '/job-queue/': FIXTURES.jobQueue,
     '/donations/status/': FIXTURES.donationsStatus,

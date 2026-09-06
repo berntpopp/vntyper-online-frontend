@@ -61,6 +61,10 @@ interface Window {
     API_URL: string;
     API_DOCS_URL?: string;
     ENABLE_DONATIONS?: boolean;
+    DEFAULT_ADVNTR_MODE?: boolean;
+    DEFAULT_NORMAL_MODE?: boolean;
+    FORCE_ADVNTR_MODE?: boolean;
+    FORCE_NORMAL_MODE?: boolean;
     institutions: {
       name: string;
       logo: string;

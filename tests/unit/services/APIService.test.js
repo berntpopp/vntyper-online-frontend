@@ -13,6 +13,7 @@ vi.mock('../../../resources/js/apiInteractions.js', () => ({
   createCohort: vi.fn(),
   pollJobStatusAPI: vi.fn(),
   pollCohortStatusAPI: vi.fn(),
+  getOptionsConfigAPI: vi.fn(),
 }));
 
 // Mock log.js module
@@ -30,6 +31,7 @@ import {
   createCohort,
   pollJobStatusAPI,
   pollCohortStatusAPI,
+  getOptionsConfigAPI,
 } from '../../../resources/js/apiInteractions.js';
 
 describe('APIService', () => {
@@ -451,6 +453,34 @@ describe('APIService', () => {
 
       // Assert - falls back to global logMessage
       expect(logMessage).toHaveBeenCalledWith('[APIService.testMethod] Test error', 'error');
+    });
+  });
+
+  describe('getOptionsConfig()', () => {
+    it('should fetch and return options configuration from API', async () => {
+      const mockResult = {
+        default_advntr_mode: false,
+        default_normal_mode: false,
+        force_advntr_mode: false,
+        force_normal_mode: false,
+      };
+      getOptionsConfigAPI.mockResolvedValue(mockResult);
+
+      const result = await apiService.getOptionsConfig();
+
+      expect(getOptionsConfigAPI).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockResult);
+    });
+
+    it('should handle and rethrow errors when getOptionsConfig fails', async () => {
+      const error = new Error('Network error');
+      getOptionsConfigAPI.mockRejectedValue(error);
+
+      await expect(apiService.getOptionsConfig()).rejects.toThrow('Network error');
+      expect(mockLogger.logMessage).toHaveBeenCalledWith(
+        '[APIService.getOptionsConfig] Network error',
+        'error'
+      );
     });
   });
 });
