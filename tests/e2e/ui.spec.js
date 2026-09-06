@@ -59,6 +59,21 @@ test.describe('modals', () => {
     await toggle.click();
     await expect(toggle).toHaveAttribute('aria-expanded', 'true');
   });
+
+  test('the stats panel toggles and reports its state', async ({ page }) => {
+    const toggle = page.locator('#toggleStatsBtn');
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('footer utility controls are centered within the footer', async ({ page }) => {
+    const container = page.locator('.footer-utility-actions');
+    await expect(container).toBeVisible();
+    const style = await container.evaluate(el => window.getComputedStyle(el).justifyContent);
+    expect(style).toBe('center');
+  });
 });
 
 test.describe('mobile navigation', () => {
