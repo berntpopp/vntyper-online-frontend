@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.71.1'; // Fix layout shift, align card widths, and update clinical terminology to screening
+const frontendVersion = '0.71.2'; // Reconcile assembly detection, eliminate comlink proxy apply error, and modernize UI
 
 /**
  * Build the API version endpoint, or null when this page has no API config.
