@@ -809,37 +809,34 @@ function detectAssembly(bamContigs, assemblyHints) {
  * @throws {Error} - If no region is configured for the detected/selected assembly
  */
 function determineAssemblyAndRegion(bamContigs, assemblyHints, regionValue) {
-  let detectedAssembly;
+  let detectedAssembly = regionValue;
+  const chr1 = bamContigs.find(c => c.name === 'chr1' || c.name === '1');
+  const isChr1Hg19 = chr1 && chr1.length === 249250621;
+  const isChr1Hg38 = chr1 && chr1.length === 248956422;
 
-  // Determine assembly (either auto-detect or use user selection)
   if (regionValue === 'guess') {
     detectedAssembly = detectAssembly(bamContigs, assemblyHints);
     logMessage(`Auto-detected assembly: ${detectedAssembly || 'None'}`, 'info');
+  } else if (
+    (isChr1Hg19 && /^(hg38|grch38)/i.test(regionValue)) ||
+    (isChr1Hg38 && /^(hg19|grch37)/i.test(regionValue))
+  ) {
+    const ucsc = detectNamingConvention(bamContigs) === 'ucsc';
+    detectedAssembly = isChr1Hg19 ? (ucsc ? 'hg19' : 'GRCh37') : ucsc ? 'hg38' : 'GRCh38';
+    logMessage(`⚠️ Selection mismatch: Reconciled to ${detectedAssembly}`, 'warning');
   } else {
-    detectedAssembly = regionValue;
-    logMessage(`User-selected assembly (skipping auto-detection): ${detectedAssembly}`, 'info');
+    logMessage(`Using assembly: ${detectedAssembly}`, 'info');
   }
 
-  // Use detected or selected assembly for region lookup
   const assemblyForRegion = detectedAssembly || regionValue;
-
-  // Look up region configuration using assembly name
   const regionInfo = regions[assemblyForRegion];
-
   if (!regionInfo) {
     throw new Error(
-      `No region configured for assembly: ${assemblyForRegion}. Available options: ${Object.keys(regions).join(', ')}`
+      `No region configured for assembly: ${assemblyForRegion}. Options: ${Object.keys(regions).join(', ')}`
     );
   }
 
-  // Extract region string (already has correct chromosome naming from regionsConfig)
-  const region = regionInfo.region;
-  logMessage(`Region to extract: ${region}`, 'info');
-
-  return {
-    assembly: detectedAssembly,
-    region,
-  };
+  return { assembly: detectedAssembly, region: regionInfo.region };
 }
 
 /**
@@ -921,11 +918,11 @@ async function indexBam(CLI, subsetBamPath) {
  *                          - a "sam" property.
  * @returns {Promise<Object>} - An object containing subset BAM/BAI Blobs and detected assembly & region.
  */
-export async function extractRegionAndIndex(CLI, pair) {
+export async function extractRegionAndIndex(CLI, pair, explicitRegion = null) {
   // #region is a <select> and #normalMode an <input type="checkbox">, both static markup in
   // index.html - the only page that loads this module (lazily, from ExtractionController).
   const regionSelect = /** @type {HTMLSelectElement} */ (document.getElementById('region'));
-  const regionValue = regionSelect.value;
+  const regionValue = explicitRegion || regionSelect?.value || 'guess';
 
   // ADDED: Read normal mode checkbox
   // The cast below is deliberately written without inner spaces: at the usual `/** @type ... */`

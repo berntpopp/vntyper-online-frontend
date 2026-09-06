@@ -42,9 +42,6 @@ export class StateManager {
         count: 0, // Allow nesting
       },
 
-      // Aioli CLI instance
-      cli: null,
-
       // Server monitoring
       serverLoad: {
         interval: null,
@@ -610,10 +607,25 @@ if (typeof window !== 'undefined' && window.addEventListener) {
   // Log state changes in development
   if (window.location && window.location.port === '3000') {
     stateManager.on('state.changed', ({ path, value, oldValue }) => {
-      logMessage(
-        `[State] ${path}: ${JSON.stringify(oldValue)} -> ${JSON.stringify(value)}`,
-        'debug'
-      );
+      const safeSerialize = v => {
+        if (v === null || v === undefined) return String(v);
+        if (typeof v === 'function') return '[Function]';
+        if (typeof v === 'symbol') return v.toString();
+        if (typeof v !== 'object') return String(v);
+        if (path === 'cli' || ('exec' in v && 'mount' in v)) return '[Aioli CLI]';
+        if (v instanceof Map) return `[Map (${v.size})]`;
+        if (v instanceof Set) return `[Set (${v.size})]`;
+        if (typeof HTMLElement !== 'undefined' && v instanceof HTMLElement) {
+          return `<${v.tagName.toLowerCase()}>`;
+        }
+        if (typeof Blob !== 'undefined' && v instanceof Blob) return `[Blob: ${v.size} bytes]`;
+        try {
+          return JSON.stringify(v);
+        } catch {
+          return '[Object]';
+        }
+      };
+      logMessage(`[State] ${path}: ${safeSerialize(oldValue)} -> ${safeSerialize(value)}`, 'debug');
     });
   }
 }

@@ -84,9 +84,6 @@ export class ExtractionController extends BaseController {
 
       this.cli = await module.initializeAioli();
 
-      // Store in state
-      this.setState('cli', this.cli);
-
       this.emit('extraction:initialized', { cli: this.cli });
 
       this._log('Aioli initialized successfully', 'success');
@@ -131,7 +128,7 @@ export class ExtractionController extends BaseController {
       }
 
       // Extract region and generate index
-      const result = await module.extractRegionAndIndex(this.cli, pair);
+      const result = await module.extractRegionAndIndex(this.cli, pair, region);
 
       this.emit('extraction:complete', {
         pair,
@@ -219,7 +216,6 @@ export class ExtractionController extends BaseController {
     // Cleanup Aioli resources if needed
     this.cli = null;
     this.bamModule = null;
-    this.setState('cli', null);
 
     this._log('Cleanup complete', 'info');
   }

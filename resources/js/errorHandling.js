@@ -130,6 +130,13 @@ export class ErrorHandler {
 
     // Handle unhandled promise rejections
     window.addEventListener('unhandledrejection', event => {
+      const reasonMsg = event.reason?.message || String(event.reason || '');
+      if (reasonMsg.includes("reading 'apply'")) {
+        logMessage(`[Worker/Comlink RPC Ignored] ${reasonMsg}`, 'debug');
+        event.preventDefault();
+        return;
+      }
+
       this.handleError(
         event.reason,
         {

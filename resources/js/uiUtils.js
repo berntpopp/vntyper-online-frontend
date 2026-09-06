@@ -430,18 +430,28 @@ export function createSpinnerHTML({
  * div.innerHTML = createAssemblyMessageHTML('hg19');
  */
 export function createAssemblyMessageHTML(assembly) {
+  const norm = (assembly || '').toUpperCase();
   return `
         <div class="assembly-info-message" style="
-            background-color: #e7f3fe;
-            color: #31708f;
-            border: 1px solid #bce8f1;
-            border-radius: 4px;
-            padding: 12px 16px;
-            margin-bottom: 16px;
+            background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 14px 20px;
+            margin-bottom: 20px;
             font-size: 0.95rem;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(3, 105, 161, 0.08);
         ">
-            Detected reference assembly: ${assembly.toUpperCase()}. Please confirm or select manually.
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+            <span>Detected reference assembly: <strong style="color: #0c4a6e; font-weight: 700; background: #e0f2fe; padding: 2px 8px; border-radius: 4px; border: 1px solid #7dd3fc;">${norm}</strong>. Coordinates configured automatically. Please confirm or select manually.</span>
         </div>
     `;
 }

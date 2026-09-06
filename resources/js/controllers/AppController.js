@@ -239,10 +239,17 @@ export class AppController extends BaseController {
         cohortId = cohort.cohortId;
       }
 
+      // Capture initial user-selected region before iterating over pairs
+      const initialRegionValue =
+        /** @type {HTMLSelectElement} */ (document.getElementById('region'))?.value || 'guess';
+
       // Process each file pair
       for (const pair of matchedPairs) {
         // Extract region
-        const extractionResult = await this.extractionController.handleExtract({ pair });
+        const extractionResult = await this.extractionController.handleExtract({
+          pair,
+          region: initialRegionValue,
+        });
 
         // Prepare FormData
         const formData = new FormData();
@@ -455,10 +462,11 @@ export class AppController extends BaseController {
       document.getElementById('cohortAlias')
     );
     const passphraseInput = /** @type {HTMLInputElement} */ (document.getElementById('passphrase'));
-
+    const regionSelect = /** @type {HTMLSelectElement} */ (document.getElementById('region'));
     if (emailInput) emailInput.value = '';
     if (cohortAliasInput) cohortAliasInput.value = '';
     if (passphraseInput) passphraseInput.value = '';
+    if (regionSelect) regionSelect.value = 'guess';
 
     this.emit('app:reset:complete');
 
@@ -508,19 +516,22 @@ export class AppController extends BaseController {
       // are revoked here rather than left resident for the whole session.
       this._replaceRegionOutput(createAssemblyMessageHTML(detectedAssembly));
 
-      // Update assembly dropdown to detected assembly.
-      const assemblySelect = document.getElementById('region');
-      if (assemblySelect instanceof HTMLSelectElement) {
-        const normalizedAssembly = detectedAssembly.toLowerCase();
-        // Find matching option (exact match or contains match)
-        const option = Array.from(assemblySelect.options).find(
-          opt =>
-            opt.value.toLowerCase() === normalizedAssembly ||
-            opt.value.toLowerCase().startsWith(normalizedAssembly)
-        );
-        if (option) {
-          assemblySelect.value = option.value;
-          this._log(`Updated assembly dropdown to: ${option.value}`, 'info');
+      // Update assembly dropdown ONLY when user explicitly clicked "Extract Region" locally.
+      // Do NOT mutate dropdown during job submission so subsequent files/jobs continue guessing.
+      if (this.showDownloadButtons) {
+        const assemblySelect = document.getElementById('region');
+        if (assemblySelect instanceof HTMLSelectElement) {
+          const normalizedAssembly = detectedAssembly.toLowerCase();
+          // Find matching option (exact match or contains match)
+          const option = Array.from(assemblySelect.options).find(
+            opt =>
+              opt.value.toLowerCase() === normalizedAssembly ||
+              opt.value.toLowerCase().startsWith(normalizedAssembly)
+          );
+          if (option) {
+            assemblySelect.value = option.value;
+            this._log(`Updated assembly dropdown to: ${option.value}`, 'info');
+          }
         }
       }
 
