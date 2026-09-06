@@ -113,6 +113,10 @@
 }
 
 .server-load-indicator .load-count {
+  display: inline-block;
+  min-width: 1.2ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
   font-weight: bold;
 }
 
@@ -264,6 +268,10 @@
   }
 
   .load-count {
+    display: inline-block;
+    min-width: 1.2ch;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
     font-size: 1.2em;
     font-weight: bold;
   }
