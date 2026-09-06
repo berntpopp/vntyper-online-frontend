@@ -439,20 +439,26 @@ body.menu-open {
     margin-top: 15px;
   }
 
-  /* Adjust container padding */
-  .container {
-    padding: 20px;
-    margin: 20px;
-  }
-
-  /* Adjust font sizes for readability */
+  /* Optimize container padding and zero out double margins on mobile */
   body {
-    margin: 20px;
-    font-size: 16px; /* Increased base font size */
+    margin: 0;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+      max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    font-size: 16px; /* Legible base font size */
   }
 
-  .header h2 {
-    font-size: 24px;
+  .container {
+    padding: 16px;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    border-radius: 8px;
+  }
+
+  .header h2,
+  .header .brand-title {
+    font-size: 1.35rem;
   }
 
   .navbar-menu {
@@ -468,9 +474,9 @@ body.menu-open {
 
   /* Adjust logo size */
   .logo {
-    width: 60px;
-    height: 60px;
-    margin-right: 15px;
+    width: 52px;
+    height: 52px;
+    margin-right: 12px;
   }
 
   /* Adjust button sizes */
@@ -488,6 +494,7 @@ body.menu-open {
     margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    box-sizing: border-box;
   }
 
   /* Adjust spinner size */
@@ -498,7 +505,7 @@ body.menu-open {
 
   /* Adjust modal content */
   .modal-content {
-    padding: 20px;
+    padding: 18px 16px;
   }
 
   /* Adjust citations section font size */
@@ -517,16 +524,29 @@ body.menu-open {
   }
 }
 
-/* Create a parent container to hold the logs and usage stats panels */
+/* Parent container for logs and usage stats panels */
 #panelsContainer {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: max(20px, env(safe-area-inset-bottom, 20px));
+  right: max(20px, env(safe-area-inset-right, 20px));
   display: flex;
   flex-direction: column-reverse; /* Start from bottom and stack upwards */
   align-items: flex-end;
-  gap: 20px; /* Space between panels when both are visible */
+  gap: 16px; /* Space between panels when both are visible */
   z-index: 1000; /* Ensure panels appear above other elements */
+  max-width: calc(100vw - 32px);
+  pointer-events: none; /* Allow interaction through outer container */
+}
+
+@media (max-width: 600px) {
+  #panelsContainer {
+    left: max(10px, env(safe-area-inset-left, 10px));
+    right: max(10px, env(safe-area-inset-right, 10px));
+    bottom: max(10px, env(safe-area-inset-bottom, 10px));
+    align-items: stretch;
+    max-width: calc(100vw - 20px);
+    gap: 10px;
+  }
 }
 
 /* --- Print Styles (WCAG 1.4.1 Link Differentiation) --- */

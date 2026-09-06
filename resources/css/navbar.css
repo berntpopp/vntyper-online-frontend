@@ -11,9 +11,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   padding: 0;
   width: 100%;
   position: relative; /* Ensure positioning context for absolute elements */
+  box-sizing: border-box;
 }
 
 .header {
@@ -30,12 +33,14 @@
   flex-shrink: 0;
 }
 
-.header h2 {
+.header h2,
+.header .brand-title {
   font-size: 1.6rem;
   font-weight: 700;
   margin: 0;
   color: #1e293b;
   opacity: 1;
+  display: inline-block;
 }
 
 /* --- Navigation Menu Styles --- */
@@ -83,6 +88,9 @@
   display: inline-flex;
   align-items: center;
   padding: 8px 12px;
+  min-height: 44px;
+  min-width: 44px;
+  box-sizing: border-box;
   border-radius: 4px;
 }
 
@@ -185,8 +193,8 @@
     transform: none;
   }
 
-  /* Navbar container adjustment */
-  .navbar-container {
+  /* Navbar container adjustment only when mobile toggle button is present */
+  .navbar-container:has(.navbar-toggle) {
     padding-right: 48px; /* Space for hamburger button */
   }
 

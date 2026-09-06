@@ -67,13 +67,20 @@
       padding: 1.25rem;
       margin: 1.5rem 0;
       border-radius: 8px;
+    fieldset {
+      min-inline-size: 0;
+      min-width: 0;
+      width: 100%;
+      box-sizing: border-box;
     }
+    .consent-banner h2,
     .consent-banner h3 {
       margin-top: 0;
       color: var(--color-primary, #005f73);
       font-size: 1.25rem;
       font-weight: 600;
       line-height: 1.4;
+      margin-bottom: 0.5rem;
     }
     .consent-checkbox-group {
       display: flex;
@@ -139,9 +146,9 @@
     <!-- Header with Navigation -->
     <nav class="navbar" aria-label="Main navigation">
       <div class="navbar-container">
-        <a href="index.html" class="header" style="text-decoration: none; color: inherit;" aria-label="Back to Home">
+        <a href="index.html" class="header" style="text-decoration: none; color: inherit;" aria-label="vntyper-online - Home">
           <img src="resources/assets/logo/vntyperonline_logo_160px.png" alt="vntyper-online Logo" class="logo" width="80" height="80">
-          <h2>vntyper-online</h2>
+          <span class="brand-title">vntyper-online</span>
         </a>
         <a href="index.html" class="back-link" aria-label="Back to Home">← Back to Home</a>
       </div>
@@ -164,7 +171,7 @@
       <div id="donationActiveContainer">
         <!-- Privacy & Consent Notice -->
         <div class="consent-banner">
-          <h3>GDPR Article 9 Informed Consent Notice</h3>
+          <h2>GDPR Article 9 Informed Consent Notice</h2>
           <p style="font-size: 0.9rem; line-height: 1.45; color: #334155;">
             Under the EU General Data Protection Regulation (GDPR Art. 9), genetic and health information requires explicit, informed consent. 
             Data controller: <strong>Dr. Bernt Popp</strong>, Berlin Institute of Health at Charité / Universitätsmedizin Berlin (<a href="mailto:support@vntyper.org">support@vntyper.org</a>).
@@ -186,6 +193,7 @@
             <legend style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b;">1. VNtyper Result Archive</legend>
             <p style="font-size: 0.9rem; color: #64748b; margin-top: 0;">Upload your downloaded VNtyper <code>.zip</code> result file. Raw sequence files are automatically checked and must not be present.</p>
             <div class="file-input-wrapper">
+              <label for="archiveFile" style="display: block; font-weight: 500; margin-bottom: 4px;">Select VNtyper result ZIP archive *</label>
               <input type="file" id="archiveFile" accept=".zip" required class="form-input" style="padding: 8px;">
             </div>
           </fieldset>
@@ -193,7 +201,7 @@
           <!-- Step 2: Sequencing & Library Kit -->
           <fieldset style="border: none; padding: 0; margin-bottom: 1.5rem;">
             <legend style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b;">2. Sequencing & Library Preparation</legend>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 1rem;">
               <div>
                 <label for="kitSelect" style="display: block; font-weight: 500; margin-bottom: 4px;">Target Capture / Library Kit *</label>
                 <select id="kitSelect" name="kit" required class="form-input" style="width: 100%; padding: 8px;">
@@ -235,14 +243,14 @@
           <!-- Step 3: Finding Category (First-class Negative Arm) -->
           <fieldset style="border: none; padding: 0; margin-bottom: 1.5rem;">
             <legend style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b;">3. Diagnostic Finding Category</legend>
-            <div style="display: flex; gap: 1.5rem; margin-bottom: 0.75rem;">
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
+              <label for="radioNegative" style="display: flex; align-items: center; gap: 8px; cursor: pointer; min-height: 44px;">
                 <input type="radio" name="finding_call" value="negative" checked id="radioNegative">
-                <strong>Negative Control / No Finding</strong>
+                <span><strong>Negative Control / No Finding</strong></span>
               </label>
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <label for="radioPositive" style="display: flex; align-items: center; gap: 8px; cursor: pointer; min-height: 44px;">
                 <input type="radio" name="finding_call" value="positive" id="radioPositive">
-                <strong>Positive Finding (MUC1 mutation)</strong>
+                <span><strong>Positive Finding (MUC1 mutation)</strong></span>
               </label>
             </div>
 
@@ -267,7 +275,7 @@
           <!-- Step 4: Clinical Phenotypes (HPO) & Coarse Demographics -->
           <fieldset style="border: none; padding: 0; margin-bottom: 1.5rem;">
             <legend style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b;">4. Clinical Features & Coarse Demographics</legend>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 1rem; margin-bottom: 1rem;">
               <div>
                 <label for="collectionMonth" style="display: block; font-weight: 500; margin-bottom: 4px;">Collection Date (Coarse YYYY-MM)</label>
                 <input type="month" id="collectionMonth" class="form-input" style="width: 100%; padding: 8px;">
@@ -300,7 +308,7 @@
           </fieldset>
 
           <!-- Submit Button -->
-          <div style="margin-top: 2rem; display: flex; align-items: center; gap: 1rem;">
+          <div style="margin-top: 2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;">
             <button type="submit" id="donateSubmitBtn" class="button button-primary" disabled>
               Submit Anonymous Donation
             </button>

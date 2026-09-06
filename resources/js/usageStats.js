@@ -20,37 +20,106 @@ async function fetchUsageStatistics() {
  */
 function displayUsageStatistics(stats) {
   const usageStatsContent = document.getElementById('usageStatsContent');
-  usageStatsContent.innerHTML = ''; // Clear previous content
+  if (!usageStatsContent) return;
+  usageStatsContent.textContent = ''; // Clear previous content
 
-  // XSS-safe: Use DOM API instead of innerHTML
-  const totalJobs = document.createElement('p');
-  const totalJobsStrong = document.createElement('strong');
-  totalJobsStrong.textContent = 'Total Jobs:';
-  totalJobs.appendChild(totalJobsStrong);
-  totalJobs.appendChild(document.createTextNode(` ${stats.total_jobs}`));
+  // 1. KPI Grid (Total Jobs & Unique Users)
+  const kpiGrid = document.createElement('div');
+  kpiGrid.className = 'stats-kpi-grid';
 
-  const uniqueUsers = document.createElement('p');
-  const uniqueUsersStrong = document.createElement('strong');
-  uniqueUsersStrong.textContent = 'Unique Users:';
-  uniqueUsers.appendChild(uniqueUsersStrong);
-  uniqueUsers.appendChild(document.createTextNode(` ${stats.unique_users}`));
+  const jobsCard = document.createElement('div');
+  jobsCard.className = 'stats-kpi-card';
+  const jobsNumber = document.createElement('div');
+  jobsNumber.className = 'stats-kpi-number';
+  jobsNumber.textContent = String(stats.total_jobs ?? 0);
+  const jobsLabel = document.createElement('div');
+  jobsLabel.className = 'stats-kpi-label';
+  jobsLabel.textContent = 'Active Jobs';
+  jobsCard.appendChild(jobsNumber);
+  jobsCard.appendChild(jobsLabel);
 
-  const jobStatuses = document.createElement('div');
-  const jobStatusesStrong = document.createElement('strong');
-  jobStatusesStrong.textContent = 'Job Statuses:';
-  jobStatuses.appendChild(jobStatusesStrong);
+  const usersCard = document.createElement('div');
+  usersCard.className = 'stats-kpi-card';
+  const usersNumber = document.createElement('div');
+  usersNumber.className = 'stats-kpi-number';
+  usersNumber.style.color = '#0a9396';
+  usersNumber.textContent = String(stats.unique_users ?? 0);
+  const usersLabel = document.createElement('div');
+  usersLabel.className = 'stats-kpi-label';
+  usersLabel.textContent = 'Unique Users';
+  usersCard.appendChild(usersNumber);
+  usersCard.appendChild(usersLabel);
 
-  const jobList = document.createElement('ul');
-  for (const [status, count] of Object.entries(stats.job_statuses)) {
-    const li = document.createElement('li');
-    li.textContent = `${status}: ${count}`;
-    jobList.appendChild(li);
+  kpiGrid.appendChild(jobsCard);
+  kpiGrid.appendChild(usersCard);
+  usageStatsContent.appendChild(kpiGrid);
+
+  // 2. Job Statuses Section
+  const statusTitle = document.createElement('div');
+  statusTitle.className = 'stats-section-title';
+  statusTitle.textContent = 'Active Window Statuses';
+  usageStatsContent.appendChild(statusTitle);
+
+  const pillsList = document.createElement('ul');
+  pillsList.className = 'stats-pills-list';
+
+  const statuses = stats.job_statuses || {};
+  const statusEntries = Object.entries(statuses);
+
+  if (statusEntries.length > 0) {
+    for (const [status, count] of statusEntries) {
+      const pill = document.createElement('li');
+      pill.className = 'stats-pill';
+      const sLower = status.toLowerCase();
+      if (sLower.includes('complete') || sLower.includes('success')) {
+        pill.classList.add('stats-pill-completed');
+      } else if (
+        sLower.includes('run') ||
+        sLower.includes('pending') ||
+        sLower.includes('progress')
+      ) {
+        pill.classList.add('stats-pill-running');
+      } else if (sLower.includes('fail') || sLower.includes('error')) {
+        pill.classList.add('stats-pill-failed');
+      }
+      pill.textContent = `${status}: ${count}`;
+      pillsList.appendChild(pill);
+    }
+  } else {
+    const emptyPill = document.createElement('li');
+    emptyPill.className = 'stats-pill';
+    emptyPill.textContent = 'No active jobs in window';
+    pillsList.appendChild(emptyPill);
   }
-  jobStatuses.appendChild(jobList);
+  usageStatsContent.appendChild(pillsList);
 
-  usageStatsContent.appendChild(totalJobs);
-  usageStatsContent.appendChild(uniqueUsers);
-  usageStatsContent.appendChild(jobStatuses);
+  // 3. Cumulative Statistics (if provided by API)
+  if (stats.cumulative) {
+    const cumBox = document.createElement('div');
+    cumBox.className = 'stats-cumulative-box';
+
+    const cumTitle = document.createElement('div');
+    cumTitle.className = 'stats-cumulative-title';
+    cumTitle.textContent = 'Cumulative Usage Tracking';
+    cumBox.appendChild(cumTitle);
+
+    const cumText = document.createElement('div');
+    cumText.textContent = `All-time jobs: ${stats.cumulative.total_jobs ?? 0} | All-time users: ${stats.cumulative.unique_users ?? 0}`;
+    cumBox.appendChild(cumText);
+
+    if (stats.cumulative.since) {
+      const sinceDate = new Date(stats.cumulative.since);
+      const formattedDate = isNaN(sinceDate.getTime())
+        ? stats.cumulative.since
+        : sinceDate.toLocaleDateString();
+      const cumMeta = document.createElement('div');
+      cumMeta.className = 'stats-cumulative-meta';
+      cumMeta.textContent = `Cumulative tracking recorded since ${formattedDate}`;
+      cumBox.appendChild(cumMeta);
+    }
+
+    usageStatsContent.appendChild(cumBox);
+  }
 }
 
 /**
