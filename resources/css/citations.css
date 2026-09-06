@@ -31,9 +31,8 @@
   gap: 12px;
   background-color: #eef4ff;
   border: 1px solid #b6d0ff;
-  border-left: 4px solid #0056b3;
   padding: 12px 14px;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 .preprint-badge {
@@ -76,8 +75,9 @@
 }
 
 .citation-item p {
-  color: #6c757d;
+  color: #475569;
   line-height: 1.6;
+  max-width: 68ch;
 }
 
 /* --- Citation Links (WCAG 1.4.1 Use of Color) --- */

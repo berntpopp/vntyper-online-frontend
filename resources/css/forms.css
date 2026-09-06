@@ -56,17 +56,17 @@
   display: none;
   flex-direction: column;
   transition:
-    max-height 0.3s ease,
-    opacity 0.3s ease;
+    opacity 0.25s ease,
+    transform 0.25s ease;
   overflow: hidden;
-  max-height: 0;
   opacity: 0;
+  transform: translateY(-4px);
 }
 
 .additional-inputs.visible {
   display: flex;
-  max-height: 1000px;
   opacity: 1;
+  transform: translateY(0);
 }
 
 /* Labels */
@@ -96,7 +96,8 @@
 
 .additional-inputs .form-input:focus-visible {
   border-color: #0a9396;
-  box-shadow: 0 0 5px rgba(10, 147, 150, 0.5);
+  outline: 2px solid #0a9396;
+  outline-offset: 1px;
 }
 
 /* Input hints - subtle gray text under inputs */
@@ -142,28 +143,24 @@
 
 /* Error State - Invalid input with visual feedback */
 .form-input.error {
-  border: 2px solid var(--color-error, #dc3545);
-  border-left: 4px solid var(--color-error, #dc3545);
+  border: 1.5px solid var(--color-error, #dc3545);
   background-color: #fff5f5;
 }
 
 .form-input.error:focus-visible {
   outline: 2px solid var(--color-error, #dc3545);
   outline-offset: 2px;
-  box-shadow: 0 0 5px rgba(220, 53, 69, 0.3);
 }
 
 /* Success State - Valid input with visual confirmation */
 .form-input.success {
-  border: 2px solid var(--color-success, #28a745);
-  border-left: 4px solid var(--color-success, #28a745);
+  border: 1.5px solid var(--color-success, #28a745);
   background-color: #f0fff4;
 }
 
 .form-input.success:focus-visible {
   outline: 2px solid var(--color-success, #28a745);
   outline-offset: 2px;
-  box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
 }
 
 /* Error Message Display */
