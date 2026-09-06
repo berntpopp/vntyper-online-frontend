@@ -43,6 +43,8 @@ describe('CohortController', () => {
     mockAPIService = {
       createCohort: vi.fn(),
       getCohortStatus: vi.fn(),
+      analyzeCohort: vi.fn(),
+      getJobStatus: vi.fn(),
     };
 
     // Setup mock CohortView
@@ -51,6 +53,7 @@ describe('CohortController', () => {
       updateCohort: vi.fn(),
       showAnalysisSection: vi.fn(),
       updateAnalysisStatus: vi.fn(),
+      updateAnalysisComplete: vi.fn(),
     };
 
     // Setup mock ErrorView
@@ -492,7 +495,8 @@ describe('CohortController', () => {
 
       // Assert
       expect(mockCohortView.showAnalysisSection).toHaveBeenCalledWith(
-        'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d'
+        'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
+        expect.any(Function)
       );
     });
 
@@ -765,7 +769,7 @@ describe('CohortController', () => {
   // ============================================================================
 
   describe('handleAnalyze()', () => {
-    it('should update analysis status in view', async () => {
+    it('should require passphrase if not provided and not in memory', async () => {
       // Arrange
       const params = { cohortId: 'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d' };
 
@@ -775,13 +779,53 @@ describe('CohortController', () => {
       // Assert
       expect(mockCohortView.updateAnalysisStatus).toHaveBeenCalledWith(
         'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
-        'processing'
+        'failed',
+        'Cohort passphrase is required to run joint analysis.'
+      );
+      expect(mockErrorView.show).toHaveBeenCalled();
+    });
+
+    it('should update analysis status and trigger API when passphrase provided', async () => {
+      // Arrange
+      const params = {
+        cohortId: 'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
+        passphrase: 'test-passphrase',
+      };
+      mockAPIService.analyzeCohort.mockResolvedValue({
+        message: 'Cohort analysis submitted',
+        analysis_job_id: 'analysis-123',
+      });
+
+      // Act
+      await cohortController.handleAnalyze(params);
+
+      // Assert
+      expect(mockAPIService.analyzeCohort).toHaveBeenCalledWith(
+        'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
+        'test-passphrase'
+      );
+      expect(mockCohortView.updateAnalysisStatus).toHaveBeenCalledWith(
+        'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
+        'processing',
+        'Initiating joint analysis...'
+      );
+      expect(mockCohortView.updateAnalysisStatus).toHaveBeenCalledWith(
+        'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
+        'processing',
+        'Analysis in progress...'
       );
     });
 
     it('should emit cohort:analysis:started event', async () => {
       // Arrange
-      const params = { cohortId: 'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d' };
+      const params = {
+        cohortId: 'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
+        passphrase: 'test-passphrase',
+      };
+      mockAPIService.analyzeCohort.mockResolvedValue({
+        message: 'Cohort analysis submitted',
+        analysis_job_id: 'analysis-123',
+      });
 
       // Act
       await cohortController.handleAnalyze(params);
@@ -789,12 +833,20 @@ describe('CohortController', () => {
       // Assert
       expect(mockEventBus.emit).toHaveBeenCalledWith('cohort:analysis:started', {
         cohortId: 'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
+        analysisJobId: 'analysis-123',
       });
     });
 
     it('should log analysis start', async () => {
       // Arrange
-      const params = { cohortId: 'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d' };
+      const params = {
+        cohortId: 'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
+        passphrase: 'test-passphrase',
+      };
+      mockAPIService.analyzeCohort.mockResolvedValue({
+        message: 'Cohort analysis submitted',
+        analysis_job_id: 'analysis-123',
+      });
 
       // Act
       await cohortController.handleAnalyze(params);
@@ -806,18 +858,74 @@ describe('CohortController', () => {
       );
     });
 
-    it('should handle analysis errors', async () => {
-      // Arrange
-      const params = { cohortId: 'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d' };
-      const error = new Error('Analysis failed');
-      mockCohortView.updateAnalysisStatus.mockImplementation(() => {
-        throw error;
+    it('should poll analysis job status until completion', async () => {
+      const params = {
+        cohortId: 'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
+        passphrase: 'test-passphrase',
+      };
+      mockAPIService.analyzeCohort.mockResolvedValue({
+        analysis_job_id: 'analysis-123',
       });
 
-      // Act
+      /** @type {Record<string, any>} */
+      let pollingConfig = {};
+      mockPollingManager.start.mockImplementation((id, pollFn, config) => {
+        pollingConfig = config;
+        return vi.fn();
+      });
+
       await cohortController.handleAnalyze(params);
 
-      // Assert
+      expect(mockPollingManager.start).toHaveBeenCalledWith(
+        'cohort-analysis-analysis-123',
+        expect.any(Function),
+        expect.any(Object)
+      );
+
+      // Test onUpdate
+      pollingConfig.onUpdate({ status: 'running' });
+      expect(mockCohortView.updateAnalysisStatus).toHaveBeenCalledWith(
+        'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
+        'running'
+      );
+
+      // Test onComplete success
+      pollingConfig.onComplete({ status: 'completed' });
+      expect(mockCohortView.updateAnalysisComplete).toHaveBeenCalledWith(
+        'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
+        'analysis-123'
+      );
+      expect(mockEventBus.emit).toHaveBeenCalledWith('cohort:analysis:completed', {
+        cohortId: 'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
+        analysisJobId: 'analysis-123',
+        statusData: { status: 'completed' },
+      });
+
+      // Test onComplete failure
+      pollingConfig.onComplete({ status: 'failed', error: 'Pipeline crash' });
+      expect(mockCohortView.updateAnalysisStatus).toHaveBeenCalledWith(
+        'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
+        'failed',
+        'Pipeline crash'
+      );
+    });
+
+    it('should handle analysis errors', async () => {
+      // Arrange
+      const params = {
+        cohortId: 'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
+        passphrase: 'test-passphrase',
+      };
+      const error = new Error('Analysis API failed');
+      mockAPIService.analyzeCohort.mockRejectedValue(error);
+
+      // Act & Assert
+      await expect(cohortController.handleAnalyze(params)).rejects.toThrow('Analysis API failed');
+      expect(mockCohortView.updateAnalysisStatus).toHaveBeenCalledWith(
+        'c9b7f8d3-4e5a-4f6b-8c7d-9e0f1a2b3c4d',
+        'failed',
+        'Analysis API failed'
+      );
       expect(mockErrorView.show).toHaveBeenCalledWith(error, 'Cohort Analysis');
     });
   });

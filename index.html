@@ -445,8 +445,9 @@
         class="form-input"
         placeholder="My cohort"
         aria-label="Cohort Alias"
+        aria-describedby="cohortAliasHint"
       >
-      <span class="input-hint">Group multiple samples under one cohort name.</span>
+      <span id="cohortAliasHint" class="input-hint">Group multiple samples under one cohort name.</span>
 
       <label for="passphrase">Passphrase (optional):</label>
       <input
@@ -455,10 +456,11 @@
         name="passphrase"
         class="form-input"
         placeholder="Password"
-        autocomplete="off"
+        autocomplete="new-password"
         aria-label="Passphrase for cohort creation"
+        aria-describedby="passphraseHint"
       >
-      <span class="input-hint">Secure your cohort with a passphrase.</span>
+      <span id="passphraseHint" class="input-hint">Secure your cohort with a passphrase to protect and re-access it.</span>
 
       <label for="advntrMode">
         <input
@@ -510,14 +512,14 @@
       </div>
       
       <!-- Cohorts and Jobs Display -->
-      <div id="cohortsContainer" class="cohorts-container" aria-live="polite">
+      <div id="cohortsContainer" class="cohorts-container">
         <!-- Cohort sections will be dynamically injected here -->
       </div>
 
       <!-- Region Extraction Output -->
       <div id="regionOutput" class="region-output"></div>
     </div>
-    <div id="error" class="error d-none hidden"></div>
+    <div id="error" class="error d-none hidden" role="alert" aria-atomic="true"></div>
   </div>
 
   <!-- Citations Section -->

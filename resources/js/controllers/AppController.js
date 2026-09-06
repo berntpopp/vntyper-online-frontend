@@ -229,9 +229,9 @@ export class AppController extends BaseController {
       const passphrase = passphraseInput?.value?.trim() || null;
       const advntrMode = advntrModeCheckbox?.checked || false;
 
-      // Create cohort if multiple files
+      // Create cohort if multiple files or if cohort alias/passphrase provided
       let cohortId = null;
-      if (matchedPairs.length > 1) {
+      if (matchedPairs.length > 1 || cohortAlias || passphrase) {
         const cohort = await this.cohortController.handleCreate({
           alias: cohortAlias,
           passphrase,

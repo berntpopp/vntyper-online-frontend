@@ -1,6 +1,6 @@
 // frontend/resources/js/views/CohortView.js
 
-import { createLabelValue, createTextElement, safeGetElementById } from '../domHelpers.js';
+import { createLabelValue, safeGetElementById } from '../domHelpers.js';
 import { displayShareableLink, hidePlaceholderMessage } from '../uiUtils.js';
 
 /**
@@ -133,7 +133,7 @@ export class CohortView {
    * Show cohort analysis section
    * @param {string} cohortId - Cohort ID
    */
-  showAnalysisSection(cohortId) {
+  showAnalysisSection(cohortId, onAnalyze = null) {
     const cohortElement = this.cohortElements.get(cohortId);
     if (!cohortElement) {
       return;
@@ -143,14 +143,20 @@ export class CohortView {
     if (analysisSection) {
       analysisSection.classList.remove('hidden');
     }
+
+    const analyzeBtn = cohortElement.querySelector('.cohort-analyze-btn');
+    if (analyzeBtn instanceof HTMLButtonElement && onAnalyze) {
+      analyzeBtn.onclick = () => onAnalyze(cohortId);
+    }
   }
 
   /**
    * Update cohort analysis status
    * @param {string} cohortId - Cohort ID
    * @param {string} status - Analysis status
+   * @param {string|null} [message=null] - Optional detailed status message
    */
-  updateAnalysisStatus(cohortId, status) {
+  updateAnalysisStatus(cohortId, status, message = null) {
     const cohortElement = this.cohortElements.get(cohortId);
     if (!cohortElement) {
       return;
@@ -158,8 +164,49 @@ export class CohortView {
 
     const statusElement = cohortElement.querySelector('.cohort-analysis-status');
     if (statusElement) {
-      statusElement.textContent = this._formatStatus(status);
+      statusElement.textContent = message || this._formatStatus(status);
       statusElement.className = `cohort-analysis-status status-${status}`;
+    }
+
+    const analyzeBtn = cohortElement.querySelector('.cohort-analyze-btn');
+    if (analyzeBtn instanceof HTMLButtonElement) {
+      if (status === 'processing' || status === 'pending') {
+        analyzeBtn.disabled = true;
+        analyzeBtn.textContent = 'Running Joint Analysis...';
+      } else if (status === 'failed') {
+        analyzeBtn.disabled = false;
+        analyzeBtn.textContent = 'Retry Joint Analysis';
+      } else if (status === 'completed') {
+        analyzeBtn.disabled = true;
+        analyzeBtn.textContent = 'Analysis Completed';
+      }
+    }
+  }
+
+  /**
+   * Update cohort display with completed analysis results
+   * @param {string} cohortId - Cohort ID
+   * @param {string} analysisJobId - Completed analysis job ID
+   */
+  updateAnalysisComplete(cohortId, analysisJobId) {
+    const cohortElement = this.cohortElements.get(cohortId);
+    if (!cohortElement) {
+      return;
+    }
+
+    this.updateAnalysisStatus(cohortId, 'completed', 'Analysis Complete');
+
+    const downloadContainer = cohortElement.querySelector('.cohort-analysis-download');
+    if (downloadContainer) {
+      downloadContainer.innerHTML = '';
+      const downloadLink = document.createElement('a');
+      const baseUrl =
+        window.CONFIG && window.CONFIG.API_URL ? window.CONFIG.API_URL.replace(/\/$/, '') : '/api';
+      downloadLink.href = `${baseUrl}/download/${encodeURIComponent(analysisJobId)}`;
+      downloadLink.className = 'button button-success cohort-download-btn';
+      downloadLink.setAttribute('download', `cohort_${cohortId}_results.zip`);
+      downloadLink.textContent = 'Download Cohort Results (.zip)';
+      downloadContainer.appendChild(downloadLink);
     }
   }
 
@@ -213,11 +260,18 @@ export class CohortView {
       header.appendChild(idElement);
     }
 
-    // Job count
-    const jobCount = createTextElement('div', `Jobs: ${cohort.getJobCount()}`, {
-      className: 'cohort-job-count-container',
-    });
-    header.appendChild(jobCount);
+    // Job count container with nested span so querySelector('.cohort-job-count') finds it
+    const jobCountContainer = document.createElement('div');
+    jobCountContainer.className = 'cohort-job-count-container';
+    jobCountContainer.innerHTML = `<span class="cohort-job-count-label">Jobs: </span><span class="cohort-job-count">${cohort.getJobCount()}</span>`;
+    header.appendChild(jobCountContainer);
+
+    // Cohort status live region
+    const status = document.createElement('div');
+    status.className = 'cohort-status';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-atomic', 'true');
+    header.appendChild(status);
 
     cohortDiv.appendChild(header);
 
@@ -238,11 +292,31 @@ export class CohortView {
     analysisSection.className = 'cohort-analysis hidden';
 
     const analysisTitle = document.createElement('h4');
-    analysisTitle.textContent = 'Cohort Analysis';
+    analysisTitle.className = 'cohort-analysis-title';
+    analysisTitle.textContent = 'Joint Cohort Analysis';
     analysisSection.appendChild(analysisTitle);
+
+    const analysisDesc = document.createElement('p');
+    analysisDesc.className = 'cohort-analysis-desc';
+    analysisDesc.textContent =
+      'All cohort samples have completed processing. Run joint analysis to aggregate screening calls, compute cohort allele frequencies, and generate summary visualizations.';
+    analysisSection.appendChild(analysisDesc);
+
+    const analysisActions = document.createElement('div');
+    analysisActions.className = 'cohort-analysis-actions';
+
+    const analyzeBtn = document.createElement('button');
+    analyzeBtn.type = 'button';
+    analyzeBtn.className = 'button button-primary cohort-analyze-btn';
+    analyzeBtn.setAttribute('data-cohort-id', cohort.cohortId);
+    analyzeBtn.textContent = 'Run Joint Analysis';
+    analysisActions.appendChild(analyzeBtn);
+    analysisSection.appendChild(analysisActions);
 
     const analysisStatus = document.createElement('div');
     analysisStatus.className = 'cohort-analysis-status';
+    analysisStatus.setAttribute('role', 'status');
+    analysisStatus.setAttribute('aria-atomic', 'true');
     analysisSection.appendChild(analysisStatus);
 
     const analysisDownload = document.createElement('div');

@@ -7,6 +7,7 @@ import {
   createCohort,
   pollJobStatusAPI,
   pollCohortStatusAPI,
+  analyzeCohort,
 } from '../apiInteractions.js';
 import { Job } from '../models/Job.js';
 import { Cohort } from '../models/Cohort.js';
@@ -142,6 +143,22 @@ export class APIService {
       return pollCohortStatusAPI(cohortId, onUpdate, onComplete, onError, null, passphrase);
     } catch (error) {
       this._handleError('pollCohortStatus', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Run a joint cohort analysis
+   * @param {string} cohortId - Cohort ID
+   * @param {string} passphrase - Passphrase protecting the cohort
+   * @param {string} [alias] - Optional alias
+   * @returns {Promise<{message: string, analysis_job_id: string}>} Analysis job details
+   */
+  async analyzeCohort(cohortId, passphrase, alias = null) {
+    try {
+      return await analyzeCohort(cohortId, passphrase, alias);
+    } catch (error) {
+      this._handleError('analyzeCohort', error);
       throw error;
     }
   }

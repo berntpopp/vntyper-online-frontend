@@ -147,17 +147,7 @@ export async function getCohortStatus(cohortId, passphrase = null, alias = null)
   try {
     logMessage(`Fetching status for Cohort ID: ${cohortId}`, 'info');
 
-    // Construct URL with optional passphrase and alias
     let url = `${window.CONFIG.API_URL}/cohort-status/?cohort_id=${encodeURIComponent(cohortId)}`;
-
-    if (passphrase) {
-      if (typeof passphrase !== 'string') {
-        logMessage('Passphrase must be a string in getCohortStatus.', 'error');
-        throw new Error('Passphrase must be a string.');
-      }
-      url += `&passphrase=${encodeURIComponent(passphrase)}`;
-      logMessage('Passphrase included in cohort status request.', 'info');
-    }
 
     if (alias) {
       if (typeof alias !== 'string') {
@@ -168,8 +158,21 @@ export async function getCohortStatus(cohortId, passphrase = null, alias = null)
       logMessage('Alias included in cohort status request.', 'info');
     }
 
+    /** @type {RequestInit} */
+    const options = {};
+    if (passphrase) {
+      if (typeof passphrase !== 'string') {
+        logMessage('Passphrase must be a string in getCohortStatus.', 'error');
+        throw new Error('Passphrase must be a string.');
+      }
+      options.headers = {
+        'X-Cohort-Passphrase': passphrase,
+      };
+      logMessage('Passphrase included in cohort status request header.', 'info');
+    }
+
     // No retry - PollingManager handles retry
-    const data = await apiRequest(url, {}, false);
+    const data = await apiRequest(url, options, false);
 
     logMessage(`Status fetched for Cohort ID ${cohortId}: ${data.status}`, 'info');
     return data;
@@ -435,6 +438,54 @@ export async function createCohort(alias, passphrase = null) {
     return data;
   } catch (error) {
     logMessage(`Error in createCohort: ${error.message}`, 'error');
+    throw error;
+  }
+}
+
+/**
+ * Triggers a joint cohort analysis on the backend.
+ *
+ * @param {string} cohortId - The unique identifier of the cohort
+ * @param {string} passphrase - The passphrase protecting the cohort
+ * @param {string|null} [alias=null] - Optional cohort alias
+ * @returns {Promise<{message: string, analysis_job_id: string}>}
+ */
+export async function analyzeCohort(cohortId, passphrase, alias = null) {
+  if (typeof cohortId !== 'string' || cohortId.trim() === '') {
+    logMessage('analyzeCohort called with invalid Cohort ID.', 'error');
+    throw new Error('Invalid Cohort ID provided.');
+  }
+  if (!passphrase || typeof passphrase !== 'string') {
+    logMessage('Passphrase is required for cohort analysis.', 'error');
+    throw new Error('Passphrase is required for cohort analysis.');
+  }
+
+  try {
+    logMessage(`Requesting joint cohort analysis for Cohort ID: ${cohortId}`, 'info');
+
+    const params = new URLSearchParams();
+    params.append('cohort_id', cohortId);
+    params.append('passphrase', passphrase);
+    if (alias) {
+      params.append('alias', alias);
+    }
+
+    const data = await apiRequest(
+      `${window.CONFIG.API_URL}/cohort-analysis/`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString(),
+      },
+      false
+    );
+
+    logMessage(`Cohort analysis enqueued! Analysis Job ID: ${data.analysis_job_id}`, 'success');
+    return data;
+  } catch (error) {
+    logMessage(`Error in analyzeCohort: ${error.message}`, 'error');
     throw error;
   }
 }

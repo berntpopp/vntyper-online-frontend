@@ -33,6 +33,7 @@ export class CohortController extends BaseController {
     this.cohortView = dependencies.cohortView;
     this.errorView = dependencies.errorView;
     this.pollingManager = dependencies.pollingManager;
+    this.cohortPassphrases = new Map();
   }
 
   /**
@@ -62,6 +63,11 @@ export class CohortController extends BaseController {
 
       // Create cohort via API
       const cohort = await this.apiService.createCohort(cohortAlias, passphrase);
+
+      // Save passphrase in memory if provided
+      if (passphrase) {
+        this.cohortPassphrases.set(cohort.cohortId, passphrase);
+      }
 
       // Update state
       this.stateManager.addCohort(cohort.cohortId, {
@@ -152,8 +158,10 @@ export class CohortController extends BaseController {
       this._log(`All jobs in cohort ${cohortId} completed`, 'info');
       this.emit('cohort:allJobsComplete', { cohortId });
 
-      // Show analysis section
-      this.cohortView.showAnalysisSection(cohortId);
+      // Show analysis section with execution callback
+      this.cohortView.showAnalysisSection(cohortId, () => {
+        this.handleAnalyze({ cohortId });
+      });
     }
   }
 
@@ -166,6 +174,10 @@ export class CohortController extends BaseController {
   async handlePoll({ cohortId, passphrase }) {
     try {
       this._log(`Starting polling for cohort: ${cohortId}`, 'info');
+
+      if (passphrase) {
+        this.cohortPassphrases.set(cohortId, passphrase);
+      }
 
       // Use polling manager
       const stopPolling = this.pollingManager.start(
@@ -265,22 +277,81 @@ export class CohortController extends BaseController {
    * Handle cohort analysis
    * @param {Object} params - Analysis parameters
    * @param {string} params.cohortId - Cohort ID
+   * @param {string} [params.passphrase] - Optional passphrase override
    */
-  async handleAnalyze({ cohortId }) {
+  async handleAnalyze({ cohortId, passphrase = null }) {
     try {
       this._log(`Starting cohort analysis: ${cohortId}`, 'info');
 
-      // Trigger cohort analysis via API
-      // (API endpoint not shown in current codebase, but following the pattern)
+      const pwd = passphrase || this.cohortPassphrases.get(cohortId);
+      if (!pwd) {
+        const error = new Error('Cohort passphrase is required to run joint analysis.');
+        this.cohortView.updateAnalysisStatus(cohortId, 'failed', error.message);
+        this.handleError(error, 'Cohort analysis failed');
+        this.errorView.show(error, 'Cohort Analysis');
+        return;
+      }
 
       // Update view
-      this.cohortView.updateAnalysisStatus(cohortId, 'processing');
+      this.cohortView.updateAnalysisStatus(cohortId, 'processing', 'Initiating joint analysis...');
+
+      // Trigger cohort analysis via API
+      const result = await this.apiService.analyzeCohort(cohortId, pwd);
+      const analysisJobId = result.analysis_job_id;
+
+      this._log(`Cohort analysis job enqueued: ${analysisJobId}`, 'success');
+
+      // Update view to processing
+      this.cohortView.updateAnalysisStatus(cohortId, 'processing', 'Analysis in progress...');
 
       // Emit event
-      this.emit('cohort:analysis:started', { cohortId });
+      this.emit('cohort:analysis:started', { cohortId, analysisJobId });
+
+      // Poll analysis job status using PollingManager if available
+      if (this.pollingManager && typeof this.pollingManager.start === 'function') {
+        const stopPolling = this.pollingManager.start(
+          `cohort-analysis-${analysisJobId}`,
+          async () => {
+            return this.apiService.getJobStatus(analysisJobId);
+          },
+          {
+            interval: 4000,
+            maxRetries: 30,
+            onUpdate: statusData => {
+              const status = statusData?.status || 'processing';
+              this.cohortView.updateAnalysisStatus(cohortId, status);
+              this.emit('cohort:analysis:update', { cohortId, analysisJobId, statusData });
+            },
+            onComplete: statusData => {
+              if (statusData?.status === 'failed') {
+                const errMsg = statusData.error || 'Cohort analysis failed.';
+                this.cohortView.updateAnalysisStatus(cohortId, 'failed', errMsg);
+                this.handleError(new Error(errMsg), 'Cohort Analysis');
+                this.emit('cohort:analysis:failed', { cohortId, analysisJobId, error: errMsg });
+                return;
+              }
+              this._log(`Cohort analysis ${analysisJobId} completed!`, 'success');
+              this.cohortView.updateAnalysisComplete(cohortId, analysisJobId);
+              this.emit('cohort:analysis:completed', { cohortId, analysisJobId, statusData });
+            },
+            onError: (error, context) => {
+              if (!context || !context.willRetry) {
+                this.cohortView.updateAnalysisStatus(cohortId, 'failed', error.message);
+                this.handleError(error, `Polling failed for cohort analysis ${analysisJobId}`);
+              }
+            },
+          }
+        );
+
+        this.stateManager.setCohortPolling(`analysis-${cohortId}`, stopPolling);
+      }
+
+      return analysisJobId;
     } catch (error) {
+      this.cohortView.updateAnalysisStatus(cohortId, 'failed', error.message);
       this.handleError(error, `Cohort analysis failed`);
       this.errorView.show(error, 'Cohort Analysis');
+      throw error;
     }
   }
 

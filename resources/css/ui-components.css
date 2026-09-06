@@ -56,26 +56,27 @@
 }
 
 .copy-button {
-  background-color: #4caf50; /* Green */
-  color: white;
+  background-color: #256b2a; /* WCAG AAA contrast >= 5.8:1 against white */
+  color: #ffffff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px; /* Adjusted for better visibility */
+  font-size: 15px;
+  font-weight: 500;
   transition:
-    background-color 0.3s ease,
+    background-color 0.2s ease,
     transform 0.1s ease;
   /* Touch target sizing - WCAG 2.5.5 Level AAA */
   min-width: 44px;
   min-height: 44px;
-  padding: 12px;
+  padding: 10px 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
 .copy-button:hover {
-  background-color: #45a049; /* Darker green on hover */
+  background-color: #1b5220; /* Darker green on hover */
   transform: translateY(-1px);
 }
 
@@ -84,69 +85,244 @@
 }
 
 .copy-button:focus-visible {
-  outline: 2px solid var(--color-focus);
+  outline: 2px solid var(--color-focus, #005f73);
   outline-offset: 2px;
 }
 
 /* --- Cohort Section Styles --- */
 
 .cohort-section {
-  border: 2px solid var(--color-cohort-border); /* Blue border */
-  padding: 15px;
-  margin-bottom: 20px;
+  border: 1px solid #cbd5e1;
+  border-left: 4px solid #0284c7;
+  padding: 20px;
+  margin-bottom: 24px;
   border-radius: 8px;
-  background-color: var(--color-cohort-bg); /* WCAG AA compliant background */
+  background-color: #f8fafc;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease;
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .cohort-section:hover {
-  background-color: var(--color-cohort-bg-hover); /* Slightly darker blue on hover */
-  border-color: var(--color-cohort-border-hover); /* Darker blue border on hover */
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
 }
 
-.cohort-info {
-  font-size: 1.2em;
-  margin-bottom: 10px;
-  color: var(--color-cohort-text); /* WCAG AA compliant: 7.2:1 contrast */
+.cohort-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-.job-info {
-  padding-left: 20px;
-  margin-bottom: 5px;
-  font-size: 1em;
-  color: #333; /* Dark grey text */
+.cohort-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
-.job-status {
-  padding-left: 20px;
-  margin-bottom: 10px;
-  color: #28a745; /* Green text for success */
+.cohort-id-display {
+  font-size: 0.875rem;
+  color: #64748b;
+  overflow-wrap: anywhere;
 }
 
-/* --- Additional Enhancements (Optional) --- */
-
-/* Styling for Shareable Link Input - removed duplicate .copy-button definition */
-.share-link-input {
-  width: 70%;
-  padding: 5px;
-  margin-right: 10px;
+.cohort-id {
+  font-family: monospace;
+  background-color: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #1e293b;
 }
 
-/* Ensuring the spinner is centered and accessible - REMOVED duplicate */
-/* Already defined above with proper centering */
+.cohort-job-count-container {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #334155;
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
 
-/* Optional: Add some spacing to the share-container */
+.cohort-status {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: capitalize;
+}
+
+.cohort-status.status-completed {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.cohort-status.status-processing,
+.cohort-status.status-started {
+  background-color: #fef9c3;
+  color: #854d0e;
+}
+
+.cohort-status.status-failed {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* --- Cohort Shareable Link --- */
+
 .share-container {
-  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 10px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
 }
 
-/* Optional: Add styles for job-info and job-status within cohort sections */
-.cohort-section .job-info {
-  margin-bottom: 5px;
+.share-link-input {
+  flex: 1 1 240px;
+  min-width: 0;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  border: 1px solid #767676; /* WCAG 2.1 3:1 non-text contrast */
+  border-radius: 4px;
+  background-color: #f8fafc;
+  color: #1e293b;
 }
 
-.cohort-section .job-status {
+/* --- Cohort Joint Analysis Card --- */
+
+.cohort-analysis {
+  margin-top: 20px;
+  padding: 16px 20px;
+  background-color: #ffffff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.cohort-analysis.hidden {
+  display: none !important;
+}
+
+.cohort-analysis-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0369a1;
+  margin: 0 0 6px 0;
+}
+
+.cohort-analysis-desc {
+  font-size: 0.9rem;
+  color: #475569;
+  margin: 0 0 14px 0;
+  line-height: 1.5;
+}
+
+.cohort-analysis-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cohort-analyze-btn {
+  background-color: #0284c7;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+}
+
+.cohort-analyze-btn:hover:not(:disabled) {
+  background-color: #0369a1;
+  transform: translateY(-1px);
+}
+
+.cohort-analyze-btn:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.cohort-analysis-status {
+  font-size: 0.9rem;
+  font-weight: 500;
   margin-bottom: 10px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.cohort-analysis-status:empty {
+  display: none;
+}
+
+.cohort-analysis-status.status-processing,
+.cohort-analysis-status.status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.cohort-analysis-status.status-completed {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.cohort-analysis-status.status-failed {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.cohort-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #15803d;
+  color: #ffffff !important;
+  text-decoration: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+}
+
+.cohort-download-btn:hover {
+  background-color: #166534;
+  transform: translateY(-1px);
+}
+
+.cohort-download-btn:focus-visible {
+  outline: 2px solid #15803d;
+  outline-offset: 2px;
 }
