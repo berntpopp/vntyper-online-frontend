@@ -19,8 +19,12 @@ function generateFooter() {
   const footerLinksDiv = document.getElementById('footerLinks');
 
   // Clear existing content to avoid duplication
-  institutionLogosDiv.innerHTML = '';
-  footerLinksDiv.innerHTML = '';
+  if (institutionLogosDiv) {
+    institutionLogosDiv.innerHTML = '';
+  }
+  if (footerLinksDiv) {
+    footerLinksDiv.innerHTML = '';
+  }
 
   // Generate Institution Logos
   institutions.forEach(inst => {

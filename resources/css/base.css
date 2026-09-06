@@ -688,9 +688,6 @@ body.menu-open {
 }
 
 /* --- Typographic Reading Measure (WCAG / Impeccable 45-75ch) --- */
-main p,
-main li,
-.container > p,
 .citation-item p,
 .modal-content p,
 #disclaimerDescription,
@@ -808,25 +805,97 @@ figcaption {
 
 /* --- Article & Documentation Container --- */
 .article-page {
-  background-color: #ffffff;
+  background-color: #f8f9fa;
 }
 
 .article-container {
-  max-width: 920px;
-  background-color: transparent;
-  box-shadow: none;
-  border: none;
-  border-radius: 0;
-  padding: 36px 24px 48px;
-  margin: 0 auto;
+  max-width: 960px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 36px 36px 48px;
+  margin: 20px auto 40px;
+}
+
+.article-container p,
+.article-container li {
+  max-width: 100%;
 }
 
 @media (max-width: 768px) {
   .article-container {
-    padding: 20px 16px 36px;
-    border-radius: 0;
-    border: none;
+    padding: 20px 16px 32px;
+    margin: 10px auto;
+    border-radius: 8px;
   }
+}
+
+/* --- Consensus Diagnostic Pathways Grid --- */
+.pathway-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin: 1.25rem 0 2rem;
+}
+
+@media (min-width: 640px) {
+  .pathway-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+}
+
+.pathway-card {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.pathway-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5e1;
+}
+
+.pathway-header {
+  margin-bottom: 0.75rem;
+}
+
+.pathway-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  margin-bottom: 0.5rem;
+}
+
+.pathway-card h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.pathway-card p {
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 100%;
+  flex-grow: 1;
 }
 
 /* --- Clinical Reference Tables --- */
