@@ -119,7 +119,8 @@ class MobileNavigation {
     // Update UI
     this.navbarMenu.classList.add('active');
     this.navbarToggle.setAttribute('aria-expanded', 'true');
-    this.hamburgerIcon.textContent = '✕';
+    this.hamburgerIcon.innerHTML =
+      '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
 
     // Prevent body scroll
     this.body.classList.add('menu-open');
@@ -143,7 +144,8 @@ class MobileNavigation {
     // Update UI
     this.navbarMenu.classList.remove('active');
     this.navbarToggle.setAttribute('aria-expanded', 'false');
-    this.hamburgerIcon.textContent = '☰';
+    this.hamburgerIcon.innerHTML =
+      '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
 
     // Restore body scroll
     this.body.classList.remove('menu-open');

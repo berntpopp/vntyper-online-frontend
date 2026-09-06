@@ -245,7 +245,7 @@
             </div>
 
             <div id="negativeArmNotice" class="notice-negative">
-              ✓ <strong>Negative controls are essential:</strong> Benchmarking commercial kits requires verified negative samples to calculate specificity and establish minimum-depth thresholds. Thank you for contributing negative data!
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px;"><polyline points="20 6 9 17 4 12"></polyline></svg><strong>Negative controls are essential:</strong> Benchmarking commercial kits requires verified negative samples to calculate specificity and establish minimum-depth thresholds. Thank you for contributing negative data!
             </div>
 
             <div id="positiveConfirmationGroup" class="hidden" style="margin-top: 1rem;">
@@ -308,7 +308,10 @@
 
         <!-- Success Display -->
         <div id="donationSuccessCard" class="donation-card hidden" style="border-color: #2e7d32; background: #f9fdfa;">
-          <h2 style="color: #2e7d32; margin-top: 0;">✓ Donation Successfully Recorded</h2>
+          <h2 style="color: #2e7d32; margin-top: 0; display: flex; align-items: center; gap: 8px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Donation Successfully Recorded
+          </h2>
           <p>Thank you for contributing to open scientific research for ADTKD-MUC1. Your metrics have been cryptographically validated and anonymized.</p>
           <p><strong>Donation ID:</strong> <code id="dispDonationId"></code></p>
           <p><strong>Run ID:</strong> <code id="dispRunId"></code></p>

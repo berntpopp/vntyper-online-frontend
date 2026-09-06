@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>VNtyper Online - MUC1 VNTR Genotyping | ADTKD Screening Tool</title>
+  <title>VNtyper Online - MUC1 VNTR Genotyping | ADTKD-MUC1 Screening Tool</title>
   <!-- Viewport Meta Tag -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Meta Description -->
-  <meta name="description" content="VNtyper Online: Free browser-based MUC1 VNTR genotyping tool for ADTKD-MUC1 screening. Analyze BAM files with VNtyper 2.0 — no upload of full genome data required.">
+  <!-- Meta Description & Keywords -->
+  <meta name="description" content="VNtyper Online: Browser-based MUC1 VNTR genotyping tool for ADTKD-MUC1 screening. Genotype short-read BAM and SAM sequencing data with VNtyper 2.0 locally in your browser.">
+  <meta name="keywords" content="MUC1, VNTR, ADTKD, ADTKD-MUC1, VNtyper, VNtyper 2, variable number of tandem repeats, short-read sequencing, Illumina, BAM, BAI, medullary cystic kidney disease, tubulointerstitial kidney disease, genetics, bioinformatics, genomics">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
@@ -117,6 +118,14 @@
       "operatingSystem": "Web Browser",
       "url": "https://vntyper.org/",
       "description": "Online MUC1 VNTR genotyping tool for screening autosomal dominant tubulointerstitial kidney disease (ADTKD-MUC1) from BAM files using VNtyper 2.0.",
+      "keywords": "MUC1, VNTR, ADTKD, ADTKD-MUC1, VNtyper, variable number of tandem repeats, BAM, bioinformatics, genomics",
+      "featureList": [
+        "In-browser client-side BAM slicing preserving genomic data privacy",
+        "Alignment-free and alignment-based VNTR genotyping with VNtyper 2.0",
+        "Automated detection of the frameshift +1-bp insC pathogenic variant in MUC1 VNTR",
+        "Support for human reference assemblies GRCh37/hg19 and GRCh38/hg38",
+        "Cryptographic report integrity anchoring"
+      ],
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -161,6 +170,43 @@
             "@type": "Periodical",
             "name": "iScience"
           }
+        }
+      ]
+    }
+  </script>
+
+  <!-- Schema.org JSON-LD: MedicalCondition -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MedicalCondition",
+      "name": "Autosomal Dominant Tubulointerstitial Kidney Disease caused by MUC1 mutations",
+      "alternateName": ["ADTKD-MUC1", "Medullary Cystic Kidney Disease Type 1", "MCKD1"],
+      "code": [
+        {
+          "@type": "MedicalCode",
+          "code": "174000",
+          "codingSystem": "OMIM"
+        },
+        {
+          "@type": "MedicalCode",
+          "code": "D007674",
+          "codingSystem": "MeSH"
+        }
+      ],
+      "associatedAnatomy": {
+        "@type": "AnatomicalStructure",
+        "name": "Kidney Tubules"
+      },
+      "possibleTreatment": [],
+      "signOrSymptom": [
+        {
+          "@type": "MedicalSignOrSymptom",
+          "name": "Progressive chronic kidney disease"
+        },
+        {
+          "@type": "MedicalSignOrSymptom",
+          "name": "Hyperuricemia and gout"
         }
       ]
     }
@@ -217,8 +263,8 @@
     <!-- Navigation Bar -->
     <nav class="navbar" aria-label="Main navigation">
       <div class="navbar-container">
-        <div class="header" id="resetHeader" role="button" aria-label="Reset Page">
-          <img src="resources/assets/logo/vntyperonline_logo_160px.png" alt="vntyper-online Logo" class="logo">
+        <div class="header" id="resetHeader" role="button" tabindex="0" aria-label="vntyper-online - Reset Page">
+          <img src="resources/assets/logo/vntyperonline_logo_160px.png" alt="vntyper-online Logo" class="logo" width="80" height="80">
           <h2>vntyper-online</h2>
         </div>
 
@@ -229,7 +275,11 @@
           aria-expanded="false"
           aria-controls="navbar-menu"
         >
-          <span class="hamburger-icon" aria-hidden="true">☰</span>
+          <svg class="hamburger-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
           <span class="sr-only">Menu</span>
         </button>
 
@@ -242,7 +292,7 @@
           
           <!-- Server Load Indicator -->
           <li id="serverLoadIndicator" class="server-load-indicator">
-            <a href="#" class="navbar-link" aria-label="Current Server Load" data-tooltip="Shows the number of jobs currently in the queue">
+            <a href="#" class="navbar-link" data-tooltip="Shows the number of jobs currently in the queue">
               <span id="serverLoadText">Jobs: </span>
               <span id="totalJobsInQueue" class="load-count">0</span>
             </a>
@@ -250,8 +300,10 @@
 
           <!-- Disclaimer Indicator -->
           <li id="disclaimerIndicator">
-            <a href="#" id="disclaimerLink" class="navbar-link" aria-label="View Disclaimer Status" data-tooltip="Check the disclaimer status">
-              <span id="disclaimerStatusIcon" class="status-icon" aria-hidden="true">✔️</span>
+            <a href="#" id="disclaimerLink" class="navbar-link" aria-label="Disclaimer - View disclaimer status" data-tooltip="Check the disclaimer status">
+              <span id="disclaimerStatusIcon" class="status-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
               <span id="disclaimerStatusText" class="status-text">Disclaimer</span>
             </a>
           </li>
@@ -281,7 +333,7 @@
       data-intro="Upload your BAM, BAI, or SAM files here. Each BAM file should have a corresponding BAI file, and SAM files will be converted automatically."
       data-step="1"
     >
-      <!-- NEW RESET BUTTON -->
+      <!-- RESET BUTTON -->
       <button
         type="button"
         id="resetFileSelectionBtn"
@@ -289,7 +341,7 @@
         aria-label="Reset File Selection"
         data-tooltip="Reset files"
       >
-        ↺
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
       </button>
 
       <label class="drag-drop-label" for="bamFiles">Upload sequencing files:</label>
@@ -299,7 +351,6 @@
         class="drag-drop-area"
         tabindex="0"
         role="button"
-        aria-label="File Upload Area"
         data-tooltip="Click or drag and drop your BAM, BAI, or SAM files here"
       >
         <p>Drag & drop BAM, BAI, or SAM files or click to select multiple files.</p>
@@ -579,7 +630,9 @@
   <div id="disclaimerModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle" aria-describedby="disclaimerDescription">
     <div class="modal-overlay"></div> <!-- Overlay background -->
     <div class="modal-content">
-      <button class="modal-close" aria-label="Close Disclaimer Modal">&times;</button>
+      <button class="modal-close" aria-label="Close Disclaimer Modal">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
       <h2 id="disclaimerTitle">Disclaimer</h2>
       <p id="disclaimerDescription">
         <strong>Important Information</strong><br>
@@ -597,7 +650,9 @@
   <div id="faqModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="faqTitle" aria-describedby="faqDescription" aria-hidden="true">
     <div class="modal-overlay"></div> <!-- Overlay background -->
     <div class="modal-content">
-      <button class="modal-close" aria-label="Close FAQ Modal">&times;</button>
+      <button class="modal-close" aria-label="Close FAQ Modal">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
       <h2 id="faqTitle">Frequently Asked Questions</h2>
       <div id="faqDescription" class="faq-container">
         <div class="faq-item">
@@ -646,7 +701,9 @@
         <div class="log-header">
             <h2>Logs</h2>
             <div>
-                <button class="close-log-btn" aria-label="Close Logs">✖️</button>
+                <button class="close-log-btn" aria-label="Close Logs">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
             </div>
         </div>
         <div class="log-filters-actions">
@@ -660,20 +717,20 @@
                 <button class="log-filter-btn" data-level="info" aria-pressed="false" data-tooltip="Show info messages only">
                     Info
                 </button>
-                <button class="log-filter-btn" data-level="success" aria-pressed="false" data-tooltip="Show success messages only">
-                    ✓
+                <button class="log-filter-btn" data-level="success" aria-pressed="false" aria-label="Filter success logs" data-tooltip="Show success messages only">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </button>
-                <button class="log-filter-btn" data-level="warning" aria-pressed="false" data-tooltip="Show warning messages only">
-                    ⚠
+                <button class="log-filter-btn" data-level="warning" aria-pressed="false" aria-label="Filter warning logs" data-tooltip="Show warning messages only">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                 </button>
-                <button class="log-filter-btn" data-level="error" aria-pressed="false" data-tooltip="Show error messages only">
-                    ✕
+                <button class="log-filter-btn" data-level="error" aria-pressed="false" aria-label="Filter error logs" data-tooltip="Show error messages only">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
             </div>
             <div class="log-actions">
                 <div class="log-download-group">
-                    <button id="downloadLogsBtn" class="log-action-btn" data-tooltip="Download logs">
-                        ⬇
+                    <button id="downloadLogsBtn" class="log-action-btn" aria-label="Download logs" data-tooltip="Download logs">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     </button>
                     <select id="downloadFormatSelect" class="log-format-select" data-tooltip="Select export format">
                         <option value="txt">TXT</option>
@@ -681,7 +738,7 @@
                     </select>
                 </div>
                 <button class="clear-log-btn log-action-btn" aria-label="Clear Logs" data-tooltip="Clear all logs">
-                    🗑️
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </button>
             </div>
         </div>
@@ -695,7 +752,9 @@
       <div class="usage-stats-header">
         <h2>Usage Statistics</h2>
         <div>
-          <button class="close-stats-btn" aria-label="Close Usage Statistics">✖️</button>
+          <button class="close-stats-btn" aria-label="Close Usage Statistics">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
         </div>
       </div>
       <div class="usage-stats-content" id="usageStatsContent" role="region" aria-live="polite" aria-atomic="false">
@@ -705,8 +764,14 @@
   </div>
 
   <!-- Toggle Buttons remain outside as before -->
-  <button id="toggleLogBtn" aria-controls="logContainer" aria-expanded="false" aria-label="Toggle Logs Panel">📜 Logs</button>
-  <button id="toggleStatsBtn" aria-controls="usageStatsContainer" aria-expanded="false" aria-label="Toggle Usage Statistics Panel">📊 Stats</button>
+  <button id="toggleLogBtn" aria-controls="logContainer" aria-expanded="false" aria-label="Logs - Toggle logs panel">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+    <span>Logs</span>
+  </button>
+  <button id="toggleStatsBtn" aria-controls="usageStatsContainer" aria-expanded="false" aria-label="Stats - Toggle usage statistics panel">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+    <span>Stats</span>
+  </button>
 
 </body>
 </html>

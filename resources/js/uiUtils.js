@@ -191,21 +191,26 @@ export function displayShareableLink(id, targetContainer, type = 'job') {
   shareLink.setAttribute('aria-label', `Shareable link for ${type} ID ${id}`);
 
   // Add copy button
+  const copyIconSVG =
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+  const checkIconSVG =
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
   const copyButton = document.createElement('button');
   copyButton.classList.add('copy-button');
   copyButton.setAttribute('aria-label', 'Copy link');
-  copyButton.innerHTML = '📋'; // Using clipboard emoji as copy icon
+  copyButton.innerHTML = copyIconSVG;
 
   // Event listener for copy functionality
   copyButton.addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(shareLink.value);
-      copyButton.innerHTML = '✅'; // Change icon to indicate success
+      copyButton.innerHTML = checkIconSVG;
       logMessage(`Shareable link for ${type} ID ${id} copied to clipboard.`, 'info');
 
       // Revert the icon back after 2 seconds
       setTimeout(() => {
-        copyButton.innerHTML = '📋';
+        copyButton.innerHTML = copyIconSVG;
       }, 2000);
     } catch (err) {
       logMessage(`Failed to copy shareable link for ${type} ID ${id}: ${err.message}`, 'error');
@@ -229,7 +234,7 @@ export function displayShareableLink(id, targetContainer, type = 'job') {
  * @param {object} context - An object containing necessary DOM elements and state.
  */
 export function displayDownloadLink(jobId, context) {
-  logMessage(`✅ displayDownloadLink called for Job ID: ${jobId}`, 'info');
+  logMessage(`displayDownloadLink called for Job ID: ${jobId}`, 'info');
   logMessage(`Context keys: ${Object.keys(context).join(', ')}`, 'info');
 
   const { hidePlaceholderMessage, jobStatusDiv, clearCountdown } = context;
@@ -262,13 +267,13 @@ export function displayDownloadLink(jobId, context) {
 
   if (existingDownloadLink && existingCopyButton) {
     logMessage(
-      `⚠️ Download and Copy Link buttons already exist for Job ID ${jobId}. Skipping creation.`,
+      `Download and Copy Link buttons already exist for Job ID ${jobId}. Skipping creation.`,
       'warning'
     );
     return; // Exit the function to prevent duplication
   }
 
-  logMessage(`✨ Creating download and copy buttons for Job ID ${jobId}...`, 'info');
+  logMessage(`Creating download and copy buttons for Job ID ${jobId}...`, 'info');
 
   // Create Download Link
   const downloadLink = document.createElement('a');
@@ -305,7 +310,7 @@ export function displayDownloadLink(jobId, context) {
   jobStatusDiv.appendChild(downloadLink);
   jobStatusDiv.appendChild(copyButton);
 
-  logMessage(`✅ Download and Copy Link buttons appended to DOM for Job ID ${jobId}.`, 'success');
+  logMessage(`Download and Copy Link buttons appended to DOM for Job ID ${jobId}.`, 'success');
   logMessage(`Download link href: ${downloadLink.href}`, 'info');
   logMessage(`jobStatusDiv now has ${jobStatusDiv.children.length} children`, 'info');
 
@@ -315,7 +320,7 @@ export function displayDownloadLink(jobId, context) {
     clearCountdown();
     logMessage(`clearCountdown completed.`, 'info');
   } else {
-    logMessage('⚠️ clearCountdown function not provided in context.', 'warning');
+    logMessage('clearCountdown function not provided in context.', 'warning');
   }
 }
 

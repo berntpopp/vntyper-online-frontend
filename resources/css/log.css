@@ -95,8 +95,9 @@
 }
 
 .log-filter-btn:hover {
-  color: #096162;
-  background-color: rgba(9, 97, 98, 0.1);
+  color: #ffffff;
+  background-color: rgba(168, 218, 220, 0.15);
+  border-color: #a8dadc;
 }
 
 .log-filter-btn.active {
@@ -130,8 +131,9 @@
 }
 
 .log-action-btn:hover {
-  color: #096162;
-  background-color: rgba(9, 97, 98, 0.1);
+  color: #ffffff;
+  background-color: rgba(168, 218, 220, 0.15);
+  border-color: #a8dadc;
 }
 
 .log-action-btn:focus-visible {

@@ -27,78 +27,14 @@
   width: 80px;
   height: 80px;
   margin-right: 20px;
-  animation: logoPulse 3s ease-in-out infinite; /* Applies the pulse animation */
-  transform-origin: center;
+  flex-shrink: 0;
 }
 
 .header h2 {
   font-size: 32px;
   margin: 0;
   color: #333;
-  opacity: 0; /* Start invisible */
-  animation: appNameFadeInSlideIn 1.5s ease-out forwards; /* Applies fade-in and slide-in */
-  animation-delay: 0.5s; /* Delays animation for sequential effect */
-}
-
-/* --- Keyframe Animations --- */
-
-/* Logo Pulse Animation */
-@keyframes logoPulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* App Name Fade-In and Slide-In Animation */
-@keyframes appNameFadeInSlideIn {
-  0% {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Optional: Vendor Prefixes for Better Compatibility */
-@-webkit-keyframes logoPulse {
-  0% {
-    -webkit-transform: scale(1);
-  }
-  50% {
-    -webkit-transform: scale(1.05);
-  }
-  100% {
-    -webkit-transform: scale(1);
-  }
-}
-
-@-webkit-keyframes appNameFadeInSlideIn {
-  0% {
-    opacity: 0;
-    -webkit-transform: translateX(-20px);
-  }
-  100% {
-    opacity: 1;
-    -webkit-transform: translateX(0);
-  }
-}
-
-.logo {
-  -webkit-animation: logoPulse 3s ease-in-out infinite;
-  animation: logoPulse 3s ease-in-out infinite;
-}
-
-.header h2 {
-  -webkit-animation: appNameFadeInSlideIn 1.5s ease-out forwards;
-  animation: appNameFadeInSlideIn 1.5s ease-out forwards;
+  opacity: 1;
 }
 
 /* --- Navigation Menu Styles --- */
@@ -172,15 +108,15 @@
 }
 
 .server-load-indicator.load-blue a {
-  color: #007bff;
+  color: #0056b3;
 }
 
 .server-load-indicator.load-orange a {
-  color: #fd7e14;
+  color: #b45309;
 }
 
 .server-load-indicator.load-red a {
-  color: #dc3545;
+  color: #c82333;
 }
 
 /* --- Hamburger Menu Styles --- */
