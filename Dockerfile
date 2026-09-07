@@ -1,6 +1,6 @@
 # frontend/Dockerfile
 
-FROM nginx:1.31.4-alpine-slim
+FROM nginx:1.31.5-alpine-slim
 
 # Upgrade packages to patch OS vulnerabilities and install gettext, bash, and curl for health checks
 RUN apk update && apk upgrade --no-cache && apk add --no-cache gettext bash curl
