@@ -124,6 +124,9 @@ test.describe('monkey and exploratory testing', () => {
     const { fileURLToPath } = await import('node:url');
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
     const dataDir = path.resolve(__dirname, '../../../backend/tests/data');
+    const { existsSync } = await import('node:fs');
+    // The BAM fixtures live in the backend repository, next to this one in the monorepo.
+    test.skip(!existsSync(dataDir), 'backend test data not present');
 
     const realBams = {
       hg38_40cf: {
@@ -278,6 +281,9 @@ test.describe('monkey and exploratory testing', () => {
     const { fileURLToPath } = await import('node:url');
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
     const dataDir = path.resolve(__dirname, '../../../backend/tests/data');
+    const { existsSync } = await import('node:fs');
+    // The BAM fixtures live in the backend repository, next to this one in the monorepo.
+    test.skip(!existsSync(dataDir), 'backend test data not present');
 
     // 1. Upload real BAM and BAI pairs
     await page

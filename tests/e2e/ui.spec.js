@@ -114,9 +114,8 @@ test.describe('mobile navigation', () => {
 });
 
 test.describe('navbar navigation', () => {
-  test('API documentation link points to configured API docs endpoint and dev server proxies it', async ({
+  test('API documentation link points to configured API docs endpoint', async ({
     page,
-    request,
     isMobile,
   }) => {
     test.skip(isMobile, 'desktop navbar visibility');
@@ -130,8 +129,15 @@ test.describe('navbar navigation', () => {
     await expect(apiLink).toHaveAttribute('rel', 'noopener noreferrer');
     // In dev mode (port 3000), configured to point directly to backend docs:
     await expect(apiLink).toHaveAttribute('href', 'http://localhost:8000/api/docs');
+  });
 
-    // Dev server also proxies /api/docs directly:
+  test('dev server proxies /api/docs to the backend', async ({ request }) => {
+    const backendUp = await request.get('http://localhost:8000/api/docs').then(
+      response => response.ok(),
+      () => false
+    );
+    test.skip(!backendUp, 'no backend running on localhost:8000');
+
     const devDocsResponse = await request.get('/api/docs');
     expect(devDocsResponse.status()).toBe(200);
   });
