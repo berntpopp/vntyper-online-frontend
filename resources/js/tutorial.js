@@ -3,6 +3,9 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 import { safeStorage } from './utils/safeStorage.js';
+import { loadCdnAsset } from './utils/loadScript.js';
+
+const INTRO_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0';
 
 /**
  * Initializes the In-App Guided Tutorial using Intro.js.
@@ -25,9 +28,20 @@ export function initializeTutorial() {
 /**
  * Starts the Intro.js tutorial and marks it as completed.
  */
-function startIntroTutorial() {
-  if (typeof introJs === 'undefined') {
-    logMessage('Intro.js is not loaded. Please ensure Intro.js is included correctly.', 'error');
+async function startIntroTutorial() {
+  try {
+    await Promise.all([
+      loadCdnAsset(
+        `${INTRO_CDN}/introjs.min.css`,
+        'sha512-631ugrjzlQYCOP9P8BOLEMFspr5ooQwY3rgt8SMUa+QqtVMbY/tniEUOcABHDGjK50VExB4CNc61g5oopGqCEw=='
+      ),
+      loadCdnAsset(
+        `${INTRO_CDN}/intro.min.js`,
+        'sha512-+hhhH0eKqYCmXsO28OJE1HHWkgNYwlpceBwmeeDEt5jpCL8jOuqAVunXlZ/WZ4qIluJdwlcv4f5BUIQ/l1w9iw=='
+      ),
+    ]);
+  } catch (error) {
+    logMessage(`Intro.js could not be loaded: ${error.message}`, 'error');
     return;
   }
 

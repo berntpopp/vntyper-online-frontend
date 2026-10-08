@@ -106,8 +106,8 @@
     background-color 0.2s ease,
     color 0.2s ease,
     transform 0.15s ease;
-  min-width: 40px;
-  min-height: 40px;
+  min-width: 44px;
+  min-height: 44px;
   width: 40px;
   height: 40px;
   padding: 8px;
@@ -224,4 +224,9 @@
   .modal-header {
     margin-bottom: 1rem;
   }
+}
+
+/* First visit: shown before first paint by disclaimerGate.js, so it never pops in late. */
+html.needs-disclaimer #disclaimerModal {
+  display: block;
 }

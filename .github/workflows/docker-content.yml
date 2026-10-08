@@ -77,7 +77,6 @@ jobs:
           /resources/css/output.css
           /resources/css/ui-components.css
           /resources/css/usageStats.css
-          /resources/js/loadDeferredStyles.js
           /resources/js/config.js
           /resources/js/inputWrangling.js
           /resources/js/regionsConfig.js
@@ -86,6 +85,7 @@ jobs:
           /resources/js/inputValidation.js
           /resources/js/main.js
           /resources/js/modal.js
+          /resources/js/disclaimerGate.js
           /resources/js/navbar.js
           /resources/js/mobileNav.js
           /resources/js/populateRegions.js

@@ -35,7 +35,6 @@ export default defineConfig({
         'resources/js/**/*.spec.js',
         'resources/js/tutorial.js', // UI-only modules
         'resources/js/modal.js',
-        'resources/js/footer.js',
         'resources/js/faq.js',
         'resources/js/disclaimer.js',
         'resources/js/userGuide.js',

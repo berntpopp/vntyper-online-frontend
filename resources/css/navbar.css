@@ -116,7 +116,7 @@
 
 .server-load-indicator .load-count {
   display: inline-block;
-  min-width: 1.2ch;
+  min-width: 2ch;
   text-align: center;
   font-variant-numeric: tabular-nums;
   font-weight: bold;
@@ -271,7 +271,7 @@
 
   .load-count {
     display: inline-block;
-    min-width: 1.2ch;
+    min-width: 2ch;
     text-align: center;
     font-variant-numeric: tabular-nums;
     font-size: 1.2em;
@@ -331,5 +331,45 @@
   100% {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+/* Phones: the header is one row of the same height on every page, so content
+   does not jump when moving between the tool and its subpages. */
+@media (max-width: 520px) {
+  .logo {
+    width: 56px;
+    height: 56px;
+    margin-right: 12px;
+  }
+
+  /* Arrow-only back link; its aria-label still names the destination. */
+  .back-link {
+    font-size: 0;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .back-link::before {
+    content: '\2190';
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .header .brand-title {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 340px) {
+  .logo {
+    width: 44px;
+    height: 44px;
+    margin-right: 8px;
+  }
+
+  .header .brand-title {
+    font-size: 1rem;
   }
 }
