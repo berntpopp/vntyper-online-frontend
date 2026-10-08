@@ -10,6 +10,7 @@ import {
   displayDownloadLink,
 } from './uiUtils.js';
 import { logMessage } from './log.js';
+import { t } from './i18n.js';
 
 /**
  * Capitalizes the first letter of a string.
@@ -56,7 +57,7 @@ function updateCohortUI(cohortStatus, context) {
     // Create job info element (XSS-safe)
     const jobInfo = document.createElement('div');
     jobInfo.classList.add('job-info');
-    jobInfo.appendChild(document.createTextNode('Job ID: '));
+    jobInfo.appendChild(document.createTextNode(t('Job ID: ')));
     const jobIdStrong = document.createElement('strong');
     jobIdStrong.textContent = job_id;
     jobInfo.appendChild(jobIdStrong);
@@ -65,7 +66,7 @@ function updateCohortUI(cohortStatus, context) {
     const jobStatus = document.createElement('div');
     jobStatus.id = `status-${job_id}`;
     jobStatus.classList.add('job-status');
-    jobStatus.appendChild(document.createTextNode('Status: '));
+    jobStatus.appendChild(document.createTextNode(t('Status: ')));
     const statusStrong = document.createElement('strong');
     statusStrong.textContent = capitalizeFirstLetter(status);
     jobStatus.appendChild(statusStrong);
@@ -87,7 +88,7 @@ function updateCohortUI(cohortStatus, context) {
     }
 
     if (status === 'failed') {
-      const errorMessage = error || 'Job failed.';
+      const errorMessage = error || t('Job failed.');
       displayError(errorMessage);
       logMessage(`Job ID ${job_id} failed with error: ${errorMessage}`, 'error');
       allCompleted = false;
@@ -162,7 +163,7 @@ export async function loadCohortFromURL(cohortId, context) {
   // Validate cohortId
   if (!cohortId || typeof cohortId !== 'string' || cohortId.trim() === '') {
     logMessage('Invalid Cohort ID provided to loadCohortFromURL.', 'error');
-    displayError('Invalid Cohort ID provided.');
+    displayError(t('Invalid Cohort ID provided.'));
     hideSpinner();
     clearCountdown();
     return;
@@ -179,7 +180,7 @@ export async function loadCohortFromURL(cohortId, context) {
 
     // Display initial cohort information (XSS-safe)
     const cohortInfo = document.createElement('div');
-    cohortInfo.appendChild(document.createTextNode('Loading cohort details for Cohort ID: '));
+    cohortInfo.appendChild(document.createTextNode(t('Loading cohort details for Cohort ID: ')));
     const cohortIdStrong = document.createElement('strong');
     cohortIdStrong.textContent = cohortId;
     cohortInfo.appendChild(cohortIdStrong);
@@ -191,9 +192,9 @@ export async function loadCohortFromURL(cohortId, context) {
     statusElement.id = `status-${cohortId}`;
     statusElement.classList.add('job-status');
     // XSS-safe: Use DOM API even for static strings
-    statusElement.appendChild(document.createTextNode('Status: '));
+    statusElement.appendChild(document.createTextNode(t('Status: ')));
     const loadingStrong = document.createElement('strong');
-    loadingStrong.textContent = 'Loading...';
+    loadingStrong.textContent = t('Loading...');
     statusElement.appendChild(loadingStrong);
     jobInfoDiv.appendChild(statusElement); // Append directly to jobInfoDiv
 
@@ -266,7 +267,7 @@ export async function loadJobFromURL(jobId, context) {
   // Validate jobId
   if (!jobId || typeof jobId !== 'string' || jobId.trim() === '') {
     logMessage('Invalid Job ID provided to loadJobFromURL.', 'error');
-    displayError('Invalid Job ID provided.');
+    displayError(t('Invalid Job ID provided.'));
     hideSpinner();
     clearCountdown();
     return;
@@ -283,7 +284,7 @@ export async function loadJobFromURL(jobId, context) {
 
     // Display initial job information (XSS-safe)
     const jobInfo = document.createElement('div');
-    jobInfo.appendChild(document.createTextNode('Loading job details for Job ID: '));
+    jobInfo.appendChild(document.createTextNode(t('Loading job details for Job ID: ')));
     const jobIdStrong = document.createElement('strong');
     jobIdStrong.textContent = jobId;
     jobInfo.appendChild(jobIdStrong);
@@ -298,9 +299,9 @@ export async function loadJobFromURL(jobId, context) {
     statusElement.id = `status-${jobId}`;
     statusElement.classList.add('job-status');
     // XSS-safe: Use DOM API even for static strings
-    statusElement.appendChild(document.createTextNode('Status: '));
+    statusElement.appendChild(document.createTextNode(t('Status: ')));
     const loadingStrong = document.createElement('strong');
-    loadingStrong.textContent = 'Loading...';
+    loadingStrong.textContent = t('Loading...');
     statusElement.appendChild(loadingStrong);
     jobInfoDiv.appendChild(statusElement);
 
@@ -312,7 +313,7 @@ export async function loadJobFromURL(jobId, context) {
         const jobStatusDivElement = document.getElementById(`status-${jobId}`);
         if (jobStatusDivElement) {
           jobStatusDivElement.textContent = '';
-          jobStatusDivElement.appendChild(document.createTextNode('Status: '));
+          jobStatusDivElement.appendChild(document.createTextNode(t('Status: ')));
           const statusStrong = document.createElement('strong');
           statusStrong.textContent = capitalizeFirstLetter(status);
           jobStatusDivElement.appendChild(statusStrong);
@@ -327,7 +328,7 @@ export async function loadJobFromURL(jobId, context) {
             clearCountdown,
           });
         } else if (status === 'failed') {
-          const errorMessage = 'Job failed.';
+          const errorMessage = t('Job failed.');
           displayError(errorMessage);
           logMessage(`Job ID ${jobId} failed with error: ${errorMessage}`, 'error');
         } else {

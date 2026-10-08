@@ -1,0 +1,18 @@
+{
+  "origin": "https://vntyper.org",
+  "source": { "code": "en", "name": "English" },
+  "locales": {
+    "de": "Deutsch",
+    "fr": "Français",
+    "it": "Italiano",
+    "es": "Español",
+    "nl": "Nederlands"
+  },
+  "pages": [
+    "index.html",
+    "adtkd_diagnostics.html",
+    "donate.html",
+    "contact.html",
+    "impressum_en.html"
+  ]
+}

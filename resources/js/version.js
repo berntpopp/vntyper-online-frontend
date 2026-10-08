@@ -1,9 +1,10 @@
 // frontend/resources/js/version.js
 
 import { logMessage } from './log.js'; // Import the logMessage function
+import { t } from './i18n.js';
 
 // Frontend Version
-const frontendVersion = '0.71.4'; // Default adVNTR and normal mode on; VNtyper 2 naming
+const frontendVersion = '0.72.0'; // Default adVNTR and normal mode on; VNtyper 2 naming
 
 /**
  * Build the API version endpoint, or null when this page has no API config.
@@ -78,12 +79,12 @@ async function displayVersions() {
     // Set to N/A silently
     const apiVersionElement = document.getElementById('apiVersion');
     if (apiVersionElement) {
-      apiVersionElement.textContent = 'N/A';
+      apiVersionElement.textContent = t('N/A');
     }
 
     const toolVersionElement = document.getElementById('toolVersion');
     if (toolVersionElement) {
-      toolVersionElement.textContent = 'N/A';
+      toolVersionElement.textContent = t('N/A');
     }
   }
 }

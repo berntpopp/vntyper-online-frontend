@@ -3,6 +3,7 @@
 import { BaseController } from './BaseController.js';
 import { Job } from '../models/Job.js';
 import { showSpinner, hideSpinner, startCountdown, clearCountdown } from '../uiUtils.js';
+import { t } from '../i18n.js';
 
 /**
  * Job Controller - Handles job submission and tracking
@@ -100,7 +101,7 @@ export class JobController extends BaseController {
       return job;
     } catch (error) {
       this.handleError(error, 'Job submission failed');
-      this.errorView.show(error, 'Job Submission');
+      this.errorView.show(error, t('Job Submission'));
 
       // Clean up UI
       hideSpinner();
@@ -177,7 +178,7 @@ export class JobController extends BaseController {
     // means "polling reached a terminal state", not "the job succeeded".
     // A screening tool must never show a download link for a failed run.
     if (statusData?.status === 'failed') {
-      this.handleTerminalFailure(jobId, statusData.error || 'Job failed.');
+      this.handleTerminalFailure(jobId, statusData.error || t('Job failed.'));
       return;
     }
 
@@ -293,7 +294,7 @@ export class JobController extends BaseController {
       // Get job from state
       const jobData = this.stateManager.getJob(jobId);
       if (!jobData) {
-        throw new Error(`Job ${jobId} not found`);
+        throw new Error(t('Job {id} not found', { id: jobId }));
       }
 
       // Re-submit with same parameters
@@ -307,7 +308,7 @@ export class JobController extends BaseController {
       this.emit('job:retried', { jobId });
     } catch (error) {
       this.handleError(error, `Retry failed for job ${jobId}`);
-      this.errorView.show(error, 'Job Retry');
+      this.errorView.show(error, t('Job Retry'));
     }
   }
 

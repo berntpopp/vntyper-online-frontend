@@ -1,6 +1,7 @@
 // frontend/resources/js/donate.js
 
 import { safeStorage } from './utils/safeStorage.js';
+import { t } from './i18n.js';
 
 /**
  * Initializes the Data Donation page, handling consent, form validation,
@@ -138,18 +139,18 @@ export function initDonatePage() {
     e.preventDefault();
 
     if (!gdprConsent?.checked) {
-      alert('GDPR explicit consent is required to donate data.');
+      alert(t('GDPR explicit consent is required to donate data.'));
       return;
     }
 
     const file = archiveFileInput?.files?.[0];
     if (!file) {
-      alert('Please select a result ZIP archive to donate.');
+      alert(t('Please select a result ZIP archive to donate.'));
       return;
     }
 
     if (!file.name.toLowerCase().endsWith('.zip')) {
-      alert('Please select a valid .zip result file.');
+      alert(t('Please select a valid .zip result file.'));
       return;
     }
 
@@ -170,13 +171,13 @@ export function initDonatePage() {
     const confirmationMethod = isPositive ? confirmationSelect?.value : null;
 
     if (isPositive && (!confirmationMethod || !confirmationMethod.trim())) {
-      alert('Confirmation method is required for positive findings.');
+      alert(t('Confirmation method is required for positive findings.'));
       return;
     }
 
     if (submitBtn) submitBtn.disabled = true;
     if (statusText) {
-      statusText.textContent = 'Verifying and uploading donation...';
+      statusText.textContent = t('Verifying and uploading donation...');
       statusText.style.color = '#005f73';
     }
 
@@ -207,7 +208,13 @@ export function initDonatePage() {
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.detail || `Server responded with ${res.status}: ${res.statusText}`);
+        throw new Error(
+          errData.detail ||
+            t('Server responded with {status}: {statusText}', {
+              status: res.status,
+              statusText: res.statusText,
+            })
+        );
       }
 
       const responseData = await res.json();
@@ -219,7 +226,7 @@ export function initDonatePage() {
       }
     } catch (err) {
       if (statusText) {
-        statusText.textContent = `Error: ${err.message}`;
+        statusText.textContent = t('Error: {message}', { message: err.message });
         statusText.style.color = '#c0392b';
       }
       if (submitBtn) submitBtn.disabled = false;

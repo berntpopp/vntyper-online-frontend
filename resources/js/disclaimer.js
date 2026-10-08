@@ -1,6 +1,7 @@
 // frontend/resources/js/disclaimer.js
 
 import { getCookie } from './cookie.js';
+import { t } from './i18n.js';
 
 /**
  * Displays the disclaimer indicator in the navbar.
@@ -18,7 +19,7 @@ export function showDisclaimerIndicator() {
       '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>';
   }
   if (disclaimerStatusText) {
-    disclaimerStatusText.textContent = 'Disclaimer';
+    disclaimerStatusText.textContent = t('Disclaimer');
   }
 }
 

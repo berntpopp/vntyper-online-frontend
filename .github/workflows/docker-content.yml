@@ -62,6 +62,9 @@ jobs:
           /contact.html
           /impressum_en.html
           /impressum_de.html
+          /de/
+          /fr/adtkd_diagnostics.html
+          /nl/donate.html
           /robots.txt
           /sitemap.xml
           /resources/css/base.css
@@ -78,6 +81,7 @@ jobs:
           /resources/css/ui-components.css
           /resources/css/usageStats.css
           /resources/js/config.js
+          /resources/js/lang.js
           /resources/js/inputWrangling.js
           /resources/js/regionsConfig.js
           /resources/js/assemblyConfigs.js

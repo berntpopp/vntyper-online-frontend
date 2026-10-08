@@ -1,6 +1,7 @@
 // frontend/resources/js/views/ErrorView.js
 
 import { displayError, clearError } from '../errorHandling.js';
+import { t } from '../i18n.js';
 
 /**
  * Error View - Handles error display
@@ -47,7 +48,7 @@ export class ErrorView {
    * @param {string} message - Validation error message
    */
   showValidation(message) {
-    this.show(`Validation Error: ${message}`);
+    this.show(t('Validation Error: {message}', { message }));
   }
 
   /**
@@ -55,7 +56,7 @@ export class ErrorView {
    * @param {Error} error - Network error
    */
   showNetwork(error) {
-    this.show(error, 'Network Error');
+    this.show(error, t('Network Error'));
   }
 
   /**
@@ -64,7 +65,7 @@ export class ErrorView {
    * @param {number} [statusCode] - HTTP status code
    */
   showAPI(error, statusCode) {
-    const context = statusCode ? `API Error (${statusCode})` : 'API Error';
+    const context = statusCode ? t('API Error ({statusCode})', { statusCode }) : t('API Error');
     this.show(error, context);
   }
 
@@ -73,7 +74,7 @@ export class ErrorView {
    * @param {string} message - Error message
    */
   showGeneric(message) {
-    this.show(message, 'Error');
+    this.show(message, t('Error'));
   }
 
   /**

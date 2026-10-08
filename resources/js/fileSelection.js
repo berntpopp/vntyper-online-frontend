@@ -3,6 +3,7 @@
 import { validateFiles } from './inputWrangling.js';
 import { displayError, clearError } from './errorHandling.js';
 import { showSpinner, hideSpinner } from './uiUtils.js';
+import { t } from './i18n.js';
 
 export function initializeFileSelection(selectedFiles) {
   const dropArea = document.getElementById('dropArea');
@@ -29,7 +30,7 @@ export function initializeFileSelection(selectedFiles) {
         const removeBtn = document.createElement('button');
         removeBtn.textContent = '×';
         removeBtn.classList.add('remove-file');
-        removeBtn.setAttribute('aria-label', `Remove ${file.name}`);
+        removeBtn.setAttribute('aria-label', t('Remove {name}', { name: file.name }));
 
         // FIX: Stop event propagation to avoid triggering the file selector
         removeBtn.addEventListener('click', event => {
@@ -43,7 +44,7 @@ export function initializeFileSelection(selectedFiles) {
       });
       fileList.appendChild(ul);
     } else {
-      fileList.innerHTML = '<p>No files selected.</p>';
+      fileList.innerHTML = `<p>${t('No files selected.')}</p>`;
     }
   }
 
@@ -88,7 +89,9 @@ export function initializeFileSelection(selectedFiles) {
     // Handle invalid files
     if (invalidFiles.length > 0) {
       displayError(
-        `Some files were invalid and not added: ${invalidFiles.map(f => f.name).join(', ')}`
+        t('Some files were invalid and not added: {files}', {
+          files: invalidFiles.map(f => f.name).join(', '),
+        })
       );
     } else {
       clearError();
@@ -110,7 +113,7 @@ export function initializeFileSelection(selectedFiles) {
 
     // Show immediate feedback
     showSpinner();
-    fileList.innerHTML = '<p>Processing files...</p>';
+    fileList.innerHTML = `<p>${t('Processing files...')}</p>`;
 
     // Debounce validation (300ms delay)
     // This prevents UI freezing when selecting many files

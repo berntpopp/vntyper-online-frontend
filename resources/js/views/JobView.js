@@ -2,6 +2,7 @@
 
 import { createLabelValue, safeGetElementById } from '../domHelpers.js';
 import { displayShareableLink, hidePlaceholderMessage } from '../uiUtils.js';
+import { t } from '../i18n.js';
 
 /**
  * Job View - Handles job UI rendering
@@ -110,7 +111,7 @@ export class JobView {
     downloadLink.id = `download-${jobId}`;
     downloadLink.href = downloadUrl;
     downloadLink.className = 'download-link';
-    downloadLink.textContent = 'Download Results';
+    downloadLink.textContent = t('Download Results');
     downloadLink.download = `results_${jobId}.zip`;
 
     downloadContainer.appendChild(downloadLink);
@@ -217,7 +218,7 @@ export class JobView {
     jobDiv.id = `job-${job.jobId}`;
 
     // Job header with ID
-    const header = createLabelValue('Job ID: ', job.jobId, {
+    const header = createLabelValue(t('Job ID: '), job.jobId, {
       containerClass: 'job-header',
       valueClass: 'job-id',
     });
@@ -225,7 +226,7 @@ export class JobView {
 
     // File name (if available)
     if (job.fileName) {
-      const fileName = createLabelValue('File: ', job.fileName, {
+      const fileName = createLabelValue(t('File: '), job.fileName, {
         containerClass: 'job-file',
         valueClass: 'file-name',
       });
@@ -236,7 +237,7 @@ export class JobView {
     const statusDiv = document.createElement('div');
     statusDiv.className = 'job-status-container';
 
-    const statusLabel = document.createTextNode('Status: ');
+    const statusLabel = document.createTextNode(t('Status: '));
     statusDiv.appendChild(statusLabel);
 
     const statusElement = document.createElement('span');
@@ -301,13 +302,13 @@ export class JobView {
    */
   _formatStatus(status) {
     const statusMap = {
-      pending: 'Pending',
-      queued: 'Queued',
-      started: 'Started',
-      processing: 'Processing',
-      completed: 'Completed',
-      failed: 'Failed',
-      cancelled: 'Cancelled',
+      pending: t('Pending'),
+      queued: t('Queued'),
+      started: t('Started'),
+      processing: t('Processing'),
+      completed: t('Completed'),
+      failed: t('Failed'),
+      cancelled: t('Cancelled'),
     };
 
     return statusMap[status] || status;

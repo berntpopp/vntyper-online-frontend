@@ -6,6 +6,7 @@ import { loadCohortFromURL } from '../jobManager.js';
 import { Job } from '../models/Job.js';
 import { blobManager } from '../blobManager.js';
 import { logMessage } from '../log.js';
+import { t } from '../i18n.js';
 import { createSpinnerHTML, createAssemblyMessageHTML, ensureSpinAnimation } from '../uiUtils.js';
 
 /**
@@ -168,7 +169,7 @@ export class AppController extends BaseController {
     }
 
     // Cache original button text
-    const originalText = this.submitBtn?.textContent || 'Submit Job';
+    const originalText = this.submitBtn?.textContent || t('Submit Job');
 
     try {
       // Ensure spin animation CSS is loaded
@@ -180,7 +181,7 @@ export class AppController extends BaseController {
         this.submitBtn.disabled = true;
         this.submitBtn.innerHTML = createSpinnerHTML({
           size: 16,
-          text: 'Submitting...',
+          text: t('Submitting...'),
         });
       }
 
@@ -195,7 +196,7 @@ export class AppController extends BaseController {
       const selectedFiles = this.fileController.getSelectedFiles();
 
       if (!selectedFiles || selectedFiles.length === 0) {
-        this.errorView?.showValidation('No files selected. Please upload BAM and BAI files.');
+        this.errorView?.showValidation(t('No files selected. Please upload BAM and BAI files.'));
         this._log('No files selected', 'warning');
         return;
       }
@@ -311,7 +312,7 @@ export class AppController extends BaseController {
     }
 
     // Cache original button text
-    const originalText = this.extractBtn?.textContent || 'Extract Region';
+    const originalText = this.extractBtn?.textContent || t('Extract Region');
 
     try {
       this._log('Extract button clicked', 'info');
@@ -320,7 +321,7 @@ export class AppController extends BaseController {
       const selectedFiles = this.fileController.getSelectedFiles();
 
       if (!selectedFiles || selectedFiles.length === 0) {
-        this.errorView?.showValidation('No files selected. Please upload BAM and BAI files.');
+        this.errorView?.showValidation(t('No files selected. Please upload BAM and BAI files.'));
         this._log('No files selected', 'warning');
         return;
       }
@@ -334,7 +335,7 @@ export class AppController extends BaseController {
         this.extractBtn.disabled = true;
         this.extractBtn.innerHTML = createSpinnerHTML({
           size: 16,
-          text: 'Extracting...',
+          text: t('Extracting...'),
         });
       }
 
@@ -344,7 +345,7 @@ export class AppController extends BaseController {
         placeholderMessage.innerHTML = createSpinnerHTML({
           size: 40,
           color: '#3498db',
-          text: 'Processing BAM file extraction...',
+          text: t('Processing BAM file extraction...'),
           inline: false,
         });
       }
@@ -426,12 +427,12 @@ export class AppController extends BaseController {
     // Re-enable and restore button states
     if (this.submitBtn) {
       this.submitBtn.disabled = false;
-      this.submitBtn.textContent = 'Submit Jobs';
+      this.submitBtn.textContent = t('Submit Jobs');
     }
 
     if (this.extractBtn) {
       this.extractBtn.disabled = false;
-      this.extractBtn.textContent = 'Extract Region';
+      this.extractBtn.textContent = t('Extract Region');
     }
 
     // Clear file selection
@@ -453,7 +454,7 @@ export class AppController extends BaseController {
     const placeholderMessage = document.getElementById('placeholderMessage');
     if (placeholderMessage) {
       placeholderMessage.classList.remove('hidden');
-      placeholderMessage.textContent = 'Your results will appear here after job submission.';
+      placeholderMessage.textContent = t('Your results will appear here after job submission.');
     }
 
     // Clear form inputs
@@ -570,17 +571,23 @@ export class AppController extends BaseController {
       const downloadBamLink = document.createElement('a');
       downloadBamLink.href = downloadBamUrl;
       downloadBamLink.download = subsetName;
-      downloadBamLink.textContent = `Download ${subsetName}`;
+      downloadBamLink.textContent = t('Download {name}', { name: subsetName });
       downloadBamLink.classList.add('download-link', 'download-button');
-      downloadBamLink.setAttribute('aria-label', `Download subset BAM file ${subsetName}`);
+      downloadBamLink.setAttribute(
+        'aria-label',
+        t('Download subset BAM file {name}', { name: subsetName })
+      );
 
       // Download Link for BAI
       const downloadBaiLink = document.createElement('a');
       downloadBaiLink.href = downloadBaiUrl;
       downloadBaiLink.download = subsetBaiName;
-      downloadBaiLink.textContent = `Download ${subsetBaiName}`;
+      downloadBaiLink.textContent = t('Download {name}', { name: subsetBaiName });
       downloadBaiLink.classList.add('download-link', 'download-button');
-      downloadBaiLink.setAttribute('aria-label', `Download subset BAI file ${subsetBaiName}`);
+      downloadBaiLink.setAttribute(
+        'aria-label',
+        t('Download subset BAI file {name}', { name: subsetBaiName })
+      );
 
       // Create a container for the download links
       const linkContainer = document.createElement('div');
@@ -617,7 +624,7 @@ export class AppController extends BaseController {
 
       // Validate job ID
       if (!jobId || typeof jobId !== 'string' || jobId.trim() === '') {
-        throw new Error('Invalid Job ID provided');
+        throw new Error(t('Invalid Job ID provided'));
       }
 
       // Debug: Check if jobController exists
@@ -656,13 +663,13 @@ export class AppController extends BaseController {
         this.jobController.jobView.showDownloadLink(jobId);
       } else if (job.isFailed()) {
         // Show error if failed
-        this.jobController.jobView.showError(jobId, statusData.error || 'Job failed');
+        this.jobController.jobView.showError(jobId, statusData.error || t('Job failed'));
       }
 
       this.emit('app:job:loaded', { jobId });
     } catch (error) {
       this.handleError(error, `Failed to load job ${jobId}`);
-      this.errorView?.show(error, 'Load Job from URL');
+      this.errorView?.show(error, t('Load Job from URL'));
     }
   }
 

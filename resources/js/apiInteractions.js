@@ -1,6 +1,7 @@
 // frontend/resources/js/apiInteractions.js
 
 import { logMessage } from './log.js';
+import { t } from './i18n.js';
 import { pollingManager } from './pollingManager.js';
 import { fetchWithTimeout, parseErrorResponse, retryRequest } from './services/httpUtils.js';
 
@@ -61,7 +62,7 @@ export async function submitJobToAPI(formData, cohortId = null, passphrase = nul
     if (cohortId) {
       if (typeof cohortId !== 'string' || cohortId.trim() === '') {
         logMessage('Invalid Cohort ID provided to submitJobToAPI.', 'error');
-        throw new Error('Invalid Cohort ID provided.');
+        throw new Error(t('Invalid Cohort ID provided.'));
       }
       formData.append('cohort_id', cohortId);
       logMessage(`Associating jobs with Cohort ID: ${cohortId}`, 'info');
@@ -70,7 +71,7 @@ export async function submitJobToAPI(formData, cohortId = null, passphrase = nul
       if (passphrase) {
         if (typeof passphrase !== 'string') {
           logMessage('Passphrase must be a string in submitJobToAPI.', 'error');
-          throw new Error('Passphrase must be a string.');
+          throw new Error(t('Passphrase must be a string.'));
         }
         formData.append('passphrase', passphrase);
         logMessage('Passphrase included in job submission.', 'info');
@@ -105,7 +106,7 @@ export async function getJobStatus(jobId) {
   // Validate jobId
   if (typeof jobId !== 'string' || jobId.trim() === '') {
     logMessage('getJobStatus called with invalid Job ID.', 'error');
-    throw new Error('Invalid Job ID provided.');
+    throw new Error(t('Invalid Job ID provided.'));
   }
 
   try {
@@ -141,7 +142,7 @@ export async function getCohortStatus(cohortId, passphrase = null, alias = null)
   // Validate cohortId
   if (typeof cohortId !== 'string' || cohortId.trim() === '') {
     logMessage('getCohortStatus called with invalid Cohort ID.', 'error');
-    throw new Error('Invalid Cohort ID provided.');
+    throw new Error(t('Invalid Cohort ID provided.'));
   }
 
   try {
@@ -152,7 +153,7 @@ export async function getCohortStatus(cohortId, passphrase = null, alias = null)
     if (alias) {
       if (typeof alias !== 'string') {
         logMessage('Alias must be a string in getCohortStatus.', 'error');
-        throw new Error('Alias must be a string.');
+        throw new Error(t('Alias must be a string.'));
       }
       url += `&alias=${encodeURIComponent(alias)}`;
       logMessage('Alias included in cohort status request.', 'info');
@@ -163,7 +164,7 @@ export async function getCohortStatus(cohortId, passphrase = null, alias = null)
     if (passphrase) {
       if (typeof passphrase !== 'string') {
         logMessage('Passphrase must be a string in getCohortStatus.', 'error');
-        throw new Error('Passphrase must be a string.');
+        throw new Error(t('Passphrase must be a string.'));
       }
       options.headers = {
         'X-Cohort-Passphrase': passphrase,
@@ -258,7 +259,7 @@ export function pollJobStatusAPI(
         onComplete();
         logMessage(`onComplete callback executed for Job ID ${jobId}.`, 'success');
       } else if (data.status === 'failed') {
-        const errorMsg = data.error || 'Job failed.';
+        const errorMsg = data.error || t('Job failed.');
         logMessage(`Job ID ${jobId} failed with error: ${errorMsg}`, 'error');
         onError(errorMsg);
       }
@@ -311,7 +312,7 @@ export function pollCohortStatusAPI(
     // Validate cohort data
     if (!data.jobs || !Array.isArray(data.jobs)) {
       logMessage(`Invalid cohort status data for Cohort ID ${cohortId}.`, 'error');
-      throw new Error('Invalid cohort status data.');
+      throw new Error(t('Invalid cohort status data.'));
     }
 
     // Check if all jobs completed
@@ -340,7 +341,7 @@ export function pollCohortStatusAPI(
           logMessage(`All jobs in Cohort ID ${cohortId} have been completed.`, 'success');
           onComplete();
         } else if (data.status === 'failed') {
-          const errorMsg = data.error || 'Cohort processing failed.';
+          const errorMsg = data.error || t('Cohort processing failed.');
           logMessage(`Cohort ID ${cohortId} failed with error: ${errorMsg}`, 'error');
           onError(errorMsg);
         }
@@ -404,13 +405,13 @@ export async function createCohort(alias, passphrase = null) {
   // Validate alias
   if (typeof alias !== 'string' || alias.trim() === '') {
     logMessage('createCohort called with invalid alias.', 'error');
-    throw new Error('Invalid alias provided.');
+    throw new Error(t('Invalid alias provided.'));
   }
 
   // Validate passphrase if provided
   if (passphrase !== null && typeof passphrase !== 'string') {
     logMessage('Passphrase must be a string in createCohort.', 'error');
-    throw new Error('Passphrase must be a string.');
+    throw new Error(t('Passphrase must be a string.'));
   }
 
   try {
@@ -453,11 +454,11 @@ export async function createCohort(alias, passphrase = null) {
 export async function analyzeCohort(cohortId, passphrase, alias = null) {
   if (typeof cohortId !== 'string' || cohortId.trim() === '') {
     logMessage('analyzeCohort called with invalid Cohort ID.', 'error');
-    throw new Error('Invalid Cohort ID provided.');
+    throw new Error(t('Invalid Cohort ID provided.'));
   }
   if (!passphrase || typeof passphrase !== 'string') {
     logMessage('Passphrase is required for cohort analysis.', 'error');
-    throw new Error('Passphrase is required for cohort analysis.');
+    throw new Error(t('Passphrase is required for cohort analysis.'));
   }
 
   try {

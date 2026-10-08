@@ -2,6 +2,7 @@
 
 import { BaseController } from './BaseController.js';
 import { validateFiles } from '../inputWrangling.js';
+import { t } from '../i18n.js';
 
 /**
  * File Controller - Handles file selection and validation
@@ -60,7 +61,7 @@ export class FileController extends BaseController {
       this.emit('files:selected:success', { files: this.selectedFiles });
     } catch (error) {
       this.handleError(error, 'File selection failed');
-      this.errorView.show(error, 'File Selection');
+      this.errorView.show(error, t('File Selection'));
     }
   }
 
@@ -84,7 +85,9 @@ export class FileController extends BaseController {
 
       // Show errors if requested
       if (showErrors && invalidFiles.length > 0) {
-        const errorMessage = `Invalid files: ${invalidFiles.map(f => f.name).join(', ')}`;
+        const errorMessage = t('Invalid files: {files}', {
+          files: invalidFiles.map(f => f.name).join(', '),
+        });
         this.errorView.showValidation(errorMessage);
       }
 
@@ -98,7 +101,7 @@ export class FileController extends BaseController {
       return { matchedPairs, invalidFiles };
     } catch (error) {
       this.handleError(error, 'File validation failed');
-      this.errorView.show(error, 'File Validation');
+      this.errorView.show(error, t('File Validation'));
       throw error;
     }
   }

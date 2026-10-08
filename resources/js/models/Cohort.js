@@ -1,5 +1,7 @@
 // frontend/resources/js/models/Cohort.js
 
+import { t } from '../i18n.js';
+
 /**
  * Cohort Model
  *
@@ -62,13 +64,13 @@ export class Cohort {
    */
   validateCohortId(cohortId) {
     if (!cohortId || typeof cohortId !== 'string') {
-      throw new Error('Cohort ID must be a non-empty string');
+      throw new Error(t('Cohort ID must be a non-empty string'));
     }
 
     // UUID v4 format validation
     const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     if (!uuidPattern.test(cohortId)) {
-      throw new Error(`Invalid cohort ID format: ${cohortId}`);
+      throw new Error(t('Invalid cohort ID format: {id}', { id: cohortId }));
     }
   }
 

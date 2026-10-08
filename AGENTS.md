@@ -93,6 +93,23 @@ npm run version:sync  # rewrites resources/js/version.js and index.html
 `npm run version:check` fails the build on drift and runs in CI. Commit
 `1799d05` is what this prevents.
 
+## Translations
+
+The English pages at the root are the source. `scripts/sync-i18n.mjs`
+generates `/de/`, `/fr/`, `/it/`, `/es/` and `/nl/` from them - do not edit
+those directories by hand. Translations live in `i18n/<locale>.json`, keyed by
+the English text, so changing English wording orphans its translations.
+
+```bash
+npm run i18n:sync     # regenerate the translated pages, hreflang links and sitemap
+npm run i18n:check    # fails on stale output or untranslated strings; runs in CI
+```
+
+The site is research use only: translations must never call it a diagnostic
+test. Text set by JavaScript goes through `t()` from `resources/js/i18n.js`;
+its first argument must be a plain string literal, which the sync script
+collects. Log-panel messages stay English.
+
 ## Gotchas
 
 - **`window.CONFIG` only exists on `index.html`.** `config.js` is loaded by that
