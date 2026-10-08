@@ -9,7 +9,7 @@
 
 /**
  * Aioli runs samtools as WebAssembly in a WebWorker. Loaded from biowasm's CDN
- * with SRI; see index.html. Only the members the app calls are declared.
+ * with SRI on first extraction; see ExtractionController.js. Only the members the app calls are declared.
  */
 declare class Aioli {
   constructor(tools: string | string[], options?: Record<string, unknown>);
@@ -65,14 +65,6 @@ interface Window {
     DEFAULT_NORMAL_MODE?: boolean;
     FORCE_ADVNTR_MODE?: boolean;
     FORCE_NORMAL_MODE?: boolean;
-    institutions: {
-      name: string;
-      logo: string;
-      url: string;
-      height: string;
-      width: string;
-      alt: string;
-    }[];
   };
 
   /** Debugging handles parked by main.js. Not part of the application API. */

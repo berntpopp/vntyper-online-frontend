@@ -18,7 +18,7 @@
   --color-tertiary-active: #6a3300;
 
   /* Link Button Colors - WCAG AA Compliant */
-  --color-link-button: #2c7bbd; /* Fixed from #3498db for 4.6:1 contrast */
+  --color-link-button: #2a76b5; /* 4.8:1 on white */
   --color-link-button-hover: #1e5a8d;
   --color-link-button-active: #1c5d99;
 
@@ -278,8 +278,6 @@ h4 {
 
 [data-tooltip]:hover::after,
 [data-tooltip]:hover::before,
-[data-tooltip]:focus::after,
-[data-tooltip]:focus::before,
 [data-tooltip]:focus-visible::after,
 [data-tooltip]:focus-visible::before {
   display: block;
@@ -952,4 +950,50 @@ figcaption {
 
 .clinical-table tbody tr:hover td {
   background-color: #f8fafc;
+}
+
+/* --- Body links: one colour instead of the browser default --- */
+main a:not(.button):not(.back-link) {
+  color: var(--color-primary);
+  text-underline-offset: 2px;
+}
+
+main a:not(.button):not(.back-link):hover {
+  color: var(--color-primary-hover);
+}
+
+/* --- Small screens: wide figures and tables scroll instead of shrinking to unreadable --- */
+@media (max-width: 768px) {
+  .workflow-figure {
+    overflow-x: auto;
+  }
+
+  .workflow-figure svg {
+    min-width: 640px;
+  }
+}
+
+/* --- Respect the OS "reduce motion" setting; no state here depends on motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* --- Moving between pages --- */
+
+/* Reserve the scrollbar so short and long pages line up horizontally. */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Cross-fade same-site navigations instead of flashing white. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
 }

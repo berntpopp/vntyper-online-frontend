@@ -77,11 +77,11 @@
     <!-- Header with Logo and Back Button -->
     <nav class="navbar" aria-label="Main navigation">
       <div class="navbar-container">
-        <a href="index.html" class="header" aria-label="vntyper-online - Home">
-          <img src="resources/assets/logo/vntyperonline_logo_160px.png" alt="vntyper-online Logo" class="logo" width="80" height="80">
+        <a href="./" class="header" aria-label="vntyper-online - Home">
+          <img src="resources/assets/logo/vntyperonline_logo_80px.webp" srcset="resources/assets/logo/vntyperonline_logo_80px.webp 1x, resources/assets/logo/vntyperonline_logo_160px.webp 2x" alt="" class="logo" width="80" height="80">
           <span class="brand-title">vntyper-online</span>
         </a>
-        <a href="index.html" class="back-link" aria-label="Back to Home">← Back to Home</a>
+        <a href="./" class="back-link" aria-label="Back to Home">← Back to Home</a>
       </div>
     </nav>
 
@@ -235,13 +235,13 @@
       </figure>
 
       <h2>Interpretation Tiers &amp; Clinical Actions</h2>
-      <div class="clinical-table-wrapper">
+      <div class="clinical-table-wrapper" tabindex="0" role="region" aria-label="Interpretation tiers">
         <table class="clinical-table">
           <thead>
             <tr>
-              <th style="width: 22%;">Interpretation Tier</th>
-              <th style="width: 38%;">Screening Criteria</th>
-              <th style="width: 40%;">Recommended Action</th>
+              <th scope="col" style="width: 22%;">Interpretation Tier</th>
+              <th scope="col" style="width: 38%;">Screening Criteria</th>
+              <th scope="col" style="width: 40%;">Recommended Action</th>
             </tr>
           </thead>
           <tbody>
@@ -274,15 +274,15 @@
       </div>
 
       <h2>Comparison of Testing Modalities</h2>
-      <div class="clinical-table-wrapper">
+      <div class="clinical-table-wrapper" tabindex="0" role="region" aria-label="Diagnostic modalities compared">
         <table class="clinical-table">
           <thead>
             <tr>
-              <th>Modality</th>
-              <th>Variant Spectrum</th>
-              <th>Input Specimen</th>
-              <th>Turnaround</th>
-              <th>Role &amp; Considerations</th>
+              <th scope="col">Modality</th>
+              <th scope="col">Variant Spectrum</th>
+              <th scope="col">Input Specimen</th>
+              <th scope="col">Turnaround</th>
+              <th scope="col">Role &amp; Considerations</th>
             </tr>
           </thead>
           <tbody>
@@ -335,14 +335,14 @@
       </ul>
 
       <h2>Accredited Testing Centers &amp; ADTKD-Net Laboratories</h2>
-      <div class="clinical-table-wrapper">
+      <div class="clinical-table-wrapper" tabindex="0" role="region" aria-label="Laboratories offering testing">
         <table class="clinical-table">
           <thead>
             <tr>
-              <th>Institution</th>
-              <th>Location</th>
-              <th>Testing &amp; Screening Capabilities</th>
-              <th>Reference Link</th>
+              <th scope="col">Institution</th>
+              <th scope="col">Location</th>
+              <th scope="col">Testing &amp; Screening Capabilities</th>
+              <th scope="col">Reference Link</th>
             </tr>
           </thead>
           <tbody>
@@ -396,7 +396,7 @@
           Screen short-read sequencing data directly in your web browser. Target region extraction executes client-side via WebAssembly without uploading raw sequencing files.
         </p>
         <p style="margin-bottom: 0;">
-          <a href="index.html" class="button" style="display: inline-block; background-color: var(--color-primary, #005f73); color: #ffffff; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; text-decoration: none;">Launch VNtyper Online →</a>
+          <a href="./" class="button" style="display: inline-block; background-color: var(--color-primary, #005f73); color: #ffffff; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; text-decoration: none;">Launch VNtyper Online →</a>
         </p>
       </div>
     </main>
@@ -404,7 +404,7 @@
 
   <footer class="footer">
     <div class="footer-bottom">
-      <p>&copy; <span id="currentYear"></span> vntyper-online. All rights reserved.</p>
+      <p>&copy; <span id="currentYear">2026</span> vntyper-online. All rights reserved.</p>
       <p>
         <a href="impressum_en.html" aria-label="Imprint">Imprint</a> |
         <a href="contact.html" aria-label="Contact">Contact</a> |

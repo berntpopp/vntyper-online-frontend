@@ -1,5 +1,7 @@
 // frontend/resources/js/donate.js
 
+import { safeStorage } from './utils/safeStorage.js';
+
 /**
  * Initializes the Data Donation page, handling consent, form validation,
  * controlled vocabularies, and submission to the backend API.
@@ -48,25 +50,31 @@ export function initDonatePage() {
       const res = await fetch(`${apiUrl}/donations/status/`);
       if (res.ok) {
         const data = await res.json();
-        if (!data.enabled && !isEnabledConfig) {
-          showDisabled();
-        }
-      } else if (!isEnabledConfig) {
-        showDisabled();
+        return Boolean(data.enabled);
       }
     } catch {
-      if (!isEnabledConfig) {
-        showDisabled();
-      }
+      // Unreachable API: treat as disabled.
     }
+    return false;
   }
 
-  function showDisabled() {
-    donationActiveContainer?.classList.add('hidden');
-    donationDisabledMsg?.classList.remove('hidden');
+  // Both panels start hidden so the form never flashes before being replaced.
+  if (isEnabledConfig) {
+    donationActiveContainer?.classList.remove('hidden');
+  } else {
+    // Paint the last known state at once (a reload restores scroll, and a late
+    // panel would shift the footer), then correct it if the server disagrees.
+    const showPanel = (/** @type {boolean} */ enabled) => {
+      donationActiveContainer?.classList.toggle('hidden', !enabled);
+      donationDisabledMsg?.classList.toggle('hidden', enabled);
+    };
+    const known = safeStorage.getItem('donationsEnabled');
+    if (known !== null) showPanel(known === 'true');
+    checkServerStatus().then(enabled => {
+      showPanel(enabled);
+      safeStorage.setItem('donationsEnabled', String(enabled));
+    });
   }
-
-  checkServerStatus();
 
   // 2. Positive vs Negative finding toggle
   function updateFindingUI() {

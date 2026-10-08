@@ -3,7 +3,7 @@
 import { logMessage } from './log.js'; // Import the logMessage function
 
 // Frontend Version
-const frontendVersion = '0.71.3'; // Remove outdated adVNTR processing time estimate
+const frontendVersion = '0.71.4'; // Default adVNTR and normal mode on; VNtyper 2 naming
 
 /**
  * Build the API version endpoint, or null when this page has no API config.

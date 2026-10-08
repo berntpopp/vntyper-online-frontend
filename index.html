@@ -7,14 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Meta Description & Keywords -->
-  <meta name="description" content="VNtyper Online: Browser-based MUC1 VNTR genotyping tool for ADTKD-MUC1 screening. Genotype short-read BAM and SAM sequencing data with VNtyper 2.0 locally in your browser.">
+  <meta name="description" content="VNtyper Online: Browser-based MUC1 VNTR genotyping tool for ADTKD-MUC1 screening. Genotype short-read BAM and SAM sequencing data with VNtyper 2 locally in your browser.">
   <meta name="keywords" content="MUC1, VNTR, ADTKD, ADTKD-MUC1, VNtyper, VNtyper 2, variable number of tandem repeats, short-read sequencing, Illumina, BAM, BAI, medullary cystic kidney disease, tubulointerstitial kidney disease, genetics, bioinformatics, genomics">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://vntyper.org/">
   <meta property="og:title" content="VNtyper Online - MUC1 VNTR Genotyping for ADTKD Screening">
-  <meta property="og:description" content="Free online tool for MUC1 VNTR genotyping from BAM files. Screen for ADTKD-MUC1 mutations using VNtyper 2.0 directly in your browser.">
+  <meta property="og:description" content="Free online tool for MUC1 VNTR genotyping from BAM files. Screen for ADTKD-MUC1 mutations using VNtyper 2 directly in your browser.">
   <meta property="og:image" content="https://vntyper.org/resources/assets/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -23,7 +23,7 @@
   <!-- Twitter Card (no account needed — controls link previews when others share) -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="VNtyper Online - MUC1 VNTR Genotyping for ADTKD Screening">
-  <meta name="twitter:description" content="Free online tool for MUC1 VNTR genotyping from BAM files. Screen for ADTKD-MUC1 mutations using VNtyper 2.0.">
+  <meta name="twitter:description" content="Free online tool for MUC1 VNTR genotyping from BAM files. Screen for ADTKD-MUC1 mutations using VNtyper 2.">
   <meta name="twitter:image" content="https://vntyper.org/resources/assets/og-image.png">
 
   <!-- Canonical Link -->
@@ -36,18 +36,8 @@
   <link rel="apple-touch-icon" sizes="180x180" href="resources/assets/favicon/apple-touch-icon.png" />
   <link rel="manifest" href="resources/assets/favicon/site.webmanifest" />
 
-  <!-- Preconnect to CDN origins -->
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <!-- Preconnect to the WebAssembly CDN (Aioli is loaded on first extraction) -->
   <link rel="preconnect" href="https://biowasm.com" crossorigin>
-
-  <!-- Preload LCP image -->
-  <link rel="preload" as="image" href="resources/assets/logo/vntyperonline_logo_160px.png">
-
-  <!-- Intro.js CSS (deferred — only needed for tutorial). Promoted to a stylesheet by
-       resources/js/loadDeferredStyles.js (CSP blocks inline onload handlers). -->
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0/introjs.min.css" as="style" integrity="sha512-631ugrjzlQYCOP9P8BOLEMFspr5ooQwY3rgt8SMUa+QqtVMbY/tniEUOcABHDGjK50VExB4CNc61g5oopGqCEw==" crossorigin="anonymous" referrerpolicy="no-referrer">
-  <script src="resources/js/loadDeferredStyles.js?v=0.71.3" defer></script>
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0/introjs.min.css" integrity="sha512-631ugrjzlQYCOP9P8BOLEMFspr5ooQwY3rgt8SMUa+QqtVMbY/tniEUOcABHDGjK50VExB4CNc61g5oopGqCEw==" crossorigin="anonymous" referrerpolicy="no-referrer"></noscript>
 
   <!-- Link to CSS Files -->
   <link rel="stylesheet" href="resources/css/base.css">
@@ -64,35 +54,29 @@
   <link rel="stylesheet" href="resources/css/log.css">
   <link rel="stylesheet" href="resources/css/usageStats.css">
   
-  <!-- Intro.js JavaScript -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0/intro.min.js" integrity="sha512-+hhhH0eKqYCmXsO28OJE1HHWkgNYwlpceBwmeeDEt5jpCL8jOuqAVunXlZ/WZ4qIluJdwlcv4f5BUIQ/l1w9iw==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
-
-  <!-- Include Aioli from BioWasm CDN with Subresource Integrity (SRI) -->
-  <!-- Pin to an immutable, version-specific URL. The unversioned /cdn/v3/aioli.js is
-       mutable and gets republished by biowasm, which breaks the SRI hash (and thus
-       leaves `Aioli` undefined). The versioned path serves stable bytes matching the hash. -->
-  <script src="https://biowasm.com/cdn/v3/aioli/3.2.1/aioli.js"
-          integrity="sha384-1Ergza974F0w12B/lIP0OD/cMzMizVolHbzSX1Jlmour//ypy41MIN8qYeHl45Jz"
-          crossorigin="anonymous" defer></script>
+  <!-- intro.js and Aioli are loaded on demand: see tutorial.js and ExtractionController.js -->
   
+  <!-- Decides before first paint whether the disclaimer shows -->
+  <script src="resources/js/disclaimerGate.js?v=0.71.4"></script>
+
   <!-- Link to Config JS -->
-  <script src="resources/js/config.js?v=0.71.3" defer></script>
+  <script src="resources/js/config.js?v=0.71.4" defer></script>
   
   <!-- Link to JavaScript Modules -->
-  <script type="module" src="resources/js/inputWrangling.js?v=0.71.3" defer></script>
-  <script type="module" src="resources/js/regionsConfig.js?v=0.71.3" defer></script>
-  <script type="module" src="resources/js/assemblyConfigs.js?v=0.71.3" defer></script>
+  <script type="module" src="resources/js/inputWrangling.js?v=0.71.4" defer></script>
+  <script type="module" src="resources/js/regionsConfig.js?v=0.71.4" defer></script>
+  <script type="module" src="resources/js/assemblyConfigs.js?v=0.71.4" defer></script>
   <!-- bamProcessing.js is lazy-loaded in ExtractionController when needed -->
-  <script type="module" src="resources/js/apiInteractions.js?v=0.71.3" defer></script>
-  <script type="module" src="resources/js/inputValidation.js?v=0.71.3" defer></script>
-  <script type="module" src="resources/js/main.js?v=0.71.3" defer></script>
-  <script type="module" src="resources/js/mobileNav.js?v=0.71.3" defer></script>
-  <script type="module" src="resources/js/populateRegions.js?v=0.71.3" defer></script>
-  <script type="module" src="resources/js/uiUtils.js?v=0.71.3" defer></script>
-  <script type="module" src="resources/js/usageStats.js?v=0.71.3" defer></script>
+  <script type="module" src="resources/js/apiInteractions.js?v=0.71.4" defer></script>
+  <script type="module" src="resources/js/inputValidation.js?v=0.71.4" defer></script>
+  <script type="module" src="resources/js/main.js?v=0.71.4" defer></script>
+  <script type="module" src="resources/js/mobileNav.js?v=0.71.4" defer></script>
+  <script type="module" src="resources/js/populateRegions.js?v=0.71.4" defer></script>
+  <script type="module" src="resources/js/uiUtils.js?v=0.71.4" defer></script>
+  <script type="module" src="resources/js/usageStats.js?v=0.71.4" defer></script>
 
   <!-- Version and Current Year Script -->
-  <script type="module" src="resources/js/version.js?v=0.71.3" defer></script>
+  <script type="module" src="resources/js/version.js?v=0.71.4" defer></script>
   
   <!-- Schema.org JSON-LD: WebSite -->
   <script type="application/ld+json">
@@ -100,9 +84,9 @@
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "VNtyper Online",
-      "alternateName": ["vntyper-online", "VNtyper 2.0"],
+      "alternateName": ["vntyper-online", "VNtyper 2"],
       "url": "https://vntyper.org/",
-      "description": "Free browser-based MUC1 VNTR genotyping tool for ADTKD-MUC1 screening. Analyze BAM files with VNtyper 2.0."
+      "description": "Free browser-based MUC1 VNTR genotyping tool for ADTKD-MUC1 screening. Analyze BAM files with VNtyper 2."
     }
   </script>
 
@@ -112,16 +96,16 @@
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "VNtyper Online",
-      "alternateName": ["VNtyper 2.0", "VNtyper2", "vntyper-online"],
+      "alternateName": ["VNtyper 2", "VNtyper2", "vntyper-online"],
       "applicationCategory": "HealthApplication",
       "applicationSubCategory": "Genetic Analysis Tool",
       "operatingSystem": "Web Browser",
       "url": "https://vntyper.org/",
-      "description": "Online MUC1 VNTR genotyping tool for screening autosomal dominant tubulointerstitial kidney disease (ADTKD-MUC1) from BAM files using VNtyper 2.0.",
+      "description": "Online MUC1 VNTR genotyping tool for screening autosomal dominant tubulointerstitial kidney disease (ADTKD-MUC1) from BAM files using VNtyper 2.",
       "keywords": "MUC1, VNTR, ADTKD, ADTKD-MUC1, VNtyper, variable number of tandem repeats, BAM, bioinformatics, genomics",
       "featureList": [
         "In-browser client-side BAM slicing preserving genomic data privacy",
-        "Alignment-free and alignment-based VNTR genotyping with VNtyper 2.0",
+        "Alignment-free and alignment-based VNTR genotyping with VNtyper 2",
         "Automated detection of the frameshift +1-bp insC pathogenic variant in MUC1 VNTR",
         "Support for human reference assemblies GRCh37/hg19 and GRCh38/hg38",
         "Cryptographic report integrity anchoring"
@@ -264,7 +248,7 @@
     <nav class="navbar" aria-label="Main navigation">
       <div class="navbar-container">
         <div class="header" id="resetHeader" role="button" tabindex="0" aria-label="vntyper-online - Reset Page">
-          <img src="resources/assets/logo/vntyperonline_logo_160px.png" alt="vntyper-online Logo" class="logo" width="80" height="80">
+          <img src="resources/assets/logo/vntyperonline_logo_80px.webp" srcset="resources/assets/logo/vntyperonline_logo_80px.webp 1x, resources/assets/logo/vntyperonline_logo_160px.webp 2x" alt="" class="logo" width="80" height="80">
           <span class="brand-title">vntyper-online</span>
         </div>
 
@@ -318,7 +302,7 @@
     <section class="hero-section">
       <h1>Online MUC1 VNTR Genotyping for ADTKD Screening</h1>
       <p>
-        Screen BAM files for MUC1 coding VNTR mutations using VNtyper 2.0.
+        Screen BAM files for MUC1 coding VNTR mutations using VNtyper 2.
         Fast, secure, browser-based analysis for autosomal dominant
         tubulointerstitial kidney disease (ADTKD-MUC1, MCKD).
       </p>
@@ -609,9 +593,36 @@
     <hr class="footer-separator">
 
     <div class="footer-content">
-      <!-- Dynamic Institution Logos -->
+      <!-- Institution logos: static so nothing below them moves after load -->
       <div class="institution-logos" id="institutionLogos">
-        <!-- Logos will be injected here by JavaScript -->
+        <a href="https://www.institutimagine.org/en" target="_blank" rel="noopener noreferrer">
+          <img src="resources/assets/logos/II_60px.webp" alt="Institut Imagine Paris" class="institution-logo" width="128" height="60" loading="lazy">
+          <span class="sr-only">Visit Institut Imagine</span>
+        </a>
+        <a href="https://u-paris.fr/" target="_blank" rel="noopener noreferrer">
+          <img src="resources/assets/logos/UPC_60px.webp" alt="Université Paris Cité" class="institution-logo" width="157" height="60" loading="lazy">
+          <span class="sr-only">Visit Université Paris Cité</span>
+        </a>
+        <a href="https://www.bihealth.org/en/" target="_blank" rel="noopener noreferrer">
+          <img src="resources/assets/logos/BIH_60px.webp" alt="Berlin Institute of Health at Charité (BIH)" class="institution-logo" width="136" height="60" loading="lazy">
+          <span class="sr-only">Visit Berlin Institute of Health at Charité (BIH)</span>
+        </a>
+        <a href="https://www.laborberlin.com/en/" target="_blank" rel="noopener noreferrer">
+          <img src="resources/assets/logos/LB_60px.webp" alt="Labor Berlin" class="institution-logo" width="234" height="60" loading="lazy">
+          <span class="sr-only">Visit Labor Berlin</span>
+        </a>
+        <a href="https://nephrologie-intensivmedizin.charite.de/en/fuer_patienten/cerkid/" target="_blank" rel="noopener noreferrer">
+          <img src="resources/assets/logos/CeRKiD_60px.webp" alt="CeRKiD" class="institution-logo" width="81" height="60" loading="lazy">
+          <span class="sr-only">Visit CeRKiD</span>
+        </a>
+        <a href="https://www.gesundheitsforschung-bmbf.de/de/adtkd-net-netzwerk-fur-autosomal-dominante-tubulointerstitielle-nierenerkrankung-17889.php" target="_blank" rel="noopener noreferrer">
+          <img src="resources/assets/logos/ADTKD-Net_horizontal_60px.webp" alt="ADTKD-Net" class="institution-logo" width="239" height="60" loading="lazy">
+          <span class="sr-only">Visit ADTKD-Net</span>
+        </a>
+        <a href="https://www.adtkd.de" target="_blank" rel="noopener noreferrer">
+          <img src="resources/assets/logos/adtkd_de_60px.webp" alt="ADTKD.de" class="institution-logo" width="124" height="60" loading="lazy">
+          <span class="sr-only">Visit ADTKD.de</span>
+        </a>
       </div>
     </div>
 
@@ -622,7 +633,7 @@
         <p class="about-lead">
           <strong>VNtyper Online</strong> is a free, browser-based tool for
           <strong>MUC1 VNTR genotyping</strong> using the
-          <strong>VNtyper 2.0</strong> algorithm. It enables rapid screening
+          <strong>VNtyper 2</strong> algorithm. It enables rapid screening
           for mutations in the MUC1 coding variable number of tandem repeats
           (VNTR), the most common cause of
           <strong>Autosomal Dominant Tubulointerstitial Kidney Disease (ADTKD-MUC1)</strong>,
@@ -635,7 +646,7 @@
               Upload your BAM/BAI sequencing files. Only the MUC1 region is
               extracted locally in your browser using BioWasm, ensuring genomic
               privacy. The extracted reads are then analyzed server-side by
-              VNtyper 2.0 to detect the prototypic cytosine insertion (insC) mutation and other
+              VNtyper 2 to detect the prototypic cytosine insertion (insC) mutation and other
               VNTR alterations.
             </p>
           </div>
@@ -656,7 +667,7 @@
     <hr class="footer-separator">
 
     <div class="footer-bottom">
-      <p>&copy; <span id="currentYear"></span> vntyper-online. All rights reserved.</p>
+      <p>&copy; <span id="currentYear">2026</span> vntyper-online. All rights reserved.</p>
       <!-- Version Information -->
       <p>
         Frontend version: <span id="appVersion"></span> |

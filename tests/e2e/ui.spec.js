@@ -26,10 +26,8 @@ test.describe('modals', () => {
     await page.goto('/');
   });
 
-  // Desktop only. index.html ships two a[data-modal="faqModal"] links, but
-  // footer.js rebuilds #footerLinks from window.CONFIG.institutions and drops
-  // the footer copy, so exactly one survives - the navbar one, which lives
-  // inside the collapsed menu at mobile widths.
+  // Desktop only. The single a[data-modal="faqModal"] link is the navbar one,
+  // which lives inside the collapsed menu at mobile widths.
   test('the FAQ modal opens and closes', async ({ page, isMobile }) => {
     test.skip(isMobile, 'the only surviving FAQ link is inside the collapsed mobile menu');
 

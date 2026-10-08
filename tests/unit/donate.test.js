@@ -10,7 +10,7 @@ describe('donate.js', () => {
 
     document.body.innerHTML = `
       <div id="donationDisabledMsg" class="hidden"></div>
-      <div id="donationActiveContainer">
+      <div id="donationActiveContainer" class="hidden">
         <input type="checkbox" id="gdprConsent">
         <form id="donationForm">
           <input type="file" id="archiveFile">

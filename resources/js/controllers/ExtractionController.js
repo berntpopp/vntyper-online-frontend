@@ -1,6 +1,7 @@
 // frontend/resources/js/controllers/ExtractionController.js
 
 import { BaseController } from './BaseController.js';
+import { loadCdnAsset } from '../utils/loadScript.js';
 
 /**
  * Extraction Controller - Handles BAM file region extraction
@@ -59,8 +60,16 @@ export class ExtractionController extends BaseController {
 
     this._log('Loading BAM processing tools (first time, ~2-3s)...', 'info');
 
-    // Dynamic import - loads on demand
-    this.bamModule = await import('../bamProcessing.js');
+    // Dynamic import - loads on demand, together with the Aioli runtime it needs.
+    // Pinned to a version-specific URL: the unversioned /cdn/v3/aioli.js is
+    // republished by biowasm, which breaks the SRI hash and leaves `Aioli` undefined.
+    [this.bamModule] = await Promise.all([
+      import('../bamProcessing.js'),
+      loadCdnAsset(
+        'https://biowasm.com/cdn/v3/aioli/3.2.1/aioli.js',
+        'sha384-1Ergza974F0w12B/lIP0OD/cMzMizVolHbzSX1Jlmour//ypy41MIN8qYeHl45Jz'
+      ),
+    ]);
 
     this._log('BAM processing module loaded successfully', 'success');
 

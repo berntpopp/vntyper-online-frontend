@@ -27,7 +27,6 @@ describe('navbar.js - initializeNavbar', () => {
     window.CONFIG = {
       API_URL: 'http://localhost:8000/api',
       API_DOCS_URL: 'https://docs.custom-vntyper.org',
-      institutions: [],
     };
 
     initializeNavbar();
@@ -39,7 +38,6 @@ describe('navbar.js - initializeNavbar', () => {
   it('falls back to ${API_URL}/docs when API_DOCS_URL is omitted', () => {
     window.CONFIG = {
       API_URL: 'http://localhost:8000/api',
-      institutions: [],
     };
 
     initializeNavbar();
@@ -61,7 +59,6 @@ describe('navbar.js - initializeNavbar', () => {
     document.body.innerHTML = '<div>No navbar here</div>';
     window.CONFIG = {
       API_URL: 'http://localhost:8000/api',
-      institutions: [],
     };
 
     expect(() => initializeNavbar()).not.toThrow();

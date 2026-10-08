@@ -35,7 +35,7 @@ resources/js/
   views/         JobView, CohortView, ErrorView
   models/        Job, Cohort
   services/      APIService, httpUtils
-  utils/         EventBus, DI (container), safeStorage
+  utils/         EventBus, DI (container), safeStorage, loadScript
   *.js           legacy flat modules (bamProcessing, stateManager, uiUtils,
                  apiInteractions, log, modal, …)
   main.js        wires both generations together via the DI container
@@ -105,7 +105,8 @@ npm run version:sync  # rewrites resources/js/version.js and index.html
 - **A disclaimer modal blocks the page on first load** until the cookie
   `disclaimerAcknowledged=true` is set. E2E tests set it via the fixture in
   `tests/e2e/fixtures/api.js`.
-- **`Aioli` and `introJs` are CDN globals**, not imports. They are declared in
+- **`Aioli` and `introJs` are CDN globals**, not imports, injected on first use
+  by `utils/loadScript.js` rather than by a tag in `index.html`. They are declared in
   `types/globals.d.ts`; extend that file rather than casting to `any`.
 - **Adding a file the site must serve?** Update the `COPY` allowlist in
   `Dockerfile` _and_ the served-paths list in
@@ -124,15 +125,14 @@ npm run version:sync  # rewrites resources/js/version.js and index.html
 - **E2E** — Playwright in `tests/e2e/`, driving a real browser against
   `scripts/dev-server.mjs`. Only the VNtyper backend is stubbed, via
   `page.route()`; an unmocked backend call fails the test loudly instead of
-  hanging. **Do not stub the CDN requests.** `index.html` loads intro.js and
-  Aioli with Subresource Integrity, and the browser hashes the bytes it
-  actually receives, so a stub fails SRI and breaks the page. The current
-  suite still passes with the CDNs unreachable, because those globals are only
-  needed by the tutorial and by extraction; a test that exercises extraction
+  hanging. **Do not stub the CDN requests.** intro.js and Aioli are loaded on demand
+  (`utils/loadScript.js`) with Subresource Integrity, and the browser hashes
+  the bytes it actually receives, so a stub fails SRI and breaks the feature.
+  The current suite still passes with the CDNs unreachable, because those
+  globals are only needed by the tutorial and by extraction; a test that exercises extraction
   will need real network access.
 - **Assert what the app does, not what you assume it does.** Check behaviour
   against the running page before writing the assertion. Several of these
   tests were written from the source and were wrong: a lone `.bam` is rejected
-  as "invalid", an unsupported extension is discarded with no message at all,
-  and `footer.js` deletes the footer's FAQ link at runtime.
+  as "invalid", and an unsupported extension is discarded with no message at all.
 - Never lower a coverage threshold or delete an assertion to make a suite pass.
