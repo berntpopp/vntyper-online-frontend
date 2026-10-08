@@ -2,6 +2,7 @@
 
 import { BaseController } from './BaseController.js';
 import { loadCdnAsset } from '../utils/loadScript.js';
+import { t } from '../i18n.js';
 
 /**
  * Extraction Controller - Handles BAM file region extraction
@@ -100,7 +101,7 @@ export class ExtractionController extends BaseController {
       return this.cli;
     } catch (error) {
       this.handleError(error, 'Aioli initialization failed');
-      this.errorView.show(error, 'Aioli Initialization');
+      this.errorView.show(error, t('Aioli Initialization'));
       throw error;
     }
   }
@@ -155,7 +156,7 @@ export class ExtractionController extends BaseController {
       return result;
     } catch (error) {
       this.handleError(error, 'BAM extraction failed');
-      this.errorView.show(error, 'BAM Extraction');
+      this.errorView.show(error, t('BAM Extraction'));
       throw error;
     }
   }

@@ -2,6 +2,7 @@
 
 import { BaseController } from './BaseController.js';
 import { Cohort } from '../models/Cohort.js';
+import { t } from '../i18n.js';
 
 /**
  * Cohort Controller - Handles cohort creation and management
@@ -93,7 +94,7 @@ export class CohortController extends BaseController {
       return cohort;
     } catch (error) {
       this.handleError(error, 'Cohort creation failed');
-      this.errorView.show(error, 'Cohort Creation');
+      this.errorView.show(error, t('Cohort Creation'));
       throw error;
     }
   }
@@ -229,7 +230,7 @@ export class CohortController extends BaseController {
     // Announcing success for a failed cohort is the same defect fixed in
     // JobController - do not reintroduce it here.
     if (statusData?.status === 'failed') {
-      this.handleCohortError(cohortId, new Error(statusData.error || 'Cohort failed.'));
+      this.handleCohortError(cohortId, new Error(statusData.error || t('Cohort failed.')));
       return;
     }
 
@@ -285,15 +286,19 @@ export class CohortController extends BaseController {
 
       const pwd = passphrase || this.cohortPassphrases.get(cohortId);
       if (!pwd) {
-        const error = new Error('Cohort passphrase is required to run joint analysis.');
+        const error = new Error(t('Cohort passphrase is required to run joint analysis.'));
         this.cohortView.updateAnalysisStatus(cohortId, 'failed', error.message);
         this.handleError(error, 'Cohort analysis failed');
-        this.errorView.show(error, 'Cohort Analysis');
+        this.errorView.show(error, t('Cohort Analysis'));
         return;
       }
 
       // Update view
-      this.cohortView.updateAnalysisStatus(cohortId, 'processing', 'Initiating joint analysis...');
+      this.cohortView.updateAnalysisStatus(
+        cohortId,
+        'processing',
+        t('Initiating joint analysis...')
+      );
 
       // Trigger cohort analysis via API
       const result = await this.apiService.analyzeCohort(cohortId, pwd);
@@ -302,7 +307,7 @@ export class CohortController extends BaseController {
       this._log(`Cohort analysis job enqueued: ${analysisJobId}`, 'success');
 
       // Update view to processing
-      this.cohortView.updateAnalysisStatus(cohortId, 'processing', 'Analysis in progress...');
+      this.cohortView.updateAnalysisStatus(cohortId, 'processing', t('Analysis in progress...'));
 
       // Emit event
       this.emit('cohort:analysis:started', { cohortId, analysisJobId });
@@ -324,7 +329,7 @@ export class CohortController extends BaseController {
             },
             onComplete: statusData => {
               if (statusData?.status === 'failed') {
-                const errMsg = statusData.error || 'Cohort analysis failed.';
+                const errMsg = statusData.error || t('Cohort analysis failed.');
                 this.cohortView.updateAnalysisStatus(cohortId, 'failed', errMsg);
                 this.handleError(new Error(errMsg), 'Cohort Analysis');
                 this.emit('cohort:analysis:failed', { cohortId, analysisJobId, error: errMsg });
@@ -350,7 +355,7 @@ export class CohortController extends BaseController {
     } catch (error) {
       this.cohortView.updateAnalysisStatus(cohortId, 'failed', error.message);
       this.handleError(error, `Cohort analysis failed`);
-      this.errorView.show(error, 'Cohort Analysis');
+      this.errorView.show(error, t('Cohort Analysis'));
       throw error;
     }
   }

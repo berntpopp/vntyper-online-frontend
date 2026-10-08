@@ -2,6 +2,7 @@
 
 // Import the logging and UI message functions
 import { logMessage } from './log.js';
+import { t } from './i18n.js';
 import { displayMessage, createSpinnerHTML, ensureSpinAnimation } from './uiUtils.js';
 
 // Import assemblies and NCBI accession helper
@@ -26,7 +27,7 @@ export async function initializeAioli() {
     logMessage(`CLI.fs is ${CLI.fs ? 'initialized' : 'undefined'}.`, 'info');
 
     if (!CLI.fs) {
-      throw new Error('Failed to initialize the virtual filesystem (CLI.fs is undefined).');
+      throw new Error(t('Failed to initialize the virtual filesystem (CLI.fs is undefined).'));
     }
 
     return CLI;
@@ -34,7 +35,7 @@ export async function initializeAioli() {
     logMessage(`Error initializing Aioli: ${err.message}`, 'error');
     const errorDiv = document.getElementById('error');
     if (errorDiv) {
-      errorDiv.textContent = 'Failed to initialize the processing environment.';
+      errorDiv.textContent = t('Failed to initialize the processing environment.');
       errorDiv.classList.remove('hidden');
     }
     throw err;
@@ -287,12 +288,14 @@ function detectPipelineAndWarn(header) {
 
   if (lowerHeader.includes('dragen')) {
     pipeline = 'Dragen';
-    warningMessage =
-      '⚠️  Pipeline Warning: The Dragen pipeline has known issues aligning reads in the MUC1 VNTR region. For best results, consider using the offline VNtyper CLI in normal mode.';
+    warningMessage = t(
+      '⚠️  Pipeline Warning: The Dragen pipeline has known issues aligning reads in the MUC1 VNTR region. For best results, consider using the offline VNtyper CLI in normal mode.'
+    );
   } else if (lowerHeader.includes('clc') || lowerHeader.includes('clcbio')) {
     pipeline = 'CLC';
-    warningMessage =
-      '⚠️  Pipeline Warning: The CLC pipeline has not been fully tested and may have issues aligning reads in the MUC1 VNTR region. Please verify results carefully or use the offline VNtyper CLI.';
+    warningMessage = t(
+      '⚠️  Pipeline Warning: The CLC pipeline has not been fully tested and may have issues aligning reads in the MUC1 VNTR region. Please verify results carefully or use the offline VNtyper CLI.'
+    );
   } else if (lowerHeader.includes('bwa')) {
     pipeline = 'BWA';
   }
@@ -943,7 +946,7 @@ export async function extractRegionAndIndex(CLI, pair, explicitRegion = null) {
   // Input Validation
   if (!regionValue) {
     logMessage('No region selected.', 'error');
-    throw new Error('No region selected.');
+    throw new Error(t('No region selected.'));
   }
 
   // Ensure spin animation CSS is loaded
@@ -953,10 +956,7 @@ export async function extractRegionAndIndex(CLI, pair, explicitRegion = null) {
   // #extractBtn is a <button> in index.html; the finally block below re-enables it.
   const extractBtn = /** @type {HTMLButtonElement} */ (document.getElementById('extractBtn'));
   extractBtn.disabled = true;
-  extractBtn.innerHTML = createSpinnerHTML({
-    size: 16,
-    text: 'Processing...',
-  });
+  extractBtn.innerHTML = createSpinnerHTML({ size: 16, text: t('Processing...') });
   logMessage("Extract button disabled and text updated to 'Processing...'", 'info');
 
   let detectedAssembly;
@@ -972,7 +972,7 @@ export async function extractRegionAndIndex(CLI, pair, explicitRegion = null) {
       logMessage(`Mounted Paths: ${paths.join(', ')}`, 'info');
       const samPath = paths.find(p => p.endsWith(pair.sam.name));
       if (!samPath) {
-        throw new Error(`Failed to mount SAM file: ${pair.sam.name}`);
+        throw new Error(t('Failed to mount SAM file: {name}', { name: pair.sam.name }));
       }
       logMessage(`Processing SAM file: ${samPath}`, 'info');
       // Define output filenames
@@ -1238,7 +1238,7 @@ export async function extractRegionAndIndex(CLI, pair, explicitRegion = null) {
       const finalBamBlob = new Blob([finalBam], { type: 'application/octet-stream' });
       if (finalBamBlob.size === 0) {
         logMessage(`Failed to create Blob from BAM file ${finalBamPath}.`, 'error');
-        throw new Error(`Failed to create Blob from BAM file ${finalBamPath}.`);
+        throw new Error(t('Failed to create Blob from BAM file {file}.', { file: finalBamPath }));
       }
       const finalBamSizeMB = (finalBamBlob.size / 1024 / 1024).toFixed(2);
       logMessage(`Created Blob for final BAM: ${finalBamPath} (${finalBamSizeMB} MB)`, 'info');
@@ -1249,7 +1249,7 @@ export async function extractRegionAndIndex(CLI, pair, explicitRegion = null) {
       const finalBaiBlob = new Blob([finalBai], { type: 'application/octet-stream' });
       if (finalBaiBlob.size === 0) {
         logMessage(`Failed to create Blob from BAI file ${finalBaiPath}.`, 'error');
-        throw new Error(`Failed to create Blob from BAI file ${finalBaiPath}.`);
+        throw new Error(t('Failed to create Blob from BAI file {file}.', { file: finalBaiPath }));
       }
       const finalBaiSizeKB = (finalBaiBlob.size / 1024).toFixed(2);
       logMessage(`Created Blob for final BAI: ${finalBaiPath} (${finalBaiSizeKB} KB)`, 'info');
@@ -1282,14 +1282,14 @@ export async function extractRegionAndIndex(CLI, pair, explicitRegion = null) {
     logMessage(`Error during extraction and indexing: ${err.message}`, 'error');
     const errorDiv = document.getElementById('error');
     if (errorDiv) {
-      errorDiv.textContent = `Error: ${err.message}`;
+      errorDiv.textContent = t('Error: {message}', { message: err.message });
       errorDiv.classList.remove('hidden');
     }
     throw err;
   } finally {
     // Reset the button
     extractBtn.disabled = false;
-    extractBtn.textContent = 'Extract Region';
+    extractBtn.textContent = t('Extract Region');
     logMessage("Extract button re-enabled and text reset to 'Extract Region'.", 'info');
   }
 }

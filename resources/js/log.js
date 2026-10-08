@@ -1,6 +1,7 @@
 // frontend/resources/js/log.js
 
 import { safeStorage } from './utils/safeStorage.js';
+import { t } from './i18n.js';
 
 /**
  * Logging Module
@@ -69,7 +70,7 @@ export function downloadLogs(format = 'txt') {
   const logEntries = getAllLogEntries();
 
   if (logEntries.length === 0) {
-    alert('No logs to download');
+    alert(t('No logs to download'));
     return;
   }
 
@@ -82,7 +83,7 @@ export function downloadLogs(format = 'txt') {
  * Clears all log entries after user confirmation.
  */
 export function clearLogs() {
-  if (!confirm('Clear all logs?')) {
+  if (!confirm(t('Clear all logs?'))) {
     return;
   }
 

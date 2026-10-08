@@ -4,6 +4,7 @@ import { logMessage } from './log.js'; // Import the logMessage function
 
 import { safeStorage } from './utils/safeStorage.js';
 import { loadCdnAsset } from './utils/loadScript.js';
+import { t } from './i18n.js';
 
 const INTRO_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/intro.js/4.0.0';
 
@@ -48,6 +49,7 @@ async function startIntroTutorial() {
   logMessage('Starting Intro.js tutorial...', 'info');
 
   introJs()
+    .setOptions({ nextLabel: t('Next'), prevLabel: t('Back'), doneLabel: t('Done') })
     .start()
     .oncomplete(() => {
       safeStorage.setItem('tutorialCompleted', 'true');

@@ -1,6 +1,7 @@
 // frontend/resources/js/usageStats.js
 
 import { safeStorage } from './utils/safeStorage.js';
+import { t } from './i18n.js';
 
 /**
  * Fetches usage statistics from the server.
@@ -9,7 +10,9 @@ import { safeStorage } from './utils/safeStorage.js';
 async function fetchUsageStatistics() {
   const response = await fetch(`${window.CONFIG.API_URL}/usage-statistics/`);
   if (!response.ok) {
-    throw new Error(`Failed to fetch usage statistics: ${response.statusText}`);
+    throw new Error(
+      t('Failed to fetch usage statistics: {status}', { status: response.statusText })
+    );
   }
   return response.json();
 }
@@ -34,7 +37,7 @@ function displayUsageStatistics(stats) {
   jobsNumber.textContent = String(stats.total_jobs ?? 0);
   const jobsLabel = document.createElement('div');
   jobsLabel.className = 'stats-kpi-label';
-  jobsLabel.textContent = 'Active Jobs';
+  jobsLabel.textContent = t('Active Jobs');
   jobsCard.appendChild(jobsNumber);
   jobsCard.appendChild(jobsLabel);
 
@@ -46,7 +49,7 @@ function displayUsageStatistics(stats) {
   usersNumber.textContent = String(stats.unique_users ?? 0);
   const usersLabel = document.createElement('div');
   usersLabel.className = 'stats-kpi-label';
-  usersLabel.textContent = 'Unique Users';
+  usersLabel.textContent = t('Unique Users');
   usersCard.appendChild(usersNumber);
   usersCard.appendChild(usersLabel);
 
@@ -57,7 +60,7 @@ function displayUsageStatistics(stats) {
   // 2. Job Statuses Section
   const statusTitle = document.createElement('div');
   statusTitle.className = 'stats-section-title';
-  statusTitle.textContent = 'Active Window Statuses';
+  statusTitle.textContent = t('Active Window Statuses');
   usageStatsContent.appendChild(statusTitle);
 
   const pillsList = document.createElement('ul');
@@ -88,7 +91,7 @@ function displayUsageStatistics(stats) {
   } else {
     const emptyPill = document.createElement('li');
     emptyPill.className = 'stats-pill';
-    emptyPill.textContent = 'No active jobs in window';
+    emptyPill.textContent = t('No active jobs in window');
     pillsList.appendChild(emptyPill);
   }
   usageStatsContent.appendChild(pillsList);
@@ -100,11 +103,14 @@ function displayUsageStatistics(stats) {
 
     const cumTitle = document.createElement('div');
     cumTitle.className = 'stats-cumulative-title';
-    cumTitle.textContent = 'Cumulative Usage Tracking';
+    cumTitle.textContent = t('Cumulative Usage Tracking');
     cumBox.appendChild(cumTitle);
 
     const cumText = document.createElement('div');
-    cumText.textContent = `All-time jobs: ${stats.cumulative.total_jobs ?? 0} | All-time users: ${stats.cumulative.unique_users ?? 0}`;
+    cumText.textContent = t('All-time jobs: {jobs} | All-time users: {users}', {
+      jobs: stats.cumulative.total_jobs ?? 0,
+      users: stats.cumulative.unique_users ?? 0,
+    });
     cumBox.appendChild(cumText);
 
     if (stats.cumulative.since) {
@@ -114,7 +120,7 @@ function displayUsageStatistics(stats) {
         : sinceDate.toLocaleDateString();
       const cumMeta = document.createElement('div');
       cumMeta.className = 'stats-cumulative-meta';
-      cumMeta.textContent = `Cumulative tracking recorded since ${formattedDate}`;
+      cumMeta.textContent = t('Cumulative tracking recorded since {date}', { date: formattedDate });
       cumBox.appendChild(cumMeta);
     }
 
@@ -156,7 +162,7 @@ export function initializeUsageStats() {
         usageStatsContent.textContent = '';
         const errorP = document.createElement('p');
         errorP.style.color = 'red';
-        errorP.textContent = `Error: ${error.message}`;
+        errorP.textContent = t('Error: {message}', { message: error.message });
         usageStatsContent.appendChild(errorP);
       }
     }

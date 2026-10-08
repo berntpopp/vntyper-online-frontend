@@ -1,6 +1,7 @@
 // frontend/resources/js/pollingManager.js
 
 import { logMessage } from './log.js';
+import { t } from './i18n.js';
 
 /**
  * Manages polling operations with deduplication and proper cleanup
@@ -109,7 +110,7 @@ export class PollingManager {
         logMessage(`Polling ${id} exceeded max duration (${maxDuration}ms)`, 'warning');
         stop();
         // Terminal: the duration cap has been hit, nothing will retry.
-        notify(onError, 'onError', new Error('Polling duration exceeded'), {
+        notify(onError, 'onError', new Error(t('Polling duration exceeded')), {
           retries,
           maxRetries,
           willRetry: false,

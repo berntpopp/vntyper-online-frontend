@@ -1,6 +1,7 @@
 // frontend/resources/js/services/httpUtils.js
 
 import { logMessage } from '../log.js';
+import { t } from '../i18n.js';
 
 /**
  * Fetch with timeout using AbortController
@@ -45,7 +46,7 @@ export async function fetchWithTimeout(url, options = {}, timeout = 30000) {
   } catch (error) {
     // Distinguish between timeout abort and other errors
     if (error.name === 'AbortError') {
-      const timeoutError = new Error(`Request timeout after ${timeout}ms`);
+      const timeoutError = new Error(t('Request timeout after {timeout}ms', { timeout }));
       timeoutError.name = 'TimeoutError';
       throw timeoutError;
     }
@@ -81,7 +82,7 @@ export async function fetchWithTimeout(url, options = {}, timeout = 30000) {
  * // Result: Error("Request failed with status 500")
  */
 export async function parseErrorResponse(response) {
-  let errorMessage = `Request failed with status ${response.status}`;
+  let errorMessage = t('Request failed with status {status}', { status: response.status });
 
   try {
     // Attempt to parse JSON error response

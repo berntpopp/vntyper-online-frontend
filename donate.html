@@ -19,6 +19,16 @@
   <meta property="og:site_name" content="VNtyper Online">
 
   <link rel="canonical" href="https://vntyper.org/donate.html">
+  <!-- i18n:alternates -->
+  <link rel="alternate" hreflang="en" href="https://vntyper.org/donate.html">
+  <link rel="alternate" hreflang="de" href="https://vntyper.org/de/donate.html">
+  <link rel="alternate" hreflang="fr" href="https://vntyper.org/fr/donate.html">
+  <link rel="alternate" hreflang="it" href="https://vntyper.org/it/donate.html">
+  <link rel="alternate" hreflang="es" href="https://vntyper.org/es/donate.html">
+  <link rel="alternate" hreflang="nl" href="https://vntyper.org/nl/donate.html">
+  <link rel="alternate" hreflang="x-default" href="https://vntyper.org/donate.html">
+  <script src="resources/js/lang.js?v=0.72.0"></script>
+  <!-- /i18n:alternates -->
 
   <!-- Favicon Links -->
   <link rel="icon" type="image/png" href="resources/assets/favicon/favicon-48x48.png" sizes="48x48" />
@@ -170,6 +180,22 @@
           <span class="brand-title">vntyper-online</span>
         </a>
         <a href="./" class="back-link" aria-label="Back to Home">← Back to Home</a>
+        <!-- i18n:switcher -->
+        <details class="lang-switch" translate="no">
+          <summary aria-label="Language: English">
+            <span lang="en">EN</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <ul>
+            <li><a href="/donate.html" lang="en" hreflang="en" aria-current="true">English</a></li>
+            <li><a href="/de/donate.html" lang="de" hreflang="de">Deutsch</a></li>
+            <li><a href="/fr/donate.html" lang="fr" hreflang="fr">Français</a></li>
+            <li><a href="/it/donate.html" lang="it" hreflang="it">Italiano</a></li>
+            <li><a href="/es/donate.html" lang="es" hreflang="es">Español</a></li>
+            <li><a href="/nl/donate.html" lang="nl" hreflang="nl">Nederlands</a></li>
+          </ul>
+        </details>
+        <!-- /i18n:switcher -->
       </div>
     </nav>
 
@@ -314,14 +340,14 @@
 
             <div>
               <label for="hpoInput" style="display: block; font-weight: 500; margin-bottom: 4px;">Phenotype (HPO Terms)</label>
-              <input type="text" id="hpoInput" placeholder="e.g. HP:0000112, HP:0000083" class="form-input" style="width: 100%;">
+              <input type="text" id="hpoInput" placeholder="e.g. HP:0000124, HP:0000083" class="form-input" style="width: 100%;">
               <small style="color: #64748b;">Click tags below to toggle common terms:</small>
               <div class="hpo-tag-cloud" id="hpoTags">
-                <span class="hpo-tag" data-hpo="HP:0000112">HP:0000112 (Renal tubular dysfunction)</span>
+                <span class="hpo-tag" data-hpo="HP:0000124">HP:0000124 (Renal tubular dysfunction)</span>
                 <span class="hpo-tag" data-hpo="HP:0000083">HP:0000083 (Renal insufficiency)</span>
-                <span class="hpo-tag" data-hpo="HP:0000100">HP:0000100 (Nephronophthisis)</span>
-                <span class="hpo-tag" data-hpo="HP:0001427">HP:0001427 (Hyperuricemia)</span>
-                <span class="hpo-tag" data-hpo="HP:0000077">HP:0000077 (Abnormal renal morphology)</span>
+                <span class="hpo-tag" data-hpo="HP:0000090">HP:0000090 (Nephronophthisis)</span>
+                <span class="hpo-tag" data-hpo="HP:0002149">HP:0002149 (Hyperuricemia)</span>
+                <span class="hpo-tag" data-hpo="HP:0012210">HP:0012210 (Abnormal renal morphology)</span>
               </div>
             </div>
           </fieldset>

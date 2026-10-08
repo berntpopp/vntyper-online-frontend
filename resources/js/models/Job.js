@@ -1,5 +1,7 @@
 // frontend/resources/js/models/Job.js
 
+import { t } from '../i18n.js';
+
 /**
  * Job Model
  *
@@ -82,13 +84,13 @@ export class Job {
    */
   validateJobId(jobId) {
     if (!jobId || typeof jobId !== 'string') {
-      throw new Error('Job ID must be a non-empty string');
+      throw new Error(t('Job ID must be a non-empty string'));
     }
 
     // UUID v4 format validation (optional - depends on backend format)
     const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     if (!uuidPattern.test(jobId)) {
-      throw new Error(`Invalid job ID format: ${jobId}`);
+      throw new Error(t('Invalid job ID format: {id}', { id: jobId }));
     }
   }
 
@@ -99,7 +101,7 @@ export class Job {
    */
   updateStatus(status) {
     if (!Object.values(Job.STATUS).includes(status)) {
-      throw new Error(`Invalid job status: ${status}`);
+      throw new Error(t('Invalid job status: {status}', { status }));
     }
 
     return new Job({

@@ -1,0 +1,796 @@
+<!DOCTYPE html><html lang="es"><head>
+  <meta charset="UTF-8">
+  <title>Genotipado de MUC1 en línea | VNtyper: cribado de ADTKD-MUC1</title>
+  <!-- Viewport Meta Tag -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Meta Description & Keywords -->
+  <meta name="description" content="Genotipado del VNTR de MUC1 en el navegador con VNtyper 2 (BAM/SAM de lecturas cortas). Para investigación; puede utilizarse para el cribado en el diagnóstico de MUC1.">
+  <meta name="keywords" content="genotipado de MUC1, genotipado del VNTR de MUC1, cribado de MUC1, diagnóstico de MUC1, prueba de MUC1, solo para uso en investigación, MUC1, VNTR, ADTKD, ADTKD-MUC1, VNtyper, VNtyper 2, número variable de repeticiones en tándem, secuenciación de lecturas cortas, Illumina, BAM, BAI, enfermedad quística medular renal, nefropatía tubulointersticial, genética, bioinformática, genómica">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://vntyper.org/es/">
+  <meta property="og:title" content="VNtyper Online - Genotipado del VNTR de MUC1 para el cribado de ADTKD">
+  <meta property="og:description" content="Herramienta en línea gratuita para el genotipado del VNTR de MUC1 a partir de archivos BAM. Cribado de mutaciones de ADTKD-MUC1 con VNtyper 2 en su navegador.">
+  <meta property="og:image" content="https://vntyper.org/resources/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="VNtyper Online">
+
+  <!-- Twitter Card (no account needed — controls link previews when others share) -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="VNtyper Online - Genotipado del VNTR de MUC1 para el cribado de ADTKD">
+  <meta name="twitter:description" content="Herramienta en línea gratuita para el genotipado del VNTR de MUC1 a partir de archivos BAM. Cribado de mutaciones de ADTKD-MUC1 con VNtyper 2.">
+  <meta name="twitter:image" content="https://vntyper.org/resources/assets/og-image.png">
+
+  <!-- Canonical Link -->
+  <link rel="canonical" href="https://vntyper.org/es/">
+  <!-- i18n:alternates -->
+  <link rel="alternate" hreflang="en" href="https://vntyper.org/">
+  <link rel="alternate" hreflang="de" href="https://vntyper.org/de/">
+  <link rel="alternate" hreflang="fr" href="https://vntyper.org/fr/">
+  <link rel="alternate" hreflang="it" href="https://vntyper.org/it/">
+  <link rel="alternate" hreflang="es" href="https://vntyper.org/es/">
+  <link rel="alternate" hreflang="nl" href="https://vntyper.org/nl/">
+  <link rel="alternate" hreflang="x-default" href="https://vntyper.org/">
+  <script src="/resources/js/lang.js?v=0.72.0"></script>
+  <script src="/es/strings.js?v=0.72.0" defer=""></script>
+<!-- /i18n:alternates -->
+
+  <!-- Favicon Links -->
+  <link rel="icon" type="image/png" href="/resources/assets/favicon/favicon-48x48.png" sizes="48x48">
+  <link rel="icon" type="image/svg+xml" href="/resources/assets/favicon/favicon.svg">
+  <link rel="shortcut icon" href="/resources/assets/favicon/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/resources/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/resources/assets/favicon/site.webmanifest">
+
+  <!-- Preconnect to the WebAssembly CDN (Aioli is loaded on first extraction) -->
+  <link rel="preconnect" href="https://biowasm.com" crossorigin="">
+
+  <!-- Link to CSS Files -->
+  <link rel="stylesheet" href="/resources/css/base.css">
+  <link rel="stylesheet" href="/resources/css/navbar.css">
+  <link rel="stylesheet" href="/resources/css/drag-drop.css">
+  <link rel="stylesheet" href="/resources/css/forms.css">
+  <link rel="stylesheet" href="/resources/css/buttons.css">
+  <link rel="stylesheet" href="/resources/css/ui-components.css">
+  <link rel="stylesheet" href="/resources/css/output.css">
+  <link rel="stylesheet" href="/resources/css/modal.css">
+  <link rel="stylesheet" href="/resources/css/faq.css">
+  <link rel="stylesheet" href="/resources/css/citations.css">
+  <link rel="stylesheet" href="/resources/css/footer.css">
+  <link rel="stylesheet" href="/resources/css/log.css">
+  <link rel="stylesheet" href="/resources/css/usageStats.css">
+  
+  <!-- intro.js and Aioli are loaded on demand: see tutorial.js and ExtractionController.js -->
+  
+  <!-- Decides before first paint whether the disclaimer shows -->
+  <script src="/resources/js/disclaimerGate.js?v=0.72.0"></script>
+
+  <!-- Link to Config JS -->
+  <script src="/resources/js/config.js?v=0.72.0" defer=""></script>
+  
+  <!-- Link to JavaScript Modules -->
+  <script type="module" src="/resources/js/inputWrangling.js?v=0.72.0" defer=""></script>
+  <script type="module" src="/resources/js/regionsConfig.js?v=0.72.0" defer=""></script>
+  <script type="module" src="/resources/js/assemblyConfigs.js?v=0.72.0" defer=""></script>
+  <!-- bamProcessing.js is lazy-loaded in ExtractionController when needed -->
+  <script type="module" src="/resources/js/apiInteractions.js?v=0.72.0" defer=""></script>
+  <script type="module" src="/resources/js/inputValidation.js?v=0.72.0" defer=""></script>
+  <script type="module" src="/resources/js/main.js?v=0.72.0" defer=""></script>
+  <script type="module" src="/resources/js/mobileNav.js?v=0.72.0" defer=""></script>
+  <script type="module" src="/resources/js/populateRegions.js?v=0.72.0" defer=""></script>
+  <script type="module" src="/resources/js/uiUtils.js?v=0.72.0" defer=""></script>
+  <script type="module" src="/resources/js/usageStats.js?v=0.72.0" defer=""></script>
+
+  <!-- Version and Current Year Script -->
+  <script type="module" src="/resources/js/version.js?v=0.72.0" defer=""></script>
+  
+  <!-- Schema.org JSON-LD: WebSite -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "VNtyper Online",
+  "alternateName": [
+    "vntyper-online",
+    "VNtyper 2"
+  ],
+  "url": "https://vntyper.org/",
+  "description": "Genotipado gratuito del VNTR de MUC1 en el navegador (VNtyper 2) para el cribado de ADTKD-MUC1. Para investigación; puede utilizarse en el diagnóstico y la prueba de MUC1.",
+  "inLanguage": "es"
+}
+</script>
+
+  <!-- Schema.org JSON-LD: SoftwareApplication -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "VNtyper Online",
+  "alternateName": [
+    "VNtyper 2",
+    "VNtyper2",
+    "vntyper-online"
+  ],
+  "applicationCategory": "HealthApplication",
+  "applicationSubCategory": "Genetic Analysis Tool",
+  "operatingSystem": "Web Browser",
+  "url": "https://vntyper.org/",
+  "description": "Herramienta en línea de genotipado del VNTR de MUC1 para el cribado de la nefropatía tubulointersticial autosómica dominante (ADTKD-MUC1) a partir de archivos BAM con VNtyper 2. Solo para uso en investigación; puede utilizarse como paso de cribado computacional dentro de los flujos de trabajo de diagnóstico de MUC1 y de prueba de MUC1.",
+  "keywords": "MUC1, VNTR, ADTKD, ADTKD-MUC1, VNtyper, número variable de repeticiones en tándem, BAM, bioinformática, genómica, genotipado de MUC1, genotipado del VNTR de MUC1, cribado de MUC1, diagnóstico de MUC1, prueba de MUC1, solo para uso en investigación",
+  "featureList": [
+    "Recorte de BAM en el navegador, en el lado del cliente, que preserva la privacidad de los datos genómicos",
+    "Genotipado del VNTR con y sin alineamiento mediante VNtyper 2",
+    "Detección automatizada de la variante patogénica insC (inserción de +1 pb con desplazamiento del marco de lectura) en el VNTR de MUC1",
+    "Compatibilidad con los ensamblajes de referencia humanos GRCh37/hg19 y GRCh38/hg38",
+    "Anclaje criptográfico de la integridad de los informes"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Bernt Popp",
+      "url": "https://berntpopp.com",
+      "sameAs": [
+        "https://github.com/berntpopp",
+        "https://orcid.org/0000-0002-3679-1081"
+      ]
+    },
+    {
+      "@type": "Person",
+      "name": "Hassan Saei",
+      "url": "https://github.com/hassansaei",
+      "sameAs": [
+        "https://github.com/hassansaei"
+      ]
+    }
+  ],
+  "citation": [
+    {
+      "@type": "ScholarlyArticle",
+      "name": "VNtyper 2 enables open-access short-read genotyping of MUC1 VNTR variants in ADTKD at high-speed",
+      "url": "https://doi.org/10.64898/2026.05.27.26352937",
+      "datePublished": "2026",
+      "isPartOf": {
+        "@type": "Periodical",
+        "name": "medRxiv"
+      }
+    },
+    {
+      "@type": "ScholarlyArticle",
+      "name": "VNtyper enables accurate alignment-free genotyping of MUC1 coding VNTR using short-read sequencing data in autosomal dominant tubulointerstitial kidney disease",
+      "url": "https://doi.org/10.1016/j.isci.2023.107171",
+      "datePublished": "2023-06-17",
+      "isPartOf": {
+        "@type": "Periodical",
+        "name": "iScience"
+      }
+    }
+  ],
+  "inLanguage": "es"
+}
+</script>
+
+  <!-- Schema.org JSON-LD: MedicalCondition -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MedicalCondition",
+  "name": "Autosomal Dominant Tubulointerstitial Kidney Disease caused by MUC1 mutations",
+  "alternateName": [
+    "ADTKD-MUC1",
+    "Medullary Cystic Kidney Disease Type 1",
+    "MCKD1"
+  ],
+  "code": [
+    {
+      "@type": "MedicalCode",
+      "code": "174000",
+      "codingSystem": "OMIM"
+    },
+    {
+      "@type": "MedicalCode",
+      "code": "D007674",
+      "codingSystem": "MeSH"
+    }
+  ],
+  "associatedAnatomy": {
+    "@type": "AnatomicalStructure",
+    "name": "Kidney Tubules"
+  },
+  "possibleTreatment": [],
+  "signOrSymptom": [
+    {
+      "@type": "MedicalSignOrSymptom",
+      "name": "Progressive chronic kidney disease"
+    },
+    {
+      "@type": "MedicalSignOrSymptom",
+      "name": "Hyperuricemia and gout"
+    }
+  ],
+  "inLanguage": "es"
+}
+</script>
+
+  <!-- Schema.org JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Qué es vntyper-online?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "vntyper-online ofrece la detección en línea de mutaciones en el VNTR de MUC1 basada en el algoritmo VNtyper 2. La extracción de las lecturas de la región diana se ejecuta directamente en su navegador mediante WebAssembly (samtools), de modo que solo se envía al servidor un pequeño subconjunto de lecturas relevantes para la identificación de variantes. Sus archivos brutos de secuenciación genómica nunca salen de su ordenador."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cómo preparo y cargo mis datos de secuenciación?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Puede cargar archivos BAM, BAI, CRAM, CRAI o SAM mediante la sección de selección de archivos de la página de inicio. Archivos BAM / CRAM: asegúrese de que cada archivo de alineamiento vaya acompañado de su índice (p. ej., sample.bam y sample.bam.bai o sample.bai). Exportación SAM desde IGV: abra su alineamiento en IGV, escriba muc1 en la barra de búsqueda, haga clic con el botón derecho en la pista de alineamiento y seleccione Export Alignments. Guarde el archivo SAM resultante y cárguelo directamente."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Están mis datos seguros y se mantienen privados?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "vntyper-online aplica rigurosas buenas prácticas de minimización de datos y de seguridad en el transporte. Los datos genómicos brutos permanecen en su equipo; solo las lecturas de la región diana se envían al backend. Los datos de lecturas cargados se eliminan inmediatamente al finalizar el genotipado. Los archivos de resultados se conservan durante 3 días para que el usuario pueda recuperarlos, tras lo cual se eliminan de forma permanente."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué ensamblajes de referencia y regiones genómicas son compatibles?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "vntyper-online es compatible con los dos principales genomas humanos de referencia: GRCh38 / hg38 (chr1:155,185,824-155,192,915) y GRCh37 / hg19 (chr1:155,158,000-155,163,000). El ensamblaje puede seleccionarse manualmente o detectarse automáticamente a partir de los metadatos de la cabecera del BAM/CRAM."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cómo puedo seguir el progreso del trabajo y descargar los resultados?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tras el envío del trabajo, el progreso se muestra en tiempo real en la sección de resultados mediante consultas periódicas. Una vez finalizado el análisis, puede revisar las métricas de las variantes directamente en pantalla o exportar los resultados como paquetes JSON y TSV."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Dónde puedo encontrar recomendaciones clínicas de cribado y de consenso para la ADTKD-MUC1?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Consulte nuestra página de referencia «Cribado y guías de ADTKD-MUC1» (https://vntyper.org/adtkd_diagnostics.html), que recoge las recomendaciones de consenso de la red europea ADTKD-Net, el árbol de decisión, los criterios de los niveles de interpretación (alta precisión, incierto, negativo) y los laboratorios internacionales de referencia acreditados."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puede utilizarse vntyper-online en el diagnóstico de MUC1?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "vntyper-online es solo para uso en investigación y no es un producto para diagnóstico in vitro (IVD). Puede utilizarse como paso de cribado computacional dentro de los flujos de trabajo de diagnóstico de MUC1 y de prueba de MUC1 para la ADTKD-MUC1, por ejemplo para priorizar muestras a partir de datos de exoma o genoma. Los hallazgos deben confirmarse con un método ortogonal acreditado (como la minisecuenciación SNaPshot o la secuenciación de lecturas largas) antes de cualquier uso clínico."
+      }
+    }
+  ],
+  "inLanguage": "es"
+}
+</script>
+
+</head>
+<body>
+  <!-- Skip to main content link for keyboard accessibility -->
+  <a href="#main-content" class="skip-to-main">Saltar al contenido principal</a>
+
+  <div class="container" id="home">
+    <!-- Navigation Bar -->
+    <nav class="navbar" aria-label="Navegación principal">
+      <div class="navbar-container">
+        <div class="header" id="resetHeader" role="button" tabindex="0" aria-label="vntyper-online - Restablecer página">
+          <img src="/resources/assets/logo/vntyperonline_logo_80px.webp" srcset="/resources/assets/logo/vntyperonline_logo_80px.webp 1x, /resources/assets/logo/vntyperonline_logo_160px.webp 2x" alt="" class="logo" width="80" height="80">
+          <span class="brand-title">vntyper-online</span>
+        </div>
+
+        <!-- Hamburger Menu Button -->
+        <button class="navbar-toggle" aria-label="Mostrar u ocultar el menú de navegación" aria-expanded="false" aria-controls="navbar-menu">
+          <svg class="hamburger-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          <span class="sr-only">Menú</span>
+        </button>
+
+        <!-- Navigation Links Container -->
+        <ul class="navbar-menu" id="navbar-menu" role="list">
+          <li><a href="#" class="navbar-link" data-modal="faqModal" data-tooltip="Ver las preguntas frecuentes">FAQ</a></li>
+          <li><a href="/es/adtkd_diagnostics.html" class="navbar-link" data-tooltip="Cribado de ADTKD y guías de consenso">ADTKD</a></li>
+          <li><a href="#" id="startTutorialBtn" class="navbar-link" data-tooltip="Iniciar el tutorial interactivo">Tutorial</a></li>
+          <li><a href="/api/docs" id="apiDocsLink" class="navbar-link" target="_blank" rel="noopener noreferrer" aria-label="Documentación de OpenAPI" data-tooltip="Ver la documentación de la API">API</a></li>
+          
+          <!-- Server Load Indicator -->
+          <li id="serverLoadIndicator" class="server-load-indicator">
+            <a href="#" class="navbar-link" data-tooltip="Muestra el número de trabajos actualmente en cola">
+              <span id="serverLoadText">Trabajos:</span>
+              <span id="totalJobsInQueue" class="load-count">0</span>
+            </a>
+          </li>
+
+          <!-- Disclaimer Indicator -->
+          <li id="disclaimerIndicator">
+            <a href="#" id="disclaimerLink" class="navbar-link" aria-label="Descargo de responsabilidad - Ver el estado del descargo" data-tooltip="Comprobar el estado del descargo de responsabilidad">
+              <span id="disclaimerStatusIcon" class="status-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span id="disclaimerStatusText" class="status-text">Descargo</span>
+            </a>
+          </li>
+
+          <li>
+        <!-- i18n:switcher -->
+        <details class="lang-switch" translate="no">
+          <summary aria-label="Language: Español">
+            <span lang="es">ES</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <ul>
+            <li><a href="/" lang="en" hreflang="en">English</a></li>
+            <li><a href="/de/" lang="de" hreflang="de">Deutsch</a></li>
+            <li><a href="/fr/" lang="fr" hreflang="fr">Français</a></li>
+            <li><a href="/it/" lang="it" hreflang="it">Italiano</a></li>
+            <li><a href="/es/" lang="es" hreflang="es" aria-current="true">Español</a></li>
+            <li><a href="/nl/" lang="nl" hreflang="nl">Nederlands</a></li>
+          </ul>
+        </details>
+<!-- /i18n:switcher -->
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Main Content Area - Skip link target -->
+    <main id="main-content" tabindex="-1">
+
+    <!-- Hero Section with H1 -->
+    <section class="hero-section">
+      <h1>Genotipado VNTR MUC1 para el cribado de ADTKD</h1>
+      <p>Cribado de archivos BAM para mutaciones del VNTR de MUC1 con VNtyper 2. Análisis rápido y seguro en el navegador para la nefropatía tubulointersticial autosómica dominante (ADTKD-MUC1).</p>
+    </section>
+
+    <!-- Upload Form - Contains all job submission inputs -->
+    <form id="uploadForm" action="#" method="post" autocomplete="on">
+
+    <!-- Drag & Drop File Input Container -->
+    <div class="drag-drop-container" data-intro="Cargue aquí sus archivos BAM, BAI o SAM. Cada archivo BAM debe tener su archivo BAI correspondiente; los archivos SAM se convierten automáticamente." data-step="1">
+      <!-- RESET BUTTON -->
+      <button type="button" id="resetFileSelectionBtn" class="reset-file-selection-button" aria-label="Restablecer la selección de archivos" data-tooltip="Restablecer archivos">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+      </button>
+
+      <label class="drag-drop-label" for="bamFiles">Cargar archivos de secuenciación:</label>
+      
+      <div id="dropArea" class="drag-drop-area" tabindex="0" role="button" data-tooltip="Haga clic o arrastre y suelte aquí sus archivos BAM, BAI o SAM">
+        <p>Arrastre archivos BAM, BAI o SAM o haga clic para seleccionar varios.</p>
+        <input type="file" id="bamFiles" accept=".bam,.bai,.sam" multiple="" class="drag-drop-input" aria-describedby="fileList">
+        <!-- Container to display selected files -->
+        <div id="fileList" class="file-list" aria-live="polite">
+          <p>No se ha seleccionado ningún archivo.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Region Select Dropdown -->
+    <div class="region-select" data-intro="Seleccione el ensamblaje de referencia utilizado en su alineamiento. La región se seleccionará en consecuencia. Si no se selecciona ninguna región, por defecto el ensamblaje se deduce de los datos proporcionados." data-step="2">
+      <label for="region">Seleccionar referencia:</label>
+      <select id="region" class="form-select" data-tooltip="Elija el ensamblaje de referencia utilizado para el alineamiento. Si no está seguro, seleccione «Detectar ensamblaje»." aria-label="Seleccionar el ensamblaje de referencia">
+        <option value="guess" selected="">Detectar ensamblaje</option>
+        <!-- Options will be populated dynamically -->
+      </select>
+    </div>
+
+    <!-- Button Group: Submit, Extract, Show Options -->
+    <div class="button-group" data-intro="Envíe sus trabajos, extraiga regiones o aporte datos opcionales adicionales." data-step="3">
+      <button type="button" id="submitBtn" class="submit-button button" data-tooltip="Haga clic aquí para enviar sus trabajos a análisis." aria-label="Enviar trabajos">Enviar trabajos</button>
+      <button type="button" id="extractBtn" class="extract-button button" data-tooltip="Opcional: extraiga las regiones de MUC1 de los BAM en su navegador y guárdelas localmente." aria-label="Extraer región">Extraer región</button>
+      <button type="button" id="toggleOptionalInputs" class="toggle-button button" aria-expanded="false" aria-controls="additionalInputs" data-tooltip="Mostrar opciones adicionales para el envío de trabajos." aria-label="Mostrar opciones">Mostrar opciones</button>
+    </div>
+
+    <!-- Optional Inputs: Hidden by Default -->
+    <div id="additionalInputs" class="additional-inputs hidden" role="region" aria-label="Opciones de envío de trabajos">
+      <!-- Section 1: Notifications & Cohort Management -->
+      <div class="options-section">
+        <h2 class="options-group-title">Notificaciones y gestión de cohortes</h2>
+        <div class="options-fields-grid">
+          <div class="form-field">
+            <label for="email" class="form-field-label">Correo electrónico (opcional):</label>
+            <input type="email" id="email" name="email" class="form-input" placeholder="your.email@example.com" aria-label="Correo electrónico para notificaciones" aria-describedby="emailHint">
+            <span id="emailHint" class="input-hint">Reciba una notificación cuando finalice su trabajo.</span>
+          </div>
+
+          <div class="form-field">
+            <label for="cohortAlias" class="form-field-label">Alias de cohorte (opcional):</label>
+            <input type="text" id="cohortAlias" name="cohortAlias" class="form-input" placeholder="Mi cohorte" aria-label="Alias de cohorte" aria-describedby="cohortAliasHint">
+            <span id="cohortAliasHint" class="input-hint">Agrupe varias muestras bajo un mismo nombre de cohorte.</span>
+          </div>
+
+          <div class="form-field">
+            <label for="passphrase" class="form-field-label">Frase de contraseña (opcional):</label>
+            <input type="password" id="passphrase" name="passphrase" class="form-input" placeholder="Contraseña" autocomplete="new-password" aria-label="Frase de contraseña para crear la cohorte" aria-describedby="passphraseHint">
+            <span id="passphraseHint" class="input-hint">Proteja su cohorte con una frase de contraseña para poder volver a acceder a ella.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="options-divider" role="separator"></div>
+
+      <!-- Section 2: Advanced Analysis Modes -->
+      <div class="options-section">
+        <h2 class="options-group-title">Modos de análisis avanzados</h2>
+        <div class="options-analysis-list">
+          <!-- adVNTR Mode Card -->
+          <div class="option-item" id="advntrCard">
+            <div class="option-item-header">
+              <label class="option-item-label" for="advntrMode">
+                <input type="checkbox" id="advntrMode" name="advntr_mode" class="option-checkbox" aria-label="Activar el análisis con adVNTR (algoritmo secundario)" aria-describedby="advntrDesc">
+                <span class="option-title">Modo adVNTR (algoritmo secundario)</span>
+              </label>
+              <span class="badge-accent hidden" id="advntrEnforcedBadge">Impuesto por el servidor</span>
+            </div>
+            <p class="help-text" id="advntrDesc">Ejecuta un análisis independiente con el algoritmo adVNTR. Proporciona una validación adicional.</p>
+          </div>
+
+          <!-- Normal Mode Card -->
+          <div class="option-item" id="normalModeCard">
+            <div class="option-item-header">
+              <label class="option-item-label" for="normalMode">
+                <input type="checkbox" id="normalMode" name="normal_mode" class="option-checkbox" aria-label="Activar el modo normal (incluir lecturas no mapeadas)" aria-describedby="normalModeDesc">
+                <span class="option-title">Modo normal (incluir lecturas no mapeadas)</span>
+              </label>
+              <span class="badge-accent hidden" id="normalModeEnforcedBadge">Impuesto por el servidor</span>
+            </div>
+            <p class="help-text" id="normalModeDesc">Incluye todas las lecturas no mapeadas para un análisis exhaustivo. Tarda más y carga un archivo de mayor tamaño.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    </form>
+    <!-- End Upload Form -->
+
+    <!-- Output and Error Containers -->
+    <div id="output" data-intro="Aquí verá el estado y los resultados de sus trabajos." data-step="6">
+      <!-- Placeholder Message -->
+      <div id="placeholderMessage" class="placeholder-message">Sus resultados aparecerán aquí tras el envío del trabajo.</div>
+
+      <!-- Message Display -->
+      <div id="message" class="message hidden"></div>
+
+      <!-- Spinner and Countdown -->
+      <div id="spinner" class="spinner hidden" aria-label="Cargando" role="status"></div>
+      <div id="countdown" class="countdown"></div>
+
+      <!-- Job Information and Status -->
+      <div id="jobOutput">
+        <!-- Job outputs will be dynamically injected here -->
+      </div>
+      
+      <!-- Cohorts and Jobs Display -->
+      <div id="cohortsContainer" class="cohorts-container">
+        <!-- Cohort sections will be dynamically injected here -->
+      </div>
+
+      <!-- Region Extraction Output -->
+      <div id="regionOutput" class="region-output"></div>
+    </div>
+    <div id="error" class="error d-none hidden" role="alert" aria-atomic="true"></div>
+  </main></div>
+
+  <!-- Citations Section -->
+  <section id="citations" class="citations-section" aria-labelledby="citations-heading">
+    <h2 id="citations-heading" class="citations-heading">Cómo citar VNtyper Online</h2>
+    <div class="citations-container">
+
+      <!-- New preprint announcement / call-to-action -->
+      <div class="preprint-callout">
+        <span class="preprint-badge">Nuevo preprint</span>
+        <p><strong>Lea nuestro preprint.</strong> Los métodos, la validación y las pruebas comparativas en que se basan VNtyper&nbsp;2 y VNtyper&nbsp;Online se describen ahora en detalle en medRxiv. <a href="https://www.medrxiv.org/content/10.64898/2026.05.27.26352937v1" target="_blank" rel="noopener noreferrer">Leer el preprint →</a></p>
+      </div>
+
+      <!-- Primary citation: VNtyper 2 / VNtyper Online preprint -->
+      <div class="citation-item">
+        <p><strong>Cite, por favor:</strong> Popp B, Saei H, Teltsh O, et al. VNtyper&nbsp;2 enables open-access short-read genotyping of MUC1 VNTR variants in ADTKD at high-speed. <strong>medRxiv</strong>. 2026. doi: <a href="https://doi.org/10.64898/2026.05.27.26352937" target="_blank" rel="noopener noreferrer">10.64898/2026.05.27.26352937</a>. <em>(Preprint)</em></p>
+      </div>
+
+      <!-- Foundational method citation: original VNtyper (iScience 2023) -->
+      <div class="citation-item">
+        <p><strong>Método original:</strong> Saei H, et al. VNtyper enables accurate alignment-free genotyping of MUC1 coding VNTR using short-read sequencing data in autosomal dominant tubulointerstitial kidney disease. <strong>iScience</strong>. 2023 Jun 17;26(7):107171. doi: <a href="https://doi.org/10.1016/j.isci.2023.107171" target="_blank" rel="noopener noreferrer">10.1016/j.isci.2023.107171</a>. PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/37456840/" target="_blank" rel="noopener noreferrer">37456840</a>; PMCID: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10338300/" target="_blank" rel="noopener noreferrer">PMC10338300</a>.</p>
+      </div>
+
+    </div>
+  </section>
+
+  
+  <!-- End Main Content -->
+
+  <!-- Footer Section -->
+  <footer class="footer">
+    <hr class="footer-separator">
+
+    <div class="footer-content">
+      <!-- Institution logos: static so nothing below them moves after load -->
+      <div class="institution-logos" id="institutionLogos">
+        <a href="https://www.institutimagine.org/en" target="_blank" rel="noopener noreferrer">
+          <img src="/resources/assets/logos/II_60px.webp" alt="Institut Imagine Paris" class="institution-logo" width="128" height="60" loading="lazy">
+          <span class="sr-only">Visitar Institut Imagine</span>
+        </a>
+        <a href="https://u-paris.fr/" target="_blank" rel="noopener noreferrer">
+          <img src="/resources/assets/logos/UPC_60px.webp" alt="Université Paris Cité" class="institution-logo" width="157" height="60" loading="lazy">
+          <span class="sr-only">Visitar Université Paris Cité</span>
+        </a>
+        <a href="https://www.bihealth.org/en/" target="_blank" rel="noopener noreferrer">
+          <img src="/resources/assets/logos/BIH_60px.webp" alt="Berlin Institute of Health at Charité (BIH)" class="institution-logo" width="136" height="60" loading="lazy">
+          <span class="sr-only">Visitar Berlin Institute of Health at Charité (BIH)</span>
+        </a>
+        <a href="https://www.laborberlin.com/en/" target="_blank" rel="noopener noreferrer">
+          <img src="/resources/assets/logos/LB_60px.webp" alt="Labor Berlin" class="institution-logo" width="234" height="60" loading="lazy">
+          <span class="sr-only">Visitar Labor Berlin</span>
+        </a>
+        <a href="https://nephrologie-intensivmedizin.charite.de/en/fuer_patienten/cerkid/" target="_blank" rel="noopener noreferrer">
+          <img src="/resources/assets/logos/CeRKiD_60px.webp" alt="CeRKiD" class="institution-logo" width="81" height="60" loading="lazy">
+          <span class="sr-only">Visitar CeRKiD</span>
+        </a>
+        <a href="https://www.gesundheitsforschung-bmbf.de/de/adtkd-net-netzwerk-fur-autosomal-dominante-tubulointerstitielle-nierenerkrankung-17889.php" target="_blank" rel="noopener noreferrer">
+          <img src="/resources/assets/logos/ADTKD-Net_horizontal_60px.webp" alt="ADTKD-Net" class="institution-logo" width="239" height="60" loading="lazy">
+          <span class="sr-only">Visitar ADTKD-Net</span>
+        </a>
+        <a href="https://www.adtkd.de" target="_blank" rel="noopener noreferrer">
+          <img src="/resources/assets/logos/adtkd_de_60px.webp" alt="ADTKD.de" class="institution-logo" width="124" height="60" loading="lazy">
+          <span class="sr-only">Visitar ADTKD.de</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- About Section - Keyword-rich crawlable content -->
+    <section id="about" class="about-section" aria-labelledby="aboutHeading">
+      <div class="about-container">
+        <h2 id="aboutHeading">Acerca de VNtyper Online</h2>
+        <p class="about-lead"><strong>VNtyper Online</strong> es una herramienta gratuita basada en el navegador para el <strong>genotipado del VNTR de MUC1</strong> mediante el algoritmo <strong>VNtyper 2</strong>. Permite un cribado rápido de mutaciones en el número variable de repeticiones en tándem (VNTR) codificante de MUC1, la causa más frecuente de la <strong>nefropatía tubulointersticial autosómica dominante (ADTKD-MUC1)</strong>, también conocida como <strong>enfermedad quística medular renal (MCKD)</strong>.</p>
+        <div class="about-grid">
+          <div class="about-card">
+            <h3>Cómo funciona</h3>
+            <p>Cargue sus archivos de secuenciación BAM/BAI. Solo la región de MUC1 se extrae localmente en su navegador mediante BioWasm, lo que garantiza la privacidad genómica. A continuación, VNtyper 2 analiza en el servidor las lecturas extraídas para detectar la mutación prototípica de inserción de una citosina (insC) y otras alteraciones del VNTR.</p>
+          </div>
+          <div class="about-card">
+            <h3>¿A quién va dirigido?</h3>
+            <p>VNtyper Online está dirigido a genetistas, nefrólogos e investigadores que estudian la <strong>ADTKD</strong>, la <strong>ADTKD-MUC1</strong>, la enfermedad renal crónica de etiología desconocida y las nefropatías familiares. Democratiza el acceso al <strong>genotipado de MUC1</strong> al funcionar con datos estándar de secuenciación de lecturas cortas (WES/WGS de Illumina). Como herramienta para uso en investigación, puede utilizarse como paso de cribado computacional dentro de los flujos de trabajo de <strong>diagnóstico de MUC1</strong> y de <strong>prueba de MUC1</strong>; los hallazgos requieren confirmación mediante un método de laboratorio acreditado.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="footer-separator">
+
+    <div class="footer-bottom">
+      <p>© <span id="currentYear">2026</span> vntyper-online. Todos los derechos reservados.</p>
+      <!-- Version Information -->
+      <p>Versión del frontend: <span id="appVersion"></span> | Versión de la API: <span id="apiVersion"></span> | Versión de la herramienta: <span id="toolVersion"></span></p>
+      <!-- Added Imprint and Contact Links Below Version Info -->
+      <p><a href="impressum_en.html" aria-label="Aviso legal" data-tooltip="Ver el aviso legal">Aviso legal</a> | <a href="contact.html" aria-label="Contacto" data-tooltip="Contáctenos">Contacto</a> | <a href="https://github.com/berntpopp/vntyper-online-backend" target="_blank" rel="noopener noreferrer" aria-label="Repositorio de GitHub" data-tooltip="Visitar el repositorio de GitHub">GitHub</a></p>
+      <div class="footer-utility-actions">
+        <button id="toggleLogBtn" class="utility-toggle-btn" aria-controls="logContainer" aria-expanded="false" aria-label="Registros - Mostrar u ocultar el panel de registros">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+          <span>Registros</span>
+        </button>
+        <button id="toggleStatsBtn" class="utility-toggle-btn" aria-controls="usageStatsContainer" aria-expanded="false" aria-label="Estadísticas - Mostrar u ocultar el panel de estadísticas de uso">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>Estadísticas</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Disclaimer Modal -->
+  <div id="disclaimerModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle" aria-describedby="disclaimerDescription">
+    <div class="modal-overlay"></div> <!-- Overlay background -->
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <div class="modal-header-main">
+          <div class="modal-title-row">
+            <h2 id="disclaimerTitle">Descargo de responsabilidad: investigación y uso clínico</h2>
+            <span class="badge" style="background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 9999px;">Solo para uso en investigación</span>
+          </div>
+        </div>
+        <button class="modal-close" aria-label="Cerrar la ventana del descargo de responsabilidad">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="disclaimer-callout">
+          <p id="disclaimerDescription"><strong>Aviso importante:</strong> vntyper-online está diseñado únicamente para fines de investigación académica y educativa. No es un producto sanitario para diagnóstico in vitro (IVD) y no debe utilizarse como única base para la toma de decisiones clínicas.</p>
+        </div>
+        <div class="disclaimer-section">
+          <h3>Cribado y orientación clínica</h3>
+          <p>La evaluación de una sospecha de nefropatía tubulointersticial autosómica dominante (ADTKD) debe realizarse en consulta con genetistas clínicos y nefrólogos cualificados. Las variantes identificadas deben interpretarse junto con el fenotipo clínico y confirmarse conforme a los estándares de un laboratorio acreditado.</p>
+        </div>
+        <div class="disclaimer-section">
+          <h3>Protección de datos y privacidad</h3>
+          <p>Los alineamientos genómicos se recortan en el lado del cliente, dentro de su navegador, mediante WebAssembly (samtools). Solo se transmiten, a través de TLS cifrado, las lecturas extraídas de la región de <em>MUC1</em>. Los archivos temporales de lecturas se eliminan inmediatamente al finalizar el análisis y los archivos de resultados se eliminan automáticamente al cabo de 3 días.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="agreeBtn" class="agree-button">Entiendo y acepto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ Modal -->
+  <div id="faqModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="faqTitle" aria-describedby="faqDescription" aria-hidden="true">
+    <div class="modal-overlay"></div> <!-- Overlay background -->
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-header-main">
+          <h2 id="faqTitle">Preguntas frecuentes</h2>
+          <p class="modal-subtitle">Orientación sobre privacidad de los datos, preparación de archivos, ensamblajes de referencia y flujos de trabajo de cribado.</p>
+        </div>
+        <button class="modal-close" aria-label="Cerrar la ventana de preguntas frecuentes">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div id="faqDescription" class="faq-container">
+        <div class="faq-item">
+          <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-1" id="faq-q-1">
+            <span class="faq-question-text">¿Qué es vntyper-online?</span>
+            <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="faq-ans-1" class="faq-answer" role="region" aria-labelledby="faq-q-1" hidden="">
+            <p>vntyper-online ofrece la detección en línea de mutaciones en el VNTR de <em>MUC1</em> basada en el algoritmo VNtyper 2. La extracción de las lecturas de la región diana se ejecuta directamente en su navegador mediante WebAssembly (samtools), de modo que solo se envía al servidor un pequeño subconjunto de lecturas relevantes para la identificación de variantes. Sus archivos brutos de secuenciación genómica nunca salen de su ordenador.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-2" id="faq-q-2">
+            <span class="faq-question-text">¿Cómo preparo y cargo mis datos de secuenciación?</span>
+            <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="faq-ans-2" class="faq-answer" role="region" aria-labelledby="faq-q-2" hidden="">
+            <p>Puede cargar archivos BAM, BAI, CRAM, CRAI o SAM mediante la sección de selección de archivos de la página de inicio:</p>
+            <ul>
+              <li><strong>Archivos BAM / CRAM:</strong> Asegúrese de que cada archivo de alineamiento vaya acompañado de su índice (p. ej., <code>sample.bam</code> y <code>sample.bam.bai</code> o <code>sample.bai</code>). El índice permite recortar rápidamente la región en el navegador sin leer el archivo completo de varios gigabytes.</li>
+              <li><strong>Exportación SAM desde IGV:</strong> Abra su alineamiento en IGV, escriba <code>muc1</code> en la barra de búsqueda, haga clic con el botón derecho en la pista de alineamiento y seleccione <em>Export Alignments</em>. Guarde el archivo SAM resultante y cárguelo directamente.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-3" id="faq-q-3">
+            <span class="faq-question-text">¿Están mis datos seguros y se mantienen privados?</span>
+            <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="faq-ans-3" class="faq-answer" role="region" aria-labelledby="faq-q-3" hidden="">
+            <p>vntyper-online aplica rigurosas buenas prácticas de minimización de datos y de seguridad en el transporte (<a href="https://developer.mozilla.org/en-US/observatory/analyze?host=vntyper.org" target="_blank" rel="noopener noreferrer">Mozilla Observatory A+</a>, <a href="https://www.ssllabs.com/ssltest/analyze.html?d=vntyper.org&amp;latest" target="_blank" rel="noopener noreferrer">SSL Labs A+</a>, <a href="https://www.immuniweb.com/ssl/vntyper.org/eqEFlmqX/" target="_blank" rel="noopener noreferrer">ImmuniWeb A+</a>):</p>
+            <ul>
+              <li><strong>Recorte en el lado del cliente:</strong> Los datos genómicos brutos permanecen en su equipo; solo las lecturas de la región diana se envían al backend.</li>
+              <li><strong>Cómputo efímero:</strong> Los datos de lecturas cargados se eliminan inmediatamente al finalizar el genotipado.</li>
+              <li><strong>Conservación de resultados durante 3 días:</strong> Los archivos de resultados se conservan durante 3 días para que el usuario pueda recuperarlos, tras lo cual se eliminan de forma permanente.</li>
+            </ul>
+            <div class="faq-callout"><strong>Aviso de seguridad de acceso:</strong> La URL de sus resultados actúa como un token de portador. Cualquier persona que disponga del enlace puede ver y descargar los archivos de resultados. Trate el enlace de forma segura y no lo comparta ni lo publique.</div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-4" id="faq-q-4">
+            <span class="faq-question-text">¿Qué ensamblajes de referencia y regiones genómicas son compatibles?</span>
+            <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="faq-ans-4" class="faq-answer" role="region" aria-labelledby="faq-q-4" hidden="">
+            <p>vntyper-online es compatible con los dos principales genomas humanos de referencia: <strong>GRCh38 / hg38</strong> (chr1:155,185,824-155,192,915) y <strong>GRCh37 / hg19</strong> (chr1:155,158,000-155,163,000). El ensamblaje puede seleccionarse manualmente o detectarse automáticamente a partir de los metadatos de la cabecera del BAM/CRAM.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-5" id="faq-q-5">
+            <span class="faq-question-text">¿Cómo puedo seguir el progreso del trabajo y descargar los resultados?</span>
+            <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="faq-ans-5" class="faq-answer" role="region" aria-labelledby="faq-q-5" hidden="">
+            <p>Tras el envío del trabajo, el progreso se muestra en tiempo real en la sección de resultados mediante consultas periódicas. Una vez finalizado el análisis, puede revisar las métricas de las variantes directamente en pantalla o exportar los resultados como paquetes JSON y TSV.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-6" id="faq-q-6">
+            <span class="faq-question-text">¿Dónde puedo encontrar recomendaciones clínicas de cribado y de consenso para la ADTKD-MUC1?</span>
+            <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="faq-ans-6" class="faq-answer" role="region" aria-labelledby="faq-q-6" hidden="">
+            <p>Consulte nuestra página de referencia <a href="adtkd_diagnostics.html">Cribado y guías de ADTKD-MUC1</a>, que recoge las recomendaciones de consenso de la red europea ADTKD-Net, el árbol de decisión, los criterios de los niveles de interpretación (alta precisión, incierto, negativo) y los laboratorios internacionales de referencia acreditados.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-7" id="faq-q-7">
+            <span class="faq-question-text">¿Puede utilizarse vntyper-online en el diagnóstico de MUC1?</span>
+            <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="faq-ans-7" class="faq-answer" role="region" aria-labelledby="faq-q-7" hidden="">
+            <p>vntyper-online es solo para uso en investigación y no es un producto para diagnóstico in vitro (IVD). Puede utilizarse como paso de cribado computacional dentro de los flujos de trabajo de diagnóstico de <em>MUC1</em> y de prueba de <em>MUC1</em> para la ADTKD-MUC1, por ejemplo para priorizar muestras a partir de datos de exoma o genoma. Los hallazgos deben confirmarse con un método ortogonal acreditado (como la minisecuenciación SNaPshot o la secuenciación de lecturas largas) antes de cualquier uso clínico.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panels Container for Logs and Stats -->
+  <div id="panelsContainer">
+    <!-- Logging Panel -->
+    <div id="logContainer" class="hidden" aria-label="Registros de la aplicación">
+        <div class="log-header">
+            <h2>Registros</h2>
+            <div>
+                <button class="close-log-btn" aria-label="Cerrar registros">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+        </div>
+        <div class="log-filters-actions">
+            <div class="log-filters">
+                <button class="log-filter-btn active" data-level="all" aria-pressed="true" data-tooltip="Mostrar todas las entradas del registro">Todos</button>
+                <button class="log-filter-btn" data-level="debug" aria-pressed="false" data-tooltip="Mostrar solo los mensajes de depuración">Depuración</button>
+                <button class="log-filter-btn" data-level="info" aria-pressed="false" data-tooltip="Mostrar solo los mensajes informativos">Info</button>
+                <button class="log-filter-btn" data-level="success" aria-pressed="false" aria-label="Filtrar registros de éxito" data-tooltip="Mostrar solo los mensajes de éxito">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+                <button class="log-filter-btn" data-level="warning" aria-pressed="false" aria-label="Filtrar registros de advertencia" data-tooltip="Mostrar solo los mensajes de advertencia">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </button>
+                <button class="log-filter-btn" data-level="error" aria-pressed="false" aria-label="Filtrar registros de error" data-tooltip="Mostrar solo los mensajes de error">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="log-actions">
+                <div class="log-download-group">
+                    <button id="downloadLogsBtn" class="log-action-btn" aria-label="Descargar registros" data-tooltip="Descargar registros">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    </button>
+                    <select id="downloadFormatSelect" class="log-format-select" data-tooltip="Seleccionar formato de exportación">
+                        <option value="txt">TXT</option>
+                        <option value="json">JSON</option>
+                    </select>
+                </div>
+                <button class="clear-log-btn log-action-btn" aria-label="Borrar registros" data-tooltip="Borrar todos los registros">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="log-content" id="logContent" role="log" aria-live="polite" aria-atomic="false">
+            <!-- Log entries will be appended here -->
+        </div>
+    </div>
+
+    <!-- Usage Statistics Panel -->
+    <div id="usageStatsContainer" class="hidden" aria-label="Estadísticas de uso">
+      <div class="usage-stats-header">
+        <h2>Estadísticas de uso</h2>
+        <div>
+          <button class="close-stats-btn" aria-label="Cerrar estadísticas de uso">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+      <div class="usage-stats-content" id="usageStatsContent" role="region" aria-live="polite" aria-atomic="false">
+        <!-- Statistics will be displayed here -->
+      </div>
+    </div>
+  </div>
+
+
+</body></html>

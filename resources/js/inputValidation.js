@@ -2,6 +2,7 @@
 
 import { validateEmail, validateCohortAlias, validatePassphrase } from './validators.js';
 import { logMessage } from './log.js';
+import { t } from './i18n.js';
 
 /**
  * Input Validation UI Controller
@@ -31,21 +32,22 @@ import { logMessage } from './log.js';
 const VALIDATION_RULES = {
   email: {
     validator: validateEmail,
-    errorMessage: 'Please enter a valid email address (e.g., user@example.com)',
-    successMessage: 'Valid email address',
+    errorMessage: t('Please enter a valid email address (e.g., user@example.com)'),
+    successMessage: t('Valid email address'),
     optional: true,
   },
   cohortAlias: {
     validator: validateCohortAlias,
-    errorMessage:
-      'Cohort alias must be 3-64 characters (letters, numbers, spaces, hyphens, underscores)',
-    successMessage: 'Valid cohort alias',
+    errorMessage: t(
+      'Cohort alias must be 3-64 characters (letters, numbers, spaces, hyphens, underscores)'
+    ),
+    successMessage: t('Valid cohort alias'),
     optional: true,
   },
   passphrase: {
     validator: validatePassphrase,
-    errorMessage: 'Passphrase must be 8-128 characters long',
-    successMessage: 'Valid passphrase',
+    errorMessage: t('Passphrase must be 8-128 characters long'),
+    successMessage: t('Valid passphrase'),
     optional: true,
   },
 };

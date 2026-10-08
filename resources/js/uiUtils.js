@@ -3,6 +3,7 @@
 import { logMessage } from './log.js';
 import { stateManager } from './stateManager.js';
 import { initializeValidation, clearAllValidation } from './inputValidation.js';
+import { t } from './i18n.js';
 
 /**
  * Shows the placeholder message in the output area.
@@ -180,7 +181,7 @@ export function displayShareableLink(id, targetContainer, type = 'job') {
   shareContainer.classList.add('share-container', 'mt-2');
 
   const shareLabel = document.createElement('span');
-  shareLabel.textContent = 'Shareable Link: ';
+  shareLabel.textContent = t('Shareable Link: ');
   shareContainer.appendChild(shareLabel);
 
   const shareLink = document.createElement('input');
@@ -188,7 +189,7 @@ export function displayShareableLink(id, targetContainer, type = 'job') {
   shareLink.value = generateShareableLink(id, type);
   shareLink.readOnly = true;
   shareLink.classList.add('share-link-input');
-  shareLink.setAttribute('aria-label', `Shareable link for ${type} ID ${id}`);
+  shareLink.setAttribute('aria-label', t('Shareable link for {type} ID {id}', { type, id }));
 
   // Add copy button
   const copyIconSVG =
@@ -198,7 +199,7 @@ export function displayShareableLink(id, targetContainer, type = 'job') {
 
   const copyButton = document.createElement('button');
   copyButton.classList.add('copy-button');
-  copyButton.setAttribute('aria-label', 'Copy link');
+  copyButton.setAttribute('aria-label', t('Copy link'));
   copyButton.innerHTML = copyIconSVG;
 
   // Event listener for copy functionality
@@ -214,7 +215,7 @@ export function displayShareableLink(id, targetContainer, type = 'job') {
       }, 2000);
     } catch (err) {
       logMessage(`Failed to copy shareable link for ${type} ID ${id}: ${err.message}`, 'error');
-      alert('Failed to copy the link. Please try manually.');
+      alert(t('Failed to copy the link. Please try manually.'));
     }
   });
 
@@ -279,28 +280,28 @@ export function displayDownloadLink(jobId, context) {
   const downloadLink = document.createElement('a');
   downloadLink.id = `download-${jobId}`; // Assign unique ID
   downloadLink.href = `${window.CONFIG.API_URL}/download/${encodeURIComponent(jobId)}/`;
-  downloadLink.textContent = 'Download vntyper results';
+  downloadLink.textContent = t('Download vntyper results');
   downloadLink.classList.add('download-link', 'download-button');
   downloadLink.target = '_blank'; // Open in a new tab
-  downloadLink.setAttribute('aria-label', `Download results for Job ID ${jobId}`);
+  downloadLink.setAttribute('aria-label', t('Download results for Job ID {jobId}', { jobId }));
   downloadLink.setAttribute('data-copyable', 'true'); // Make link copyable
 
   // Create Copy Button
   const copyButton = document.createElement('button');
   copyButton.id = `copy-${jobId}`; // Assign unique ID
-  copyButton.textContent = 'Copy Link';
+  copyButton.textContent = t('Copy Link');
   copyButton.classList.add('copy-button');
-  copyButton.setAttribute('aria-label', `Copy shareable link for Job ID ${jobId}`);
+  copyButton.setAttribute('aria-label', t('Copy shareable link for Job ID {jobId}', { jobId }));
   copyButton.addEventListener('click', () => {
     navigator.clipboard
       .writeText(downloadLink.href)
       .then(() => {
         logMessage(`Shareable link copied for Job ID ${jobId}.`, 'success');
-        alert('Shareable link copied to clipboard!');
+        alert(t('Shareable link copied to clipboard!'));
       })
       .catch(err => {
         logMessage(`Failed to copy link for Job ID ${jobId}: ${err.message}`, 'error');
-        alert('Failed to copy the link. Please try manually.');
+        alert(t('Failed to copy the link. Please try manually.'));
       });
   });
 
@@ -451,7 +452,7 @@ export function createAssemblyMessageHTML(assembly) {
                 <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
                 <line x1="12" y1="22.08" x2="12" y2="12"></line>
             </svg>
-            <span>Detected reference assembly: <strong style="color: #0c4a6e; font-weight: 700; background: #e0f2fe; padding: 2px 8px; border-radius: 4px; border: 1px solid #7dd3fc;">${norm}</strong>. Coordinates configured automatically. Please confirm or select manually.</span>
+            <span>${t('Detected reference assembly:')} <strong style="color: #0c4a6e; font-weight: 700; background: #e0f2fe; padding: 2px 8px; border-radius: 4px; border: 1px solid #7dd3fc;">${norm}</strong>. ${t('Coordinates configured automatically. Please confirm or select manually.')}</span>
         </div>
     `;
 }
@@ -500,7 +501,7 @@ function initializeToggleOptionalInputs() {
       // Show optional inputs
       additionalInputs.classList.remove('hidden');
       additionalInputs.classList.add('visible');
-      toggleButton.textContent = 'Hide options';
+      toggleButton.textContent = t('Hide options');
       toggleButton.setAttribute('aria-expanded', 'true');
       logMessage('Optional inputs displayed.', 'info');
 
@@ -516,7 +517,7 @@ function initializeToggleOptionalInputs() {
       // Hide optional inputs
       additionalInputs.classList.remove('visible');
       additionalInputs.classList.add('hidden');
-      toggleButton.textContent = 'Show options';
+      toggleButton.textContent = t('Show options');
       toggleButton.setAttribute('aria-expanded', 'false');
       logMessage('Optional inputs hidden.', 'info');
 
@@ -656,7 +657,7 @@ function setupStateManagerListeners() {
   stateManager.on('countdown.tick', timeLeft => {
     const countdownDiv = document.getElementById('countdown');
     if (countdownDiv) {
-      countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+      countdownDiv.textContent = t('Next poll in: {seconds} seconds', { seconds: timeLeft });
     }
   });
 
@@ -674,7 +675,7 @@ function setupStateManagerListeners() {
     const countdownDiv = document.getElementById('countdown');
     if (countdownDiv) {
       const timeLeft = stateManager.get('countdown.timeLeft');
-      countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+      countdownDiv.textContent = t('Next poll in: {seconds} seconds', { seconds: timeLeft });
       logMessage(
         `Countdown started with ${timeLeft} seconds${jobId ? ` for job ${jobId}` : ''}.`,
         'info'
@@ -689,7 +690,7 @@ function setupStateManagerListeners() {
     const countdownDiv = document.getElementById('countdown');
     if (countdownDiv) {
       const timeLeft = stateManager.get('countdown.timeLeft');
-      countdownDiv.textContent = `Next poll in: ${timeLeft} seconds`;
+      countdownDiv.textContent = t('Next poll in: {seconds} seconds', { seconds: timeLeft });
       logMessage('Countdown reset manually to 20 seconds.', 'info');
     } else {
       logMessage('Countdown element (#countdown) not found in the DOM.', 'warning');

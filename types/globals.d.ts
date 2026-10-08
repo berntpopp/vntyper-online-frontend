@@ -52,6 +52,8 @@ interface IntroJsInstance {
 }
 
 interface Window {
+  /** Runtime translations, set by /<locale>/strings.js on translated pages. */
+  I18N?: Record<string, string>;
   /**
    * Set by resources/js/config.js, which is loaded ONLY by index.html. The
    * other four pages do not have it, so it is optional on purpose - read it

@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>VNtyper Online - MUC1 VNTR Genotyping | ADTKD-MUC1 Screening Tool</title>
+  <title>MUC1 Genotyping Online | VNtyper - ADTKD-MUC1 VNTR Screening Tool</title>
   <!-- Viewport Meta Tag -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Meta Description & Keywords -->
-  <meta name="description" content="VNtyper Online: Browser-based MUC1 VNTR genotyping tool for ADTKD-MUC1 screening. Genotype short-read BAM and SAM sequencing data with VNtyper 2 locally in your browser.">
-  <meta name="keywords" content="MUC1, VNTR, ADTKD, ADTKD-MUC1, VNtyper, VNtyper 2, variable number of tandem repeats, short-read sequencing, Illumina, BAM, BAI, medullary cystic kidney disease, tubulointerstitial kidney disease, genetics, bioinformatics, genomics">
+  <meta name="description" content="Browser-based MUC1 VNTR genotyping of short-read BAM/SAM data with VNtyper 2. A research-use tool that can be used for screening within MUC1 diagnostics workflows (ADTKD-MUC1).">
+  <meta name="keywords" content="MUC1 genotyping, MUC1 VNTR genotyping, MUC1 screening, MUC1 diagnostics, MUC1 testing, research use only, MUC1, VNTR, ADTKD, ADTKD-MUC1, VNtyper, VNtyper 2, variable number of tandem repeats, short-read sequencing, Illumina, BAM, BAI, medullary cystic kidney disease, tubulointerstitial kidney disease, genetics, bioinformatics, genomics">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
@@ -28,6 +28,16 @@
 
   <!-- Canonical Link -->
   <link rel="canonical" href="https://vntyper.org/" />
+  <!-- i18n:alternates -->
+  <link rel="alternate" hreflang="en" href="https://vntyper.org/">
+  <link rel="alternate" hreflang="de" href="https://vntyper.org/de/">
+  <link rel="alternate" hreflang="fr" href="https://vntyper.org/fr/">
+  <link rel="alternate" hreflang="it" href="https://vntyper.org/it/">
+  <link rel="alternate" hreflang="es" href="https://vntyper.org/es/">
+  <link rel="alternate" hreflang="nl" href="https://vntyper.org/nl/">
+  <link rel="alternate" hreflang="x-default" href="https://vntyper.org/">
+  <script src="resources/js/lang.js?v=0.72.0"></script>
+<!-- /i18n:alternates -->
 
   <!-- Favicon Links -->
   <link rel="icon" type="image/png" href="resources/assets/favicon/favicon-48x48.png" sizes="48x48" />
@@ -57,26 +67,26 @@
   <!-- intro.js and Aioli are loaded on demand: see tutorial.js and ExtractionController.js -->
   
   <!-- Decides before first paint whether the disclaimer shows -->
-  <script src="resources/js/disclaimerGate.js?v=0.71.4"></script>
+  <script src="resources/js/disclaimerGate.js?v=0.72.0"></script>
 
   <!-- Link to Config JS -->
-  <script src="resources/js/config.js?v=0.71.4" defer></script>
+  <script src="resources/js/config.js?v=0.72.0" defer></script>
   
   <!-- Link to JavaScript Modules -->
-  <script type="module" src="resources/js/inputWrangling.js?v=0.71.4" defer></script>
-  <script type="module" src="resources/js/regionsConfig.js?v=0.71.4" defer></script>
-  <script type="module" src="resources/js/assemblyConfigs.js?v=0.71.4" defer></script>
+  <script type="module" src="resources/js/inputWrangling.js?v=0.72.0" defer></script>
+  <script type="module" src="resources/js/regionsConfig.js?v=0.72.0" defer></script>
+  <script type="module" src="resources/js/assemblyConfigs.js?v=0.72.0" defer></script>
   <!-- bamProcessing.js is lazy-loaded in ExtractionController when needed -->
-  <script type="module" src="resources/js/apiInteractions.js?v=0.71.4" defer></script>
-  <script type="module" src="resources/js/inputValidation.js?v=0.71.4" defer></script>
-  <script type="module" src="resources/js/main.js?v=0.71.4" defer></script>
-  <script type="module" src="resources/js/mobileNav.js?v=0.71.4" defer></script>
-  <script type="module" src="resources/js/populateRegions.js?v=0.71.4" defer></script>
-  <script type="module" src="resources/js/uiUtils.js?v=0.71.4" defer></script>
-  <script type="module" src="resources/js/usageStats.js?v=0.71.4" defer></script>
+  <script type="module" src="resources/js/apiInteractions.js?v=0.72.0" defer></script>
+  <script type="module" src="resources/js/inputValidation.js?v=0.72.0" defer></script>
+  <script type="module" src="resources/js/main.js?v=0.72.0" defer></script>
+  <script type="module" src="resources/js/mobileNav.js?v=0.72.0" defer></script>
+  <script type="module" src="resources/js/populateRegions.js?v=0.72.0" defer></script>
+  <script type="module" src="resources/js/uiUtils.js?v=0.72.0" defer></script>
+  <script type="module" src="resources/js/usageStats.js?v=0.72.0" defer></script>
 
   <!-- Version and Current Year Script -->
-  <script type="module" src="resources/js/version.js?v=0.71.4" defer></script>
+  <script type="module" src="resources/js/version.js?v=0.72.0" defer></script>
   
   <!-- Schema.org JSON-LD: WebSite -->
   <script type="application/ld+json">
@@ -86,7 +96,7 @@
       "name": "VNtyper Online",
       "alternateName": ["vntyper-online", "VNtyper 2"],
       "url": "https://vntyper.org/",
-      "description": "Free browser-based MUC1 VNTR genotyping tool for ADTKD-MUC1 screening. Analyze BAM files with VNtyper 2."
+      "description": "Free browser-based MUC1 VNTR genotyping tool for ADTKD-MUC1 screening. Analyze BAM files with VNtyper 2. Research-use tool that can be used within MUC1 diagnostics and MUC1 testing workflows."
     }
   </script>
 
@@ -101,8 +111,8 @@
       "applicationSubCategory": "Genetic Analysis Tool",
       "operatingSystem": "Web Browser",
       "url": "https://vntyper.org/",
-      "description": "Online MUC1 VNTR genotyping tool for screening autosomal dominant tubulointerstitial kidney disease (ADTKD-MUC1) from BAM files using VNtyper 2.",
-      "keywords": "MUC1, VNTR, ADTKD, ADTKD-MUC1, VNtyper, variable number of tandem repeats, BAM, bioinformatics, genomics",
+      "description": "Online MUC1 VNTR genotyping tool for screening autosomal dominant tubulointerstitial kidney disease (ADTKD-MUC1) from BAM files using VNtyper 2. Research use only; can be used as a computational screening step within MUC1 diagnostics and MUC1 testing workflows.",
+      "keywords": "MUC1, VNTR, ADTKD, ADTKD-MUC1, VNtyper, variable number of tandem repeats, BAM, bioinformatics, genomics, MUC1 genotyping, MUC1 VNTR genotyping, MUC1 screening, MUC1 diagnostics, MUC1 testing, research use only",
       "featureList": [
         "In-browser client-side BAM slicing preserving genomic data privacy",
         "Alignment-free and alignment-based VNTR genotyping with VNtyper 2",
@@ -207,31 +217,55 @@
           "name": "What is vntyper-online?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "vntyper-online offers online MUC1 VNTR genotyping using the VNtyper algorithm. The MUC1 read data is extracted locally in your browser from BAM files and only this subset is uploaded to the server for analysis."
+            "text": "vntyper-online provides web-based MUC1 VNTR mutation detection powered by the VNtyper 2 algorithm. Target region read extraction executes directly inside your browser via WebAssembly (samtools), meaning only a small subset of relevant reads is sent to the server for variant calling. Your raw genomic sequencing files never leave your computer."
           }
         },
         {
           "@type": "Question",
-          "name": "How do I upload my data?",
+          "name": "How do I prepare and upload my sequencing data?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Upload BAM, BAI, or SAM files using the file input section. For BAM files, ensure each has a corresponding BAI file. SAM files from IGV can also be uploaded after navigating to the MUC1 region."
+            "text": "You can upload BAM, BAI, CRAM, CRAI, or SAM files using the file input section on the home page. BAM / CRAM files: ensure each alignment file has an accompanying index (e.g., sample.bam and sample.bam.bai or sample.bai). IGV SAM export: open your alignment in IGV, type muc1 in the search bar, right-click the alignment track, and select Export Alignments. Save the resulting SAM file and upload it directly."
           }
         },
         {
           "@type": "Question",
-          "name": "Is my data secure?",
+          "name": "Is my data secure and private?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "vntyper.org uses SSL/HTTPS with strong encryption (Mozilla Observatory A+, SSL Labs A+). Only a small fraction of the BAM file is uploaded, preserving privacy. Read data is immediately deleted after computation, and results are kept for 3 days before deletion. Note that the results link itself carries no password: anyone who has it can download the results, so it should be treated as confidential."
+            "text": "vntyper-online follows rigorous data minimization and transport security best practices. Raw genomic data stays on your machine; only targeted reads are sent to the backend. Uploaded read data is immediately purged upon completion of the genotyping run. Result files are retained for 3 days to allow user retrieval, after which they are permanently deleted."
           }
         },
         {
           "@type": "Question",
-          "name": "What regions can I analyze?",
+          "name": "Which reference assemblies and genomic regions are supported?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Select the reference assembly used for your alignment. The region corresponding to the MUC1 locus will be automatically selected for analysis."
+            "text": "vntyper-online supports both major human reference genomes: GRCh38 / hg38 (chr1:155,185,824-155,192,915) and GRCh37 / hg19 (chr1:155,158,000-155,163,000). The assembly can be selected manually or auto-detected from BAM/CRAM header metadata."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How can I track job progress and download results?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "After job submission, progress is displayed live in the output section via polling. Once analysis completes, you can review variant metrics directly on screen or export the results as JSON and TSV packages."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where can I find clinical screening and consensus recommendations for ADTKD-MUC1?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "See our dedicated ADTKD-MUC1 Screening & Guidelines reference page (https://vntyper.org/adtkd_diagnostics.html) for the European ADTKD-Net consensus recommendations, decision tree, interpretation tier criteria (High Precision, Uncertain, Negative), and accredited international referral laboratories."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can vntyper-online be used in MUC1 diagnostics?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "vntyper-online is for research use only and is not an in vitro diagnostic (IVD) device. It can be used as a computational screening step within MUC1 diagnostics and MUC1 testing workflows for ADTKD-MUC1, for example to prioritise samples from exome or genome data. Findings must be confirmed with an accredited orthogonal method (such as SNaPshot minisequencing or long-read sequencing) before any clinical use."
           }
         }
       ]
@@ -290,6 +324,25 @@
               </span>
               <span id="disclaimerStatusText" class="status-text">Disclaimer</span>
             </a>
+          </li>
+
+          <li>
+        <!-- i18n:switcher -->
+        <details class="lang-switch" translate="no">
+          <summary aria-label="Language: English">
+            <span lang="en">EN</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <ul>
+            <li><a href="/" lang="en" hreflang="en" aria-current="true">English</a></li>
+            <li><a href="/de/" lang="de" hreflang="de">Deutsch</a></li>
+            <li><a href="/fr/" lang="fr" hreflang="fr">Français</a></li>
+            <li><a href="/it/" lang="it" hreflang="it">Italiano</a></li>
+            <li><a href="/es/" lang="es" hreflang="es">Español</a></li>
+            <li><a href="/nl/" lang="nl" hreflang="nl">Nederlands</a></li>
+          </ul>
+        </details>
+<!-- /i18n:switcher -->
           </li>
         </ul>
       </div>
@@ -658,6 +711,9 @@
               chronic kidney disease of unknown etiology, and familial kidney
               disorders. It democratizes access to <strong>MUC1 genotyping</strong> by working with
               standard short-read sequencing data (Illumina WES/WGS).
+              As a research-use tool, it can be used as a computational screening step
+              within <strong>MUC1 diagnostics</strong> and <strong>MUC1 testing</strong> workflows;
+              findings require confirmation by an accredited laboratory method.
             </p>
           </div>
         </div>
@@ -825,6 +881,18 @@
           <div id="faq-ans-6" class="faq-answer" role="region" aria-labelledby="faq-q-6" hidden>
             <p>
               See our dedicated <a href="adtkd_diagnostics.html">ADTKD-MUC1 Screening &amp; Guidelines</a> reference page for the European ADTKD-Net consensus recommendations, decision tree, interpretation tier criteria (High Precision, Uncertain, Negative), and accredited international referral laboratories.
+            </p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-7" id="faq-q-7">
+            <span class="faq-question-text">Can vntyper-online be used in MUC1 diagnostics?</span>
+            <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="faq-ans-7" class="faq-answer" role="region" aria-labelledby="faq-q-7" hidden>
+            <p>
+              vntyper-online is for research use only and is not an in vitro diagnostic (IVD) device. It can be used as a computational screening step within <em>MUC1</em> diagnostics and <em>MUC1</em> testing workflows for ADTKD-MUC1, for example to prioritise samples from exome or genome data. Findings must be confirmed with an accredited orthogonal method (such as SNaPshot minisequencing or long-read sequencing) before any clinical use.
             </p>
           </div>
         </div>
