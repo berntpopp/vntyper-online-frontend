@@ -123,6 +123,9 @@
         <strong>Ephemeral Processing:</strong> By default, uploaded genomic data is processed strictly in memory and ephemeral storage. Output archives are retained for a maximum of 3 days solely to enable user retrieval, after which all submitted alignments and generated result archives are permanently deleted.
       </li>
       <li>
+        <strong>Usage Statistics:</strong> When a job starts, the server stores a SHA-256 hash of your IP address combined with your browser user agent, together with the job ID and a timestamp. The hash is not keyed with a secret, so it is pseudonymous rather than anonymous data. It is used only to count jobs and distinct users. These per-job records are deleted automatically after 30 days; long-term totals keep only an aggregate job count and a probabilistic estimate of distinct users (HyperLogLog), from which individual hashes cannot be read back. For abuse prevention, request rate limiting keeps short-lived counters per IP address that expire after about one minute. Legal basis: Art. 6(1)(f) GDPR (legitimate interest in operating and protecting the service).
+      </li>
+      <li>
         <strong>Voluntary Research Data Donation (GDPR Art. 9):</strong> Users may optionally and voluntarily donate stripped decision artifacts and technical sequencing metadata for scientific calibration and ADTKD research pursuant to GDPR Art. 9(2)(a) (explicit consent) and Art. 9(2)(j) (scientific research). Raw sequence reads (BAM/CRAM/FASTQ) are strictly excluded and never accepted. Data controller: Bernt Popp (<a href="mailto:support@vntyper.org">support@vntyper.org</a>). Donated records are stored irreversibly pseudonymized without patient identifiers. You may contact the data controller with your donation Run ID for questions or data management.
       </li>
     </ul>

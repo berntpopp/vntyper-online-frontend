@@ -6,13 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Meta Description -->
-  <meta name="description" content="Donnez volontairement des métriques VNtyper anonymes pour étalonner les seuils diagnostiques du VNTR de MUC1 selon les kits de capture d'exome (recherche ADTKD-MUC1).">
+  <meta name="description" content="Donnez volontairement des métriques d'analyse VNtyper pseudonymisées pour soutenir la recherche future sur l'analyse du VNTR de MUC1 entre kits de capture d'exome (ADTKD-MUC1).">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://vntyper.org/fr/donate.html">
   <meta property="og:title" content="Don de données scientifiques - VNtyper Online">
-  <meta property="og:description" content="Soutenez la recherche sur l'ADTKD-MUC1 en donnant anonymement des métriques décisionnelles VNtyper épurées.">
+  <meta property="og:description" content="Soutenez la recherche sur l'ADTKD-MUC1 en donnant des métriques de décision VNtyper épurées et pseudonymisées.">
   <meta property="og:image" content="https://vntyper.org/resources/assets/og-image.png">
   <meta property="og:site_name" content="VNtyper Online">
 
@@ -200,7 +200,7 @@
 
     <main>
       <h1>Don de données pour la recherche ADTKD</h1>
-      <p style="font-size: 1.05rem; color: #4b5563; line-height: 1.5;">Contribuez à l'étalonnage mondial, toujours en cours, des seuils diagnostiques du VNTR de MUC1. Les métriques décisionnelles que vous donnez aident les laboratoires universitaires et cliniques à établir des modèles de couverture fiables, propres à chaque kit de capture, pour la néphropathie tubulo-interstitielle autosomique dominante (ADTKD-MUC1).</p>
+      <p style="font-size: 1.05rem; color: #4b5563; line-height: 1.5;">Soutenez la recherche sur l'analyse du VNTR de MUC1 dans la néphropathie tubulo-interstitielle autosomique dominante (ADTKD-MUC1). Les métriques de décision données pourront alimenter une future calibration de recherche, sur base volontaire, entre kits de capture de séquençage. Aucune calibration spécifique aux kits de capture n'existe aujourd'hui, et les dons ne modifient aucun résultat.</p>
 
       <!-- Container when donation is disabled -->
       <div id="donationDisabledMsg" class="disabled-feature-overlay hidden">
@@ -215,10 +215,10 @@
         <div class="consent-banner">
           <h2>Information en vue du consentement éclairé - article 9 du RGPD</h2>
           <p style="font-size: 0.9rem; line-height: 1.45; color: #334155;">En vertu du règlement général sur la protection des données de l'UE (RGPD, art. 9), les données génétiques et de santé requièrent un consentement explicite et éclairé. Responsable du traitement&nbsp;: <strong>Dr Bernt Popp</strong>, Berlin Institute of Health at Charité / Universitätsmedizin Berlin (<a href="mailto:support@vntyper.org">support@vntyper.org</a>).</p>
-          <p style="font-size: 0.9rem; line-height: 1.45; color: #334155;"><strong>Ce qui est donné&nbsp;:</strong> uniquement des statistiques de synthèse anonymes du pipeline (métriques déterminantes pour la décision, profondeur de couverture, kit de capture, plateforme de séquençage et étiquettes phénotypiques sommaires). <strong>Les lectures génomiques brutes (BAM, CRAM, FASTQ) sont strictement exclues et ne seront jamais acceptées ni conservées.</strong> Tous les identifiants d'échantillons sont hachés de manière irréversible côté client avant l'envoi.</p>
+          <p style="font-size: 0.9rem; line-height: 1.45; color: #334155;"><strong>Ce qui est donné&nbsp;:</strong> uniquement des statistiques de synthèse pseudonymisées du pipeline (métriques déterminantes pour la décision, profondeur de couverture, kit de capture, plateforme de séquençage et étiquettes phénotypiques sommaires). <strong>Les lectures génomiques brutes (BAM, CRAM, FASTQ) sont strictement exclues et ne seront jamais acceptées ni conservées.</strong> Tous les identifiants d'échantillons sont hachés de manière irréversible côté client avant l'envoi.</p>
           <div class="consent-checkbox-group">
             <input type="checkbox" id="gdprConsent" name="consent" required="">
-            <label for="gdprConsent" style="font-size: 0.9rem; font-weight: 500; cursor: pointer;">Je consens explicitement à donner ces métriques décisionnelles anonymes du pipeline et ces annotations cliniques à des fins de recherche scientifique sans but lucratif sur l'ADTKD-MUC1.</label>
+            <label for="gdprConsent" style="font-size: 0.9rem; font-weight: 500; cursor: pointer;">Je consens explicitement à donner ces métriques de décision du pipeline pseudonymisées et ces annotations cliniques pour la recherche scientifique à but non lucratif sur l'ADTKD-MUC1.</label>
           </div>
         </div>
 
@@ -344,7 +344,7 @@
 
           <!-- Submit Button -->
           <div style="margin-top: 2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;">
-            <button type="submit" id="donateSubmitBtn" class="button button-primary" disabled="">Soumettre le don anonyme</button>
+            <button type="submit" id="donateSubmitBtn" class="button button-primary" disabled="">Envoyer le don pseudonymisé</button>
             <span id="donationStatusText" style="font-size: 0.95rem; color: #475569;"></span>
           </div>
         </form>
@@ -355,7 +355,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
             Don enregistré avec succès
           </h2>
-          <p>Merci de contribuer à la recherche scientifique ouverte sur l'ADTKD-MUC1. Vos métriques ont été validées cryptographiquement et anonymisées.</p>
+          <p>Merci de contribuer à la recherche scientifique ouverte sur l'ADTKD-MUC1. Vos métriques ont été validées cryptographiquement et pseudonymisées.</p>
           <p><strong>Identifiant du don&nbsp;:</strong> <code id="dispDonationId"></code></p>
           <p><strong>Identifiant d'exécution&nbsp;:</strong> <code id="dispRunId"></code></p>
           <div style="margin-top: 1.5rem;">
