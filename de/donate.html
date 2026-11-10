@@ -6,13 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Meta Description -->
-  <meta name="description" content="Spenden Sie freiwillig anonyme VNtyper-Analysemetriken zur Kalibrierung diagnostischer MUC1-VNTR-Schwellenwerte über Exom-Capture-Kits hinweg – für die ADTKD-MUC1-Forschung.">
+  <meta name="description" content="Spenden Sie freiwillig pseudonymisierte VNtyper-Analysemetriken zur Unterstützung künftiger Forschung zur MUC1-VNTR-Analyse über Exom-Capture-Kits (ADTKD-MUC1).">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://vntyper.org/de/donate.html">
   <meta property="og:title" content="Wissenschaftliche Datenspende – VNtyper Online">
-  <meta property="og:description" content="Unterstützen Sie die ADTKD-MUC1-Forschung durch die anonyme Spende bereinigter VNtyper-Entscheidungsmetriken.">
+  <meta property="og:description" content="Unterstützen Sie die ADTKD-MUC1-Forschung durch die Spende pseudonymisierter, bereinigter VNtyper-Entscheidungsmetriken.">
   <meta property="og:image" content="https://vntyper.org/resources/assets/og-image.png">
   <meta property="og:site_name" content="VNtyper Online">
 
@@ -200,7 +200,7 @@
 
     <main>
       <h1>Wissenschaftliche Datenspende für ADTKD-Forschung</h1>
-      <p style="font-size: 1.05rem; color: #4b5563; line-height: 1.5;">Tragen Sie zur fortlaufenden weltweiten Kalibrierung der diagnostischen Schwellenwerte für den MUC1-VNTR bei. Ihre gespendeten Entscheidungsmetriken helfen akademischen und klinischen Laboren, verlässliche, Capture-Kit-spezifische Abdeckungsmodelle für die autosomal-dominante tubulointerstitielle Nierenerkrankung (ADTKD-MUC1) zu erstellen.</p>
+      <p style="font-size: 1.05rem; color: #4b5563; line-height: 1.5;">Unterstützen Sie die Forschung zur MUC1-VNTR-Analyse bei autosomal-dominanter tubulointerstitieller Nierenerkrankung (ADTKD-MUC1). Gespendete Entscheidungsmetriken können künftig in eine optionale Forschungskalibrierung über Sequenzier-Capture-Kits einfließen. Eine Capture-Kit-spezifische Kalibrierung gibt es derzeit nicht, und Spenden verändern keine Ergebnisse.</p>
 
       <!-- Container when donation is disabled -->
       <div id="donationDisabledMsg" class="disabled-feature-overlay hidden">
@@ -215,10 +215,10 @@
         <div class="consent-banner">
           <h2>Hinweis zur informierten Einwilligung nach Art. 9 DSGVO</h2>
           <p style="font-size: 0.9rem; line-height: 1.45; color: #334155;">Nach der EU-Datenschutz-Grundverordnung (Art. 9 DSGVO) erfordert die Verarbeitung genetischer Daten und Gesundheitsdaten eine ausdrückliche, informierte Einwilligung. Verantwortlicher: <strong>Dr. Bernt Popp</strong>, Berlin Institute of Health at Charité / Universitätsmedizin Berlin (<a href="mailto:support@vntyper.org">support@vntyper.org</a>).</p>
-          <p style="font-size: 0.9rem; line-height: 1.45; color: #334155;"><strong>Was gespendet wird:</strong> Ausschließlich anonyme zusammenfassende Statistiken der Pipeline (entscheidungsrelevante Metriken, Abdeckungstiefe, Target-Kit, Sequenzierplattform und grobe Phänotyp-Tags). <strong>Genomische Roh-Reads (BAM, CRAM, FASTQ) sind strikt ausgeschlossen und werden niemals angenommen oder gespeichert.</strong> Alle Probenkennungen werden vor der Übermittlung clientseitig irreversibel gehasht.</p>
+          <p style="font-size: 0.9rem; line-height: 1.45; color: #334155;"><strong>Was gespendet wird:</strong> Ausschließlich pseudonymisierte zusammenfassende Statistiken der Pipeline (entscheidungsrelevante Metriken, Abdeckungstiefe, Target-Kit, Sequenzierplattform und grobe Phänotyp-Tags). <strong>Genomische Roh-Reads (BAM, CRAM, FASTQ) sind strikt ausgeschlossen und werden niemals angenommen oder gespeichert.</strong> Alle Probenkennungen werden vor der Übermittlung clientseitig irreversibel gehasht.</p>
           <div class="consent-checkbox-group">
             <input type="checkbox" id="gdprConsent" name="consent" required="">
-            <label for="gdprConsent" style="font-size: 0.9rem; font-weight: 500; cursor: pointer;">Ich willige ausdrücklich ein, diese anonymen Entscheidungsmetriken der Pipeline und klinischen Annotationen für die nicht gewinnorientierte wissenschaftliche Forschung zu ADTKD-MUC1 zu spenden.</label>
+            <label for="gdprConsent" style="font-size: 0.9rem; font-weight: 500; cursor: pointer;">Ich willige ausdrücklich ein, diese pseudonymisierten Entscheidungsmetriken der Pipeline und klinischen Annotationen für die nicht gewinnorientierte wissenschaftliche Forschung zu ADTKD-MUC1 zu spenden.</label>
           </div>
         </div>
 
@@ -344,7 +344,7 @@
 
           <!-- Submit Button -->
           <div style="margin-top: 2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;">
-            <button type="submit" id="donateSubmitBtn" class="button button-primary" disabled="">Anonyme Spende absenden</button>
+            <button type="submit" id="donateSubmitBtn" class="button button-primary" disabled="">Pseudonymisierte Spende absenden</button>
             <span id="donationStatusText" style="font-size: 0.95rem; color: #475569;"></span>
           </div>
         </form>
@@ -355,7 +355,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
             Spende erfolgreich erfasst
           </h2>
-          <p>Vielen Dank für Ihren Beitrag zur offenen wissenschaftlichen Forschung zu ADTKD-MUC1. Ihre Metriken wurden kryptografisch validiert und anonymisiert.</p>
+          <p>Vielen Dank für Ihren Beitrag zur offenen wissenschaftlichen Forschung zu ADTKD-MUC1. Ihre Metriken wurden kryptografisch validiert und pseudonymisiert.</p>
           <p><strong>Spenden-ID:</strong> <code id="dispDonationId"></code></p>
           <p><strong>Run-ID:</strong> <code id="dispRunId"></code></p>
           <div style="margin-top: 1.5rem;">

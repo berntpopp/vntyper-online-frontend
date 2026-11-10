@@ -6,13 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Meta Description -->
-  <meta name="description" content="Doneer vrijwillig anonieme VNtyper-analyseparameters om diagnostische MUC1-VNTR-drempelwaarden voor exoom-capture-kits te helpen kalibreren voor ADTKD-MUC1-onderzoek.">
+  <meta name="description" content="Doneer vrijwillig gepseudonimiseerde VNtyper-analysemetrieken ter ondersteuning van toekomstig onderzoek naar MUC1-VNTR-analyse over exoom-capturekits (ADTKD-MUC1).">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://vntyper.org/nl/donate.html">
   <meta property="og:title" content="Wetenschappelijke datadonatie - VNtyper Online">
-  <meta property="og:description" content="Steun het ADTKD-MUC1-onderzoek door anoniem gestripte VNtyper-beslissingsparameters te doneren.">
+  <meta property="og:description" content="Ondersteun ADTKD-MUC1-onderzoek door opgeschoonde, gepseudonimiseerde VNtyper-beslissingsmetrieken te doneren.">
   <meta property="og:image" content="https://vntyper.org/resources/assets/og-image.png">
   <meta property="og:site_name" content="VNtyper Online">
 
@@ -200,7 +200,7 @@
 
     <main>
       <h1>Wetenschappelijke datadonatie voor ADTKD-onderzoek</h1>
-      <p style="font-size: 1.05rem; color: #4b5563; line-height: 1.5;">Draag bij aan de doorlopende wereldwijde kalibratie van diagnostische drempelwaarden voor de MUC1-VNTR. Uw gedoneerde beslissingsparameters helpen academische en klinische laboratoria om betrouwbare, capture-kit-specifieke coveragemodellen op te stellen voor autosomaal dominante tubulo-interstitiële nierziekte (ADTKD-MUC1).</p>
+      <p style="font-size: 1.05rem; color: #4b5563; line-height: 1.5;">Ondersteun onderzoek naar MUC1-VNTR-analyse bij autosomaal dominante tubulo-interstitiële nierziekte (ADTKD-MUC1). Gedoneerde beslissingsmetrieken kunnen bijdragen aan een toekomstige, vrijwillige onderzoekskalibratie over sequencing-capturekits. Een capturekit-specifieke kalibratie bestaat vandaag niet, en donaties veranderen geen enkel resultaat.</p>
 
       <!-- Container when donation is disabled -->
       <div id="donationDisabledMsg" class="disabled-feature-overlay hidden">
@@ -215,10 +215,10 @@
         <div class="consent-banner">
           <h2>Kennisgeving inzake geïnformeerde toestemming - artikel 9 AVG</h2>
           <p style="font-size: 0.9rem; line-height: 1.45; color: #334155;">Krachtens de Algemene Verordening Gegevensbescherming van de EU (artikel 9 AVG) is voor genetische gegevens en gegevens over gezondheid uitdrukkelijke, geïnformeerde toestemming vereist. Verwerkingsverantwoordelijke: <strong>Dr. Bernt Popp</strong>, Berlin Institute of Health at Charité / Universitätsmedizin Berlin (<a href="mailto:support@vntyper.org">support@vntyper.org</a>).</p>
-          <p style="font-size: 0.9rem; line-height: 1.45; color: #334155;"><strong>Wat wordt gedoneerd:</strong> Uitsluitend anonieme samenvattende statistieken van de pipeline (beslissingsbepalende parameters, coveragediepte, target-kit, sequencingplatform en grove fenotype-tags). <strong>Ruwe genomische reads (BAM, CRAM, FASTQ) zijn strikt uitgesloten en worden nooit geaccepteerd of opgeslagen.</strong> Alle sample-identificatoren worden vóór verzending client-side onomkeerbaar gehasht.</p>
+          <p style="font-size: 0.9rem; line-height: 1.45; color: #334155;"><strong>Wat wordt gedoneerd:</strong> Uitsluitend gepseudonimiseerde samenvattende statistieken van de pipeline (beslissingsbepalende parameters, coveragediepte, target-kit, sequencingplatform en grove fenotype-tags). <strong>Ruwe genomische reads (BAM, CRAM, FASTQ) zijn strikt uitgesloten en worden nooit geaccepteerd of opgeslagen.</strong> Alle sample-identificatoren worden vóór verzending client-side onomkeerbaar gehasht.</p>
           <div class="consent-checkbox-group">
             <input type="checkbox" id="gdprConsent" name="consent" required="">
-            <label for="gdprConsent" style="font-size: 0.9rem; font-weight: 500; cursor: pointer;">Ik geef uitdrukkelijk toestemming om deze anonieme beslissingsparameters van de pipeline en klinische annotaties te doneren voor wetenschappelijk onderzoek zonder winstoogmerk naar ADTKD-MUC1.</label>
+            <label for="gdprConsent" style="font-size: 0.9rem; font-weight: 500; cursor: pointer;">Ik geef uitdrukkelijk toestemming om deze gepseudonimiseerde beslissingsmetrieken van de pipeline en klinische annotaties te doneren voor niet-commercieel wetenschappelijk onderzoek naar ADTKD-MUC1.</label>
           </div>
         </div>
 
@@ -344,7 +344,7 @@
 
           <!-- Submit Button -->
           <div style="margin-top: 2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;">
-            <button type="submit" id="donateSubmitBtn" class="button button-primary" disabled="">Anonieme donatie indienen</button>
+            <button type="submit" id="donateSubmitBtn" class="button button-primary" disabled="">Gepseudonimiseerde donatie verzenden</button>
             <span id="donationStatusText" style="font-size: 0.95rem; color: #475569;"></span>
           </div>
         </form>
@@ -355,7 +355,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
             Donatie succesvol geregistreerd
           </h2>
-          <p>Dank u voor uw bijdrage aan open wetenschappelijk onderzoek naar ADTKD-MUC1. Uw parameters zijn cryptografisch gevalideerd en geanonimiseerd.</p>
+          <p>Bedankt voor uw bijdrage aan open wetenschappelijk onderzoek naar ADTKD-MUC1. Uw metrieken zijn cryptografisch gevalideerd en gepseudonimiseerd.</p>
           <p><strong>Donatie-ID:</strong> <code id="dispDonationId"></code></p>
           <p><strong>Run-ID:</strong> <code id="dispRunId"></code></p>
           <div style="margin-top: 1.5rem;">

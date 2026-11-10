@@ -8,13 +8,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Meta Description -->
-  <meta name="description" content="Voluntarily donate anonymous VNtyper analysis metrics to help calibrate MUC1 VNTR diagnostic thresholds across exome capture kits for ADTKD-MUC1 research.">
+  <meta name="description" content="Voluntarily donate pseudonymized VNtyper analysis metrics to support future research on MUC1 VNTR calling across exome capture kits (ADTKD-MUC1).">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://vntyper.org/donate.html">
   <meta property="og:title" content="Scientific Data Donation - VNtyper Online">
-  <meta property="og:description" content="Support ADTKD-MUC1 research by anonymously donating stripped VNtyper decision metrics.">
+  <meta property="og:description" content="Support ADTKD-MUC1 research by donating pseudonymized, stripped VNtyper decision metrics.">
   <meta property="og:image" content="https://vntyper.org/resources/assets/og-image.png">
   <meta property="og:site_name" content="VNtyper Online">
 
@@ -202,7 +202,7 @@
     <main>
       <h1>Scientific Data Donation for ADTKD Research</h1>
       <p style="font-size: 1.05rem; color: #4b5563; line-height: 1.5;">
-        Contribute to the ongoing global calibration of MUC1 VNTR diagnostic thresholds. Your donated decision metrics help academic and clinical laboratories establish reliable capture-kit specific coverage models for Autosomal Dominant Tubulointerstitial Kidney Disease (ADTKD-MUC1).
+        Support research on MUC1 VNTR calling in Autosomal Dominant Tubulointerstitial Kidney Disease (ADTKD-MUC1). Donated decision metrics may inform a future, opt-in research calibration across sequencing capture kits. No capture-kit specific calibration exists today, and donations do not change any result.
       </p>
 
       <!-- Container when donation is disabled -->
@@ -222,12 +222,12 @@
             Data controller: <strong>Dr. Bernt Popp</strong>, Berlin Institute of Health at Charité / Universitätsmedizin Berlin (<a href="mailto:support@vntyper.org">support@vntyper.org</a>).
           </p>
           <p style="font-size: 0.9rem; line-height: 1.45; color: #334155;">
-            <strong>What is donated:</strong> Only anonymous pipeline summary statistics (decision-bearing metrics, coverage depth, target kit, sequencing platform, and coarse phenotype tags). <strong>Raw genomic reads (BAM, CRAM, FASTQ) are strictly excluded and will never be accepted or stored.</strong> All sample identifiers are irreversibly hashed client-side before submission.
+            <strong>What is donated:</strong> Only pseudonymized pipeline summary statistics (decision-bearing metrics, coverage depth, target kit, sequencing platform, and coarse phenotype tags). <strong>Raw genomic reads (BAM, CRAM, FASTQ) are strictly excluded and will never be accepted or stored.</strong> All sample identifiers are irreversibly hashed client-side before submission.
           </p>
           <div class="consent-checkbox-group">
             <input type="checkbox" id="gdprConsent" name="consent" required>
             <label for="gdprConsent" style="font-size: 0.9rem; font-weight: 500; cursor: pointer;">
-              I explicitly consent to donate these anonymous pipeline decision metrics and clinical annotations for non-profit scientific research on ADTKD-MUC1.
+              I explicitly consent to donate these pseudonymized pipeline decision metrics and clinical annotations for non-profit scientific research on ADTKD-MUC1.
             </label>
           </div>
         </div>
@@ -355,7 +355,7 @@
           <!-- Submit Button -->
           <div style="margin-top: 2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;">
             <button type="submit" id="donateSubmitBtn" class="button button-primary" disabled>
-              Submit Anonymous Donation
+              Submit Pseudonymized Donation
             </button>
             <span id="donationStatusText" style="font-size: 0.95rem; color: #475569;"></span>
           </div>
@@ -367,7 +367,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
             Donation Successfully Recorded
           </h2>
-          <p>Thank you for contributing to open scientific research for ADTKD-MUC1. Your metrics have been cryptographically validated and anonymized.</p>
+          <p>Thank you for contributing to open scientific research for ADTKD-MUC1. Your metrics have been cryptographically validated and pseudonymized.</p>
           <p><strong>Donation ID:</strong> <code id="dispDonationId"></code></p>
           <p><strong>Run ID:</strong> <code id="dispRunId"></code></p>
           <div style="margin-top: 1.5rem;">
