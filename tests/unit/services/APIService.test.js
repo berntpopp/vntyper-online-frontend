@@ -484,3 +484,38 @@ describe('APIService', () => {
     });
   });
 });
+
+describe('APIService.getJobSummary()', () => {
+  const service = () => new APIService({ config: { API_URL: 'http://api' } });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('returns the summary from /job-summary/{id}/', async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ confidence_grade: 'finding' }),
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(service().getJobSummary('a b')).resolves.toEqual({ confidence_grade: 'finding' });
+    expect(fetchMock.mock.calls[0][0]).toBe('http://api/job-summary/a%20b/');
+  });
+
+  it('returns null on 404 (backend without the route)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: false, status: 404 }))
+    );
+    await expect(service().getJobSummary('j')).resolves.toBeNull();
+  });
+
+  it('returns null on network failure', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Promise.reject(new TypeError('offline')))
+    );
+    await expect(service().getJobSummary('j')).resolves.toBeNull();
+  });
+});
