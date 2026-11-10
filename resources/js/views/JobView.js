@@ -23,6 +23,8 @@ const CONFIDENCE_LABELS = () => ({
 });
 
 const note = text => createTextElement('p', text, { className: 'job-summary-note' });
+// Number(null) is 0, so a missing value must not pass as a finite number.
+const finite = value => (typeof value === 'number' && Number.isFinite(value) ? value : null);
 
 /**
  * Job View - Handles job UI rendering
@@ -166,10 +168,10 @@ export class JobView {
       rows.push(createLabelValue(t('Confidence: '), CONFIDENCE_LABELS()[grade] || grade));
     }
     if (subthreshold?.state === 'negative_subthreshold') {
-      const score = Number(subthreshold.best_depth_score);
+      const score = finite(subthreshold.best_depth_score);
       rows.push(
         note(
-          Number.isFinite(score)
+          score !== null
             ? t(
                 'A candidate variant was seen below the reporting threshold (best depth score {score}). It is not a call.',
                 { score: String(Number(score.toPrecision(3))) }
@@ -181,7 +183,7 @@ export class JobView {
     if (summary.length_sensitivity_tier === 'high') {
       rows.push(
         note(
-          Number.isFinite(Number(highThreshold))
+          finite(highThreshold) !== null
             ? t(
                 'The VNTR array is estimated at over {threshold} repeats. Detection is less sensitive in long arrays, mostly for frameshifts other than dupC.',
                 { threshold: String(highThreshold) }

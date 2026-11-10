@@ -127,6 +127,20 @@ describe('JobView.showSummary()', () => {
     expect(text).not.toContain('repeats');
   });
 
+  it('does not print a missing score or threshold as a number', () => {
+    view.showSummary('job-1', {
+      subthreshold_signal: { state: 'negative_subthreshold', best_depth_score: null },
+      length_sensitivity_tier: 'high',
+      length_sensitivity_policy: { high_threshold: null },
+    });
+
+    const text = panelText();
+    expect(text).toContain('seen below the reporting threshold. It is not a call.');
+    expect(text).not.toContain('best depth score');
+    expect(text).toContain('estimated to be long');
+    expect(text).not.toContain('null');
+  });
+
   it('renders nothing for a null summary (404) or one without QC fields', () => {
     view.showSummary('job-1', null);
     expect(panelText()).toBeNull();
