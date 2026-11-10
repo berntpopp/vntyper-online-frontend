@@ -13,6 +13,7 @@ import {
 import { Job } from '../models/Job.js';
 import { Cohort } from '../models/Cohort.js';
 import { logMessage } from '../log.js';
+import { fetchWithTimeout } from './httpUtils.js';
 
 /**
  * API Service - Wraps API interactions with clean interface
@@ -74,6 +75,26 @@ export class APIService {
     } catch (error) {
       this._handleError('getJobStatus', error);
       throw error;
+    }
+  }
+
+  /**
+   * Get a completed job's pipeline_summary.json (`GET /job-summary/{id}/`).
+   *
+   * Optional enrichment: older backends have no such route, so any failure
+   * (404, network, bad JSON) resolves to null instead of throwing.
+   *
+   * @param {string} jobId - Job ID
+   * @returns {Promise<Object|null>} The summary, or null when unavailable
+   */
+  async getJobSummary(jobId) {
+    try {
+      const url = `${this.baseURL}/job-summary/${encodeURIComponent(jobId)}/`;
+      const response = await fetchWithTimeout(url, {}, 30000);
+      return response.ok ? await response.json() : null;
+    } catch (error) {
+      logMessage(`Job summary unavailable for ${jobId}: ${error.message}`, 'warning');
+      return null;
     }
   }
 

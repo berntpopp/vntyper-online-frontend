@@ -1,8 +1,28 @@
 // frontend/resources/js/views/JobView.js
 
-import { createLabelValue, safeGetElementById } from '../domHelpers.js';
+import { createLabelValue, createTextElement, safeGetElementById } from '../domHelpers.js';
 import { displayShareableLink, hidePlaceholderMessage } from '../uiUtils.js';
 import { t } from '../i18n.js';
+
+// Functions, not constants: translate only after the locale's strings have loaded.
+const COVERAGE_QC_LABELS = () => ({
+  PASS: t('Pass'),
+  REDUCED: t('Reduced (a weak variant signal can be missed)'),
+  FAIL: t('Fail'),
+  NOT_EVALUATED: t('Not evaluated'),
+});
+
+// Grade tokens and wording from VNtyper report_config.json chip_labels.
+const CONFIDENCE_LABELS = () => ({
+  finding: t('Finding'),
+  'finding-corroborated': t('Finding, corroborated'),
+  'finding-limited': t('Finding, with caveats'),
+  'no-finding': t('No finding'),
+  'no-finding-limited': t('No finding, inconclusive'),
+  'not-established': t('No result'),
+});
+
+const note = text => createTextElement('p', text, { className: 'job-summary-note' });
 
 /**
  * Job View - Handles job UI rendering
@@ -115,6 +135,79 @@ export class JobView {
     downloadLink.download = `results_${jobId}.zip`;
 
     downloadContainer.appendChild(downloadLink);
+  }
+
+  /**
+   * Show coverage QC, confidence grade, subthreshold signal and the long-array
+   * note from a job's pipeline_summary.json. Fields an older backend does not
+   * write are skipped; a null summary (no /job-summary/ route) renders nothing.
+   * @param {string} jobId - Job ID
+   * @param {Object|null} summary - pipeline_summary.json, or null
+   */
+  showSummary(jobId, summary) {
+    const jobElement = this.jobElements.get(jobId);
+    if (!jobElement || !summary || typeof summary !== 'object') {
+      return;
+    }
+
+    const coverageQc = (Array.isArray(summary.steps) ? summary.steps : []).find(
+      step => step?.step === 'Coverage Calculation'
+    )?.parsed_result?.data?.[0]?.coverage_qc;
+    const grade = summary.confidence_grade;
+    const subthreshold = summary.subthreshold_signal;
+    const highThreshold = summary.length_sensitivity_policy?.high_threshold;
+
+    const rows = [];
+    if (coverageQc) {
+      const label = COVERAGE_QC_LABELS()[coverageQc] || coverageQc;
+      rows.push(createLabelValue(t('Coverage QC: '), label));
+    }
+    if (grade) {
+      rows.push(createLabelValue(t('Confidence: '), CONFIDENCE_LABELS()[grade] || grade));
+    }
+    if (subthreshold?.state === 'negative_subthreshold') {
+      const score = Number(subthreshold.best_depth_score);
+      rows.push(
+        note(
+          Number.isFinite(score)
+            ? t(
+                'A candidate variant was seen below the reporting threshold (best depth score {score}). It is not a call.',
+                { score: String(Number(score.toPrecision(3))) }
+              )
+            : t('A candidate variant was seen below the reporting threshold. It is not a call.')
+        )
+      );
+    }
+    if (summary.length_sensitivity_tier === 'high') {
+      rows.push(
+        note(
+          Number.isFinite(Number(highThreshold))
+            ? t(
+                'The VNTR array is estimated at over {threshold} repeats. Detection is less sensitive in long arrays, mostly for frameshifts other than dupC.',
+                { threshold: String(highThreshold) }
+              )
+            : t(
+                'The VNTR array is estimated to be long. Detection is less sensitive in long arrays, mostly for frameshifts other than dupC.'
+              )
+        )
+      );
+    }
+    if (rows.length === 0) {
+      return;
+    }
+
+    jobElement.querySelector('.job-summary')?.remove();
+    const panel = document.createElement('div');
+    panel.className = 'job-summary';
+    panel.append(
+      ...rows,
+      note(
+        t(
+          'Research use only. A negative result does not exclude ADTKD-MUC1. Only unflagged calls are positive: flagged calls carry transparency flags for review, and 4-bp insertion artifacts are filtered out and never count as positive.'
+        )
+      )
+    );
+    jobElement.querySelector('.job-download')?.after(panel);
   }
 
   /**

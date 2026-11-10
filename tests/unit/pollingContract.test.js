@@ -61,13 +61,14 @@ describe('PollingManager -> controller onError contract', () => {
       hideDownloadLink: vi.fn(),
       showError: vi.fn(),
       showDownloadLink: vi.fn(),
+      showSummary: vi.fn(),
       showJob: vi.fn(),
     };
     const emitted = [];
     const controller = new JobController({
       eventBus: { on: vi.fn(() => vi.fn()), emit: (e, p) => emitted.push([e, p]) },
       stateManager,
-      apiService: {},
+      apiService: { getJobSummary: vi.fn(async () => null) },
       jobView,
       errorView: { show: vi.fn() },
       pollingManager,

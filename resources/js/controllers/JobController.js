@@ -187,8 +187,7 @@ export class JobController extends BaseController {
     // Update state
     this.stateManager.updateJobStatus(jobId, 'completed');
 
-    // Show download link
-    this.jobView.showDownloadLink(jobId);
+    this.showResult(jobId);
 
     // Clean up UI
     hideSpinner();
@@ -196,6 +195,16 @@ export class JobController extends BaseController {
 
     // Emit completion event
     this.emit('job:completed', { jobId, statusData });
+  }
+
+  /**
+   * Show a completed job's download link, then its QC summary once fetched.
+   * @param {string} jobId - Job ID
+   * @returns {Promise<void>} Resolves when the summary is rendered (or unavailable)
+   */
+  async showResult(jobId) {
+    this.jobView.showDownloadLink(jobId);
+    this.jobView.showSummary(jobId, await this.apiService.getJobSummary(jobId));
   }
 
   /**

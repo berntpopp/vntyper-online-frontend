@@ -660,7 +660,7 @@ export class AppController extends BaseController {
         this.jobController.emit('job:poll', { jobId });
       } else if (job.isCompleted()) {
         // Show download link if already complete
-        this.jobController.jobView.showDownloadLink(jobId);
+        this.jobController.showResult(jobId);
       } else if (job.isFailed()) {
         // Show error if failed
         this.jobController.jobView.showError(jobId, statusData.error || t('Job failed'));

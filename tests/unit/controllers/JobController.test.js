@@ -54,6 +54,7 @@ describe('JobController', () => {
       submitJob: vi.fn(),
       getJobStatus: vi.fn(),
       pollJobStatus: vi.fn(),
+      getJobSummary: vi.fn(async () => null),
     };
 
     // Mock JobView
@@ -63,6 +64,7 @@ describe('JobController', () => {
       showDownloadLink: vi.fn(),
       hideDownloadLink: vi.fn(),
       showError: vi.fn(),
+      showSummary: vi.fn(),
     };
 
     // Mock ErrorView
@@ -405,6 +407,17 @@ describe('JobController', () => {
       expect(mockJobView.showDownloadLink).toHaveBeenCalledWith(jobId);
       expect(hideSpinner).toHaveBeenCalled();
       expect(clearCountdown).toHaveBeenCalled();
+    });
+
+    it('fetches the job summary and hands it to the view', async () => {
+      const summary = { confidence_grade: 'no-finding' };
+      mockAPIService.getJobSummary.mockResolvedValue(summary);
+
+      await jobController.showResult('job-9');
+
+      expect(mockJobView.showDownloadLink).toHaveBeenCalledWith('job-9');
+      expect(mockAPIService.getJobSummary).toHaveBeenCalledWith('job-9');
+      expect(mockJobView.showSummary).toHaveBeenCalledWith('job-9', summary);
     });
 
     it('should emit job:completed event', () => {
