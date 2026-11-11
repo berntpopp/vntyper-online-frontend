@@ -3,7 +3,12 @@
 // Import the logging and UI message functions
 import { logMessage } from './log.js';
 import { t } from './i18n.js';
-import { displayMessage, createSpinnerHTML, ensureSpinAnimation } from './uiUtils.js';
+import {
+  displayMessage,
+  appendWarningMessage,
+  createSpinnerHTML,
+  ensureSpinAnimation,
+} from './uiUtils.js';
 
 // Import assemblies and NCBI accession helper
 import { assemblies } from './assemblyConfigs.js';
@@ -1104,7 +1109,7 @@ export async function extractRegionAndIndex(CLI, pair, explicitRegion = null) {
 
         try {
           // Step 1: Extract unmapped reads using BGZF offset seeking (FAST!)
-          logMessage('📋 Step 1/3: Extracting unmapped reads (BGZF offset seeking)...', 'info');
+          logMessage('📋 Step 1/3: Extracting unplaced unmapped reads...', 'info');
 
           // ADDED: Check subset BAM before extraction
           const subsetStats = await CLI.fs.stat(subsetBamName);
@@ -1113,12 +1118,7 @@ export async function extractRegionAndIndex(CLI, pair, explicitRegion = null) {
             'info'
           );
 
-          const unmappedResult = await extractUnmappedReads(
-            CLI,
-            pair.bam,
-            pair.bai,
-            unmappedBamName
-          );
+          const unmappedResult = await extractUnmappedReads(CLI, bamPath, unmappedBamName);
 
           // Check if we have any unmapped reads
           if (unmappedResult.isEmpty || unmappedResult.size === 0) {
@@ -1131,20 +1131,6 @@ export async function extractRegionAndIndex(CLI, pair, explicitRegion = null) {
               `✅ Found ${unmappedResult.count} unmapped reads (${unmappedResult.sizeFormatted})`,
               'success'
             );
-
-            // ADDED: Verify unmapped BAM was written to virtual FS
-            try {
-              const unmappedStats = await CLI.fs.stat(unmappedBamName);
-              logMessage(
-                `✓ Unmapped BAM exists in virtual FS: ${unmappedBamName} (${(unmappedStats.size / 1024 / 1024).toFixed(2)} MB)`,
-                'info'
-              );
-            } catch (e) {
-              throw new Error(
-                `Unmapped BAM file ${unmappedBamName} not found in virtual FS: ${e.message}`,
-                { cause: e }
-              );
-            }
 
             // Step 2: Merge region subset + unmapped reads
             logMessage('📋 Step 2/3: Merging region subset + unmapped reads...', 'info');
@@ -1217,6 +1203,9 @@ export async function extractRegionAndIndex(CLI, pair, explicitRegion = null) {
           logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'warning');
           logMessage('Falling back to fast mode (region subset only).', 'warning');
           logMessage('Your analysis will continue but without unmapped reads.', 'warning');
+          appendWarningMessage(
+            t('Unmapped reads could not be added; the analysis uses the MUC1 region only.')
+          );
           logMessage('', 'warning');
 
           processingMode = 'normal-failed';

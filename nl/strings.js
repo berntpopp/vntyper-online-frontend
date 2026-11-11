@@ -15,6 +15,7 @@ window.I18N = {
   "No region selected.": "Geen regio geselecteerd.",
   "Processing...": "Verwerken...",
   "Failed to mount SAM file: {name}": "SAM-bestand kon niet worden gekoppeld: {name}",
+  "Unmapped reads could not be added; the analysis uses the MUC1 region only.": "Niet-gemapte reads konden niet worden toegevoegd; de analyse gebruikt alleen de MUC1-regio.",
   "Failed to create Blob from BAM file {file}.": "Blob kon niet worden aangemaakt uit BAM-bestand {file}.",
   "Failed to create Blob from BAI file {file}.": "Blob kon niet worden aangemaakt uit BAI-bestand {file}.",
   "Error: {message}": "Fout: {message}",

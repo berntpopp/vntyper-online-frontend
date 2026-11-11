@@ -74,11 +74,3 @@ interface Window {
   __di?: unknown;
   __eventBus?: unknown;
 }
-
-/**
- * pako is dynamically imported from Skypack at runtime for BGZF inflation.
- * Only inflateRaw is used.
- */
-declare module 'https://cdn.skypack.dev/pako@2.1.0' {
-  export function inflateRaw(data: Uint8Array): Uint8Array;
-}
