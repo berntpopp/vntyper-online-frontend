@@ -4,7 +4,7 @@ import { logMessage } from './log.js'; // Import the logMessage function
 import { t } from './i18n.js';
 
 // Frontend Version
-const frontendVersion = '0.73.0'; // Default adVNTR and normal mode on; VNtyper 2 naming
+const frontendVersion = '0.73.1'; // Default adVNTR and normal mode on; VNtyper 2 naming
 
 /**
  * Build the API version endpoint, or null when this page has no API config.
