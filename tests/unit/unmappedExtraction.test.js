@@ -1,22 +1,30 @@
 // tests/unit/unmappedExtraction.test.js
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { mergeBamFiles, validateBamFile } from '../../resources/js/unmappedExtraction.js';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync, statSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import {
+  extractUnmappedReads,
+  mergeBamFiles,
+  validateBamFile,
+  MAX_UNPLACED_BYTES,
+} from '../../resources/js/unmappedExtraction.js';
 
 // Mock the log module
 vi.mock('../../resources/js/log.js', () => ({
   logMessage: vi.fn(),
 }));
 
-/**
- * Note: extractUnmappedReads uses BGZF parsing with pako and requires real File objects
- * with arrayBuffer() method and actual BAI/BAM binary data. Testing this requires
- * complex binary fixtures and is better suited for integration tests.
- *
- * These unit tests focus on:
- * - mergeBamFiles: Uses samtools via CLI.exec
- * - validateBamFile: Simple file stat check
- */
+const hasSamtools = (() => {
+  try {
+    execFileSync('samtools', ['--version']);
+    return true;
+  } catch {
+    return false;
+  }
+})();
 
 describe('unmappedExtraction', () => {
   let mockCLI;
@@ -215,5 +223,104 @@ describe('unmappedExtraction', () => {
 
       expect(result).toBe(true);
     });
+  });
+
+  // ============================================================================
+  // extractUnmappedReads - samtools view '*' (unplaced unmapped block)
+  // ============================================================================
+
+  describe('extractUnmappedReads', () => {
+    it("requests the unplaced block with samtools view '*'", async () => {
+      mockCLI.exec.mockResolvedValueOnce('').mockResolvedValueOnce('42\n');
+      mockCLI.fs.stat.mockResolvedValue({ size: 2048 });
+
+      const result = await extractUnmappedReads(mockCLI, '/data/s.bam', 'u.bam');
+
+      expect(mockCLI.exec).toHaveBeenNthCalledWith(1, 'samtools', [
+        'view',
+        '-b',
+        '-o',
+        'u.bam',
+        '/data/s.bam',
+        '*',
+      ]);
+      expect(result).toMatchObject({ path: 'u.bam', size: 2048, count: 42, isEmpty: false });
+    });
+
+    it('reports an empty block', async () => {
+      mockCLI.exec.mockResolvedValueOnce('').mockResolvedValueOnce('0\n');
+      mockCLI.fs.stat.mockResolvedValue({ size: 100 });
+
+      const result = await extractUnmappedReads(mockCLI, 's.bam', 'u.bam');
+
+      expect(result.isEmpty).toBe(true);
+    });
+
+    it('rejects a block over the upload limit', async () => {
+      mockCLI.exec.mockResolvedValue('');
+      mockCLI.fs.stat.mockResolvedValue({ size: MAX_UNPLACED_BYTES + 1 });
+
+      await expect(extractUnmappedReads(mockCLI, 's.bam', 'u.bam')).rejects.toThrow(
+        'exceed the upload limit'
+      );
+    });
+
+    it.skipIf(!hasSamtools)(
+      'returns exactly the unplaced reads of samtools view -f 4',
+      async () => {
+        const dir = mkdtempSync(join(tmpdir(), 'unplaced-'));
+        try {
+          const seq = 'ACGTACGTAC';
+          const qual = 'IIIIIIIIII';
+          const sam = [
+            '@HD\tVN:1.6\tSO:coordinate',
+            '@SQ\tSN:chr1\tLN:1000',
+            '@SQ\tSN:chr2\tLN:1000',
+            `mapped\t99\tchr1\t100\t60\t10M\t=\t300\t210\t${seq}\t${qual}`,
+            `mateplaced\t73\tchr1\t200\t60\t10M\t=\t200\t0\t${seq}\t${qual}`,
+            `mateplaced\t133\tchr1\t200\t0\t*\t=\t200\t0\t${seq}\t${qual}`,
+            `mapped\t147\tchr1\t300\t60\t10M\t=\t100\t-210\t${seq}\t${qual}`,
+            `last\t0\tchr2\t500\t60\t10M\t*\t0\t0\t${seq}\t${qual}`,
+            `unplacedA\t77\t*\t0\t0\t*\t*\t0\t0\t${seq}\t${qual}`,
+            `unplacedA\t141\t*\t0\t0\t*\t*\t0\t0\t${seq}\t${qual}`,
+            `unplacedB\t4\t*\t0\t0\t*\t*\t0\t0\t${seq}\t${qual}`,
+          ].join('\n');
+          const bam = join(dir, 'in.bam');
+          writeFileSync(join(dir, 'in.sam'), `${sam}\n`);
+          execFileSync('samtools', ['view', '-b', '-o', bam, join(dir, 'in.sam')]);
+          execFileSync('samtools', ['index', bam]);
+
+          // Node stand-in for the Aioli CLI: same exec/fs.stat surface, real samtools.
+          const cli = {
+            exec: async (cmd, args) => execFileSync(cmd, args, { encoding: 'utf8' }),
+            fs: { stat: async p => statSync(p) },
+          };
+          const out = join(dir, 'u.bam');
+          const result = await extractUnmappedReads(cli, bam, out);
+
+          const reads = file =>
+            execFileSync('samtools', ['view', file], { encoding: 'utf8' })
+              .trim()
+              .split('\n')
+              .map(l => l.split('\t'))
+              .filter(f => f[2] === '*')
+              .map(f => `${f[0]}/${f[1]}`)
+              .sort();
+          const expected = execFileSync('samtools', ['view', '-f', '4', bam], { encoding: 'utf8' })
+            .trim()
+            .split('\n')
+            .map(l => l.split('\t'))
+            .filter(f => f[2] === '*')
+            .map(f => `${f[0]}/${f[1]}`)
+            .sort();
+
+          expect(expected).toEqual(['unplacedA/141', 'unplacedA/77', 'unplacedB/4']);
+          expect(reads(out)).toEqual(expected);
+          expect(result.count).toBe(3);
+        } finally {
+          rmSync(dir, { recursive: true, force: true });
+        }
+      }
+    );
   });
 });

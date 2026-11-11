@@ -15,6 +15,7 @@ window.I18N = {
   "No region selected.": "Nessuna regione selezionata.",
   "Processing...": "Elaborazione in corso...",
   "Failed to mount SAM file: {name}": "Impossibile montare il file SAM: {name}",
+  "Unmapped reads could not be added; the analysis uses the MUC1 region only.": "Non è stato possibile aggiungere le letture non allineate; l'analisi usa solo la regione MUC1.",
   "Failed to create Blob from BAM file {file}.": "Impossibile creare il Blob dal file BAM {file}.",
   "Failed to create Blob from BAI file {file}.": "Impossibile creare il Blob dal file BAI {file}.",
   "Error: {message}": "Errore: {message}",

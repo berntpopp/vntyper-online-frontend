@@ -191,11 +191,11 @@ export default defineConfig([
   {
     files: ['resources/js/bamProcessing.js'],
     rules: {
-      // The file measures exactly 906 effective lines. The ceiling is 910 so a
+      // The file measures exactly 901 effective lines. The ceiling is 905 so a
       // JSDoc annotation can be added without contorting it onto one line to
       // dodge Prettier's wrap - a zero-headroom cap forces exactly that.
       // This number must only ever go DOWN. Lower it as logic is extracted.
-      'max-lines': ['error', { max: 910, skipBlankLines: true, skipComments: true }],
+      'max-lines': ['error', { max: 905, skipBlankLines: true, skipComments: true }],
     },
   },
 
