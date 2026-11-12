@@ -114,6 +114,13 @@ describe('buildDonation', () => {
     expect(Object.keys(d)).toEqual(CONTRACT_KEYS);
   });
 
+  it('atypical dupC at another position is other, not canonical dupC', () => {
+    for (const name of ['23dupC', '56_59dupCCCC', '159dupC']) {
+      const d = donate(kestrel(`D-C\t67\t0.02\tHigh_Precision\tNot flagged\t${name}`));
+      expect(d.variant_class).toBe('other');
+    }
+  });
+
   it('other variant: positive call with a non-dupC nomenclature', () => {
     const d = donate(kestrel('D-C\t67\t0.006\tLow_Precision\tNot flagged\t56_59dupCCCC'));
     expect(d).toMatchObject({

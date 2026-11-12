@@ -154,7 +154,7 @@ export function buildDonation(members, form) {
     depth_score_bin: scored ? binOf(num(scored.Depth_Score), SCORE_EDGES) : null,
     // Exact nomenclature never leaves the browser: canonical dupC vs any other call.
     variant_class: positive
-      ? /dupC(?!C)/.test(positive.Nomenclature ?? '')
+      ? /(?:^|[^\d_])59dupC(?!C)/.test(positive.Nomenclature ?? '')
         ? 'dupC'
         : 'other'
       : 'none',
