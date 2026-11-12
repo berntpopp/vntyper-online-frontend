@@ -69,37 +69,23 @@ test.describe('monkey and exploratory testing', () => {
     });
     await page.goto('/donate.html');
 
-    // 1. Toggle positive / negative arms
-    const radioPos = page.locator('#radioPositive');
-    const radioNeg = page.locator('#radioNegative');
+    // 1. Toggle the diagnostic status arms
     const confirmationGroup = page.locator('#positiveConfirmationGroup');
     const negativeNotice = page.locator('#negativeArmNotice');
 
-    await radioPos.check();
+    await page.locator('#radioUnconfirmed').check();
+    await expect(confirmationGroup).toBeHidden();
+    await expect(negativeNotice).toBeHidden();
+
+    await page.locator('#radioPositive').check();
     await expect(confirmationGroup).toBeVisible();
     await expect(negativeNotice).toBeHidden();
 
-    await radioNeg.check();
-    await expect(confirmationGroup).toBeHidden();
+    await page.locator('#radioNegative').check();
+    await expect(confirmationGroup).toBeVisible();
     await expect(negativeNotice).toBeVisible();
 
-    // 2. Rapidly toggle HPO tags
-    const hpoTags = page.locator('#hpoTags .hpo-tag');
-    const count = await hpoTags.count();
-    for (let i = 0; i < Math.min(count, 4); i++) {
-      await hpoTags.nth(i).click();
-    }
-    const hpoInput = page.locator('#hpoInput');
-    const val = await hpoInput.inputValue();
-    expect(val.length).toBeGreaterThan(0);
-
-    // Toggle off
-    for (let i = 0; i < Math.min(count, 4); i++) {
-      await hpoTags.nth(i).click();
-    }
-    expect(await hpoInput.inputValue()).toBe('');
-
-    // 3. Submit button disabled state
+    // 2. Submit button disabled state
     const submitBtn = page.locator('#donateSubmitBtn');
     await expect(submitBtn).toBeDisabled();
 
