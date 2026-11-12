@@ -49,6 +49,7 @@ window.I18N = {
   "Job {id} not found": "Taak {id} niet gevonden",
   "Job Retry": "Taak opnieuw proberen",
   "Disclaimer": "Disclaimer",
+  "The VNtyper call in this result has no readable depth score, so it cannot be donated.": "De VNtyper-call in dit resultaat heeft geen leesbare depth score en kan daarom niet worden gedoneerd.",
   "This file could not be read as a VNtyper result ZIP.": "Dit bestand kon niet worden gelezen als VNtyper-resultaat-ZIP.",
   "Sending donation...": "Donatie wordt verzonden...",
   "Server responded with {status}: {statusText}": "Server antwoordde met {status}: {statusText}",

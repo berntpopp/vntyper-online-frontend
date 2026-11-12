@@ -49,6 +49,7 @@ window.I18N = {
   "Job {id} not found": "Job {id} non trovato",
   "Job Retry": "Nuovo tentativo job",
   "Disclaimer": "Disclaimer",
+  "The VNtyper call in this result has no readable depth score, so it cannot be donated.": "La chiamata VNtyper in questo risultato non ha un punteggio di profondità leggibile, quindi non può essere donata.",
   "This file could not be read as a VNtyper result ZIP.": "Impossibile leggere questo file come ZIP dei risultati VNtyper.",
   "Sending donation...": "Invio della donazione...",
   "Server responded with {status}: {statusText}": "Il server ha risposto con {status}: {statusText}",

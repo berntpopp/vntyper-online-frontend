@@ -1,7 +1,7 @@
 // frontend/resources/js/donate.js
 
 import { safeStorage } from './utils/safeStorage.js';
-import { readZipMembers, buildDonation } from './utils/donationPayload.js';
+import { readZipMembers, buildDonation, NO_DEPTH_SCORE } from './utils/donationPayload.js';
 import { t } from './i18n.js';
 
 /**
@@ -106,7 +106,7 @@ export function initDonatePage() {
     const field = (/** @type {string} */ id) => /** @type {HTMLSelectElement} */ ($(id))?.value;
     const truth = /** @type {RadioNodeList} */ (donationForm.elements.namedItem('truth')).value;
     try {
-      const members = await readZipMembers(await file.arrayBuffer());
+      const members = await readZipMembers(file);
       payload = buildDonation(members, {
         kit: field('kitSelect'),
         platform_class: field('platformSelect'),
@@ -115,8 +115,13 @@ export function initDonatePage() {
         referral: field('referralSelect') || undefined,
       });
     } catch (err) {
-      const reason = t('This file could not be read as a VNtyper result ZIP.');
-      setStatus(`${reason} (${err.message})`, '#c0392b');
+      const reason =
+        err.message === NO_DEPTH_SCORE
+          ? t(
+              'The VNtyper call in this result has no readable depth score, so it cannot be donated.'
+            )
+          : `${t('This file could not be read as a VNtyper result ZIP.')} (${err.message})`;
+      setStatus(reason, '#c0392b');
       return;
     }
     if (preview) preview.textContent = JSON.stringify(payload, null, 2);

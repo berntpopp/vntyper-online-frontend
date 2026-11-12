@@ -7,6 +7,7 @@ import {
   binOf,
   SCORE_EDGES,
   DEPTH_EDGES,
+  NO_DEPTH_SCORE,
 } from '../../../resources/js/utils/donationPayload.js';
 import { makeZip } from '../../e2e/fixtures/zip.js';
 
@@ -58,15 +59,39 @@ describe('readZipMembers', () => {
       },
       d
     );
-    const members = await readZipMembers(zip);
+    const members = await readZipMembers(new Blob([zip]));
     expect(Object.keys(members).sort()).toEqual(['coverage_summary.tsv', 'kestrel_result.tsv']);
     expect(members['coverage_summary.tsv']).toBe(COVERAGE);
   });
 
+  it('slices only the directory and the two members, never a large BAM', async () => {
+    const bam = 'B'.repeat(4_000_000);
+    const zip = new Blob([
+      await makeZip({
+        'fastq_bam_processing/big.bam': bam,
+        'coverage/coverage_summary.tsv': COVERAGE,
+        'kestrel/kestrel_result.tsv': NEGATIVE,
+      }),
+    ]);
+    /** @type {number[]} */
+    const read = [];
+    const file = {
+      size: zip.size,
+      slice: (/** @type {number} */ a, /** @type {number} */ b) => {
+        read.push(b - a);
+        return zip.slice(a, b);
+      },
+      arrayBuffer: () => {
+        throw new Error('whole file read');
+      },
+    };
+    const members = await readZipMembers(/** @type {any} */ (file));
+    expect(Object.keys(members).sort()).toEqual(['coverage_summary.tsv', 'kestrel_result.tsv']);
+    expect(Math.max(...read)).toBeLessThan(70_000);
+  });
+
   it('rejects a file that is not a ZIP', async () => {
-    await expect(readZipMembers(new TextEncoder().encode('not a zip').buffer)).rejects.toThrow(
-      'Not a ZIP'
-    );
+    await expect(readZipMembers(new Blob(['not a zip']))).rejects.toThrow('Not a ZIP');
   });
 });
 
@@ -142,6 +167,12 @@ describe('buildDonation', () => {
       referral: 'suspected_adtkd',
     });
     expect(Object.keys(d)).toEqual([...CONTRACT_KEYS, 'referral']);
+  });
+
+  it('refuses a positive call without a readable Depth_Score', () => {
+    expect(() => donate(kestrel('D-C\t67\tNone\tHigh_Precision\tNot flagged\t59dupC'))).toThrow(
+      NO_DEPTH_SCORE
+    );
   });
 
   it('missing coverage summary gives NA, missing kestrel result throws', () => {

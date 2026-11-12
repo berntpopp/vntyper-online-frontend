@@ -15,6 +15,9 @@ const WANTED = ['coverage_summary.tsv', 'kestrel_result.tsv'];
 const ARTIFACT_FLAGS = ['False_Positive_4bp_Insertion'];
 const CALL_CONFIDENCE = ['High_Precision', 'Low_Precision'];
 
+// A positive call without a depth score is refused here rather than by the server (422).
+export const NO_DEPTH_SCORE = 'The call in this result has no readable depth score';
+
 export const DEPTH_EDGES = [20, 40, 60, 80, 100, 150, 200, 300, 500];
 // Fine around the 0.00469 / 0.00515 confidence gates, coarse elsewhere.
 export const SCORE_EDGES = [
@@ -22,19 +25,26 @@ export const SCORE_EDGES = [
 ];
 
 /**
- * Read selected members of a ZIP archive by basename, in memory.
+ * Read selected members of a ZIP archive by basename. Only the directory and the
+ * wanted members are sliced from the file, so large BAM members are never read.
  * ponytail: no ZIP64; VNtyper result ZIPs stay far below 4 GB.
- * @param {ArrayBuffer} buf - The whole ZIP file
+ * @param {Blob} file - The ZIP file
  * @param {string[]} [wanted] - Basenames to extract
  * @returns {Promise<Record<string, string>>} Basename to decoded text, first match wins
  */
-export async function readZipMembers(buf, wanted = WANTED) {
-  const dv = new DataView(buf);
-  let eocd = buf.byteLength - 22;
-  while (eocd >= 0 && dv.getUint32(eocd, true) !== 0x06054b50) eocd--;
+export async function readZipMembers(file, wanted = WANTED) {
+  /** @param {number} start @param {number} end */
+  const view = async (start, end) => new DataView(await file.slice(start, end).arrayBuffer());
+  // The end record is the last 22 bytes plus an optional comment of up to 64 KiB.
+  const tailStart = Math.max(0, file.size - 22 - 0xffff);
+  const tail = await view(tailStart, file.size);
+  let eocd = tail.byteLength - 22;
+  while (eocd >= 0 && tail.getUint32(eocd, true) !== 0x06054b50) eocd--;
   if (eocd < 0) throw new Error('Not a ZIP archive');
-  const count = dv.getUint16(eocd + 10, true);
-  let p = dv.getUint32(eocd + 16, true);
+  const count = tail.getUint16(eocd + 10, true);
+  const cdStart = tail.getUint32(eocd + 16, true);
+  const dv = await view(cdStart, cdStart + tail.getUint32(eocd + 12, true));
+  let p = 0;
   /** @type {Record<string, string>} */
   const out = {};
   for (let i = 0; i < count; i++) {
@@ -43,19 +53,19 @@ export async function readZipMembers(buf, wanted = WANTED) {
     const size = dv.getUint32(p + 20, true);
     const nameLen = dv.getUint16(p + 28, true);
     const local = dv.getUint32(p + 42, true);
-    const name = new TextDecoder().decode(new Uint8Array(buf, p + 46, nameLen));
+    const name = new TextDecoder().decode(new Uint8Array(dv.buffer, p + 46, nameLen));
     p += 46 + nameLen + dv.getUint16(p + 30, true) + dv.getUint16(p + 32, true);
     const base = name.split('/').pop();
     if (!wanted.includes(base) || base in out) continue;
     if (method !== 0 && method !== 8) throw new Error(`Unsupported ZIP compression ${method}`);
-    const start = local + 30 + dv.getUint16(local + 26, true) + dv.getUint16(local + 28, true);
-    const raw = new Uint8Array(buf, start, size);
-    const bytes =
-      method === 0
-        ? raw
-        : await new Response(
-            new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'))
-          ).arrayBuffer();
+    const lh = await view(local, local + 30);
+    const start = local + 30 + lh.getUint16(26, true) + lh.getUint16(28, true);
+    const raw = file.slice(start, start + size);
+    const bytes = await (method === 0
+      ? raw.arrayBuffer()
+      : new Response(
+          raw.stream().pipeThrough(new DecompressionStream('deflate-raw'))
+        ).arrayBuffer());
     out[base] = new TextDecoder().decode(bytes);
   }
   return out;
@@ -127,6 +137,7 @@ export function buildDonation(members, form) {
   const positive = calls.find(row => !row.Flag || row.Flag === 'Not flagged');
   const flagged = calls.find(row => row !== positive);
   const scored = positive ?? flagged;
+  if (positive && !Number.isFinite(num(positive.Depth_Score))) throw new Error(NO_DEPTH_SCORE);
 
   const cov = rows(members['coverage_summary.tsv'] ?? '')[0] ?? {};
   const qc = { PASS: 'PASS', REDUCED: 'REDUCED', FAIL: 'FAIL' }[cov.coverage_qc] ?? 'NA';
