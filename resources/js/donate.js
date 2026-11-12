@@ -1,44 +1,31 @@
 // frontend/resources/js/donate.js
 
 import { safeStorage } from './utils/safeStorage.js';
+import { readZipMembers, buildDonation, NO_DEPTH_SCORE } from './utils/donationPayload.js';
 import { t } from './i18n.js';
 
 /**
- * Initializes the Data Donation page, handling consent, form validation,
- * controlled vocabularies, and submission to the backend API.
+ * Initializes the Data Donation page: the result ZIP is reduced in the browser
+ * to a small binned record, shown to the donor, and only that JSON is sent.
+ * @returns {void}
  */
 export function initDonatePage() {
-  const donationActiveContainer = document.getElementById('donationActiveContainer');
-  const donationDisabledMsg = document.getElementById('donationDisabledMsg');
-  const donationForm = /** @type {HTMLFormElement | null} */ (
-    document.getElementById('donationForm')
-  );
-  const gdprConsent = /** @type {HTMLInputElement | null} */ (
-    document.getElementById('gdprConsent')
-  );
-  const archiveFileInput = /** @type {HTMLInputElement | null} */ (
-    document.getElementById('archiveFile')
-  );
-  const submitBtn = /** @type {HTMLButtonElement | null} */ (
-    document.getElementById('donateSubmitBtn')
-  );
-  const statusText = document.getElementById('donationStatusText');
-  const radioNegative = /** @type {HTMLInputElement | null} */ (
-    document.getElementById('radioNegative')
-  );
-  const radioPositive = /** @type {HTMLInputElement | null} */ (
-    document.getElementById('radioPositive')
-  );
-  const negativeArmNotice = document.getElementById('negativeArmNotice');
-  const positiveConfirmationGroup = document.getElementById('positiveConfirmationGroup');
-  const confirmationSelect = /** @type {HTMLSelectElement | null} */ (
-    document.getElementById('confirmationSelect')
-  );
-  const hpoInput = /** @type {HTMLInputElement | null} */ (document.getElementById('hpoInput'));
-  const hpoTagsContainer = document.getElementById('hpoTags');
-  const donationSuccessCard = document.getElementById('donationSuccessCard');
-  const dispDonationId = document.getElementById('dispDonationId');
-  const dispRunId = document.getElementById('dispRunId');
+  const $ = (/** @type {string} */ id) => /** @type {any} */ (document.getElementById(id));
+  const donationActiveContainer = $('donationActiveContainer');
+  const donationDisabledMsg = $('donationDisabledMsg');
+  const donationForm = /** @type {HTMLFormElement | null} */ ($('donationForm'));
+  const gdprConsent = /** @type {HTMLInputElement | null} */ ($('gdprConsent'));
+  const archiveFileInput = /** @type {HTMLInputElement | null} */ ($('archiveFile'));
+  const submitBtn = /** @type {HTMLButtonElement | null} */ ($('donateSubmitBtn'));
+  const sendBtn = /** @type {HTMLButtonElement | null} */ ($('donateSendBtn'));
+  const statusText = $('donationStatusText');
+  const radioNegative = /** @type {HTMLInputElement | null} */ ($('radioNegative'));
+  const negativeArmNotice = $('negativeArmNotice');
+  const confirmationGroup = $('positiveConfirmationGroup');
+  const confirmationSelect = /** @type {HTMLSelectElement | null} */ ($('confirmationSelect'));
+  const previewSection = $('donationPreviewSection');
+  const preview = $('donationPreview');
+  const donationSuccessCard = $('donationSuccessCard');
 
   if (!donationForm) return;
 
@@ -77,159 +64,99 @@ export function initDonatePage() {
     });
   }
 
-  // 2. Positive vs Negative finding toggle
-  function updateFindingUI() {
-    const isPositive = radioPositive?.checked;
-    if (isPositive) {
-      positiveConfirmationGroup?.classList.remove('hidden');
-      negativeArmNotice?.classList.add('hidden');
-      if (confirmationSelect) confirmationSelect.required = true;
-    } else {
-      positiveConfirmationGroup?.classList.add('hidden');
-      negativeArmNotice?.classList.remove('hidden');
-      if (confirmationSelect) {
-        confirmationSelect.required = false;
-        confirmationSelect.value = '';
-      }
+  /** @type {Record<string, string | boolean | null> | null} */
+  let payload = null;
+
+  /** @param {string} message @param {string} [color] */
+  function setStatus(message, color = '#475569') {
+    if (statusText) {
+      statusText.textContent = message;
+      statusText.style.color = color;
     }
   }
 
-  radioNegative?.addEventListener('change', updateFindingUI);
-  radioPositive?.addEventListener('change', updateFindingUI);
+  // 2. Any change invalidates a shown record and re-evaluates the controls.
+  function updateFormState() {
+    const truth = donationForm.elements.namedItem('truth');
+    const unconfirmed = /** @type {RadioNodeList} */ (truth)?.value === 'unconfirmed';
+    confirmationGroup?.classList.toggle('hidden', unconfirmed);
+    if (confirmationSelect) {
+      confirmationSelect.required = !unconfirmed;
+      if (unconfirmed) confirmationSelect.value = '';
+    }
+    negativeArmNotice?.classList.toggle('hidden', !radioNegative?.checked);
 
-  // 3. HPO tag helper
-  if (hpoTagsContainer && hpoInput) {
-    hpoTagsContainer.addEventListener('click', e => {
-      const target = /** @type {HTMLElement | null} */ (e.target);
-      if (target && target.classList.contains('hpo-tag')) {
-        const hpoCode = target.getAttribute('data-hpo');
-        if (!hpoCode) return;
-
-        let currentTerms = hpoInput.value
-          .split(',')
-          .map(t => t.trim().toUpperCase())
-          .filter(Boolean);
-
-        if (currentTerms.includes(hpoCode)) {
-          currentTerms = currentTerms.filter(t => t !== hpoCode);
-          target.classList.remove('active');
-        } else {
-          currentTerms.push(hpoCode);
-          target.classList.add('active');
-        }
-        hpoInput.value = currentTerms.join(', ');
-      }
-    });
-  }
-
-  // 4. Form validation & submit enabling
-  function validateFormState() {
-    const hasConsent = Boolean(gdprConsent?.checked);
-    const hasFile = Boolean(archiveFileInput?.files && archiveFileInput.files.length > 0);
+    payload = null;
+    previewSection?.classList.add('hidden');
     if (submitBtn) {
-      submitBtn.disabled = !(hasConsent && hasFile);
+      submitBtn.disabled = !(gdprConsent?.checked && archiveFileInput?.files?.length);
     }
   }
 
-  gdprConsent?.addEventListener('change', validateFormState);
-  archiveFileInput?.addEventListener('change', validateFormState);
+  gdprConsent?.addEventListener('change', updateFormState);
+  donationForm.addEventListener('change', updateFormState);
+  updateFormState();
 
-  // 5. Submit Handler
+  // 3. Review: read the ZIP locally and show the exact record.
   donationForm.addEventListener('submit', async e => {
     e.preventDefault();
-
-    if (!gdprConsent?.checked) {
-      alert(t('GDPR explicit consent is required to donate data.'));
-      return;
-    }
-
     const file = archiveFileInput?.files?.[0];
-    if (!file) {
-      alert(t('Please select a result ZIP archive to donate.'));
+    if (!gdprConsent?.checked || !file) return;
+
+    const field = (/** @type {string} */ id) => /** @type {HTMLSelectElement} */ ($(id))?.value;
+    const truth = /** @type {RadioNodeList} */ (donationForm.elements.namedItem('truth')).value;
+    try {
+      const members = await readZipMembers(file);
+      payload = buildDonation(members, {
+        kit: field('kitSelect'),
+        platform_class: field('platformSelect'),
+        truth,
+        confirmation_class: truth === 'unconfirmed' ? 'none' : field('confirmationSelect'),
+        referral: field('referralSelect') || undefined,
+      });
+    } catch (err) {
+      const reason =
+        err.message === NO_DEPTH_SCORE
+          ? t(
+              'The VNtyper call in this result has no readable depth score, so it cannot be donated.'
+            )
+          : `${t('This file could not be read as a VNtyper result ZIP.')} (${err.message})`;
+      setStatus(reason, '#c0392b');
       return;
     }
+    if (preview) preview.textContent = JSON.stringify(payload, null, 2);
+    previewSection?.classList.remove('hidden');
+    if (sendBtn) sendBtn.disabled = false;
+    setStatus('');
+    previewSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 
-    if (!file.name.toLowerCase().endsWith('.zip')) {
-      alert(t('Please select a valid .zip result file.'));
-      return;
-    }
-
-    const kitSelect = /** @type {HTMLSelectElement | null} */ (
-      document.getElementById('kitSelect')
-    );
-    const platformSelect = /** @type {HTMLSelectElement | null} */ (
-      document.getElementById('platformSelect')
-    );
-    const sexSelect = /** @type {HTMLSelectElement | null} */ (
-      document.getElementById('sexSelect')
-    );
-    const collectionMonthInput = /** @type {HTMLInputElement | null} */ (
-      document.getElementById('collectionMonth')
-    );
-
-    const isPositive = Boolean(radioPositive?.checked);
-    const confirmationMethod = isPositive ? confirmationSelect?.value : null;
-
-    if (isPositive && (!confirmationMethod || !confirmationMethod.trim())) {
-      alert(t('Confirmation method is required for positive findings.'));
-      return;
-    }
-
-    if (submitBtn) submitBtn.disabled = true;
-    if (statusText) {
-      statusText.textContent = t('Verifying and uploading donation...');
-      statusText.style.color = '#005f73';
-    }
-
-    const formData = new FormData();
-    formData.append('archive', file);
-    formData.append('consent', 'true');
-    formData.append('kit', kitSelect?.value || '');
-    formData.append('sequencing_platform', platformSelect?.value || '');
-    formData.append('positive_call', isPositive ? 'true' : 'false');
-    if (confirmationMethod) {
-      formData.append('confirmation_method', confirmationMethod);
-    }
-    if (hpoInput?.value.trim()) {
-      formData.append('phenotype_hpo', hpoInput.value.trim());
-    }
-    if (sexSelect?.value) {
-      formData.append('sex', sexSelect.value);
-    }
-    if (collectionMonthInput?.value) {
-      formData.append('collection_month', collectionMonthInput.value);
-    }
-
+  // 4. Send: only the record shown above, as JSON.
+  sendBtn?.addEventListener('click', async () => {
+    if (!payload || !gdprConsent?.checked) return;
+    sendBtn.disabled = true;
+    setStatus(t('Sending donation...'), '#005f73');
     try {
       const res = await fetch(`${apiUrl}/donations/`, {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
-
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
         throw new Error(
-          errData.detail ||
-            t('Server responded with {status}: {statusText}', {
-              status: res.status,
-              statusText: res.statusText,
-            })
+          t('Server responded with {status}: {statusText}', {
+            status: res.status,
+            statusText: res.statusText,
+          })
         );
       }
-
-      const responseData = await res.json();
       donationForm.classList.add('hidden');
-      if (donationSuccessCard) {
-        donationSuccessCard.classList.remove('hidden');
-        if (dispDonationId) dispDonationId.textContent = responseData.donation_id;
-        if (dispRunId) dispRunId.textContent = responseData.run_id;
-      }
+      previewSection?.classList.add('hidden');
+      document.querySelector('.consent-banner')?.classList.add('hidden');
+      donationSuccessCard?.classList.remove('hidden');
     } catch (err) {
-      if (statusText) {
-        statusText.textContent = t('Error: {message}', { message: err.message });
-        statusText.style.color = '#c0392b';
-      }
-      if (submitBtn) submitBtn.disabled = false;
+      setStatus(t('Error: {message}', { message: err.message }), '#c0392b');
+      sendBtn.disabled = false;
     }
   });
 }

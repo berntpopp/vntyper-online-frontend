@@ -14,27 +14,18 @@ describe('donate.js', () => {
         <input type="checkbox" id="gdprConsent">
         <form id="donationForm">
           <input type="file" id="archiveFile">
-          <select id="kitSelect"><option value="Twist Exome 2.0">Twist Exome 2.0</option></select>
-          <select id="platformSelect"><option value="Illumina NovaSeq 6000">Illumina NovaSeq 6000</option></select>
-          <input type="radio" name="finding_call" id="radioNegative" checked>
-          <input type="radio" name="finding_call" id="radioPositive">
+          <input type="radio" name="truth" value="confirmed_negative" id="radioNegative" checked>
+          <input type="radio" name="truth" value="confirmed_positive" id="radioPositive">
+          <input type="radio" name="truth" value="unconfirmed" id="radioUnconfirmed">
           <div id="negativeArmNotice"></div>
-          <div id="positiveConfirmationGroup" class="hidden">
-            <select id="confirmationSelect"><option value="Sanger">Sanger</option></select>
+          <div id="positiveConfirmationGroup">
+            <select id="confirmationSelect"><option value="long_read">Long</option></select>
           </div>
-          <input type="month" id="collectionMonth" value="2024-05">
-          <select id="sexSelect"><option value="XX">XX</option></select>
-          <input type="text" id="hpoInput">
-          <div id="hpoTags">
-            <span class="hpo-tag" data-hpo="HP:0000112">HP:0000112</span>
-          </div>
-          <button type="submit" id="donateSubmitBtn" disabled>Submit</button>
+          <button type="submit" id="donateSubmitBtn" disabled>Review</button>
           <span id="donationStatusText"></span>
         </form>
-        <div id="donationSuccessCard" class="hidden">
-          <span id="dispDonationId"></span>
-          <span id="dispRunId"></span>
-        </div>
+        <section id="donationPreviewSection" class="hidden"><pre id="donationPreview"></pre></section>
+        <div id="donationSuccessCard" class="hidden"></div>
       </div>
     `;
   });
@@ -44,7 +35,7 @@ describe('donate.js', () => {
     vi.restoreAllMocks();
   });
 
-  it('enables submit button only when consent is checked and file is selected', () => {
+  it('enables review only when consent is checked and a file is selected', () => {
     initDonatePage();
 
     const consent = document.getElementById('gdprConsent');
@@ -54,57 +45,36 @@ describe('donate.js', () => {
     expect(submitBtn.disabled).toBe(true);
 
     consent.checked = true;
-    consent.dispatchEvent(new Event('change'));
+    consent.dispatchEvent(new Event('change', { bubbles: true }));
     expect(submitBtn.disabled).toBe(true);
 
-    // Mock file list
-    const file = new File(['fake zip content'], 'results.zip', { type: 'application/zip' });
-    Object.defineProperty(fileInput, 'files', {
-      value: [file],
-      writable: true,
-    });
-    fileInput.dispatchEvent(new Event('change'));
+    const file = new File(['zip'], 'results.zip', { type: 'application/zip' });
+    Object.defineProperty(fileInput, 'files', { value: [file] });
+    fileInput.dispatchEvent(new Event('change', { bubbles: true }));
 
     expect(submitBtn.disabled).toBe(false);
   });
 
-  it('toggles positive confirmation group and negative notice on radio change', () => {
+  it('hides the confirmation method for unconfirmed samples', () => {
     initDonatePage();
 
-    const radioNeg = document.getElementById('radioNegative');
-    const radioPos = document.getElementById('radioPositive');
-    const negNotice = document.getElementById('negativeArmNotice');
-    const posGroup = document.getElementById('positiveConfirmationGroup');
+    const unconfirmed = document.getElementById('radioUnconfirmed');
+    const positive = document.getElementById('radioPositive');
+    const group = document.getElementById('positiveConfirmationGroup');
+    const notice = document.getElementById('negativeArmNotice');
 
-    expect(posGroup.classList.contains('hidden')).toBe(true);
-    expect(negNotice.classList.contains('hidden')).toBe(false);
+    expect(group.classList.contains('hidden')).toBe(false);
+    expect(notice.classList.contains('hidden')).toBe(false);
 
-    radioPos.checked = true;
-    radioPos.dispatchEvent(new Event('change'));
+    unconfirmed.checked = true;
+    unconfirmed.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(group.classList.contains('hidden')).toBe(true);
+    expect(document.getElementById('confirmationSelect').required).toBe(false);
 
-    expect(posGroup.classList.contains('hidden')).toBe(false);
-    expect(negNotice.classList.contains('hidden')).toBe(true);
-
-    radioNeg.checked = true;
-    radioNeg.dispatchEvent(new Event('change'));
-
-    expect(posGroup.classList.contains('hidden')).toBe(true);
-    expect(negNotice.classList.contains('hidden')).toBe(false);
-  });
-
-  it('toggles HPO tags into the hpoInput field', () => {
-    initDonatePage();
-
-    const tag = document.querySelector('.hpo-tag');
-    const input = document.getElementById('hpoInput');
-
-    tag.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    expect(input.value).toBe('HP:0000112');
-    expect(tag.classList.contains('active')).toBe(true);
-
-    tag.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    expect(input.value).toBe('');
-    expect(tag.classList.contains('active')).toBe(false);
+    positive.checked = true;
+    positive.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(group.classList.contains('hidden')).toBe(false);
+    expect(notice.classList.contains('hidden')).toBe(true);
   });
 
   it('shows disabled message when ENABLE_DONATIONS is false', async () => {
