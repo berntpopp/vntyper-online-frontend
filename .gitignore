@@ -40,8 +40,10 @@ Thumbs.db
 # documentation and are deliberately NOT ignored.
 .claude
 
-# Documentation (code reviews, internal notes)
-docs/
+# Documentation: top-level docs/*.md are published with the repository;
+# subdirectories (code reviews, internal notes) stay local.
+docs/*
+!docs/*.md
 
 # Planning files and prototypes
 plan/
