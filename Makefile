@@ -84,7 +84,7 @@ audit:
 	npm audit --audit-level=critical
 
 # Pre-commit: run all checks
-pre-commit: format lint-fix typecheck test-run audit
+pre-commit: format lint-fix check test-run audit
 	@echo ""
 	@echo "=========================================="
 	@echo "Pre-commit checks completed!"

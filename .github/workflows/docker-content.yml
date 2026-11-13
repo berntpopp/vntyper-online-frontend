@@ -5,18 +5,42 @@ name: Docker content
 # design-master file is. Without it, a `COPY` change can silently re-expose
 # the repository and still ship a green pipeline.
 
+# Only files the Dockerfile copies (plus the build files) can change what the
+# image serves, so other changes skip the build.
 on:
   pull_request:
+    paths: &image-inputs
+      - 'Dockerfile'
+      - '.dockerignore'
+      - '*.html'
+      - 'robots.txt'
+      - 'sitemap.xml'
+      - 'resources/**'
+      - 'de/**'
+      - 'fr/**'
+      - 'it/**'
+      - 'es/**'
+      - 'nl/**'
+      - '.github/workflows/docker-content.yml'
   push:
     branches: [main]
+    paths: *image-inputs
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   web-root-contents:
     name: Verify web root contents
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # The repo no longer contains a *.backup file or an _original/ directory,
       # so asserting those paths 404 would prove nothing. Plant decoys so the
