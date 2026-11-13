@@ -1,241 +1,85 @@
-# vntyper online frontend
+<img src="resources/assets/logo/vntyperonline_logo_500px.png" alt="VNtyper Online logo" height="96">
 
-## Table of Contents
+# VNtyper Online frontend
 
-- [Overview](#overview)
-- [Features](#features)
-- [Technologies Used](#technologies-used)
-- [Development](#development)
-- [Testing](#testing)
-- [Quality Gates](#quality-gates)
-- [Usage](#usage)
-- [File Naming Conventions](#file-naming-conventions)
-- [License](#license)
+[![CI status](https://github.com/vntyper-org/vntyper-online-frontend/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/vntyper-org/vntyper-online-frontend/actions/workflows/ci.yml)
+[![CodeQL status](https://github.com/vntyper-org/vntyper-online-frontend/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/vntyper-org/vntyper-online-frontend/actions/workflows/codeql.yml)
+[![Docker web-root check](https://github.com/vntyper-org/vntyper-online-frontend/actions/workflows/docker-content.yml/badge.svg?branch=main)](https://github.com/vntyper-org/vntyper-online-frontend/actions/workflows/docker-content.yml)
+[![Latest release](https://img.shields.io/github/v/release/vntyper-org/vntyper-online-frontend)](https://github.com/vntyper-org/vntyper-online-frontend/releases)
+[![License: MIT](https://img.shields.io/github/license/vntyper-org/vntyper-online-frontend)](LICENSE)
+[![Live site: vntyper.org](https://img.shields.io/badge/live-vntyper.org-blue)](https://vntyper.org/)
 
-## Overview
+The static, multilingual web interface of [VNtyper Online](https://vntyper.org/),
+which genotypes the MUC1 VNTR (ADTKD-MUC1) from short-read sequencing data with
+[VNtyper](https://github.com/vntyper-org/VNtyper). Research use only.
 
-**vntyper-online-frontend** is a web-based application designed to facilitate the extraction of specific genomic regions from BAM files using their corresponding BAI index files. Leveraging the power of [BioWasm's Aioli](https://www.biowasm.com/), the application runs `samtools` directly in the browser, enabling users to process their genomic data without the need for backend servers or local installations.
+The page runs `samtools` in the browser through [BioWasm's Aioli](https://www.biowasm.com/)
+(WebAssembly), extracts the MUC1 region from a BAM or SAM file locally, and
+uploads only that subset to the VNtyper API. The full alignment file never
+leaves the user's machine. The site is available in English, German, French,
+Italian, Spanish and Dutch.
 
-## Features
+There is no build step: nginx serves the HTML pages and the ES modules in
+`resources/js/` as they are in the repository.
 
-- **Single File Input for BAM and BAI Files:** Users can upload multiple BAM and BAI files simultaneously through a single file input, streamlining the upload process.
-- **Predefined Region Selection:** A dropdown menu allows users to select predefined genomic regions, reducing the likelihood of input errors.
-- **In-Browser Processing:** Utilizes `samtools` via BioWasm's Aioli to perform region extraction directly in the browser.
-- **Download Extracted BAM Files:** After processing, users can download the subset BAM files corresponding to their selected regions.
-- **User-Friendly Interface:** Clean and intuitive UI ensures ease of use for both novice and experienced users.
-- **Error Handling:** Provides clear error messages for missing files or processing issues, guiding users to rectify problems.
+## Use it
 
-## Technologies Used
+Open [vntyper.org](https://vntyper.org/), drop a BAM with its index
+(`sample.bam` plus `sample.bam.bai` or `sample.bai`), and choose **Submit Jobs**.
+The [usage guide](docs/usage.md) covers file naming, region selection and
+in-browser extraction.
 
-- **HTML5 & CSS3:** For structuring and styling the user interface.
-- **JavaScript (ES6):** Handles file uploads, processing logic, and user interactions.
-- **[BioWasm's Aioli](https://www.biowasm.com/):** Enables running `samtools` in the browser for genomic data processing.
-- **[samtools](http://www.htslib.org/):** A suite of programs for interacting with high-throughput sequencing data.
+## Run it locally
 
-## Development
-
-### Running Locally
-
-1. **Clone the Repository:**
-
-   ```bash
-   git clone https://github.com/yourusername/vntyper-online-frontend.git
-   ```
-
-2. **Navigate to the Project Directory:**
-
-   ```bash
-   cd vntyper-online-frontend
-   ```
-
-3. **Start Development Server:**
-
-   ```bash
-   make dev            # or: node scripts/dev-server.mjs
-   ```
-
-   The application will be available at `http://localhost:3000`.
-
-   Port 3000 is required, not a preference: `resources/js/config.js` points the
-   app at a local backend only when the page is served on that port. The dev
-   server also mirrors production's web root, so a file that 404s in production
-   404s here too.
-
-4. **Open the Application:**
-
-   Open `http://localhost:3000` in your preferred web browser.
-
-   **For development with cache disabled:**
-   - Open browser DevTools (F12)
-   - Go to Network tab
-   - Check "Disable cache"
-   - Keep DevTools open while developing
-
-## Testing
-
-The frontend uses **Vitest** with **jsdom** for unit tests and **Playwright** for end-to-end tests.
-
-### Quick Start
+Requires Node.js 20 or later.
 
 ```bash
-# Install dependencies
-npm install
-
-# Run all tests
-npm test
-
-# Run tests once (CI mode)
-npm run test:run
-
-# Run with coverage report
-npm run test:coverage
-
-# Run in watch mode (for development)
-npm run test:watch
-
-# Run with UI
-npm run test:ui
+git clone https://github.com/vntyper-org/vntyper-online-frontend.git
+cd vntyper-online-frontend
+npm ci
+make dev
 ```
 
-### Test Structure
+The site is then served at <http://localhost:3000>. Keep port 3000: on that
+port the app sends API calls to a local backend at `http://localhost:8000/api`.
 
-```
-tests/
-├── unit/                    # Vitest unit tests, mirroring the source layout
-│   ├── controllers/         # Controller tests
-│   ├── services/            # Service tests (APIService, httpUtils)
-│   ├── utils/               # Utility tests (EventBus, DI, stateManager)
-│   └── views/               # View tests
-└── e2e/                     # Playwright end-to-end tests
-    └── fixtures/            # Backend stubs and shared helpers
-```
-
-### Coverage
-
-- **Current:** 602 tests across 19 files; 33.5% statements, 31.0% branches,
-  41.9% functions, 33.6% lines
-- **Enforced floor:** the `vitest.config.js` thresholds sit just under those
-  numbers and run in CI, so coverage cannot regress. Raise them as tests are
-  added; never lower them.
-- **Target:** 60%. Getting there means covering the legacy flat modules, which
-  are the bulk of the untested code.
-
-### Writing Tests
-
-Tests follow these principles:
-
-- **Pure Vanilla JS** - No TypeScript, no build step required
-- **ES6 modules** - Native import/export
-- **Vitest matchers** - `vi.fn()`, `vi.spyOn()`, `vi.useFakeTimers()`
-- **SOLID principles** - Tests mirror application architecture
-
-Example test:
-
-```javascript
-import { describe, it, expect, vi } from 'vitest';
-import { myFunction } from '../../../resources/js/myModule.js';
-
-describe('myFunction()', () => {
-  it('should return expected result', () => {
-    const result = myFunction('input');
-    expect(result).toBe('expected');
-  });
-});
-```
-
-### Configuration
-
-Test configuration in `vitest.config.js`:
-
-- Environment: `jsdom` (stable DOM simulation)
-- Coverage provider: `v8` (native, fast)
-- Globals: `true` (describe, it, expect available everywhere)
-
-### End-to-End Tests
-
-Playwright drives a real browser against the site served by
-`scripts/dev-server.mjs`, with the backend API stubbed.
+To build the production image, which serves an allow-listed web root with nginx:
 
 ```bash
-npx playwright install --with-deps chromium   # once
-npm run test:e2e
-npm run test:e2e:ui                           # interactive
+docker build -t vntyper-frontend .
+docker run --rm -p 8080:80 vntyper-frontend
 ```
 
-Only the VNtyper backend is mocked. The CDN assets are not: `index.html` loads
-intro.js and BioWasm's Aioli with Subresource Integrity, so stubbing those
-responses fails the hash check and breaks the page. The current suite still
-passes with the CDNs unreachable, since those globals are only needed by the
-tutorial and by extraction.
-
-## Quality Gates
+## Develop
 
 ```bash
-npm run check      # version sync + lint (zero warnings) + format + typecheck
-npm run test:all   # unit + end-to-end tests
+npm run check      # version sync, translations, lint, format, typecheck
+npm run test:all   # Vitest unit tests and Playwright end-to-end tests
 ```
 
-Both run in CI. `AGENTS.md` documents the project rules these enforce, and is
-the single source of truth for AI coding agents.
+- [Development guide](docs/development.md): dev server, testing, coverage and quality gates.
+- [AGENTS.md](AGENTS.md): architecture, hard rules, the release ritual and
+  translation workflow. It is the single source of truth for contributors and
+  AI coding agents.
 
-## Usage
+The pages under `de/`, `fr/`, `it/`, `es/` and `nl/` are generated by
+`scripts/sync-i18n.mjs`; edit the English pages and `i18n/<locale>.json` instead.
 
-1. **Select BAM and BAI Files:**
-   - Click on the **"Select BAM and BAI Files"** button.
-   - In the file selection dialog, navigate to the directory containing your BAM and BAI files.
-   - Select the desired BAM files along with their corresponding BAI files.
-     - **Naming Conventions:**
-       - For a BAM file named `sample.bam`, the corresponding BAI file should be either `sample.bam.bai` or `sample.bai`.
-   - Click **"Open"** to upload the selected files.
+## Related repositories
 
-2. **Select Genomic Region:**
-   - From the **"Select Region"** dropdown, choose the desired genomic region.
-   - The dropdown defaults to the **hg38** MUC1 locus. You can switch to **hg19** if needed.
+- [VNtyper](https://github.com/vntyper-org/VNtyper): the genotyping pipeline ([documentation](https://vntyper-org.github.io/VNtyper/)).
+- [vntyper-online-backend](https://github.com/vntyper-org/vntyper-online-backend): deployment of the web service and its API.
+- [vntyper-data](https://github.com/vntyper-org/vntyper-data): reference bundles.
+- [MucOneUp](https://github.com/vntyper-org/MucOneUp): MUC1 haplotype and read simulator.
 
-3. **Extract Region:**
-   - Click the **"Extract Region"** button.
-   - The button will display **"Processing..."** while the extraction is underway.
-   - A loading spinner indicates that processing is in progress.
+## Citing
 
-4. **Download Extracted BAM Files:**
-   - Once processing is complete, download links for the subset BAM files will appear under the **"output"** section.
-   - Click on the **"Download subset\_\*.bam"** links to download the extracted regions.
-
-5. **Verify Downloaded Files:**
-   - Ensure that the downloaded BAM files are of the expected size and contain the reads from the specified region.
-
-## File Naming Conventions
-
-To ensure successful processing, adhere to the following naming conventions for your BAM and BAI files:
-
-- For a BAM file named `example.bam`, the corresponding BAI file should be either:
-  - `example.bam.bai`
-  - `example.bai`
-
-**Example:**
-
-```plaintext
-example.bam
-example.bam.bai
-```
-
-or
-
-```plaintext
-example.bam
-example.bai
-```
-
-Ensure that each BAM file has its corresponding BAI file following one of the above naming patterns.
+To cite the method, use the
+[VNtyper citation file](https://github.com/vntyper-org/VNtyper/blob/main/CITATION.cff)
+("Cite this repository" on the VNtyper GitHub page). Report problems with
+the web interface in this repository's [issue tracker](https://github.com/vntyper-org/vntyper-online-frontend/issues).
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-## Acknowledgements
-
-- [BioWasm](https://www.biowasm.com/) for providing the Aioli library.
-- [samtools](http://www.htslib.org/) for their powerful genomic data processing tools.
-- [HTSLIB](https://github.com/samtools/htslib) for maintaining open-source tools for high-throughput sequencing data.
+[MIT](LICENSE). The page builds on [BioWasm](https://www.biowasm.com/) (Aioli),
+[samtools](http://www.htslib.org/) and [HTSlib](https://github.com/samtools/htslib).
