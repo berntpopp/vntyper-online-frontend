@@ -41,7 +41,7 @@ jobs:
         run: docker build -t vntyper-frontend:${{ github.sha }} .
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@c03d123cb480c08c69b054af418ea5e69fe6e57e # 0.34.2
+        uses: aquasecurity/trivy-action@38b337fff0a2f984d5be173c99e3f633438167ec # 0.34.2
         with:
           image-ref: 'vntyper-frontend:${{ github.sha }}'
           format: 'sarif'
@@ -57,7 +57,7 @@ jobs:
           sarif_file: 'trivy-results.sarif'
 
       - name: Run Trivy (table output for logs)
-        uses: aquasecurity/trivy-action@c03d123cb480c08c69b054af418ea5e69fe6e57e # 0.34.2
+        uses: aquasecurity/trivy-action@38b337fff0a2f984d5be173c99e3f633438167ec # 0.34.2
         with:
           image-ref: 'vntyper-frontend:${{ github.sha }}'
           format: 'table'
@@ -65,7 +65,7 @@ jobs:
           ignore-unfixed: true
 
       - name: Fail on critical vulnerabilities
-        uses: aquasecurity/trivy-action@c03d123cb480c08c69b054af418ea5e69fe6e57e # 0.34.2
+        uses: aquasecurity/trivy-action@38b337fff0a2f984d5be173c99e3f633438167ec # 0.34.2
         with:
           image-ref: 'vntyper-frontend:${{ github.sha }}'
           format: 'table'
